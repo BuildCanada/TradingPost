@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Build Canada
 
-## Getting Started
+Website for Build Canada — a content platform with memos, a multi-source feed, and an admin CMS.
 
-First, run the development server:
+## Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Framework**: Next.js 16 (App Router, React 19)
+- **Database**: SQLite via LibSQL + Prisma 7
+- **Styling**: Tailwind CSS 4
+- **Language**: TypeScript 5
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── page.tsx              # Homepage
+│   ├── about/                # About — team, testimonials, Q&A
+│   ├── memos/                # Memo listing + /[slug] detail (static gen)
+│   ├── feed/                 # Multi-source feed + /[id] detail (blogs only)
+│   ├── admin/                # CMS — memo & feed CRUD, image upload
+│   ├── api/
+│   │   ├── memos/            # Memo CRUD endpoints
+│   │   ├── feed/             # Feed CRUD + Google Sheets sync
+│   │   ├── upload/           # Image upload → /public/uploads/
+│   │   └── embed/            # Twitter embed generation
+│   ├── robots.ts             # Disallows /admin, /api
+│   └── sitemap.ts
+├── components/               # Navbar, Footer, FeaturedMemos, FeedPreview, RichTextEditor, etc.
+└── lib/
+    └── prisma.ts             # Prisma client singleton (LibSQL adapter)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Database Models
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+**Memo** — title, slug, author, key messages (x3), markdown body, supporters, images, category, featured flag
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**FeedItem** — type (BLOG | SUBSTACK | X | TIKTOK | IG | YOUTUBE), title, author, url, sourceUrl (unique, for dedup), featured flag
 
-## Learn More
+Schema: [prisma/schema.prisma](prisma/schema.prisma)
 
-To learn more about Next.js, take a look at the following resources:
+## API Routes
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+| Method | Route | Purpose |
+|--------|-------|---------|
+| GET/POST | `/api/memos` | List / create memos |
+| GET/PATCH/DELETE | `/api/memos/[slug]` | Read / update / delete memo |
+| GET/POST | `/api/feed` | List / create feed items |
+| GET | `/api/feed/[id]` | Get feed item |
+| POST | `/api/feed/sync` | Sync from Google Sheets CSV |
+| POST | `/api/upload` | Upload image |
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Setup
 
-## Deploy on Vercel
+```bash
+npm install
+npx prisma generate
+npx prisma db push
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Requires a `.env` file with `DATABASE_URL` (defaults to `file:./dev.db`).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Design
+
+Custom fonts: **Söhne** (headings), **Financier Text** (body), **Founders Grotesk Mono** (labels/buttons).
+
+Palette: cream background (`#f6ebe3`), dark text (`#272727`), red accent (`#932f2f`).

@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build Canada — Wireframe v3</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #E0E0E0; font-family: 'Courier New', monospace; color: #111; }
+  .workspace { display: flex; gap: 72px; padding: 60px 80px 80px; justify-content: center; flex-wrap: wrap; align-items: flex-start; }
+  .page-column { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .page-label { font-size: 10px; font-weight: bold; letter-spacing: 0.25em; text-transform: uppercase; color: #555; }
+  .device-note { font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: #aaa; }
+  .phone { width: 375px; background: #fff; border: 2px solid #111; overflow: visible; position: relative; }
+  .desktop { width: 860px; background: #fff; border: 2px solid #111; overflow: visible; position: relative; }
+  .sec-label { font-size: 8px; letter-spacing: 0.16em; text-transform: uppercase; color: #aaa; display: block; padding-bottom: 5px; }
+  .nav-bar { height: 44px; border-bottom: 1.5px solid #eee; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; background: #fff; }
+  .nav-logo { width: 64px; height: 10px; background: #111; border-radius: 1px; }
+  .nav-hamburger { display: flex; flex-direction: column; gap: 4px; }
+  .nav-hamburger span { width: 20px; height: 1.5px; background: #111; display: block; }
+  .nav-links { display: flex; gap: 24px; align-items: center; }
+  .nav-link-stub { width: 36px; height: 8px; background: #ddd; border-radius: 1px; }
+  .block-hero { width: 100%; height: 210px; background: #111; display: flex; align-items: center; justify-content: center; position: relative; }
+  .block-hero.tall { height: 280px; }
+  .play-icon { width: 48px; height: 48px; border: 2px solid rgba(255,255,255,0.5); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .play-icon::after { content: ''; border-left: 14px solid rgba(255,255,255,0.6); border-top: 8px solid transparent; border-bottom: 8px solid transparent; margin-left: 4px; }
+  .hero-label { position: absolute; bottom: 10px; left: 16px; font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.4); }
+  .block-brand { padding: 20px; border-bottom: 1px solid #ececec; display: flex; align-items: center; justify-content: space-between; }
+  .brand-tagline { font-family: Georgia, serif; font-size: 15px; font-style: italic; color: #111; line-height: 1.3; }
+  .brand-cta { width: 26px; height: 26px; border: 1.5px solid #ccc; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #bbb; flex-shrink: 0; margin-left: 12px; }
+  .block-feed { padding: 16px 20px 0; }
+  .feed-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 4px; }
+  .feed-card { height: 60px; background: #f0f0f0; border: 1.5px solid #e0e0e0; border-radius: 3px; }
+  .block-social { padding: 12px 20px 14px; border-bottom: 1px solid #ececec; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+  .social-icon { width: 28px; height: 28px; border: 1.5px solid #ddd; border-radius: 5px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #888; font-family: sans-serif; font-style: normal; flex-shrink: 0; }
+  .social-divider { width: 1px; height: 18px; background: #e0e0e0; margin: 0 2px; }
+  .social-link { height: 28px; padding: 0 10px; border: 1.5px solid #ddd; border-radius: 5px; background: #f5f5f5; display: flex; align-items: center; font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: #888; white-space: nowrap; gap: 4px; }
+  .social-link::after { content: '→'; font-size: 10px; }
+  .block-events { padding: 16px 20px; border-bottom: 1px solid #ececec; }
+  .event-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid #f0f0f0; }
+  .event-row:last-child { border-bottom: none; }
+  .event-date { width: 32px; height: 32px; border: 1.5px solid #ddd; border-radius: 3px; background: #f8f8f8; flex-shrink: 0; }
+  .event-lines { flex: 1; }
+  .event-line { height: 7px; background: #e0e0e0; border-radius: 1px; margin-bottom: 4px; }
+  .event-line.el { width: 70%; } .event-line.es { width: 40%; }
+  .event-dot { width: 8px; height: 8px; border-radius: 50%; background: #111; flex-shrink: 0; }
+  .two-col-row { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid #ececec; }
+  .two-col-row .block-feed { border-right: 1px solid #ececec; padding-bottom: 16px; }
+  .two-col-row .block-events { border-bottom: none; }
+  .two-col-social { padding: 12px 20px 14px; border-right: 1px solid #ececec; border-bottom: 1px solid #ececec; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+  .block-projects { padding: 16px 24px 20px; border-bottom: 1px solid #ececec; }
+  .projects-inner { max-width: 310px; }
+  .dash-widget { border: 1.5px solid #e0e0e0; border-radius: 4px; background: #fafafa; padding: 10px 12px; margin-bottom: 10px; }
+  .dash-label { height: 6px; width: 50%; background: #ddd; border-radius: 1px; margin-bottom: 10px; }
+  .bar-chart { display: flex; align-items: flex-end; gap: 5px; height: 48px; }
+  .bar { flex: 1; background: #ccc; border-radius: 2px 2px 0 0; }
+  .bar.b1{height:60%}.bar.b2{height:100%}.bar.b3{height:75%}.bar.b4{height:45%}.bar.b5{height:85%}.bar.b6{height:55%}
+  .donut-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .donut-widget { border: 1.5px solid #e0e0e0; border-radius: 4px; background: #fafafa; padding: 10px 12px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .donut-label { height: 6px; width: 65%; background: #ddd; border-radius: 1px; }
+  .donut-circle { width: 44px; height: 44px; border-radius: 50%; border: 6px solid #ccc; border-top-color: #111; border-right-color: #111; }
+  .sparkline-widget { border: 1.5px solid #e0e0e0; border-radius: 4px; background: #fafafa; padding: 10px 12px; margin-bottom: 10px; }
+  .sparkline { height: 36px; overflow: hidden; }
+  .sparkline svg { width: 100%; height: 100%; }
+  .stat-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .stat-tile { border: 1.5px solid #e0e0e0; border-radius: 4px; background: #fafafa; padding: 10px 8px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .stat-num { height: 14px; width: 55%; background: #111; border-radius: 1px; }
+  .stat-sub { height: 6px; width: 75%; background: #ddd; border-radius: 1px; }
+  .page-footer { background: #111; height: 52px; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
+  .footer-logo { width: 48px; height: 8px; background: #444; border-radius: 1px; }
+  .footer-links { display: flex; gap: 12px; }
+  .footer-link-stub { width: 28px; height: 6px; background: #444; border-radius: 1px; }
+  .footer-social { display: flex; gap: 6px; }
+  .footer-social-dot { width: 22px; height: 22px; border-radius: 4px; background: #333; display: flex; align-items: center; justify-content: center; font-size: 8px; color: #777; font-family: sans-serif; }
+
+  /* MEMOS */
+  .block-statement { padding: 22px 20px 16px; border-bottom: 1px solid #ececec; }
+  .stmt-title { height: 14px; background: #111; border-radius: 1px; width: 88%; margin-bottom: 10px; }
+  .stmt-sub { height: 8px; background: #d8d8d8; border-radius: 1px; width: 58%; }
+  .block-featured { padding: 16px 20px; }
+  .feat-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px; margin-top: 4px; }
+  .feat-main { height: 130px; background: #111; border-radius: 3px; }
+  .feat-picks { display: flex; flex-direction: column; gap: 10px; }
+  .pick-card { flex: 1; background: #ebebeb; border: 1.5px solid #ddd; border-radius: 3px; min-height: 58px; }
+  .block-filter { padding: 12px 20px; border-bottom: 1px solid #ececec; border-top: 1px solid #ececec; display: flex; align-items: center; gap: 8px; }
+  .pill { height: 28px; padding: 0 14px; border-radius: 20px; font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; display: flex; align-items: center; border: 1.5px solid #111; }
+  .pill.on { background: #111; color: #fff; }
+  .pill.off { background: #fff; color: #bbb; border-color: #ddd; }
+  .block-search { padding: 14px 20px; border-bottom: 1px solid #ececec; }
+  .search-bar { height: 38px; border: 1.5px solid #ccc; border-radius: 4px; background: #fafafa; display: flex; align-items: center; padding: 0 12px; gap: 8px; margin-top: 4px; }
+  .search-ph { flex: 1; height: 7px; background: #e0e0e0; border-radius: 1px; }
+  .search-ico { width: 14px; height: 14px; border: 1.5px solid #ccc; border-radius: 50%; position: relative; flex-shrink: 0; }
+  .search-ico::after { content: ''; position: absolute; bottom: -4px; right: -4px; width: 5px; height: 1.5px; background: #ccc; transform: rotate(45deg); }
+  .block-topics { padding: 14px 20px; border-bottom: 1px solid #ececec; }
+  .topic-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 4px; }
+  .topic-tile { height: 58px; border: 1.5px solid #e0e0e0; border-radius: 5px; background: #f5f5f5; }
+  .topic-grid-sm { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; margin-top: 8px; }
+  .topic-tile-sm { height: 32px; border: 1.5px solid #e0e0e0; border-radius: 4px; background: #f8f8f8; }
+  .block-articles { padding: 14px 20px 4px; border-bottom: 1px solid #ececec; }
+  .art-row { height: 54px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid #f0f0f0; }
+  .art-thumb { width: 38px; height: 38px; background: #e0e0e0; border-radius: 3px; flex-shrink: 0; }
+  .art-lines { flex: 1; }
+  .art-line { height: 7px; background: #e0e0e0; border-radius: 1px; margin-bottom: 5px; }
+  .art-line.l{width:82%} .art-line.s{width:48%}
+  .scroll-down { text-align: center; padding: 10px; font-size: 16px; color: #ccc; }
+  .block-logos { padding: 16px 20px 18px; border-bottom: 1px solid #ececec; }
+  .logo-row { display: flex; gap: 10px; justify-content: center; margin-top: 8px; flex-wrap: wrap; }
+  .logo-dot { width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid #d8d8d8; background: #f0f0f0; }
+
+  /* FEED PAGE */
+  .block-feed-header { padding: 20px 20px 14px; border-bottom: 1px solid #ececec; }
+  .feed-header-title { height: 13px; background: #111; border-radius: 1px; width: 55%; margin-bottom: 8px; }
+  .feed-header-sub { height: 7px; background: #ddd; border-radius: 1px; width: 70%; }
+  .block-feed-filters { padding: 10px 20px; border-bottom: 1px solid #ececec; display: flex; gap: 7px; flex-wrap: wrap; }
+  .filter-chip { height: 26px; padding: 0 10px; border-radius: 20px; font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; display: flex; align-items: center; border: 1.5px solid #ddd; background: #f8f8f8; color: #999; }
+  .filter-chip.active { background: #111; color: #fff; border-color: #111; }
+  .block-feed-content { padding: 16px 20px; border-bottom: 1px solid #ececec; }
+  .feed-card-tall { width: 100%; height: 120px; background: #111; border-radius: 4px; margin-bottom: 10px; }
+  .feed-card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+  .feed-card-md { height: 90px; background: #e8e8e8; border: 1.5px solid #ddd; border-radius: 4px; }
+  .feed-list-row { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+  .feed-list-row:last-child { border-bottom: none; }
+  .feed-list-thumb { width: 52px; height: 52px; background: #ddd; border-radius: 3px; flex-shrink: 0; }
+  .feed-list-lines { flex: 1; }
+  .feed-list-line { height: 7px; background: #e0e0e0; border-radius: 1px; margin-bottom: 5px; }
+  .feed-list-line.fl{width:85%} .feed-list-line.fm{width:60%} .feed-list-line.fs{width:38%}
+  .feed-list-meta { width: 28px; height: 28px; border: 1.5px solid #e0e0e0; border-radius: 3px; flex-shrink: 0; }
+
+  /* PROJECTS PAGE */
+  .block-proj-header { padding: 22px 20px 16px; border-bottom: 1px solid #ececec; }
+  .proj-header-title { height: 14px; background: #111; border-radius: 1px; width: 45%; margin-bottom: 8px; }
+  .proj-header-sub { height: 8px; background: #ddd; border-radius: 1px; width: 68%; }
+  .block-proj-stats { padding: 14px 20px; border-bottom: 1px solid #ececec; }
+  .proj-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px; }
+  .proj-stat-card { border: 1.5px solid #e0e0e0; border-radius: 5px; background: #fafafa; padding: 12px; }
+  .proj-stat-num { height: 16px; background: #111; border-radius: 1px; width: 45%; margin-bottom: 6px; }
+  .proj-stat-label { height: 7px; background: #ddd; border-radius: 1px; width: 70%; }
+  .block-proj-chart { padding: 14px 20px; border-bottom: 1px solid #ececec; }
+  .proj-chart-box { border: 1.5px solid #e0e0e0; border-radius: 5px; background: #fafafa; padding: 12px; margin-top: 6px; }
+  .proj-bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 56px; margin-top: 10px; }
+  .proj-bar { flex: 1; background: #ccc; border-radius: 2px 2px 0 0; }
+  .proj-bar.pb1{height:55%}.proj-bar.pb2{height:90%}.proj-bar.pb3{height:70%}.proj-bar.pb4{height:40%}
+  .proj-bar.pb5{height:80%}.proj-bar.pb6{height:60%}.proj-bar.pb7{height:95%}.proj-bar.pb8{height:50%}
+  .block-proj-list { padding: 14px 20px 4px; border-bottom: 1px solid #ececec; }
+  .proj-list-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+  .proj-list-row:last-child { border-bottom: none; }
+  .proj-list-icon { width: 32px; height: 32px; background: #e0e0e0; border-radius: 4px; flex-shrink: 0; }
+  .proj-list-lines { flex: 1; }
+  .proj-list-line { height: 7px; background: #e0e0e0; border-radius: 1px; margin-bottom: 4px; }
+  .proj-list-line.pl{width:75%} .proj-list-line.ps{width:45%}
+  .proj-status { width: 48px; height: 18px; border-radius: 10px; background: #ddd; flex-shrink: 0; }
+  .proj-status.active { background: #111; }
+  .block-proj-sparklines { padding: 14px 20px 16px; border-bottom: 1px solid #ececec; }
+  .proj-spark-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 6px; }
+  .proj-spark-card { border: 1.5px solid #e0e0e0; border-radius: 5px; background: #fafafa; padding: 10px; }
+  .proj-spark { height: 40px; overflow: hidden; }
+  .proj-spark svg { width: 100%; height: 100%; }
+
+  /* ETHOS PAGE */
+  .block-ethos-hero { padding: 28px 20px 20px; border-bottom: 1px solid #ececec; }
+  .ethos-hero-title { height: 18px; background: #111; border-radius: 1px; width: 70%; margin-bottom: 10px; }
+  .ethos-hero-line { height: 8px; background: #d8d8d8; border-radius: 1px; margin-bottom: 6px; }
+  .ethos-hero-line.el{width:90%} .ethos-hero-line.em{width:75%} .ethos-hero-line.es{width:50%}
+  .block-platform { padding: 18px 20px; border-bottom: 1px solid #ececec; }
+  .platform-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 6px; }
+  .platform-tile { height: 72px; border: 1.5px solid #e0e0e0; border-radius: 5px; background: #f7f7f7; padding: 10px; display: flex; flex-direction: column; justify-content: flex-end; gap: 5px; }
+  .platform-tile-icon { width: 18px; height: 18px; background: #ccc; border-radius: 3px; margin-bottom: 2px; }
+  .platform-tile-line { height: 6px; background: #ddd; border-radius: 1px; }
+  .platform-tile-line.ptl{width:80%} .platform-tile-line.pts{width:55%}
+  .block-team { padding: 18px 20px; border-bottom: 1px solid #ececec; }
+  .team-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-top: 6px; }
+  .team-card { display: flex; flex-direction: column; align-items: center; gap: 7px; }
+  .team-avatar { width: 52px; height: 52px; border-radius: 50%; background: #d8d8d8; border: 1.5px solid #ccc; }
+  .team-name { height: 7px; background: #ccc; border-radius: 1px; width: 65%; }
+  .team-role { height: 6px; background: #e0e0e0; border-radius: 1px; width: 80%; }
+  .block-testimonials { padding: 18px 20px; border-bottom: 1px solid #ececec; }
+  .testimonial-carousel { border: 1.5px solid #e0e0e0; border-radius: 6px; background: #fafafa; margin-top: 6px; overflow: hidden; }
+  .testimonial-track-outer { overflow: hidden; }
+  .testimonial-inner { display: flex; transition: transform 0.3s ease; }
+  .testimonial-slide { min-width: 100%; padding: 16px; }
+  .tq-line { height: 7px; background: #ddd; border-radius: 1px; margin-bottom: 5px; }
+  .testimonial-author { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+  .testimonial-avatar { width: 28px; height: 28px; border-radius: 50%; background: #ccc; flex-shrink: 0; }
+  .ta-line { height: 6px; background: #ddd; border-radius: 1px; margin-bottom: 4px; }
+  .ta-line.tal{width:70px} .ta-line.tas{width:50px}
+  .testimonial-controls { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-top: 1px solid #eee; background: #fff; }
+  .tc-arrow { width: 28px; height: 28px; border: 1.5px solid #ddd; border-radius: 4px; background: #f8f8f8; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #bbb; cursor: pointer; user-select: none; transition: all 0.15s; }
+  .tc-arrow:hover { background: #111; color: #fff; border-color: #111; }
+  .tc-dots { display: flex; gap: 5px; align-items: center; }
+  .tc-dot { width: 6px; height: 6px; border-radius: 50%; background: #ddd; transition: all 0.2s; }
+  .tc-dot.active { background: #111; width: 14px; border-radius: 3px; }
+  .block-qna { padding: 18px 20px 4px; border-bottom: 1px solid #ececec; }
+  .qna-row { padding: 11px 0; border-bottom: 1px solid #f0f0f0; }
+  .qna-row:last-child { border-bottom: none; }
+  .qna-q { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .qna-q-line { height: 8px; background: #333; border-radius: 1px; }
+  .qna-toggle { width: 18px; height: 18px; border: 1.5px solid #ddd; border-radius: 3px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #bbb; flex-shrink: 0; }
+  .qna-a { margin-top: 8px; }
+  .qna-a-line { height: 7px; background: #e0e0e0; border-radius: 1px; margin-bottom: 5px; }
+  .qna-a-line.qal{width:92%} .qna-a-line.qam{width:78%} .qna-a-line.qas{width:55%}
+
+  .global-header { text-align: center; padding: 40px 0 24px; width: 100%; }
+  .global-header h1 { font-size: 12px; letter-spacing: 0.3em; text-transform: uppercase; color: #111; font-weight: normal; }
+  .global-header p { font-size: 9px; color: #aaa; letter-spacing: 0.18em; margin-top: 6px; text-transform: uppercase; }
+</style>
+</head>
+<body>
+<div class="workspace">
+  <div class="global-header">
+    <h1>Build Canada — Website Wireframe v3</h1>
+    <p>Shape Reference · B&W · Main · Memos · Feed · Projects · Ethos</p>
+  </div>
+
+  <!-- PAGE 1A: MAIN MOBILE -->
+  <div class="page-column">
+    <div class="page-label">01 — Main</div>
+    <span class="device-note">Mobile</span>
+    <div class="phone">
+      <div class="nav-bar"><div class="nav-logo"></div><div class="nav-hamburger"><span></span><span></span><span></span></div></div>
+      <div class="block-hero"><div class="play-icon"></div><div class="hero-label">Splash Video</div></div>
+      <div class="block-brand"><span class="brand-tagline">Canada's Voice<br>for Builders.</span><div class="brand-cta">↗</div></div>
+      <div class="block-feed">
+        <span class="sec-label">Feed</span>
+        <div class="feed-grid"><div class="feed-card"></div><div class="feed-card"></div><div class="feed-card"></div><div class="feed-card"></div></div>
+      </div>
+      <div class="block-social">
+        <div class="social-icon">𝕏</div><div class="social-icon">TK</div><div class="social-icon">IG</div><div class="social-icon" style="font-size:6px;">SS</div>
+        <div class="social-divider"></div>
+        <div class="social-link">Full Feed</div><div class="social-link">Memos</div>
+      </div>
+      <div class="block-events">
+        <span class="sec-label">Events</span>
+        <div class="event-row"><div class="event-date"></div><div class="event-lines"><div class="event-line el"></div><div class="event-line es"></div></div><div class="event-dot"></div></div>
+        <div class="event-row"><div class="event-date"></div><div class="event-lines"><div class="event-line el"></div><div class="event-line es"></div></div><div class="event-dot"></div></div>
+        <div class="event-row"><div class="event-date"></div><div class="event-lines"><div class="event-line el"></div><div class="event-line es"></div></div><div class="event-dot"></div></div>
+      </div>
+      <div class="block-projects">
+        <span class="sec-label">Projects</span>
+        <div class="projects-inner">
+          <div class="stat-row" style="margin-bottom:10px;"><div class="stat-tile"><div class="stat-num"></div><div class="stat-sub"></div></div><div class="stat-tile"><div class="stat-num"></div><div class="stat-sub"></div></div><div class="stat-tile"><div class="stat-num"></div><div class="stat-sub"></div></div></div>
+          <div class="dash-widget"><div class="dash-label"></div><div class="bar-chart"><div class="bar b1"></div><div class="bar b2"></div><div class="bar b3"></div><div class="bar b4"></div><div class="bar b5"></div><div class="bar b6"></div></div></div>
+          <div class="donut-row"><div class="donut-widget"><div class="donut-label"></div><div class="donut-circle"></div></div><div class="donut-widget"><div class="donut-label"></div><div class="donut-circle"></div></div></div>
+          <div class="sparkline-widget"><div class="dash-label"></div><div class="sparkline"><svg viewBox="0 0 300 36" preserveAspectRatio="none"><polyline points="0,30 40,20 80,25 120,10 160,18 200,8 240,14 300,5" fill="none" stroke="#bbb" stroke-width="1.5"/><polyline points="0,30 40,20 80,25 120,10 160,18 200,8 240,14 300,5 300,36 0,36" fill="#f0f0f0" stroke="none"/></svg></div></div>
+        </div>
+      </div>
+      <div class="page-footer"><div class="footer-logo"></div><div class="footer-links"><div class="footer-link-stub"></div><div class="footer-link-stub"></div><div class="footer-link-stub"></div></div><div class="footer-social"><div class="footer-social-dot">𝕏</div><div class="footer-social-dot">TK</div><div class="footer-social-dot">IG</div><div class="footer-social-dot" style="font-size:6px;">SS</div></div></div>
+    </div>
+  </div>
+
+  <!-- PAGE 1B: MAIN DESKTOP -->
+  <div class="page-column">
+    <div class="page-label">01 — Main</div>
+    <span class="device-note">Desktop</span>
+    <div class="desktop">
+      <div class="nav-bar"><div class="nav-logo"></div><div class="nav-links"><div class="nav-link-stub"></div><div class="nav-link-stub"></div><div class="nav-link-stub"></div><div class="nav-link-stub" style="width:48px;"></div></div></div>
+      <div class="block-hero tall"><div class="play-icon"></div><div class="hero-label">Splash Video</div></div>
+      <div class="block-brand"><span class="brand-tagline">Canada's Voice for Builders.</span><div class="brand-cta">↗</div></div>
+      <div class="two-col-row">
+        <div>
+          <div class="block-feed"><span class="sec-label">Feed</span><div class="feed-grid"><div class="feed-card"></div><div class="feed-card"></div><div class="feed-card"></div><div class="feed-card"></div></div></div>
+          <div class="two-col-social"><div class="social-icon">𝕏</div><div class="social-icon">TK</div><div class="social-icon">IG</div><div class="social-icon" style="font-size:6px;">SS</div><div class="social-divider"></div><div class="social-link">Full Feed</div><div class="social-link">Memos</div></div>
+        </div>
+        <div class="block-events"><span class="sec-label">Events</span>
+          <div class="event-row"><div class="event-date"></div><div class="event-lines"><div class="event-line el"></div><div class="event-line es"></div></div><div class="event-dot"></div></div>
+          <div class="event-row"><div class="event-date"></div><div class="event-lines"><div class="event-line el"></div><div class="event-line es"></div></div><div class="event-dot"></div></div>
+          <div class="event-row"><div class="event-date"></div><div class="event-lines"><div class="event-line el"></div><div class="event-line es"></div></div><div class="event-dot"></div></div>
+          <div class="event-row"><div class="event-date"></div><div class="event-lines"><div class="event-line el"></div><div class="event-line es"></div></div><div class="event-dot"></div></div>
+        </div>
+      </div>
+      <div class="block-projects"><span class="sec-label">Projects</span>
+        <div style="max-width:540px;margin:0 auto;">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px;"><div class="stat-tile"><div class="stat-num"></div><div class="stat-sub"></div></div><div class="stat-tile"><div class="stat-num"></div><div class="stat-sub"></div></div><div class="stat-tile"><div class="stat-num"></div><div class="stat-sub"></div></div></div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;"><div class="dash-widget" style="margin-bottom:0;"><div class="dash-label"></div><div class="bar-chart"><div class="bar b1"></div><div class="bar b2"></div><div class="bar b3"></div><div class="bar b4"></div><div class="bar b5"></div><div class="bar b6"></div></div></div><div class="sparkline-widget" style="margin-bottom:0;"><div class="dash-label"></div><div class="sparkline" style="height:48px;"><svg viewBox="0 0 300 48" preserveAspectRatio="none"><polyline points="0,40 50,28 100,34 150,14 200,22 250,10 300,6" fill="none" stroke="#bbb" stroke-width="1.5"/><polyline points="0,40 50,28 100,34 150,14 200,22 250,10 300,6 300,48 0,48" fill="#f0f0f0" stroke="none"/></svg></div></div></div>
+        </div>
+      </div>
+      <div class="page-footer"><div class="footer-logo"></div><div class="footer-links"><div class="footer-link-stub"></div><div class="footer-link-stub"></div><div class="footer-link-stub"></div><div class="footer-link-stub"></div></div><div class="footer-social"><div class="footer-social-dot">𝕏</div><div class="footer-social-dot">TK</div><div class="footer-social-dot">IG</div><div class="footer-social-dot" style="font-size:6px;">SS</div></div></div>
+    </div>
+  </div>
+
+  <!-- PAGE 2: MEMOS -->
+  <div class="page-column">
+    <div class="page-label">02 — Memos</div>
+    <span class="device-note">Mobile</span>
+    <div class="phone">
+      <div class="nav-bar"><div class="nav-logo"></div><div class="nav-hamburger"><span></span><span></span><span></span></div></div>
+      <div class="block-statement"><span class="sec-label">Statement</span><div class="stmt-title"></div><div class="stmt-sub"></div></div>
+      <div class="block-featured"><span class="sec-label">Latest + Editor's Pick</span><div class="feat-grid"><div class="feat-main"></div><div class="feat-picks"><div class="pick-card"></div><div class="pick-card"></div></div></div></div>
+      <div class="block-filter"><div class="pill on">Recent</div><div class="pill off">Faves</div></div>
+      <div class="block-search"><span class="sec-label">Search</span><div class="search-bar"><div class="search-ph"></div><div class="search-ico"></div></div></div>
+      <div class="block-topics"><span class="sec-label">By Topic</span><div class="topic-grid"><div class="topic-tile"></div><div class="topic-tile"></div><div class="topic-tile"></div><div class="topic-tile"></div></div><div class="topic-grid-sm"><div class="topic-tile-sm"></div><div class="topic-tile-sm"></div><div class="topic-tile-sm"></div><div class="topic-tile-sm"></div><div class="topic-tile-sm"></div><div class="topic-tile-sm"></div><div class="topic-tile-sm"></div><div class="topic-tile-sm"></div></div></div>
+      <div class="block-articles"><span class="sec-label">Article Feed</span><div class="art-row"><div class="art-thumb"></div><div class="art-lines"><div class="art-line l"></div><div class="art-line s"></div></div></div><div class="art-row"><div class="art-thumb"></div><div class="art-lines"><div class="art-line l"></div><div class="art-line s"></div></div></div><div class="art-row"><div class="art-thumb"></div><div class="art-lines"><div class="art-line l"></div><div class="art-line s"></div></div></div><div class="scroll-down">↓</div></div>
+      <div class="block-logos"><span class="sec-label">Partners / Orgs</span><div class="logo-row"><div class="logo-dot"></div><div class="logo-dot"></div><div class="logo-dot"></div><div class="logo-dot"></div><div class="logo-dot"></div></div><div class="logo-row"><div class="logo-dot"></div><div class="logo-dot"></div><div class="logo-dot"></div></div></div>
+      <div class="page-footer"><div class="footer-logo"></div><div class="footer-links"><div class="footer-link-stub"></div><div class="footer-link-stub"></div><div class="footer-link-stub"></div></div><div class="footer-social"><div class="footer-social-dot">𝕏</div><div class="footer-social-dot">TK</div><div class="footer-social-dot">IG</div><div class="footer-social-dot" style="font-size:6px;">SS</div></div></div>
+    </div>
+  </div>
+
+  <!-- PAGE 3: FEED -->
+  <div class="page-column">
+    <div class="page-label">03 — Feed</div>
+    <span class="device-note">Mobile</span>
+    <div class="phone">
+      <div class="nav-bar"><div class="nav-logo"></div><div class="nav-hamburger"><span></span><span></span><span></span></div></div>
+      <div class="block-feed-header"><span class="sec-label">Feed</span><div class="feed-header-title"></div><div class="feed-header-sub"></div></div>
+      <div class="block-feed-filters"><div class="filter-chip active">All</div><div class="filter-chip">𝕏</div><div class="filter-chip">TikTok</div><div class="filter-chip">IG</div><div class="filter-chip" style="font-size:7px;">Substack</div></div>
+      <div class="block-feed-content">
+        <span class="sec-label">Featured</span>
+        <div class="feed-card-tall"></div>
+        <span class="sec-label" style="margin-top:4px;">Recent</span>
+        <div class="feed-card-grid"><div class="feed-card-md"></div><div class="feed-card-md"></div><div class="feed-card-md"></div><div class="feed-card-md"></div></div>
+        <span class="sec-label" style="margin-top:4px;">All Posts</span>
+        <div class="feed-list-row"><div class="feed-list-thumb"></div><div class="feed-list-lines"><div class="feed-list-line fl"></div><div class="feed-list-line fm"></div><div class="feed-list-line fs"></div></div><div class="feed-list-meta"></div></div>
+        <div class="feed-list-row"><div class="feed-list-thumb"></div><div class="feed-list-lines"><div class="feed-list-line fl"></div><div class="feed-list-line fm"></div><div class="feed-list-line fs"></div></div><div class="feed-list-meta"></div></div>
+        <div class="feed-list-row"><div class="feed-list-thumb"></div><div class="feed-list-lines"><div class="feed-list-line fl"></div><div class="feed-list-line fm"></div><div class="feed-list-line fs"></div></div><div class="feed-list-meta"></div></div>
+        <div class="scroll-down">↓</div>
+      </div>
+      <div class="page-footer"><div class="footer-logo"></div><div class="footer-links"><div class="footer-link-stub"></div><div class="footer-link-stub"></div><div class="footer-link-stub"></div></div><div class="footer-social"><div class="footer-social-dot">𝕏</div><div class="footer-social-dot">TK</div><div class="footer-social-dot">IG</div><div class="footer-social-dot" style="font-size:6px;">SS</div></div></div>
+    </div>
+  </div>
+
+  <!-- PAGE 4: PROJECTS -->
+  <div class="page-column">
+    <div class="page-label">04 — Projects</div>
+    <span class="device-note">Mobile</span>
+    <div class="phone">
+      <div class="nav-bar"><div class="nav-logo"></div><div class="nav-hamburger"><span></span><span></span><span></span></div></div>
+      <div class="block-proj-header"><span class="sec-label">Projects</span><div class="proj-header-title"></div><div class="proj-header-sub"></div></div>
+      <div class="block-proj-stats"><span class="sec-label">At a Glance</span><div class="proj-stat-grid"><div class="proj-stat-card"><div class="proj-stat-num"></div><div class="proj-stat-label"></div></div><div class="proj-stat-card"><div class="proj-stat-num"></div><div class="proj-stat-label"></div></div><div class="proj-stat-card"><div class="proj-stat-num"></div><div class="proj-stat-label"></div></div><div class="proj-stat-card"><div class="proj-stat-num"></div><div class="proj-stat-label"></div></div></div></div>
+      <div class="block-proj-chart"><span class="sec-label">Activity</span><div class="proj-chart-box"><div class="dash-label"></div><div class="proj-bar-chart"><div class="proj-bar pb1"></div><div class="proj-bar pb2"></div><div class="proj-bar pb3"></div><div class="proj-bar pb4"></div><div class="proj-bar pb5"></div><div class="proj-bar pb6"></div><div class="proj-bar pb7"></div><div class="proj-bar pb8"></div></div></div></div>
+      <div class="block-proj-list"><span class="sec-label">Active Projects</span>
+        <div class="proj-list-row"><div class="proj-list-icon"></div><div class="proj-list-lines"><div class="proj-list-line pl"></div><div class="proj-list-line ps"></div></div><div class="proj-status active"></div></div>
+        <div class="proj-list-row"><div class="proj-list-icon"></div><div class="proj-list-lines"><div class="proj-list-line pl"></div><div class="proj-list-line ps"></div></div><div class="proj-status active"></div></div>
+        <div class="proj-list-row"><div class="proj-list-icon"></div><div class="proj-list-lines"><div class="proj-list-line pl"></div><div class="proj-list-line ps"></div></div><div class="proj-status"></div></div>
+        <div class="proj-list-row"><div class="proj-list-icon"></div><div class="proj-list-lines"><div class="proj-list-line pl"></div><div class="proj-list-line ps"></div></div><div class="proj-status"></div></div>
+        <div class="scroll-down">↓</div>
+      </div>
+      <div class="block-proj-sparklines"><span class="sec-label">Trends</span><div class="proj-spark-grid"><div class="proj-spark-card"><div class="dash-label"></div><div class="proj-spark"><svg viewBox="0 0 200 40" preserveAspectRatio="none"><polyline points="0,35 40,25 80,28 120,10 160,18 200,5" fill="none" stroke="#bbb" stroke-width="1.5"/><polyline points="0,35 40,25 80,28 120,10 160,18 200,5 200,40 0,40" fill="#f0f0f0" stroke="none"/></svg></div></div><div class="proj-spark-card"><div class="dash-label"></div><div class="proj-spark"><svg viewBox="0 0 200 40" preserveAspectRatio="none"><polyline points="0,10 40,20 80,15 120,28 160,22 200,30" fill="none" stroke="#bbb" stroke-width="1.5"/><polyline points="0,10 40,20 80,15 120,28 160,22 200,30 200,40 0,40" fill="#f0f0f0" stroke="none"/></svg></div></div></div></div>
+      <div class="page-footer"><div class="footer-logo"></div><div class="footer-links"><div class="footer-link-stub"></div><div class="footer-link-stub"></div><div class="footer-link-stub"></div></div><div class="footer-social"><div class="footer-social-dot">𝕏</div><div class="footer-social-dot">TK</div><div class="footer-social-dot">IG</div><div class="footer-social-dot" style="font-size:6px;">SS</div></div></div>
+    </div>
+  </div>
+
+  <!-- PAGE 5: ETHOS -->
+  <div class="page-column">
+    <div class="page-label">05 — Ethos</div>
+    <span class="device-note">Mobile</span>
+    <div class="phone">
+      <div class="nav-bar"><div class="nav-logo"></div><div class="nav-hamburger"><span></span><span></span><span></span></div></div>
+
+      <div class="block-ethos-hero">
+        <span class="sec-label">Who We Are</span>
+        <div class="ethos-hero-title"></div>
+        <div class="ethos-hero-line el"></div>
+        <div class="ethos-hero-line em"></div>
+        <div class="ethos-hero-line es"></div>
+      </div>
+
+      <div class="block-platform">
+        <span class="sec-label">Our Platform</span>
+        <div class="platform-grid">
+          <div class="platform-tile"><div class="platform-tile-icon"></div><div class="platform-tile-line ptl"></div><div class="platform-tile-line pts"></div></div>
+          <div class="platform-tile"><div class="platform-tile-icon"></div><div class="platform-tile-line ptl"></div><div class="platform-tile-line pts"></div></div>
+          <div class="platform-tile"><div class="platform-tile-icon"></div><div class="platform-tile-line ptl"></div><div class="platform-tile-line pts"></div></div>
+          <div class="platform-tile"><div class="platform-tile-icon"></div><div class="platform-tile-line ptl"></div><div class="platform-tile-line pts"></div></div>
+        </div>
+      </div>
+
+      <div class="block-team">
+        <span class="sec-label">Team</span>
+        <div class="team-grid">
+          <div class="team-card"><div class="team-avatar"></div><div class="team-name"></div><div class="team-role"></div></div>
+          <div class="team-card"><div class="team-avatar"></div><div class="team-name"></div><div class="team-role"></div></div>
+          <div class="team-card"><div class="team-avatar"></div><div class="team-name"></div><div class="team-role"></div></div>
+          <div class="team-card"><div class="team-avatar"></div><div class="team-name"></div><div class="team-role"></div></div>
+          <div class="team-card"><div class="team-avatar"></div><div class="team-name"></div><div class="team-role"></div></div>
+          <div class="team-card"><div class="team-avatar"></div><div class="team-name"></div><div class="team-role"></div></div>
+        </div>
+      </div>
+
+      <div class="block-testimonials">
+        <span class="sec-label">Testimonials</span>
+        <div class="testimonial-carousel">
+          <div class="testimonial-track-outer">
+            <div class="testimonial-inner" id="carousel">
+              <div class="testimonial-slide">
+                <div class="tq-line" style="width:95%;"></div>
+                <div class="tq-line" style="width:80%;"></div>
+                <div class="tq-line" style="width:60%;"></div>
+                <div class="testimonial-author"><div class="testimonial-avatar"></div><div><div class="ta-line tal"></div><div class="ta-line tas"></div></div></div>
+              </div>
+              <div class="testimonial-slide">
+                <div class="tq-line" style="width:88%;"></div>
+                <div class="tq-line" style="width:70%;"></div>
+                <div class="tq-line" style="width:50%;"></div>
+                <div class="testimonial-author"><div class="testimonial-avatar"></div><div><div class="ta-line tal"></div><div class="ta-line tas"></div></div></div>
+              </div>
+              <div class="testimonial-slide">
+                <div class="tq-line" style="width:92%;"></div>
+                <div class="tq-line" style="width:75%;"></div>
+                <div class="tq-line" style="width:42%;"></div>
+                <div class="testimonial-author"><div class="testimonial-avatar"></div><div><div class="ta-line tal"></div><div class="ta-line tas"></div></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="testimonial-controls">
+            <div class="tc-arrow" onclick="moveCarousel(-1)">‹</div>
+            <div class="tc-dots">
+              <div class="tc-dot active" id="dot-0"></div>
+              <div class="tc-dot" id="dot-1"></div>
+              <div class="tc-dot" id="dot-2"></div>
+            </div>
+            <div class="tc-arrow" onclick="moveCarousel(1)">›</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="block-qna">
+        <span class="sec-label">Q&amp;A</span>
+        <div class="qna-row">
+          <div class="qna-q"><div class="qna-q-line" style="width:78%;"></div><div class="qna-toggle">−</div></div>
+          <div class="qna-a"><div class="qna-a-line qal"></div><div class="qna-a-line qam"></div><div class="qna-a-line qas"></div></div>
+        </div>
+        <div class="qna-row"><div class="qna-q"><div class="qna-q-line" style="width:65%;"></div><div class="qna-toggle">+</div></div></div>
+        <div class="qna-row"><div class="qna-q"><div class="qna-q-line" style="width:82%;"></div><div class="qna-toggle">+</div></div></div>
+        <div class="qna-row"><div class="qna-q"><div class="qna-q-line" style="width:55%;"></div><div class="qna-toggle">+</div></div></div>
+        <div style="height:8px;"></div>
+      </div>
+
+      <div class="page-footer"><div class="footer-logo"></div><div class="footer-links"><div class="footer-link-stub"></div><div class="footer-link-stub"></div><div class="footer-link-stub"></div></div><div class="footer-social"><div class="footer-social-dot">𝕏</div><div class="footer-social-dot">TK</div><div class="footer-social-dot">IG</div><div class="footer-social-dot" style="font-size:6px;">SS</div></div></div>
+    </div>
+  </div>
+
+</div>
+<script>
+  let current = 0;
+  const total = 3;
+  function moveCarousel(dir) {
+    current = (current + dir + total) % total;
+    document.getElementById('carousel').style.transform = 'translateX(-' + (current * 100) + '%)';
+    for (let i = 0; i < total; i++) {
+      document.getElementById('dot-' + i).classList.toggle('active', i === current);
+    }
+  }
+</script>
+</body>
+</html>

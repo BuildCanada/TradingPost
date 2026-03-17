@@ -1,65 +1,334 @@
-import Image from "next/image";
+import Link from "next/link";
+import FeedPreview from "@/components/FeedPreview";
+import FeaturedMemos from "@/components/FeaturedMemos";
+import SubscribeForm from "@/components/SubscribeForm";
+import SectionLabel from "@/components/SectionLabel";
+
+function HeroSection() {
+  const s = "var(--color-bg)";
+  const o = 0.2;
+
+  return (
+    <section className="w-full bg-[var(--color-dark)] flex items-center justify-center h-[280px] md:h-[420px] relative overflow-hidden">
+      {/* Autoplay video */}
+      <video
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover brightness-[0.35]"
+      >
+        <source
+          src="/assets/IntroVideo_4k_buildcanada_splash.mp4"
+          type="video/mp4"
+        />
+      </video>
+
+      {/* Decorative overlay */}
+      <div className="absolute inset-0 z-[5] pointer-events-none" aria-hidden="true">
+        {/* Vertical lines */}
+        <div className="absolute top-0 bottom-0 left-[6.7%] w-px" style={{ backgroundColor: s, opacity: o }} />
+        <div className="absolute top-0 bottom-0 right-[6.7%] w-px" style={{ backgroundColor: s, opacity: o }} />
+
+        {/* Top-left semicircle — flat side flush left, opens rightward */}
+        <svg className="absolute left-0 top-[calc(15%-15px)]" width="65" height="130" viewBox="0 0 65 130" fill="none">
+          <path d="M0 0C35.899 0 65 29.101 65 65C65 100.899 35.899 130 0 130" stroke={s} strokeOpacity={o} strokeWidth="1" />
+          <path d="M0 8C31.48 8 57 33.52 57 65C57 96.48 31.48 122 0 122" stroke={s} strokeOpacity={o} strokeWidth="1" />
+        </svg>
+
+        {/* Bottom-right semicircle — flat side flush right, opens leftward */}
+        <svg className="absolute right-0 bottom-[5%]" width="65" height="130" viewBox="0 0 65 130" fill="none">
+          <path d="M65 0C29.101 0 0 29.101 0 65C0 100.899 29.101 130 65 130" stroke={s} strokeOpacity={o} strokeWidth="1" />
+          <path d="M65 8C33.52 8 8 33.52 8 65C8 96.48 33.52 122 65 122" stroke={s} strokeOpacity={o} strokeWidth="1" />
+        </svg>
+      </div>
+
+      {/* Text with baseline-aligned horizontal lines */}
+      <h1 className="relative z-10 type-display text-center">
+        <span className="relative block">
+          <span className="text-white">Canada&apos;s Voice</span>
+          <span className="absolute left-1/2 -translate-x-1/2 bottom-[calc(0.2em-5px)] w-[200vw] h-px" style={{ backgroundColor: s, opacity: o }} />
+        </span>
+        <span className="relative block">
+          <span
+            className="text-transparent"
+            style={{ WebkitTextStroke: "1px white" }}
+          >
+            for
+          </span>{" "}
+          <span className="text-white">Builders.</span>
+          <span className="absolute left-1/2 -translate-x-1/2 bottom-[calc(0.2em-5px)] w-[200vw] h-px" style={{ backgroundColor: s, opacity: o }} />
+        </span>
+      </h1>
+    </section>
+  );
+}
+
+function BrandSection() {
+  return (
+    <section className="border-b border-[var(--color-border)] lg:flex">
+      <BrandMessaging />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/assets/images/FlagSplash.png"
+        alt=""
+        className="hidden lg:block lg:w-[30%] object-cover"
+      />
+    </section>
+  );
+}
+
+function BrandMessaging() {
+  return (
+    <div className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px]">
+      <h2 className="type-title mb-4">
+        Old thinking won&apos;t save us.
+      </h2>
+      <p className="type-body mb-5">
+        Canada&apos;s methods have put us behind. Stats are going to fill this
+        next sentence and I will fill them in eventually. Build Canada exists to
+        platform the bold &ndash; individuals, ideas, and reforms &ndash; that
+        can push our country to new frontiers. Join the discussion. What will it
+        take for Canada to prosper?
+      </p>
+      <div className="flex items-center gap-3">
+        <Link
+          href="/about"
+          className="inline-flex items-center gap-2 type-label rounded-full px-3 py-1 border border-[var(--color-dark)] text-[var(--color-dark)] bg-[var(--color-bg)] hover:bg-[var(--color-dark)] hover:text-[var(--color-bg)] transition-colors"
+        >
+          About Us
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+            <path d="M4 12l8-8M6 4h6v6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </Link>
+        <Link
+          href="#subscribe"
+          className="inline-flex items-center gap-2 type-label rounded-full px-3 py-1 border border-[var(--color-accent)] text-white bg-[var(--color-accent)] hover:opacity-80 transition-opacity"
+        >
+          Subscribe
+          <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
+            <path d="M4 12l8-8M6 4h6v6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function SocialLinks() {
+  const socials = [
+    { icon: "X", href: "https://x.com/build_canada" },
+    { icon: "TIKTOK", href: "https://www.tiktok.com/@build_canada" },
+    { icon: "IG", href: "https://www.instagram.com/build_canada/" },
+    { icon: "SUBSTACK", href: "https://buildcanada.substack.com/" },
+    { icon: "YOUTUBE", href: "https://www.youtube.com/@BuildCanada" },
+  ];
+  return (
+    <div className="px-5 pt-[22px] pb-[32px] border-b border-[var(--color-border)] md:border-b-0">
+      <div className="max-w-[768px] mx-auto flex items-center gap-2 flex-wrap">
+        {socials.map(({ icon, href }) => (
+          <a
+            key={icon}
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-7 h-7 border border-[var(--color-border-light)] flex items-center justify-center hover:border-[var(--color-dark)] transition-colors group"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`/assets/icons/${icon === "X" ? "Platform=X (Twitter), Color=Negative" : icon === "TIKTOK" ? "Platform=TikTok, Color=Negative" : icon === "IG" ? "Platform=Instagram, Color=Negative" : icon === "SUBSTACK" ? "substack-icon (1)" : "Platform=YouTube, Color=Negative"}.svg`}
+              alt={icon}
+              width={14}
+              height={14}
+              className="brightness-0 opacity-40 group-hover:opacity-80 transition-opacity"
+            />
+          </a>
+        ))}
+        <div className="w-px h-[18px] bg-[var(--color-border-light)] mx-0.5" />
+        <Link
+          href="/feed"
+          className="h-7 px-2.5 border border-[var(--color-border-light)] flex items-center type-label text-[var(--color-text-muted)] hover:text-[var(--color-dark)] hover:border-[var(--color-dark)] transition-colors"
+        >
+          Full Feed →
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function EventsSection() {
+  return (
+    <div className="px-5 pt-[26px] pb-[36px] border-b border-[var(--color-border)] flex justify-center">
+      <div className="w-full max-w-[450px]">
+        <SectionLabel>Events</SectionLabel>
+        <iframe
+          src="https://luma.com/embed/calendar/cal-KUFO2yscrfWr7RV/events"
+          width="100%"
+          height="450"
+          frameBorder="0"
+          style={{ border: `1px solid var(--color-border-light)` }}
+          allowFullScreen
+          aria-hidden="false"
+          tabIndex={0}
+        />
+      </div>
+    </div>
+  );
+}
+
+function FeedAndEvents() {
+  return (
+    <>
+      {/* Mobile: stacked */}
+      <div className="md:hidden">
+        <FeedPreview />
+        <SocialLinks />
+        <EventsSection />
+      </div>
+
+      {/* Desktop: two columns */}
+      <section className="hidden md:flex border-b border-[var(--color-border)]">
+        <div className="flex-1 min-w-0 border-r border-[var(--color-border)]">
+          <FeedPreview />
+          <SocialLinks />
+        </div>
+        <div className="flex-1 min-w-0 max-w-[600px] px-5 pt-[26px] pb-[36px] flex justify-center">
+          <div className="w-full max-w-[450px]">
+            <SectionLabel>Events</SectionLabel>
+            <iframe
+              src="https://luma.com/embed/calendar/cal-KUFO2yscrfWr7RV/events"
+              width="100%"
+              height="450"
+              frameBorder="0"
+              style={{ border: `1px solid var(--color-border-light)` }}
+              allowFullScreen
+              aria-hidden="false"
+              tabIndex={0}
+            />
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
+
+function StatTile() {
+  return (
+    <div className="border border-[var(--color-border-light)] py-2.5 px-2 flex flex-col items-center gap-1.5">
+      <div className="h-3.5 w-[55%] bg-[var(--color-dark)] rounded-sm" />
+      <div className="h-1.5 w-[75%] bg-[var(--color-border-light)] rounded-sm" />
+    </div>
+  );
+}
+
+function BarChart() {
+  const heights = ["60%", "100%", "75%", "45%", "85%", "55%"];
+  return (
+    <div className="border border-[var(--color-border-light)] p-3">
+      <div className="h-1.5 w-1/2 bg-[var(--color-border-light)] rounded-sm mb-2.5" />
+      <div className="flex items-end gap-1 h-12">
+        {heights.map((h, i) => (
+          <div
+            key={i}
+            className="flex-1 bg-[var(--color-border-light)] rounded-t"
+            style={{ height: h }}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SparklineWidget() {
+  return (
+    <div className="border border-[var(--color-border-light)] p-3">
+      <div className="h-1.5 w-1/2 bg-[var(--color-border-light)] rounded-sm mb-2.5" />
+      <div className="h-9 md:h-12">
+        <svg
+          viewBox="0 0 300 36"
+          preserveAspectRatio="none"
+          className="w-full h-full"
+        >
+          <polyline
+            points="0,30 40,20 80,25 120,10 160,18 200,8 240,14 300,5"
+            fill="none"
+            stroke="var(--color-border-light)"
+            strokeWidth="1.5"
+          />
+          <polyline
+            points="0,30 40,20 80,25 120,10 160,18 200,8 240,14 300,5 300,36 0,36"
+            fill="var(--color-border-light)"
+            fillOpacity="0.3"
+            stroke="none"
+          />
+        </svg>
+      </div>
+    </div>
+  );
+}
+
+function DonutWidget() {
+  return (
+    <div className="border border-[var(--color-border-light)] p-3 flex flex-col items-center gap-2">
+      <div className="h-1.5 w-[65%] bg-[var(--color-border-light)] rounded-sm" />
+      <div className="w-11 h-11 rounded-full border-[6px] border-[var(--color-border-light)] border-t-[var(--color-dark)] border-r-[var(--color-dark)]" />
+    </div>
+  );
+}
+
+function ProjectsSection() {
+  return (
+    <section className="px-5 pt-[26px] pb-[36px] border-b border-[var(--color-border)]">
+      <SectionLabel>Projects</SectionLabel>
+      <div className="max-w-[540px] mx-auto">
+        {/* Stats row */}
+        <div className="grid grid-cols-3 gap-2.5 mb-2.5">
+          <StatTile />
+          <StatTile />
+          <StatTile />
+        </div>
+
+        {/* Mobile: stacked widgets */}
+        <div className="md:hidden space-y-2.5">
+          <BarChart />
+          <div className="grid grid-cols-2 gap-2.5">
+            <DonutWidget />
+            <DonutWidget />
+          </div>
+          <SparklineWidget />
+        </div>
+
+        {/* Desktop: two-column widgets */}
+        <div className="hidden md:grid md:grid-cols-2 md:gap-2.5">
+          <BarChart />
+          <SparklineWidget />
+        </div>
+      </div>
+    </section>
+  );
+}
 
 export default function Home() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className="mx-1.5 md:mx-2.5 lg:mx-4 my-1.5 md:my-2.5 border border-[var(--color-border)] bg-[var(--color-bg)]">
+      <div className="animate-fade-in" style={{ animationDelay: "0s" }}>
+        <HeroSection />
+      </div>
+      <div className="animate-fade-in" style={{ animationDelay: "0.4s" }}>
+        <BrandSection />
+      </div>
+      <div className="animate-fade-in" style={{ animationDelay: "0.8s" }}>
+        <FeaturedMemos heading="Featured + Latest Memos" />
+      </div>
+      <div className="animate-fade-in" style={{ animationDelay: "1.2s" }}>
+        <FeedAndEvents />
+      </div>
+      <div className="animate-fade-in" style={{ animationDelay: "1.6s" }}>
+        <ProjectsSection />
+      </div>
+      <div className="animate-fade-in" style={{ animationDelay: "2.0s" }}>
+        <SubscribeForm />
+      </div>
     </div>
   );
 }

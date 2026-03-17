@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model FeedItem {
+  id          String   @id @default(cuid())
+  type        String   // BLOG, SUBSTACK, X, TIKTOK, IG, YOUTUBE
+  title       String?
+  subtitle    String?
+  author      String?
+  authorPhoto String?
+  image       String?
+  body        String?
+  url         String?
+  embedCode   String?
+  sourceUrl   String?  @unique // for dedup of auto-imported social posts
+  tags        String?  // comma-separated tags for SEO
+  featured    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Memo {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  author      String
+  authorImage String?
+  keyMessage1 String   // main description
+  keyMessage2 String?
+  keyMessage3 String?
+  body        String   // markdown content
+  supporters  String?  // markdown content
+  splashImage String?
+  seoImage    String?
+  category    String?
+  publishedAt DateTime?
+  twitterEmbed String?  // generated embed HTML/text
+  featured    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

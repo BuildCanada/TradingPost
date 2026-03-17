@@ -31,7 +31,7 @@ function itemTarget(item: FeedItem): string | undefined {
 const FILTERS = ["All", "Blog", "X", "TikTok", "IG", "Substack"] as const;
 
 const SOCIAL_TYPES = new Set(["X", "TIKTOK", "IG"]);
-const SOCIAL_FALLBACK_IMAGE = "/assets/logos/Logo Standard.svg";
+const SOCIAL_FALLBACK_IMAGE = "/assets/logos/logo-standard.svg";
 
 function feedImage(item: FeedItem): string | null {
   if (item.image) return item.image;
@@ -104,7 +104,7 @@ function FilterChips({
 function PlatformBadge({ type }: { type: string }) {
   const label = type === "SUBSTACK" ? "Substack" : type === "BLOG" ? "Blog" : type === "TIKTOK" ? "TikTok" : type === "IG" ? "IG" : type;
   const hasSocialIcon = ["X", "TIKTOK", "IG", "SUBSTACK", "YOUTUBE"].includes(type);
-  const iconFile = type === "X" ? "Platform=X (Twitter), Color=Negative" : type === "TIKTOK" ? "Platform=TikTok, Color=Negative" : type === "IG" ? "Platform=Instagram, Color=Negative" : type === "SUBSTACK" ? "substack-icon (1)" : "Platform=YouTube, Color=Negative";
+  const iconFile = type === "X" ? "platform-x-twitter" : type === "TIKTOK" ? "platform-tiktok" : type === "IG" ? "platform-instagram" : type === "SUBSTACK" ? "substack-icon" : "platform-youtube";
   return (
     <span className="bg-[var(--color-bg)]/80 text-[var(--color-dark)] px-1.5 py-0.5 rounded-sm flex items-center gap-1">
       {hasSocialIcon && (

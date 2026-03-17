@@ -17,7 +17,7 @@ interface FeedItem {
 }
 
 const SOCIAL_TYPES = new Set(["X", "TIKTOK", "IG", "YOUTUBE"]);
-const SOCIAL_FALLBACK_IMAGE = "/assets/logos/Logo Standard.svg";
+const SOCIAL_FALLBACK_IMAGE = "/assets/logos/logo-standard.svg";
 
 function isValidImage(src: string | null): boolean {
   if (!src || src === "-") return false;
@@ -55,7 +55,7 @@ function IGCard({ item }: { item: FeedItem }) {
       <div className="flex items-center gap-2.5 px-3 py-2.5 border-b border-[#efefef]">
         <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-[var(--color-accent)] shrink-0">
           <Image
-            src="/assets/logos/Sticker - Build Canada Logo.png"
+            src="/assets/logos/sticker-build-canada-logo.png"
             alt="Build Canada"
             width={32}
             height={32}
@@ -71,7 +71,7 @@ function IGCard({ item }: { item: FeedItem }) {
         {/* IG icon */}
         <div className="ml-auto shrink-0">
           <Image
-            src="/assets/icons/Platform=Instagram, Color=Negative.svg"
+            src="/assets/icons/platform-instagram.svg"
             alt="Instagram"
             width={14}
             height={14}
@@ -111,7 +111,7 @@ function IGCard({ item }: { item: FeedItem }) {
       {/* See post CTA */}
       <div className="px-3 py-2.5 flex items-center justify-between border-t border-[#efefef]">
         <Image
-          src="/assets/icons/Platform=Instagram, Color=Negative.svg"
+          src="/assets/icons/platform-instagram.svg"
           alt="Instagram"
           width={16}
           height={16}
@@ -141,7 +141,7 @@ function XCard({ item }: { item: FeedItem }) {
       <div className="flex items-center gap-2.5 px-3 py-2.5 border-b border-[#2f3336]">
         <div className="w-8 h-8 rounded-full overflow-hidden border border-[#333] shrink-0">
           <Image
-            src="/assets/logos/Sticker - Build Canada Logo.png"
+            src="/assets/logos/sticker-build-canada-logo.png"
             alt="Build Canada"
             width={32}
             height={32}
@@ -157,7 +157,7 @@ function XCard({ item }: { item: FeedItem }) {
         {/* X icon */}
         <div className="ml-auto shrink-0">
           <Image
-            src="/assets/icons/Platform=X (Twitter), Color=Negative.svg"
+            src="/assets/icons/platform-x-twitter.svg"
             alt="X"
             width={14}
             height={14}
@@ -188,7 +188,7 @@ function XCard({ item }: { item: FeedItem }) {
       {/* See post CTA */}
       <div className="px-3 py-2.5 flex items-center justify-between border-t border-[#2f3336]">
         <Image
-          src="/assets/icons/Platform=X (Twitter), Color=Negative.svg"
+          src="/assets/icons/platform-x-twitter.svg"
           alt="X"
           width={16}
           height={16}
@@ -218,7 +218,7 @@ function TikTokCard({ item }: { item: FeedItem }) {
       <div className="flex items-center gap-2.5 px-3 py-2.5 border-b border-[#2f2f2f]">
         <div className="w-8 h-8 rounded-full overflow-hidden border border-[#333] shrink-0">
           <Image
-            src="/assets/logos/Sticker - Build Canada Logo.png"
+            src="/assets/logos/sticker-build-canada-logo.png"
             alt="Build Canada"
             width={32}
             height={32}
@@ -234,7 +234,7 @@ function TikTokCard({ item }: { item: FeedItem }) {
         {/* TikTok icon */}
         <div className="ml-auto shrink-0">
           <Image
-            src="/assets/icons/Platform=TikTok, Color=Negative.svg"
+            src="/assets/icons/platform-tiktok.svg"
             alt="TikTok"
             width={14}
             height={14}
@@ -265,7 +265,7 @@ function TikTokCard({ item }: { item: FeedItem }) {
       {/* See post CTA */}
       <div className="px-3 py-2.5 flex items-center justify-between border-t border-[#2f2f2f]">
         <Image
-          src="/assets/icons/Platform=TikTok, Color=Negative.svg"
+          src="/assets/icons/platform-tiktok.svg"
           alt="TikTok"
           width={16}
           height={16}
@@ -308,7 +308,7 @@ function SubstackCard({ item }: { item: FeedItem }) {
         {/* Weekly Newsletter label */}
         <div className="flex items-center gap-1.5">
           <Image
-            src="/assets/icons/substack-icon (1).svg"
+            src="/assets/icons/substack-icon.svg"
             alt="Substack"
             width={12}
             height={12}
@@ -335,7 +335,7 @@ function SubstackCard({ item }: { item: FeedItem }) {
       {/* Read CTA */}
       <div className="px-3 py-2.5 flex items-center justify-between border-t border-[#e8e2d9]">
         <Image
-          src="/assets/icons/substack-icon (1).svg"
+          src="/assets/icons/substack-icon.svg"
           alt="Substack"
           width={16}
           height={16}
@@ -377,7 +377,7 @@ function FeedCard({ item }: { item: FeedItem }) {
         <span className="absolute top-2 left-2 bg-[var(--color-bg)]/80 px-1.5 py-0.5 flex items-center gap-1">
           {["X", "TIKTOK", "IG", "SUBSTACK", "YOUTUBE"].includes(item.type) ? (
             <Image
-              src={`/assets/icons/${item.type === "X" ? "Platform=X (Twitter), Color=Negative" : item.type === "TIKTOK" ? "Platform=TikTok, Color=Negative" : item.type === "IG" ? "Platform=Instagram, Color=Negative" : item.type === "SUBSTACK" ? "substack-icon (1)" : "Platform=YouTube, Color=Negative"}.svg`}
+              src={`/assets/icons/${item.type === "X" ? "platform-x-twitter" : item.type === "TIKTOK" ? "platform-tiktok" : item.type === "IG" ? "platform-instagram" : item.type === "SUBSTACK" ? "substack-icon" : "platform-youtube"}.svg`}
               alt={item.type}
               width={10}
               height={10}

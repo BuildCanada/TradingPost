@@ -6,27 +6,27 @@ import { useRef, useState, useEffect } from "react";
 
 const socials = [
   {
-    icon: "/assets/icons/Platform=X (Twitter), Color=Negative.svg",
+    icon: "/assets/icons/platform-x-twitter.svg",
     href: "https://x.com/build_canada",
     label: "X",
   },
   {
-    icon: "/assets/icons/Platform=LinkedIn, Color=Negative.svg",
+    icon: "/assets/icons/platform-linkedin.svg",
     href: "https://www.linkedin.com/company/build-canada",
     label: "LinkedIn",
   },
   {
-    icon: "/assets/icons/Platform=Instagram, Color=Negative.svg",
+    icon: "/assets/icons/platform-instagram.svg",
     href: "https://www.instagram.com/build_canada/",
     label: "Instagram",
   },
   {
-    icon: "/assets/icons/substack-icon (1).svg",
+    icon: "/assets/icons/substack-icon.svg",
     href: "https://buildcanada.substack.com/",
     label: "Substack",
   },
   {
-    icon: "/assets/icons/Platform=YouTube, Color=Negative.svg",
+    icon: "/assets/icons/platform-youtube.svg",
     href: "https://www.youtube.com/@BuildCanada",
     label: "YouTube",
   },

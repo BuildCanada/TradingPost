@@ -196,7 +196,7 @@ function SocialLinks() {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={`/assets/icons/${icon === "X" ? "Platform=X (Twitter), Color=Negative" : icon === "TIKTOK" ? "Platform=TikTok, Color=Negative" : icon === "IG" ? "Platform=Instagram, Color=Negative" : icon === "SUBSTACK" ? "substack-icon (1)" : "Platform=YouTube, Color=Negative"}.svg`}
+              src={`/assets/icons/${icon === "X" ? "platform-x-twitter" : icon === "TIKTOK" ? "platform-tiktok" : icon === "IG" ? "platform-instagram" : icon === "SUBSTACK" ? "substack-icon" : "platform-youtube"}.svg`}
               alt={icon}
               width={14}
               height={14}

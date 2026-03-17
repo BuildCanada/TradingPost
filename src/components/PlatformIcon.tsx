@@ -1,12 +1,12 @@
 import Image from "next/image";
 
 const ICONS: Record<string, string> = {
-  X: "/assets/icons/Platform=X (Twitter), Color=Negative.svg",
-  TIKTOK: "/assets/icons/Platform=TikTok, Color=Negative.svg",
-  IG: "/assets/icons/Platform=Instagram, Color=Negative.svg",
-  SUBSTACK: "/assets/icons/substack-icon (1).svg",
-  YOUTUBE: "/assets/icons/Platform=YouTube, Color=Negative.svg",
-  LINKEDIN: "/assets/icons/Platform=LinkedIn, Color=Negative.svg",
+  X: "/assets/icons/platform-x-twitter.svg",
+  TIKTOK: "/assets/icons/platform-tiktok.svg",
+  IG: "/assets/icons/platform-instagram.svg",
+  SUBSTACK: "/assets/icons/substack-icon.svg",
+  YOUTUBE: "/assets/icons/platform-youtube.svg",
+  LINKEDIN: "/assets/icons/platform-linkedin.svg",
 };
 
 const LABELS: Record<string, string> = {

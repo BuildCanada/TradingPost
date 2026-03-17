@@ -31,7 +31,7 @@ export default function Navbar() {
         className="bg-[var(--color-accent)] flex items-center px-4 py-3 shrink-0 relative"
       >
         <Image
-          src="/assets/logos/Logo Standard.svg"
+          src="/assets/logos/logo-standard.svg"
           alt="Build Canada"
           width={86}
           height={40}
@@ -79,11 +79,11 @@ export default function Navbar() {
       <div className="hidden md:flex items-center ml-auto">
         <div className="flex items-center gap-1.5 px-4">
           {[
-            { icon: "X", href: "https://x.com/build_canada", file: "Platform=X (Twitter), Color=Negative" },
-            { icon: "TIKTOK", href: "https://www.tiktok.com/@build_canada", file: "Platform=TikTok, Color=Negative" },
-            { icon: "IG", href: "https://www.instagram.com/build_canada/", file: "Platform=Instagram, Color=Negative" },
-            { icon: "SUBSTACK", href: "https://buildcanada.substack.com/", file: "substack-icon (1)" },
-            { icon: "YOUTUBE", href: "https://www.youtube.com/@BuildCanada", file: "Platform=YouTube, Color=Negative" },
+            { icon: "X", href: "https://x.com/build_canada", file: "platform-x-twitter" },
+            { icon: "TIKTOK", href: "https://www.tiktok.com/@build_canada", file: "platform-tiktok" },
+            { icon: "IG", href: "https://www.instagram.com/build_canada/", file: "platform-instagram" },
+            { icon: "SUBSTACK", href: "https://buildcanada.substack.com/", file: "substack-icon" },
+            { icon: "YOUTUBE", href: "https://www.youtube.com/@BuildCanada", file: "platform-youtube" },
           ].map(({ icon, href, file }) => (
             <a
               key={icon}

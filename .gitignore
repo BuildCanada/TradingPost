@@ -55,5 +55,3 @@ prisma/dev.db-journal
 # claude code
 .claude/
 
-# large media files
-*.mp4

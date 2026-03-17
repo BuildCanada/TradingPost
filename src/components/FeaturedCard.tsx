@@ -22,7 +22,7 @@ export default function FeaturedCard({
   return (
     <Link
       href={`/memos/${memo.slug}`}
-      className="rounded-[3px] p-5 flex flex-col justify-end group relative overflow-hidden h-full min-h-[140px]"
+      className="rounded-[3px] px-5 pb-5 pt-12 flex flex-col justify-end group relative overflow-hidden h-full min-h-[140px]"
     >
       <div className="absolute inset-0 bg-[var(--color-dark)]">
         {(memo.splashImage || memo.seoImage) && (

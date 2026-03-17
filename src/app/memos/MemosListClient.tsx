@@ -178,7 +178,7 @@ export default function MemosListClient({ memos }: { memos: MemoItem[] }) {
       {/* Featured + Latest */}
       {memos.length > 0 && (
         <div className="animate-fade-in" style={{ animationDelay: "0.4s" }}>
-          <section className="px-5 pt-[26px] pb-[36px] border-b border-[var(--color-border)]">
+          <section className="px-5 pt-[26px] pb-[36px] border-b border-[var(--color-border-light)]">
             <div className="max-w-[1080px] mx-auto">
               <SectionLabel>Featured + Latest</SectionLabel>
               <div className="grid grid-cols-1 cards:grid-cols-[1.5fr_1fr] wide:grid-cols-[1.5fr_1fr_1fr] gap-2.5 mt-1">
@@ -232,7 +232,7 @@ export default function MemosListClient({ memos }: { memos: MemoItem[] }) {
 
       {/* Category filter */}
       <div className="animate-fade-in" style={{ animationDelay: "0.8s" }}>
-        <div className="px-5 pt-[22px] pb-[32px] border-b border-[var(--color-border)]">
+        <div className="px-5 pt-[22px] pb-[32px] border-b border-[var(--color-border-light)]">
           <div className="max-w-[900px] mx-auto flex items-center gap-2 flex-wrap">
             <span className="type-label-sm text-[var(--color-text-muted)] mr-1">
               Category
@@ -268,7 +268,7 @@ export default function MemosListClient({ memos }: { memos: MemoItem[] }) {
 
       {/* Search */}
       <div className="animate-fade-in" style={{ animationDelay: "1.2s" }}>
-        <div className="px-5 pt-[24px] pb-[34px] border-b border-[var(--color-border)]">
+        <div className="px-5 pt-[24px] pb-[34px] border-b border-[var(--color-border-light)]">
           <div className="max-w-[900px] mx-auto">
             <SectionLabel>Search</SectionLabel>
             <div className="h-[38px] border border-[var(--color-border-light)] rounded flex items-center px-3 gap-2 mt-1 bg-[#fafafa]">
@@ -307,7 +307,7 @@ export default function MemosListClient({ memos }: { memos: MemoItem[] }) {
 
       {/* Article Feed */}
       <div className="animate-fade-in" style={{ animationDelay: "1.6s" }}>
-        <section className="px-5 pt-[24px] pb-[34px] border-b border-[var(--color-border)]">
+        <section className="px-5 pt-[24px] pb-[34px] border-b border-[var(--color-border-light)]">
           <div className="max-w-[900px] mx-auto">
             <SectionLabel>
               {activeCategory

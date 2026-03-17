@@ -66,14 +66,16 @@ function HeroSection() {
 
 function BrandSection() {
   return (
-    <section className="border-b border-[var(--color-border)] lg:flex">
-      <BrandMessaging />
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/assets/images/FlagSplash.png"
-        alt=""
-        className="hidden lg:block lg:w-[30%] object-cover"
-      />
+    <section className="border-b border-[var(--color-border-light)]">
+      <div className="max-w-[1080px] w-full mx-auto lg:flex">
+        <BrandMessaging />
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src="/assets/images/FlagSplash.png"
+          alt=""
+          className="hidden lg:block lg:w-[30%] object-cover"
+        />
+      </div>
     </section>
   );
 }
@@ -81,15 +83,18 @@ function BrandSection() {
 function BrandMessaging() {
   return (
     <div className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px]">
+      <div className="max-w-[1080px] mx-auto">
       <h2 className="type-title mb-4">
         Old thinking won&apos;t save us.
       </h2>
       <p className="type-body mb-5">
-        Canada&apos;s methods have put us behind. Stats are going to fill this
-        next sentence and I will fill them in eventually. Build Canada exists to
-        platform the bold &ndash; individuals, ideas, and reforms &ndash; that
-        can push our country to new frontiers. Join the discussion. What will it
-        take for Canada to prosper?
+        In a changing world, Canada must reinvent itself. Builders are those
+        scaffolding out the blueprint drawings. We help spread their
+        philosophies.{" "}
+        <span style={{ backgroundColor: "#F1B0B0", fontWeight: "bold" }}>
+          Build Canada platforms the policy, ideas, and narratives of Canadians
+        </span>{" "}
+        at the forefront of the Canadian economy.
       </p>
       <div className="flex items-center gap-3">
         <Link
@@ -111,6 +116,7 @@ function BrandMessaging() {
           </svg>
         </Link>
       </div>
+      </div>
     </div>
   );
 }
@@ -124,7 +130,7 @@ function SocialLinks() {
     { icon: "YOUTUBE", href: "https://www.youtube.com/@BuildCanada" },
   ];
   return (
-    <div className="px-5 pt-[22px] pb-[32px] border-b border-[var(--color-border)] md:border-b-0">
+    <div className="px-5 pt-3 pb-[32px] border-b border-[var(--color-border-light)] md:border-b-0">
       <div className="max-w-[768px] mx-auto flex items-center gap-2 flex-wrap">
         {socials.map(({ icon, href }) => (
           <a
@@ -147,7 +153,7 @@ function SocialLinks() {
         <div className="w-px h-[18px] bg-[var(--color-border-light)] mx-0.5" />
         <Link
           href="/feed"
-          className="h-7 px-2.5 border border-[var(--color-border-light)] flex items-center type-label text-[var(--color-text-muted)] hover:text-[var(--color-dark)] hover:border-[var(--color-dark)] transition-colors"
+          className="h-7 px-2.5 border border-[var(--color-border-light)] flex items-center type-label text-[var(--color-dark)] hover:border-[var(--color-dark)] transition-colors"
         >
           Full Feed →
         </Link>
@@ -156,59 +162,33 @@ function SocialLinks() {
   );
 }
 
-function EventsSection() {
-  return (
-    <div className="px-5 pt-[26px] pb-[36px] border-b border-[var(--color-border)] flex justify-center">
-      <div className="w-full max-w-[450px]">
-        <SectionLabel>Events</SectionLabel>
-        <iframe
-          src="https://luma.com/embed/calendar/cal-KUFO2yscrfWr7RV/events"
-          width="100%"
-          height="450"
-          frameBorder="0"
-          style={{ border: `1px solid var(--color-border-light)` }}
-          allowFullScreen
-          aria-hidden="false"
-          tabIndex={0}
-        />
-      </div>
-    </div>
-  );
-}
 
 function FeedAndEvents() {
   return (
-    <>
-      {/* Mobile: stacked */}
-      <div className="md:hidden">
-        <FeedPreview />
-        <SocialLinks />
-        <EventsSection />
-      </div>
-
-      {/* Desktop: two columns */}
-      <section className="hidden md:flex border-b border-[var(--color-border)]">
-        <div className="flex-1 min-w-0 border-r border-[var(--color-border)]">
+    <section className="border-b border-[var(--color-border-light)]">
+      <div className="flex flex-wrap justify-center gap-[20px]">
+        {/* Feed + Social */}
+        <div className="w-full md:w-auto md:flex-1 md:max-w-[768px] min-w-0">
           <FeedPreview />
           <SocialLinks />
         </div>
-        <div className="flex-1 min-w-0 max-w-[600px] px-5 pt-[26px] pb-[36px] flex justify-center">
-          <div className="w-full max-w-[450px]">
-            <SectionLabel>Events</SectionLabel>
-            <iframe
-              src="https://luma.com/embed/calendar/cal-KUFO2yscrfWr7RV/events"
-              width="100%"
-              height="450"
-              frameBorder="0"
-              style={{ border: `1px solid var(--color-border-light)` }}
-              allowFullScreen
-              aria-hidden="false"
-              tabIndex={0}
-            />
-          </div>
+
+        {/* Events */}
+        <div className="w-full md:w-auto md:max-w-[450px] pt-[26px] pb-[36px] px-5 md:px-0">
+          <SectionLabel>Events</SectionLabel>
+          <iframe
+            src="https://luma.com/embed/calendar/cal-KUFO2yscrfWr7RV/events"
+            width="100%"
+            height="450"
+            frameBorder="0"
+            style={{ border: `1px solid var(--color-border-light)` }}
+            allowFullScreen
+            aria-hidden="false"
+            tabIndex={0}
+          />
         </div>
-      </section>
-    </>
+      </div>
+    </section>
   );
 }
 
@@ -278,7 +258,7 @@ function DonutWidget() {
 
 function ProjectsSection() {
   return (
-    <section className="px-5 pt-[26px] pb-[36px] border-b border-[var(--color-border)]">
+    <section className="px-5 pt-[26px] pb-[36px] border-b border-[var(--color-border-light)]">
       <SectionLabel>Projects</SectionLabel>
       <div className="max-w-[540px] mx-auto">
         {/* Stats row */}
@@ -310,7 +290,7 @@ function ProjectsSection() {
 
 export default function Home() {
   return (
-    <div className="mx-1.5 md:mx-2.5 lg:mx-4 my-1.5 md:my-2.5 border border-[var(--color-border)] bg-[var(--color-bg)]">
+    <div className="mx-[10px] my-[10px] border border-[var(--color-border-light)] bg-[var(--color-bg)]">
       <div className="animate-fade-in" style={{ animationDelay: "0s" }}>
         <HeroSection />
       </div>

@@ -7,7 +7,7 @@ export default function SectionLabel({
 }) {
   return (
     <span
-      className={`type-label text-[var(--color-text-secondary)] block pb-1 ${className}`}
+      className={`type-label font-bold text-[var(--color-text-secondary)] block pb-1 ${className}`}
     >
       {children}
     </span>

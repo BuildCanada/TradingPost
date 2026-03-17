@@ -394,7 +394,7 @@ function FeedCard({ item }: { item: FeedItem }) {
       {/* Card body */}
       <div className="p-4 flex flex-col gap-2.5 flex-1">
         {item.title && (
-          <h3 className="type-heading group-hover:text-[var(--color-accent)] transition-colors">
+          <h3 className="type-heading group-hover:text-[var(--color-accent)] transition-colors line-clamp-4">
             {item.title}
           </h3>
         )}
@@ -425,13 +425,21 @@ export default function FeedPreview() {
   useEffect(() => {
     fetch("/api/feed")
       .then((r) => r.json())
-      .then((data: FeedItem[]) => setItems(data.slice(0, 4)));
+      .then((data: FeedItem[]) => {
+        const picks: FeedItem[] = [];
+        const types = ["X", "IG", "SUBSTACK", "BLOG"];
+        for (const t of types) {
+          const match = data.find((d) => d.type === t);
+          if (match) picks.push(match);
+        }
+        setItems(picks);
+      });
   }, []);
 
   return (
-    <div className="px-5 pt-[26px] pb-[36px] md:pb-[36px]">
+    <div className="px-5 pt-[26px] pb-0">
       <div className="max-w-[768px] mx-auto">
-      <span className="type-label text-[var(--color-text-secondary)] block pb-2">
+      <span className="type-label font-bold text-[var(--color-text-secondary)] block pb-2">
         Feed
       </span>
       <div className="grid grid-cols-2 gap-3">

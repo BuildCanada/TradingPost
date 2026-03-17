@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import SectionLabel from "@/components/SectionLabel";
 import MemosListClient from "./MemosListClient";
@@ -50,14 +51,21 @@ export default async function MemosPage() {
   }));
 
   return (
-    <>
+    <div className="mx-[10px] my-[10px] border border-[var(--color-border-light)] bg-[var(--color-bg)]">
       {/* Statement — server-rendered for SEO */}
       <div className="animate-fade-in" style={{ animationDelay: "0s" }}>
-        <section className="px-5 pt-[34px] pb-[44px] border-b border-[var(--color-border)]">
-          <div className="max-w-[900px] mx-auto">
-            <SectionLabel>Memos</SectionLabel>
-            <h1 className="type-title mt-1">Ideas Worth Building On</h1>
-            <p className="type-body text-[var(--color-text-secondary)] mt-2">
+        <section className="relative px-5 border-b border-[var(--color-border-light)] overflow-hidden">
+          <Image
+            src="/assets/images/harley.png"
+            alt=""
+            fill
+            className="object-cover brightness-[0.35]"
+            priority
+          />
+          <div className="relative max-w-[900px] mx-auto py-[60px] md:pt-[140px] md:pb-[80px] lg:pt-[180px]">
+            <SectionLabel className="text-white/60">Memos</SectionLabel>
+            <h1 className="type-title mb-1 text-white">Ideas Worth Building On</h1>
+            <p className="type-body text-white/70">
               Bold thinking from Canada&apos;s builders, reformers, and leaders.
             </p>
           </div>
@@ -65,6 +73,6 @@ export default async function MemosPage() {
       </div>
 
       <MemosListClient memos={serialized} />
-    </>
+    </div>
   );
 }

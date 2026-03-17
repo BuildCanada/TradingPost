@@ -107,7 +107,7 @@ export default async function MemoDetailPage({
   );
 
   return (
-    <>
+    <div className="mx-[10px] my-[10px] border border-[var(--color-border-light)] bg-[var(--color-bg)]">
       {/* JSON-LD structured data */}
       <script
         type="application/ld+json"
@@ -283,6 +283,6 @@ export default async function MemoDetailPage({
           {sidebar}
         </aside>
       </div>
-    </>
+    </div>
   );
 }

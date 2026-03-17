@@ -2,7 +2,7 @@ import SectionLabel from "@/components/SectionLabel";
 
 function HeroBlock() {
   return (
-    <section className="px-5 pt-[42px] pb-[52px] md:pt-[58px] md:pb-[68px] border-b-2 border-[var(--color-border)]">
+    <section className="px-5 pt-[42px] pb-[52px] md:pt-[58px] md:pb-[68px] border-b border-[var(--color-border-light)]">
       <SectionLabel className="pb-2">Who We Are</SectionLabel>
       <h1 className="type-title mb-4 max-w-[700px]">
         Building a bolder Canada.
@@ -18,7 +18,7 @@ function HeroBlock() {
 
 function PlatformBlock() {
   return (
-    <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px] border-b-2 border-[var(--color-border)]">
+    <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px] border-b border-[var(--color-border-light)]">
       <SectionLabel>Our Platform</SectionLabel>
       <div className="grid grid-cols-2 gap-3 mt-2 max-w-[600px]">
         {[1, 2, 3, 4].map((i) => (
@@ -38,7 +38,7 @@ function PlatformBlock() {
 
 function TeamBlock() {
   return (
-    <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px] border-b-2 border-[var(--color-border)]">
+    <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px] border-b border-[var(--color-border-light)]">
       <SectionLabel>Team</SectionLabel>
       <div className="grid grid-cols-3 md:grid-cols-6 gap-4 mt-2 max-w-[600px]">
         {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -55,7 +55,7 @@ function TeamBlock() {
 
 function TestimonialsBlock() {
   return (
-    <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px] border-b-2 border-[var(--color-border)]">
+    <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px] border-b border-[var(--color-border-light)]">
       <SectionLabel>Testimonials</SectionLabel>
       <div className="border border-[var(--color-border-light)] mt-2 max-w-[600px]">
         <div className="p-5">
@@ -92,7 +92,7 @@ function TestimonialsBlock() {
 
 function QnaBlock() {
   return (
-    <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px] border-b-2 border-[var(--color-border)]">
+    <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px] border-b border-[var(--color-border-light)]">
       <SectionLabel>Q&amp;A</SectionLabel>
       <div className="max-w-[600px] mt-2">
         {[78, 65, 82, 55].map((w, i) => (
@@ -116,12 +116,12 @@ function QnaBlock() {
 
 export default function AboutPage() {
   return (
-    <>
+    <div className="mx-[10px] my-[10px] border border-[var(--color-border-light)] bg-[var(--color-bg)]">
       <HeroBlock />
       <PlatformBlock />
       <TeamBlock />
       <TestimonialsBlock />
       <QnaBlock />
-    </>
+    </div>
   );
 }

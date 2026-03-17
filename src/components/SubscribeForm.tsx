@@ -3,7 +3,8 @@
 export default function SubscribeForm() {
   return (
     <div id="subscribe" className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px]">
-      <span className="type-label text-[var(--color-text-secondary)] block pb-1">
+      <div className="max-w-[1080px] mx-auto">
+      <span className="type-label font-bold text-[var(--color-text-secondary)] block pb-1">
         Subscribe
       </span>
       <p className="type-body text-[var(--color-text-secondary)] mb-4 mt-1">
@@ -14,23 +15,25 @@ export default function SubscribeForm() {
           <input
             type="text"
             placeholder="First Name"
-            className="border border-[var(--color-border-light)] bg-transparent px-3 py-2.5 type-body placeholder:text-[var(--color-text-muted)] outline-none focus:border-[var(--color-dark)] transition-colors"
+            className="border border-[var(--color-border-light)] bg-white px-3 py-2.5 type-body placeholder:text-[var(--color-text-muted)] outline-none focus:border-[var(--color-dark)] transition-colors"
           />
           <input
             type="text"
             placeholder="Last Name"
-            className="border border-[var(--color-border-light)] bg-transparent px-3 py-2.5 type-body placeholder:text-[var(--color-text-muted)] outline-none focus:border-[var(--color-dark)] transition-colors"
+            className="border border-[var(--color-border-light)] bg-white px-3 py-2.5 type-body placeholder:text-[var(--color-text-muted)] outline-none focus:border-[var(--color-dark)] transition-colors"
           />
         </div>
         <input
           type="email"
           placeholder="Email"
-          className="border border-[var(--color-border-light)] bg-transparent px-3 py-2.5 type-body placeholder:text-[var(--color-text-muted)] outline-none focus:border-[var(--color-dark)] transition-colors"
+          className="border border-[var(--color-border-light)] bg-white px-3 py-2.5 type-body placeholder:text-[var(--color-text-muted)] outline-none focus:border-[var(--color-dark)] transition-colors"
         />
         <input
           type="text"
           placeholder="Postal Code"
-          className="border border-[var(--color-border-light)] bg-transparent px-3 py-2.5 type-body placeholder:text-[var(--color-text-muted)] outline-none focus:border-[var(--color-dark)] transition-colors"
+          pattern="[A-Za-z0-9]{5,6}"
+          maxLength={6}
+          className="border border-[var(--color-border-light)] bg-white px-3 py-2.5 type-body placeholder:text-[var(--color-text-muted)] outline-none focus:border-[var(--color-dark)] transition-colors"
         />
         <button
           type="submit"
@@ -39,6 +42,7 @@ export default function SubscribeForm() {
           Subscribe
         </button>
       </form>
+      </div>
     </div>
   );
 }

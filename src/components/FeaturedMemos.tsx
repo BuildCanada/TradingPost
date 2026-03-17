@@ -86,16 +86,16 @@ export default function FeaturedMemos({ heading }: { heading?: string }) {
   if (memos.length === 0) return null;
 
   return (
-    <section className="px-5 pt-[26px] pb-[36px] border-b border-[var(--color-border)]">
+    <section className="px-5 pt-[26px] pb-[36px] border-b border-[var(--color-border-light)]">
       <div className="max-w-[1080px] mx-auto">
       <div className="flex items-center justify-between pb-1">
-        <span className="type-label text-[var(--color-text-secondary)] block">
+        <span className="type-label font-bold text-[var(--color-text-secondary)] block">
           {heading || "Featured + Latest"}
         </span>
         {heading && (
           <Link
             href="/memos"
-            className="h-7 px-2.5 border border-[var(--color-border-light)] flex items-center type-label text-[var(--color-text-muted)] hover:text-[var(--color-dark)] hover:border-[var(--color-dark)] transition-colors"
+            className="h-7 px-2.5 border border-[var(--color-border-light)] flex items-center type-label text-[var(--color-dark)] hover:border-[var(--color-dark)] transition-colors"
           >
             See All Memos →
           </Link>
@@ -129,8 +129,8 @@ export default function FeaturedMemos({ heading }: { heading?: string }) {
           )}
         </div>
         <div className="flex flex-col gap-2.5">
-          {firstThree.map((m) => (
-            <PickCard key={m.id} memo={m} />
+          {firstThree.map((m, i) => (
+            <PickCard key={m.id} memo={m} isLatest={i === 0} />
           ))}
           {Array.from({ length: Math.max(0, 3 - firstThree.length) }).map((_, i) => (
             <div key={i} className="flex-1 border border-[var(--color-border-light)] rounded-[3px] min-h-[58px]" />

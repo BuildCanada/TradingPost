@@ -26,20 +26,56 @@ function HeroSection() {
 
       {/* Decorative overlay */}
       <div className="absolute inset-0 z-[5] pointer-events-none" aria-hidden="true">
-        {/* Vertical lines */}
-        <div className="absolute top-0 bottom-0 left-[6.7%] w-px" style={{ backgroundColor: s, opacity: o }} />
-        <div className="absolute top-0 bottom-0 right-[6.7%] w-px" style={{ backgroundColor: s, opacity: o }} />
+        {/* Left vertical line — draws top→bottom */}
+        <div
+          className="absolute top-0 bottom-0 left-[6.7%] w-px"
+          style={{
+            backgroundColor: s,
+            opacity: o,
+            animation: "revealDown 1s ease-out forwards",
+          }}
+        />
 
-        {/* Top-left semicircle — flat side flush left, opens rightward */}
+        {/* Right vertical line — draws bottom→top */}
+        <div
+          className="absolute top-0 bottom-0 right-[6.7%] w-px"
+          style={{
+            backgroundColor: s,
+            opacity: o,
+            animation: "revealUp 1s ease-out forwards",
+          }}
+        />
+
+        {/* Top-left semicircles — draw top→bottom, start at 0.3s */}
         <svg className="absolute left-0 top-[calc(15%-15px)]" width="65" height="130" viewBox="0 0 65 130" fill="none">
-          <path d="M0 0C35.899 0 65 29.101 65 65C65 100.899 35.899 130 0 130" stroke={s} strokeOpacity={o} strokeWidth="1" />
-          <path d="M0 8C31.48 8 57 33.52 57 65C57 96.48 31.48 122 0 122" stroke={s} strokeOpacity={o} strokeWidth="1" />
+          <path
+            d="M0 0C35.899 0 65 29.101 65 65C65 100.899 35.899 130 0 130"
+            stroke={s} strokeOpacity={o} strokeWidth="1"
+            pathLength="1" strokeDasharray="1" strokeDashoffset="1"
+            style={{ animation: "drawIn 1.2s ease-out 0.3s forwards" }}
+          />
+          <path
+            d="M0 8C31.48 8 57 33.52 57 65C57 96.48 31.48 122 0 122"
+            stroke={s} strokeOpacity={o} strokeWidth="1"
+            pathLength="1" strokeDasharray="1" strokeDashoffset="1"
+            style={{ animation: "drawIn 1.2s ease-out 0.3s forwards" }}
+          />
         </svg>
 
-        {/* Bottom-right semicircle — flat side flush right, opens leftward */}
+        {/* Bottom-right semicircles — draw bottom→top (reverse), start at 0.3s */}
         <svg className="absolute right-0 bottom-[5%]" width="65" height="130" viewBox="0 0 65 130" fill="none">
-          <path d="M65 0C29.101 0 0 29.101 0 65C0 100.899 29.101 130 65 130" stroke={s} strokeOpacity={o} strokeWidth="1" />
-          <path d="M65 8C33.52 8 8 33.52 8 65C8 96.48 33.52 122 65 122" stroke={s} strokeOpacity={o} strokeWidth="1" />
+          <path
+            d="M65 0C29.101 0 0 29.101 0 65C0 100.899 29.101 130 65 130"
+            stroke={s} strokeOpacity={o} strokeWidth="1"
+            pathLength="1" strokeDasharray="1" strokeDashoffset="-1"
+            style={{ animation: "drawInReverse 1.2s ease-out 0.3s forwards" }}
+          />
+          <path
+            d="M65 8C33.52 8 8 33.52 8 65C8 96.48 33.52 122 65 122"
+            stroke={s} strokeOpacity={o} strokeWidth="1"
+            pathLength="1" strokeDasharray="1" strokeDashoffset="-1"
+            style={{ animation: "drawInReverse 1.2s ease-out 0.3s forwards" }}
+          />
         </svg>
       </div>
 
@@ -47,7 +83,16 @@ function HeroSection() {
       <h1 className="relative z-10 type-display text-center">
         <span className="relative block">
           <span className="text-white">Canada&apos;s Voice</span>
-          <span className="absolute left-1/2 -translate-x-1/2 bottom-[calc(0.2em-5px)] w-[200vw] h-px" style={{ backgroundColor: s, opacity: o }} />
+          {/* Top horizontal line — draws left→right, starts at 0.4s */}
+          <span
+            className="absolute left-1/2 -translate-x-1/2 bottom-[calc(0.2em-5px)] w-[200vw] h-px"
+            style={{
+              backgroundColor: s,
+              opacity: o,
+              animation: "revealRight 0.8s ease-out 0.4s forwards",
+              clipPath: "inset(0 100% 0 0)",
+            }}
+          />
         </span>
         <span className="relative block">
           <span
@@ -57,7 +102,16 @@ function HeroSection() {
             for
           </span>{" "}
           <span className="text-white">Builders.</span>
-          <span className="absolute left-1/2 -translate-x-1/2 bottom-[calc(0.2em-5px)] w-[200vw] h-px" style={{ backgroundColor: s, opacity: o }} />
+          {/* Bottom horizontal line — draws left→right, starts at 0.7s */}
+          <span
+            className="absolute left-1/2 -translate-x-1/2 bottom-[calc(0.2em-5px)] w-[200vw] h-px"
+            style={{
+              backgroundColor: s,
+              opacity: o,
+              animation: "revealRight 0.8s ease-out 0.7s forwards",
+              clipPath: "inset(0 100% 0 0)",
+            }}
+          />
         </span>
       </h1>
     </section>
@@ -291,9 +345,7 @@ function ProjectsSection() {
 export default function Home() {
   return (
     <div className="mx-[10px] my-[10px] border border-[var(--color-border-light)] bg-[var(--color-bg)]">
-      <div className="animate-fade-in" style={{ animationDelay: "0s" }}>
-        <HeroSection />
-      </div>
+      <HeroSection />
       <div className="animate-fade-in" style={{ animationDelay: "0.4s" }}>
         <BrandSection />
       </div>

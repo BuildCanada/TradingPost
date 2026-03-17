@@ -22,6 +22,45 @@ html {
   animation: fadeInUp 0.5s ease-out forwards;
 }
 
+/* Draw stroke forward (dashoffset 1 → 0) */
+@keyframes drawIn {
+  from { stroke-dashoffset: 1; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* Draw stroke reverse (dashoffset -1 → 0) */
+@keyframes drawInReverse {
+  from { stroke-dashoffset: -1; }
+  to { stroke-dashoffset: 0; }
+}
+
+/* Vertical line reveal top→bottom via clip-path */
+@keyframes revealDown {
+  from { clip-path: inset(0 0 100% 0); }
+  to { clip-path: inset(0 0 0% 0); }
+}
+
+/* Vertical line reveal bottom→top via clip-path */
+@keyframes revealUp {
+  from { clip-path: inset(100% 0 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+
+/* Horizontal line reveal left→right via clip-path */
+@keyframes revealRight {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0% 0 0); }
+}
+
+@keyframes drawLeaf {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
 /* ─── Font Faces ─── */
 
 /* Söhne — Headlines */

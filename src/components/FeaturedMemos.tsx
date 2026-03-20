@@ -101,7 +101,7 @@ export default function FeaturedMemos({ heading }: { heading?: string }) {
           </Link>
         )}
       </div>
-      <div className="grid grid-cols-1 cards:grid-cols-[1.5fr_1fr] wide:grid-cols-[1.5fr_1fr_1fr] gap-2.5 mt-1">
+      <div className="grid grid-cols-1 cards:grid-cols-[1.5fr_1fr] wide:grid-cols-[1.5fr_2fr] gap-2.5 mt-1">
         <div className="relative h-full">
           {featuredMemos[0] && (
             <div
@@ -117,7 +117,7 @@ export default function FeaturedMemos({ heading }: { heading?: string }) {
                 <button
                   key={i}
                   onClick={() => switchTo(i)}
-                  className="h-[3px] w-5 rounded-full transition-opacity duration-300"
+                  className="h-[3px] w-5 transition-opacity duration-300"
                   style={{
                     backgroundColor: "var(--color-bg)",
                     opacity: activeIndex === i ? 0.9 : 0.35,
@@ -128,20 +128,20 @@ export default function FeaturedMemos({ heading }: { heading?: string }) {
             </div>
           )}
         </div>
-        <div className="flex flex-col gap-2.5">
+        <div className="grid grid-cols-1 wide:grid-cols-2 wide:grid-rows-3 wide:grid-flow-col gap-2.5">
           {firstThree.map((m, i) => (
             <PickCard key={m.id} memo={m} isLatest={i === 0} />
           ))}
           {Array.from({ length: Math.max(0, 3 - firstThree.length) }).map((_, i) => (
-            <div key={i} className="flex-1 border border-[var(--color-border-light)] rounded-[3px] min-h-[58px]" />
+            <div key={`placeholder-first-${i}`} className="border border-[var(--color-border-light)] min-h-[58px]" />
           ))}
-        </div>
-        <div className="hidden wide:flex flex-col gap-2.5">
           {secondThree.map((m) => (
-            <PickCard key={m.id} memo={m} />
+            <div key={m.id} className="hidden wide:block h-full">
+              <PickCard memo={m} />
+            </div>
           ))}
           {Array.from({ length: Math.max(0, 3 - secondThree.length) }).map((_, i) => (
-            <div key={i} className="flex-1 border border-[var(--color-border-light)] rounded-[3px] min-h-[58px]" />
+            <div key={`placeholder-second-${i}`} className="hidden wide:block border border-[var(--color-border-light)] min-h-[58px]" />
           ))}
         </div>
       </div>

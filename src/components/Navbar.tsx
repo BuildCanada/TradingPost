@@ -73,6 +73,20 @@ export default function Navbar() {
         >
           Projects
         </Link>
+        <Link
+          href="/about"
+          className="flex items-center px-5 border-l border-[var(--color-border)] type-label text-[var(--color-dark)] hover:bg-[var(--color-dark)] hover:text-[var(--color-bg)] transition-colors"
+        >
+          About Us
+        </Link>
+        <a
+          href="https://shop.buildcanada.com"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center px-5 border-l border-[var(--color-border)] type-label text-[var(--color-dark)] hover:bg-[var(--color-dark)] hover:text-[var(--color-bg)] transition-colors"
+        >
+          Shop
+        </a>
       </div>
 
       {/* Desktop right: social icons + subscribe */}
@@ -80,6 +94,7 @@ export default function Navbar() {
         <div className="flex items-center gap-1.5 px-4">
           {[
             { icon: "X", href: "https://x.com/build_canada", file: "platform-x-twitter" },
+            { icon: "LINKEDIN", href: "https://www.linkedin.com/company/buildcanada", file: "platform-linkedin" },
             { icon: "TIKTOK", href: "https://www.tiktok.com/@build_canada", file: "platform-tiktok" },
             { icon: "IG", href: "https://www.instagram.com/build_canada/", file: "platform-instagram" },
             { icon: "SUBSTACK", href: "https://buildcanada.substack.com/", file: "substack-icon" },
@@ -158,6 +173,22 @@ export default function Navbar() {
             >
               Projects
             </Link>
+            <Link
+              href="/about"
+              className="px-5 py-4 border-b border-[var(--color-border-light)] type-label text-[var(--color-dark)] hover:bg-[var(--color-dark)] hover:text-[var(--color-bg)] transition-colors"
+              onClick={() => setMenuOpen(false)}
+            >
+              About Us
+            </Link>
+            <a
+              href="https://shop.buildcanada.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-5 py-4 border-b border-[var(--color-border-light)] type-label text-[var(--color-dark)] hover:bg-[var(--color-dark)] hover:text-[var(--color-bg)] transition-colors"
+              onClick={() => setMenuOpen(false)}
+            >
+              Shop
+            </a>
             <Link
               href="#subscribe"
               className="px-5 py-4 bg-[var(--color-dark)] type-label text-[var(--color-bg)]"

@@ -17,7 +17,7 @@ export default function PickCard({ memo, isLatest }: { memo: Memo; isLatest?: bo
   return (
     <Link
       href={`/memos/${memo.slug}`}
-      className="border border-[var(--color-border-light)] rounded-[3px] p-3 flex flex-col gap-2 cards:flex-row cards:items-center cards:gap-2.5 group relative overflow-hidden"
+      className="border border-[var(--color-border-light)] p-3 flex flex-col gap-2 cards:flex-row cards:items-center cards:gap-2.5 group relative overflow-hidden h-full"
     >
       {memo.authorImage && (
         <div className="w-7 h-7 rounded-full bg-[var(--color-border-light)] overflow-hidden shrink-0 relative z-10">
@@ -43,7 +43,7 @@ export default function PickCard({ memo, isLatest }: { memo: Memo; isLatest?: bo
             {new Date(memo.publishedAt || memo.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
           </p>
           {isLatest && (
-            <span className="type-label-sm bg-[var(--color-dark)] text-[var(--color-bg)] px-1.5 py-px rounded-sm leading-none">
+            <span className="type-label-sm bg-[var(--color-dark)] text-[var(--color-bg)] px-1.5 py-px leading-none">
               Latest
             </span>
           )}

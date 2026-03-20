@@ -143,17 +143,17 @@ function BrandMessaging() {
       </h2>
       <p className="type-body mb-5">
         In a changing world, Canada must reinvent itself. Builders are those
-        scaffolding out the blueprint drawings. We help spread their
+        scaffolding out the blueprint drawings. Build Canada spreads their
         philosophies.{" "}
         <span style={{ backgroundColor: "#F1B0B0", fontWeight: "bold" }}>
-          Build Canada platforms the policy, ideas, and narratives of Canadians
+          We platforms the policy, ideas, and narratives of Canadians
         </span>{" "}
-        at the forefront of the Canadian economy.
+        at the forefront of the new Canadian economy.
       </p>
       <div className="flex items-center gap-3">
         <Link
           href="/about"
-          className="inline-flex items-center gap-2 type-label rounded-full px-3 py-1 border border-[var(--color-dark)] text-[var(--color-dark)] bg-[var(--color-bg)] hover:bg-[var(--color-dark)] hover:text-[var(--color-bg)] transition-colors"
+          className="inline-flex items-center gap-2 type-label px-3 py-1 border border-[var(--color-dark)] text-[var(--color-dark)] bg-[var(--color-bg)] hover:bg-[var(--color-dark)] hover:text-[var(--color-bg)] transition-colors"
         >
           About Us
           <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
@@ -162,7 +162,7 @@ function BrandMessaging() {
         </Link>
         <Link
           href="#subscribe"
-          className="inline-flex items-center gap-2 type-label rounded-full px-3 py-1 border border-[var(--color-accent)] text-white bg-[var(--color-accent)] hover:opacity-80 transition-opacity"
+          className="inline-flex items-center gap-2 type-label px-3 py-1 border border-[var(--color-accent)] text-white bg-[var(--color-accent)] hover:opacity-80 transition-opacity"
         >
           Subscribe
           <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
@@ -178,13 +178,14 @@ function BrandMessaging() {
 function SocialLinks() {
   const socials = [
     { icon: "X", href: "https://x.com/build_canada" },
+    { icon: "LINKEDIN", href: "https://www.linkedin.com/company/buildcanada" },
     { icon: "TIKTOK", href: "https://www.tiktok.com/@build_canada" },
     { icon: "IG", href: "https://www.instagram.com/build_canada/" },
     { icon: "SUBSTACK", href: "https://buildcanada.substack.com/" },
     { icon: "YOUTUBE", href: "https://www.youtube.com/@BuildCanada" },
   ];
   return (
-    <div className="px-5 pt-3 pb-[32px] border-b border-[var(--color-border-light)] md:border-b-0">
+    <div className="pt-3 pb-[32px] border-b border-[var(--color-border-light)] md:border-b-0">
       <div className="max-w-[768px] mx-auto flex items-center gap-2 flex-wrap">
         {socials.map(({ icon, href }) => (
           <a
@@ -196,7 +197,7 @@ function SocialLinks() {
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={`/assets/icons/${icon === "X" ? "platform-x-twitter" : icon === "TIKTOK" ? "platform-tiktok" : icon === "IG" ? "platform-instagram" : icon === "SUBSTACK" ? "substack-icon" : "platform-youtube"}.svg`}
+              src={`/assets/icons/${icon === "X" ? "platform-x-twitter" : icon === "LINKEDIN" ? "platform-linkedin" : icon === "TIKTOK" ? "platform-tiktok" : icon === "IG" ? "platform-instagram" : icon === "SUBSTACK" ? "substack-icon" : "platform-youtube"}.svg`}
               alt={icon}
               width={14}
               height={14}
@@ -219,8 +220,8 @@ function SocialLinks() {
 
 function FeedAndEvents() {
   return (
-    <section className="border-b border-[var(--color-border-light)]">
-      <div className="flex flex-wrap justify-center gap-[20px]">
+    <section className="px-5 border-b border-[var(--color-border-light)]">
+      <div className="max-w-[1080px] mx-auto flex flex-wrap justify-center gap-[20px]">
         {/* Feed + Social */}
         <div className="w-full md:w-auto md:flex-1 md:max-w-[768px] min-w-0">
           <FeedPreview />
@@ -228,7 +229,7 @@ function FeedAndEvents() {
         </div>
 
         {/* Events */}
-        <div className="w-full md:w-auto md:max-w-[450px] pt-[26px] pb-[36px] px-5 md:px-0">
+        <div className="w-full md:w-[500px] pt-[26px] pb-[36px]">
           <SectionLabel>Events</SectionLabel>
           <iframe
             src="https://luma.com/embed/calendar/cal-KUFO2yscrfWr7RV/events"
@@ -249,8 +250,8 @@ function FeedAndEvents() {
 function StatTile() {
   return (
     <div className="border border-[var(--color-border-light)] py-2.5 px-2 flex flex-col items-center gap-1.5">
-      <div className="h-3.5 w-[55%] bg-[var(--color-dark)] rounded-sm" />
-      <div className="h-1.5 w-[75%] bg-[var(--color-border-light)] rounded-sm" />
+      <div className="h-3.5 w-[55%] bg-[var(--color-dark)]" />
+      <div className="h-1.5 w-[75%] bg-[var(--color-border-light)]" />
     </div>
   );
 }
@@ -259,12 +260,12 @@ function BarChart() {
   const heights = ["60%", "100%", "75%", "45%", "85%", "55%"];
   return (
     <div className="border border-[var(--color-border-light)] p-3">
-      <div className="h-1.5 w-1/2 bg-[var(--color-border-light)] rounded-sm mb-2.5" />
+      <div className="h-1.5 w-1/2 bg-[var(--color-border-light)] mb-2.5" />
       <div className="flex items-end gap-1 h-12">
         {heights.map((h, i) => (
           <div
             key={i}
-            className="flex-1 bg-[var(--color-border-light)] rounded-t"
+            className="flex-1 bg-[var(--color-border-light)]"
             style={{ height: h }}
           />
         ))}
@@ -276,7 +277,7 @@ function BarChart() {
 function SparklineWidget() {
   return (
     <div className="border border-[var(--color-border-light)] p-3">
-      <div className="h-1.5 w-1/2 bg-[var(--color-border-light)] rounded-sm mb-2.5" />
+      <div className="h-1.5 w-1/2 bg-[var(--color-border-light)] mb-2.5" />
       <div className="h-9 md:h-12">
         <svg
           viewBox="0 0 300 36"
@@ -304,7 +305,7 @@ function SparklineWidget() {
 function DonutWidget() {
   return (
     <div className="border border-[var(--color-border-light)] p-3 flex flex-col items-center gap-2">
-      <div className="h-1.5 w-[65%] bg-[var(--color-border-light)] rounded-sm" />
+      <div className="h-1.5 w-[65%] bg-[var(--color-border-light)]" />
       <div className="w-11 h-11 rounded-full border-[6px] border-[var(--color-border-light)] border-t-[var(--color-dark)] border-r-[var(--color-dark)]" />
     </div>
   );

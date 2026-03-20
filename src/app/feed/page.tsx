@@ -362,55 +362,59 @@ export default function FeedPage() {
   return (
     <div className="mx-[10px] my-[10px] border border-[var(--color-border-light)] bg-[var(--color-bg)]">
       <FeedHeader />
-      <FilterChips active={activeFilter} onSelect={(f) => { setActiveFilter(f); setAllPostsPage(0); }} />
+      <div className="animate-fade-in" style={{ animationDelay: "0.4s" }}>
+        <FilterChips active={activeFilter} onSelect={(f) => { setActiveFilter(f); setAllPostsPage(0); }} />
+      </div>
 
-      <section className="px-5 pt-[26px] pb-[36px] border-b border-[var(--color-border-light)]">
-        <div className="max-w-[1080px] mx-auto">
-          {/* Featured */}
-          {featuredItem && (
-            <>
-              <SectionLabel>Featured</SectionLabel>
-              <FeaturedPost item={featuredItem} />
-            </>
-          )}
-
-          {/* Recent — Blog & Substack only */}
-          {recentItems.length > 0 && (
-            <>
-              <SectionLabel>Recent</SectionLabel>
-              <div className="grid grid-cols-2 gap-2.5 mb-2.5">
-                {recentItems.map((item) => (
-                  <RecentCard key={item.id} item={item} />
-                ))}
-              </div>
-            </>
-          )}
-
-          {/* All Posts (filtered + paginated) */}
-          {filteredItems.length > 0 && (() => {
-            const totalPages = Math.ceil(filteredItems.length / POSTS_PER_PAGE);
-            const page = Math.min(allPostsPage, totalPages - 1);
-            const pageItems = filteredItems.slice(page * POSTS_PER_PAGE, (page + 1) * POSTS_PER_PAGE);
-            const onPrev = () => setAllPostsPage((p) => Math.max(0, p - 1));
-            const onNext = () => setAllPostsPage((p) => Math.min(totalPages - 1, p + 1));
-            return (
+      <div className="animate-fade-in" style={{ animationDelay: "0.8s" }}>
+        <section className="px-5 pt-[26px] pb-[36px] border-b border-[var(--color-border-light)]">
+          <div className="max-w-[1080px] mx-auto">
+            {/* Featured */}
+            {featuredItem && (
               <>
-                <div className="flex items-center">
-                  <SectionLabel>All Posts</SectionLabel>
-                  <PaginationArrows page={page} totalPages={totalPages} onPrev={onPrev} onNext={onNext} />
-                </div>
-                {pageItems.map((item) => (
-                  <PostListRow key={item.id} item={item} />
-                ))}
-                <div className="flex items-center mt-3">
-                  <div className="flex-1" />
-                  <PaginationArrows page={page} totalPages={totalPages} onPrev={onPrev} onNext={onNext} />
+                <SectionLabel>Featured</SectionLabel>
+                <FeaturedPost item={featuredItem} />
+              </>
+            )}
+
+            {/* Recent — Blog & Substack only */}
+            {recentItems.length > 0 && (
+              <>
+                <SectionLabel>Recent</SectionLabel>
+                <div className="grid grid-cols-2 gap-2.5 mb-2.5">
+                  {recentItems.map((item) => (
+                    <RecentCard key={item.id} item={item} />
+                  ))}
                 </div>
               </>
-            );
-          })()}
-        </div>
-      </section>
+            )}
+
+            {/* All Posts (filtered + paginated) */}
+            {filteredItems.length > 0 && (() => {
+              const totalPages = Math.ceil(filteredItems.length / POSTS_PER_PAGE);
+              const page = Math.min(allPostsPage, totalPages - 1);
+              const pageItems = filteredItems.slice(page * POSTS_PER_PAGE, (page + 1) * POSTS_PER_PAGE);
+              const onPrev = () => setAllPostsPage((p) => Math.max(0, p - 1));
+              const onNext = () => setAllPostsPage((p) => Math.min(totalPages - 1, p + 1));
+              return (
+                <>
+                  <div className="flex items-center">
+                    <SectionLabel>All Posts</SectionLabel>
+                    <PaginationArrows page={page} totalPages={totalPages} onPrev={onPrev} onNext={onNext} />
+                  </div>
+                  {pageItems.map((item) => (
+                    <PostListRow key={item.id} item={item} />
+                  ))}
+                  <div className="flex items-center mt-3">
+                    <div className="flex-1" />
+                    <PaginationArrows page={page} totalPages={totalPages} onPrev={onPrev} onNext={onNext} />
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+        </section>
+      </div>
     </div>
   );
 }

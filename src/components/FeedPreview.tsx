@@ -49,7 +49,7 @@ function IGCard({ item }: { item: FeedItem }) {
       href={item.url || "/feed"}
       target="_blank"
       rel="noopener noreferrer"
-      className="border border-[#dbdbdb] bg-white flex flex-col group overflow-hidden rounded-sm"
+      className="border border-[#dbdbdb] bg-white flex flex-col group overflow-hidden"
     >
       {/* IG-style header */}
       <div className="flex items-center gap-2.5 px-3 py-2.5 border-b border-[#efefef]">
@@ -63,8 +63,8 @@ function IGCard({ item }: { item: FeedItem }) {
           />
         </div>
         <div className="flex flex-col min-w-0">
-          <span className="text-[14px] font-semibold text-[#262626] leading-tight">@build_canada</span>
-          <span className="text-[12px] text-[#8e8e8e] leading-tight">
+          <span className="text-[14px] font-sans font-medium tracking-[-0.02em] text-[#262626] leading-tight">@build_canada</span>
+          <span className="text-[12px] font-mono text-[#8e8e8e] leading-tight">
             {new Date(item.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
           </span>
         </div>
@@ -102,7 +102,7 @@ function IGCard({ item }: { item: FeedItem }) {
         {/* Caption text */}
         {item.body && (
           <p className="text-[14px] leading-[1.4] text-[#262626] line-clamp-4">
-            <span className="font-semibold">@build_canada</span>{" "}
+            <span className="font-sans font-medium tracking-[-0.02em]">@build_canada</span>{" "}
             {item.body}
           </p>
         )}
@@ -118,7 +118,7 @@ function IGCard({ item }: { item: FeedItem }) {
           className="brightness-0 opacity-30"
           unoptimized
         />
-        <span className="inline-flex items-center gap-2 type-label rounded-full px-3 py-1 border border-[#262626] text-[#262626] bg-white group-hover:border-transparent group-hover:text-white group-hover:bg-gradient-to-r group-hover:from-[#833AB4] group-hover:via-[#C13584] group-hover:to-[#F77737] transition-all">
+        <span className="inline-flex items-center gap-2 type-label px-3 py-1 border border-[#262626] text-[#262626] bg-white group-hover:border-transparent group-hover:text-white group-hover:bg-gradient-to-r group-hover:from-[#833AB4] group-hover:via-[#C13584] group-hover:to-[#F77737] transition-all">
           See post
           <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
             <path d="M2 7h9M8 3l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -135,7 +135,7 @@ function XCard({ item }: { item: FeedItem }) {
       href={item.url || "/feed"}
       target="_blank"
       rel="noopener noreferrer"
-      className="border border-[#2f3336] bg-black flex flex-col group overflow-hidden rounded-sm"
+      className="border border-[#2f3336] bg-black flex flex-col group overflow-hidden"
     >
       {/* X-style header */}
       <div className="flex items-center gap-2.5 px-3 py-2.5 border-b border-[#2f3336]">
@@ -149,8 +149,8 @@ function XCard({ item }: { item: FeedItem }) {
           />
         </div>
         <div className="flex flex-col min-w-0">
-          <span className="text-[14px] font-semibold text-[#e7e9ea] leading-tight">@build_canada</span>
-          <span className="text-[12px] text-[#71767b] leading-tight">
+          <span className="text-[14px] font-sans font-medium tracking-[-0.02em] text-[#e7e9ea] leading-tight">@build_canada</span>
+          <span className="text-[12px] font-mono text-[#71767b] leading-tight">
             {new Date(item.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
           </span>
         </div>
@@ -195,7 +195,7 @@ function XCard({ item }: { item: FeedItem }) {
           className="opacity-20"
           unoptimized
         />
-        <span className="inline-flex items-center gap-2 type-label rounded-full px-3 py-1 border border-[#536471] text-[#e7e9ea] group-hover:border-[#1d9bf0] group-hover:bg-[#1d9bf0] group-hover:text-white transition-all">
+        <span className="inline-flex items-center gap-2 type-label px-3 py-1 border border-[#536471] text-[#e7e9ea] group-hover:border-[#1d9bf0] group-hover:bg-[#1d9bf0] group-hover:text-white transition-all">
           See post
           <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
             <path d="M2 7h9M8 3l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -212,7 +212,7 @@ function TikTokCard({ item }: { item: FeedItem }) {
       href={item.url || "/feed"}
       target="_blank"
       rel="noopener noreferrer"
-      className="border border-[#2f2f2f] bg-[#121212] flex flex-col group overflow-hidden rounded-sm"
+      className="border border-[#2f2f2f] bg-[#121212] flex flex-col group overflow-hidden"
     >
       {/* TikTok-style header */}
       <div className="flex items-center gap-2.5 px-3 py-2.5 border-b border-[#2f2f2f]">
@@ -226,8 +226,8 @@ function TikTokCard({ item }: { item: FeedItem }) {
           />
         </div>
         <div className="flex flex-col min-w-0">
-          <span className="text-[14px] font-semibold text-[#e1e1e2] leading-tight">@build_canada</span>
-          <span className="text-[12px] text-[#8a8b91] leading-tight">
+          <span className="text-[14px] font-sans font-medium tracking-[-0.02em] text-[#e1e1e2] leading-tight">@build_canada</span>
+          <span className="text-[12px] font-mono text-[#8a8b91] leading-tight">
             {new Date(item.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
           </span>
         </div>
@@ -272,7 +272,7 @@ function TikTokCard({ item }: { item: FeedItem }) {
           className="opacity-20"
           unoptimized
         />
-        <span className="inline-flex items-center gap-2 type-label rounded-full px-3 py-1 border border-[#444] text-[#e1e1e2] group-hover:border-[#fe2c55] group-hover:bg-[#fe2c55] group-hover:text-white transition-all">
+        <span className="inline-flex items-center gap-2 type-label px-3 py-1 border border-[#444] text-[#e1e1e2] group-hover:border-[#fe2c55] group-hover:bg-[#fe2c55] group-hover:text-white transition-all">
           See post
           <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
             <path d="M2 7h9M8 3l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -289,7 +289,7 @@ function SubstackCard({ item }: { item: FeedItem }) {
       href={item.url || "/feed"}
       target="_blank"
       rel="noopener noreferrer"
-      className="border border-[#e8e2d9] bg-[#fffdf7] flex flex-col group overflow-hidden rounded-sm"
+      className="border border-[#e8e2d9] bg-[#fffdf7] flex flex-col group overflow-hidden"
     >
       {/* Banner image */}
       {isValidImage(item.image) && (
@@ -327,7 +327,7 @@ function SubstackCard({ item }: { item: FeedItem }) {
         )}
 
         {/* Date */}
-        <span className="text-[12px] text-[#857e71]">
+        <span className="text-[12px] font-mono text-[#857e71]">
           {new Date(item.createdAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
         </span>
       </div>
@@ -342,7 +342,7 @@ function SubstackCard({ item }: { item: FeedItem }) {
           className="opacity-25"
           unoptimized
         />
-        <span className="inline-flex items-center gap-2 type-label rounded-full px-3 py-1 border border-[#1a1a1a] text-[#1a1a1a] bg-[#fffdf7] group-hover:border-[#FF6719] group-hover:bg-[#FF6719] group-hover:text-white transition-all">
+        <span className="inline-flex items-center gap-2 type-label px-3 py-1 border border-[#1a1a1a] text-[#1a1a1a] bg-[#fffdf7] group-hover:border-[#FF6719] group-hover:bg-[#FF6719] group-hover:text-white transition-all">
           Read
           <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
             <path d="M2 7h9M8 3l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -408,7 +408,7 @@ function FeedCard({ item }: { item: FeedItem }) {
 
       {/* Meta bar */}
       <div className="px-4 py-2.5 flex items-center justify-end">
-        <span className="inline-flex items-center gap-2 type-label rounded-full px-3 py-1 border border-[var(--color-dark)] text-[var(--color-dark)] bg-[var(--color-bg)] group-hover:bg-[var(--color-dark)] group-hover:text-[var(--color-bg)] transition-colors">
+        <span className="inline-flex items-center gap-2 type-label px-3 py-1 border border-[var(--color-dark)] text-[var(--color-dark)] bg-[var(--color-bg)] group-hover:bg-[var(--color-dark)] group-hover:text-[var(--color-bg)] transition-colors">
           Read more
           <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
             <path d="M2 7h9M8 3l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
@@ -437,7 +437,7 @@ export default function FeedPreview() {
   }, []);
 
   return (
-    <div className="px-5 pt-[26px] pb-0">
+    <div className="pt-[26px] pb-0">
       <div className="max-w-[768px] mx-auto">
       <span className="type-label font-bold text-[var(--color-text-secondary)] block pb-2">
         Feed

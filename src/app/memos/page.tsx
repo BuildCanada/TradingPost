@@ -46,6 +46,10 @@ export default async function MemosPage() {
   // Serialize dates for the client component
   const serialized = memos.map((m) => ({
     ...m,
+    authorImage:
+      m.author === "Build Canada"
+        ? "/assets/logos/Logocircle.png"
+        : m.authorImage,
     publishedAt: m.publishedAt?.toISOString() ?? null,
     createdAt: m.createdAt.toISOString(),
   }));

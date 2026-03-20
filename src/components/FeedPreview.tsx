@@ -55,7 +55,7 @@ function IGCard({ item }: { item: FeedItem }) {
       <div className="flex items-center gap-2.5 px-3 py-2.5 border-b border-[#efefef]">
         <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-[var(--color-accent)] shrink-0">
           <Image
-            src="/assets/logos/sticker-build-canada-logo.png"
+            src="/assets/logos/Logocircle.png"
             alt="Build Canada"
             width={32}
             height={32}
@@ -141,7 +141,7 @@ function XCard({ item }: { item: FeedItem }) {
       <div className="flex items-center gap-2.5 px-3 py-2.5 border-b border-[#2f3336]">
         <div className="w-8 h-8 rounded-full overflow-hidden border border-[#333] shrink-0">
           <Image
-            src="/assets/logos/sticker-build-canada-logo.png"
+            src="/assets/logos/Logocircle.png"
             alt="Build Canada"
             width={32}
             height={32}
@@ -218,7 +218,7 @@ function TikTokCard({ item }: { item: FeedItem }) {
       <div className="flex items-center gap-2.5 px-3 py-2.5 border-b border-[#2f2f2f]">
         <div className="w-8 h-8 rounded-full overflow-hidden border border-[#333] shrink-0">
           <Image
-            src="/assets/logos/sticker-build-canada-logo.png"
+            src="/assets/logos/Logocircle.png"
             alt="Build Canada"
             width={32}
             height={32}

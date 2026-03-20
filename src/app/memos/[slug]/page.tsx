@@ -62,6 +62,11 @@ export default async function MemoDetailPage({
 
   if (!memo) notFound();
 
+  const authorImage =
+    memo.author === "Build Canada"
+      ? "/assets/logos/Logocircle.png"
+      : memo.authorImage;
+
   const keyMessages = [memo.keyMessage1, memo.keyMessage2, memo.keyMessage3].filter(
     Boolean
   ) as string[];
@@ -157,9 +162,9 @@ export default async function MemoDetailPage({
 
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-white/20 overflow-hidden shrink-0">
-                {memo.authorImage && (
+                {authorImage && (
                   <Image
-                    src={memo.authorImage}
+                    src={authorImage}
                     alt={memo.author}
                     width={40}
                     height={40}
@@ -212,9 +217,9 @@ export default async function MemoDetailPage({
 
               <div className="flex items-center gap-3 mb-6">
                 <div className="w-10 h-10 rounded-full bg-[var(--color-border-light)] overflow-hidden shrink-0">
-                  {memo.authorImage && (
+                  {authorImage && (
                     <Image
-                      src={memo.authorImage}
+                      src={authorImage}
                       alt={memo.author}
                       width={40}
                       height={40}

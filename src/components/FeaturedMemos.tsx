@@ -36,7 +36,13 @@ export default function FeaturedMemos({ heading }: { heading?: string }) {
           const db = new Date(b.publishedAt || b.createdAt).getTime();
           return db - da;
         });
-        setMemos(data);
+        setMemos(
+          data.map((m) =>
+            m.author === "Build Canada"
+              ? { ...m, authorImage: "/assets/logos/Logocircle.png" }
+              : m
+          )
+        );
       });
   }, []);
 

@@ -31,7 +31,7 @@ function HeroBlock() {
       {/* Photo backdrop */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/assets/images/train.jpg"
+        src="/assets/images/train.webp"
         alt=""
         aria-hidden="true"
         className="absolute inset-0 w-full h-full object-cover object-bottom pointer-events-none select-none brightness-[0.35]"
@@ -42,7 +42,8 @@ function HeroBlock() {
           Building a bolder Canada.
         </h1>
         <p className="type-body max-w-[600px] text-[var(--color-bg)] opacity-70">
-          Canada must get ahead. It will require ambitious thinking, bold choices, and decisive action. Shaping this conversation properly is no small feat; and takes the qualified perspectives of thousands of Canadians. This is our method.
+          <span className="hidden min-[425px]:inline">Canada must get ahead. It will require ambitious thinking, bold choices, and decisive action. Shaping this conversation properly is no small feat; and takes the qualified perspectives of thousands of Canadians. This is our method.</span>
+          <span className="inline min-[425px]:hidden">Canada must get ahead. Shaping this conversation properly is no small feat. Here is our method.</span>
         </p>
       </div>
     </section>
@@ -413,23 +414,18 @@ function TeamBlock({ members }: { members: TeamMember[] }) {
 function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
   return (
     <div className="w-full border border-[var(--color-border-light)] overflow-hidden bg-[var(--color-bg)]">
-      {/* Image with quote overlay */}
-      <div className="relative">
-        {testimonial.splashPhoto ? (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img
-            src={testimonial.splashPhoto}
-            alt=""
-            className="w-full h-[220px] md:h-[260px] object-cover brightness-[0.4]"
-          />
-        ) : (
-          <div className="w-full h-[220px] md:h-[260px] bg-[#2a2a2a]" />
-        )}
-        <div className="absolute inset-0 flex flex-col justify-end p-5 md:p-6">
-          <p className="type-body text-white font-medium" style={{ lineHeight: 1.25 }}>
-            &ldquo;{testimonial.quote}&rdquo;
-          </p>
-        </div>
+      {/* Image with quote overlay — uses background-image to keep text in normal flow */}
+      <div
+        className="h-[220px] md:h-[260px] flex flex-col justify-end p-5 md:p-6 bg-[#2a2a2a]"
+        style={testimonial.splashPhoto ? {
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${testimonial.splashPhoto})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        } : undefined}
+      >
+        <p className="type-body text-white font-medium break-words" style={{ lineHeight: 1.25, textShadow: "0 1px 4px rgba(0,0,0,0.6)" }}>
+          &ldquo;{testimonial.quote}&rdquo;
+        </p>
       </div>
 
       {/* Attribution + title */}
@@ -476,9 +472,11 @@ function TestimonialsBlock({ testimonials }: { testimonials: Testimonial[] }) {
     return () => ro.disconnect();
   }, []);
 
-  // Below 535px viewport, card fills container (with 2px margin for borders); otherwise fixed 450px
-  const cardW = containerWidth > 0 && containerWidth < 495 ? containerWidth - 2 : 450;
-  const trackOffset = -(current * (cardW + gap));
+  // Card shrinks with container instead of overflowing
+  const cardW = containerWidth > 0 ? Math.min(450, containerWidth - 2) : 450;
+  // Center current card using pure JS math (avoids CSS calc % ambiguity on the flex track)
+  const centerOffset = containerWidth > 0 ? (containerWidth - cardW) / 2 : 0;
+  const trackOffset = centerOffset - current * (cardW + gap);
 
   if (testimonials.length === 0) {
     return (
@@ -518,7 +516,7 @@ function TestimonialsBlock({ testimonials }: { testimonials: Testimonial[] }) {
             className="flex items-start"
             style={{
               gap: `${gap}px`,
-              transform: `translateX(calc(50% - ${cardW / 2}px + ${trackOffset}px))`,
+              transform: `translateX(${trackOffset}px)`,
               transition: "transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1)",
             }}
           >
@@ -527,7 +525,7 @@ function TestimonialsBlock({ testimonials }: { testimonials: Testimonial[] }) {
               return (
                 <div
                   key={t.id}
-                  className="shrink-0 cursor-pointer"
+                  className="shrink-0 cursor-pointer overflow-hidden min-w-0"
                   style={{
                     width: cardW,
                     transform: isCurrent ? "scale(1)" : "scale(0.92)",

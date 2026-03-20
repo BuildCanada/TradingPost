@@ -48,7 +48,7 @@ export default async function MemosPage() {
     ...m,
     authorImage:
       m.author === "Build Canada"
-        ? "/assets/logos/Logocircle.png"
+        ? "/assets/logos/Logocircle.webp"
         : m.authorImage,
     publishedAt: m.publishedAt?.toISOString() ?? null,
     createdAt: m.createdAt.toISOString(),
@@ -60,7 +60,7 @@ export default async function MemosPage() {
       <div className="animate-fade-in" style={{ animationDelay: "0s" }}>
         <section className="relative px-5 border-b border-[var(--color-border-light)] overflow-hidden">
           <Image
-            src="/assets/images/harley.png"
+            src="/assets/images/harley.webp"
             alt=""
             fill
             className="object-cover brightness-[0.35]"

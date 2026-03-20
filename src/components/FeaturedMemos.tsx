@@ -39,7 +39,7 @@ export default function FeaturedMemos({ heading }: { heading?: string }) {
         setMemos(
           data.map((m) =>
             m.author === "Build Canada"
-              ? { ...m, authorImage: "/assets/logos/Logocircle.png" }
+              ? { ...m, authorImage: "/assets/logos/Logocircle.webp" }
               : m
           )
         );
@@ -101,7 +101,7 @@ export default function FeaturedMemos({ heading }: { heading?: string }) {
         {heading && (
           <Link
             href="/memos"
-            className="h-7 px-2.5 border border-[var(--color-border-light)] flex items-center type-label text-[var(--color-dark)] hover:border-[var(--color-dark)] transition-colors"
+            className="hidden compact:flex h-7 px-2.5 border border-[var(--color-border-light)] items-center type-label text-[var(--color-dark)] hover:border-[var(--color-dark)] transition-colors"
           >
             See All Memos →
           </Link>
@@ -151,6 +151,14 @@ export default function FeaturedMemos({ heading }: { heading?: string }) {
           ))}
         </div>
       </div>
+      {heading && (
+        <Link
+          href="/memos"
+          className="compact:hidden flex w-full justify-center h-7 mt-2.5 border border-[var(--color-border-light)] items-center type-label text-[var(--color-dark)] hover:border-[var(--color-dark)] transition-colors"
+        >
+          See All Memos →
+        </Link>
+      )}
       </div>
     </section>
   );

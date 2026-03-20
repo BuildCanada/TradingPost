@@ -125,7 +125,7 @@ function BrandSection() {
         <BrandMessaging />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/assets/images/FlagSplash.png"
+          src="/assets/images/FlagSplash.webp"
           alt=""
           className="hidden lg:block lg:w-[30%] object-cover"
         />

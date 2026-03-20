@@ -64,7 +64,7 @@ export default async function MemoDetailPage({
 
   const authorImage =
     memo.author === "Build Canada"
-      ? "/assets/logos/Logocircle.png"
+      ? "/assets/logos/Logocircle.webp"
       : memo.authorImage;
 
   const keyMessages = [memo.keyMessage1, memo.keyMessage2, memo.keyMessage3].filter(

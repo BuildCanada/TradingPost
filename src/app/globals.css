@@ -183,6 +183,7 @@ html {
   --breakpoint-md: 956px;
 }
 
+@custom-variant compact (@media (min-width: 425px));
 @custom-variant 2xl-memo (@media (min-width: 1200px));
 @custom-variant cards (@media (min-width: 612px));
 @custom-variant wide (@media (min-width: 956px));

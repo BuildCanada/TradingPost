@@ -59,7 +59,7 @@ export default function Footer() {
     >
       {/* Maple leaf background decoration */}
       <svg
-        className="absolute pointer-events-none"
+        className="absolute pointer-events-none max-[425px]:w-[350px] max-[425px]:h-[350px] max-[425px]:right-[-50%]"
         style={{
           bottom: "-15%",
           right: "-8%",

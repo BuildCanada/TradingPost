@@ -5,18 +5,18 @@ import SectionLabel from "@/components/SectionLabel";
 import MemosListClient from "./MemosListClient";
 
 export const metadata: Metadata = {
-  title: "Memos | Build Canada",
+  title: "Memos",
   description:
     "Bold thinking from Canada's builders, reformers, and leaders. Read policy memos and ideas worth building on.",
   openGraph: {
-    title: "Memos | Build Canada",
+    title: "Memos",
     description:
       "Bold thinking from Canada's builders, reformers, and leaders.",
     type: "website",
   },
   twitter: {
     card: "summary",
-    title: "Memos | Build Canada",
+    title: "Memos",
     description:
       "Bold thinking from Canada's builders, reformers, and leaders.",
   },
@@ -60,8 +60,8 @@ export default async function MemosPage() {
       <div className="animate-fade-in" style={{ animationDelay: "0s" }}>
         <section className="relative px-5 border-b border-[var(--color-border-light)] overflow-hidden">
           <Image
-            src="/assets/images/harley.webp"
-            alt=""
+            src="/assets/images/build-canada-founder-meetup-shopify.webp"
+            alt="Harley Finkelstein and Lucy Hargreaves speaking at Shopify HQ on Build Canada and the future of Canada"
             fill
             className="object-cover brightness-[0.35]"
             priority

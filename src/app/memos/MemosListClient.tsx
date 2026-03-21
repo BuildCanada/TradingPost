@@ -33,6 +33,12 @@ function formatDate(dateStr: string | null, fallback: string) {
   });
 }
 
+function shortenName(name: string): string {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length < 2) return name;
+  return `${parts[0]} ${parts[parts.length - 1][0]}.`;
+}
+
 function MemoCard({ memo }: { memo: MemoItem }) {
   return (
     <Link
@@ -60,7 +66,8 @@ function MemoCard({ memo }: { memo: MemoItem }) {
         </h3>
         <div className="flex items-center gap-2 mt-0.5">
           <p className="type-label text-[var(--color-text-secondary)]">
-            {memo.author}
+            <span className="hidden min-[900px]:inline">{memo.author}</span>
+            <span className="min-[900px]:hidden">{shortenName(memo.author)}</span>
           </p>
           <span className="text-[var(--color-text-secondary)]">&middot;</span>
           <p className="type-label-sm text-[var(--color-text-secondary)]">

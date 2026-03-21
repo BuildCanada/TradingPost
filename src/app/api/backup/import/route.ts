@@ -191,6 +191,7 @@ async function importTeamMembers(rows: Record<string, string>[], mode: string) {
         id: row.id,
         name: row.name || "Unknown",
         title: row.title || "",
+        role: row.role || "CORE",
         photo: strOrNull(row.photo),
         xUrl: strOrNull(row.xUrl),
         linkedinUrl: strOrNull(row.linkedinUrl),
@@ -201,6 +202,7 @@ async function importTeamMembers(rows: Record<string, string>[], mode: string) {
       update: {
         name: row.name || "Unknown",
         title: row.title || "",
+        role: row.role || "CORE",
         photo: strOrNull(row.photo),
         xUrl: strOrNull(row.xUrl),
         linkedinUrl: strOrNull(row.linkedinUrl),
@@ -246,6 +248,45 @@ async function importTestimonials(rows: Record<string, string>[], mode: string) 
   return imported;
 }
 
+async function importProjects(rows: Record<string, string>[], mode: string) {
+  if (mode === "replace") {
+    await prisma.project.deleteMany();
+  }
+  let imported = 0;
+  for (const row of rows) {
+    if (!row.id || !row.slug) continue;
+    await prisma.project.upsert({
+      where: { id: row.id },
+      create: {
+        id: row.id,
+        slug: row.slug,
+        title: row.title || "Untitled",
+        description: strOrNull(row.description),
+        externalUrl: row.externalUrl || "",
+        size: row.size || "small",
+        featured: parseBool(row.featured),
+        order: parseOptionalInt(row.order),
+        accentColor: strOrNull(row.accentColor),
+        createdAt: parseRequiredDate(row.createdAt),
+        updatedAt: parseRequiredDate(row.updatedAt),
+      },
+      update: {
+        slug: row.slug,
+        title: row.title || "Untitled",
+        description: strOrNull(row.description),
+        externalUrl: row.externalUrl || "",
+        size: row.size || "small",
+        featured: parseBool(row.featured),
+        order: parseOptionalInt(row.order),
+        accentColor: strOrNull(row.accentColor),
+        updatedAt: parseRequiredDate(row.updatedAt),
+      },
+    });
+    imported++;
+  }
+  return imported;
+}
+
 // Source: "csv" reads from local backups/, "sheets" pulls from Google Sheets
 // Mode: "upsert" (merge) or "replace" (wipe + reimport)
 export async function POST(request: Request) {
@@ -273,7 +314,7 @@ export async function POST(request: Request) {
       });
       const sheets = google.sheets({ version: "v4", auth });
 
-      for (const name of ["feed_items", "memos", "team_members", "testimonials"]) {
+      for (const name of ["feed_items", "memos", "team_members", "testimonials", "projects"]) {
         try {
           const res = await sheets.spreadsheets.values.get({
             spreadsheetId,
@@ -294,7 +335,7 @@ export async function POST(request: Request) {
     } else {
       // Read from local CSV files
       const backupsDir = path.join(process.cwd(), "backups");
-      for (const name of ["feed_items", "memos", "team_members", "testimonials"]) {
+      for (const name of ["feed_items", "memos", "team_members", "testimonials", "projects"]) {
         const csvPath = path.join(backupsDir, `${name}_latest.csv`);
         if (!fs.existsSync(csvPath)) continue;
         const content = fs.readFileSync(csvPath, "utf-8");
@@ -315,6 +356,9 @@ export async function POST(request: Request) {
     }
     if (csvData.testimonials) {
       results.push({ model: "testimonials", imported: await importTestimonials(csvData.testimonials, mode) });
+    }
+    if (csvData.projects) {
+      results.push({ model: "projects", imported: await importProjects(csvData.projects, mode) });
     }
 
     return NextResponse.json({

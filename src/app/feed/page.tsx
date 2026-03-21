@@ -54,8 +54,8 @@ function FeedHeader() {
   return (
     <section className="relative px-5 border-b border-[var(--color-border-light)] overflow-hidden">
       <Image
-        src="/assets/images/people.webp"
-        alt=""
+        src="/assets/images/build-canada-community-meetup.webp"
+        alt="Audience at a Build Canada community meetup event"
         fill
         className="object-cover brightness-[0.35]"
         priority

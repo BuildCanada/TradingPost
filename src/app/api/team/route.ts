@@ -22,6 +22,7 @@ export async function POST(req: NextRequest) {
       data: {
         name: body.name,
         title: body.title,
+        role: body.role || "CORE",
         photo: body.photo || null,
         xUrl: body.xUrl || null,
         linkedinUrl: body.linkedinUrl || null,
@@ -43,6 +44,7 @@ export async function PUT(req: NextRequest) {
       data: {
         name: body.name,
         title: body.title,
+        role: body.role || "CORE",
         photo: body.photo || null,
         xUrl: body.xUrl || null,
         linkedinUrl: body.linkedinUrl || null,

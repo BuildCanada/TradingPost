@@ -400,7 +400,7 @@ function FeedCard({ item }: { item: FeedItem }) {
         )}
 
         {item.body && (
-          <p className="type-body line-clamp-2">
+          <p className="text-[14px] leading-[1.4] text-[var(--color-text-secondary)] line-clamp-2">
             {stripHtml(item.body)}
           </p>
         )}

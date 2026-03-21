@@ -3,6 +3,7 @@ import FeedPreview from "@/components/FeedPreview";
 import FeaturedMemos from "@/components/FeaturedMemos";
 import SubscribeForm from "@/components/SubscribeForm";
 import SectionLabel from "@/components/SectionLabel";
+import FeaturedProjects from "@/components/FeaturedProjects";
 
 function HeroSection() {
   const s = "var(--color-bg)";
@@ -125,8 +126,8 @@ function BrandSection() {
         <BrandMessaging />
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
-          src="/assets/images/FlagSplash.webp"
-          alt=""
+          src="/assets/images/canadian-flag-waving.webp"
+          alt="Canadian flag waving against a blue sky"
           className="hidden lg:block lg:w-[30%] object-cover"
         />
       </div>
@@ -185,7 +186,7 @@ function SocialLinks() {
     { icon: "YOUTUBE", href: "https://www.youtube.com/@BuildCanada" },
   ];
   return (
-    <div className="pt-3 pb-[32px] border-b border-[var(--color-border-light)] md:border-b-0">
+    <div className="pt-3 pb-[32px]">
       <div className="max-w-[768px] mx-auto flex items-center gap-2 flex-wrap">
         {socials.map(({ icon, href }) => (
           <a
@@ -228,6 +229,11 @@ function FeedAndEvents() {
           <SocialLinks />
         </div>
 
+        {/* Divider between feed and events (visible only when stacked) */}
+        <div className="w-full md:hidden -mx-5 px-0" style={{ width: "calc(100% + 40px)" }}>
+          <div className="border-t border-[var(--color-border-light)]" />
+        </div>
+
         {/* Events */}
         <div className="w-full md:w-[500px] pt-[26px] pb-[36px]">
           <SectionLabel>Events</SectionLabel>
@@ -241,102 +247,6 @@ function FeedAndEvents() {
             aria-hidden="false"
             tabIndex={0}
           />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-function StatTile() {
-  return (
-    <div className="border border-[var(--color-border-light)] py-2.5 px-2 flex flex-col items-center gap-1.5">
-      <div className="h-3.5 w-[55%] bg-[var(--color-dark)]" />
-      <div className="h-1.5 w-[75%] bg-[var(--color-border-light)]" />
-    </div>
-  );
-}
-
-function BarChart() {
-  const heights = ["60%", "100%", "75%", "45%", "85%", "55%"];
-  return (
-    <div className="border border-[var(--color-border-light)] p-3">
-      <div className="h-1.5 w-1/2 bg-[var(--color-border-light)] mb-2.5" />
-      <div className="flex items-end gap-1 h-12">
-        {heights.map((h, i) => (
-          <div
-            key={i}
-            className="flex-1 bg-[var(--color-border-light)]"
-            style={{ height: h }}
-          />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function SparklineWidget() {
-  return (
-    <div className="border border-[var(--color-border-light)] p-3">
-      <div className="h-1.5 w-1/2 bg-[var(--color-border-light)] mb-2.5" />
-      <div className="h-9 md:h-12">
-        <svg
-          viewBox="0 0 300 36"
-          preserveAspectRatio="none"
-          className="w-full h-full"
-        >
-          <polyline
-            points="0,30 40,20 80,25 120,10 160,18 200,8 240,14 300,5"
-            fill="none"
-            stroke="var(--color-border-light)"
-            strokeWidth="1.5"
-          />
-          <polyline
-            points="0,30 40,20 80,25 120,10 160,18 200,8 240,14 300,5 300,36 0,36"
-            fill="var(--color-border-light)"
-            fillOpacity="0.3"
-            stroke="none"
-          />
-        </svg>
-      </div>
-    </div>
-  );
-}
-
-function DonutWidget() {
-  return (
-    <div className="border border-[var(--color-border-light)] p-3 flex flex-col items-center gap-2">
-      <div className="h-1.5 w-[65%] bg-[var(--color-border-light)]" />
-      <div className="w-11 h-11 rounded-full border-[6px] border-[var(--color-border-light)] border-t-[var(--color-dark)] border-r-[var(--color-dark)]" />
-    </div>
-  );
-}
-
-function ProjectsSection() {
-  return (
-    <section className="px-5 pt-[26px] pb-[36px] border-b border-[var(--color-border-light)]">
-      <SectionLabel>Projects</SectionLabel>
-      <div className="max-w-[540px] mx-auto">
-        {/* Stats row */}
-        <div className="grid grid-cols-3 gap-2.5 mb-2.5">
-          <StatTile />
-          <StatTile />
-          <StatTile />
-        </div>
-
-        {/* Mobile: stacked widgets */}
-        <div className="md:hidden space-y-2.5">
-          <BarChart />
-          <div className="grid grid-cols-2 gap-2.5">
-            <DonutWidget />
-            <DonutWidget />
-          </div>
-          <SparklineWidget />
-        </div>
-
-        {/* Desktop: two-column widgets */}
-        <div className="hidden md:grid md:grid-cols-2 md:gap-2.5">
-          <BarChart />
-          <SparklineWidget />
         </div>
       </div>
     </section>
@@ -357,7 +267,7 @@ export default function Home() {
         <FeedAndEvents />
       </div>
       <div className="animate-fade-in" style={{ animationDelay: "1.6s" }}>
-        <ProjectsSection />
+        <FeaturedProjects />
       </div>
       <div className="animate-fade-in" style={{ animationDelay: "2.0s" }}>
         <SubscribeForm />

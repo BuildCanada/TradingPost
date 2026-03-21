@@ -313,6 +313,9 @@ body {
   border-radius: 3px;
 }
 
+/* Hide scrollbar for scroll-snap carousels (webkit) */
+.snap-x::-webkit-scrollbar { display: none; }
+
 .prose-bc pre {
   background: var(--color-dark);
   color: var(--color-bg);

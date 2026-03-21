@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import { google } from "googleapis";
 
-const SHEET_NAMES = ["feed_items", "memos", "team_members", "testimonials"];
+const SHEET_NAMES = ["feed_items", "memos", "team_members", "testimonials", "projects"];
 
 function parseCsv(csv: string): string[][] {
   const rows: string[][] = [];

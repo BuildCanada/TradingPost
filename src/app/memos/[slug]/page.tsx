@@ -121,7 +121,7 @@ export default async function MemoDetailPage({
 
       {/* Splash Hero (when splash image exists) */}
       {memo.splashImage && (
-        <div className="relative overflow-hidden">
+        <div className="animate-fade-in relative overflow-hidden">
           <Image
             src={memo.splashImage}
             alt=""
@@ -182,7 +182,7 @@ export default async function MemoDetailPage({
         </div>
       )}
 
-      <div className="max-w-[1400px] mx-auto px-5 pt-[42px] pb-[52px] 2xl-memo:flex 2xl-memo:gap-0">
+      <div className="animate-fade-in max-w-[1400px] mx-auto px-5 pt-[42px] pb-[52px] 2xl-memo:flex 2xl-memo:gap-0" style={{ animationDelay: "0.3s" }}>
         {/* Left column: main content */}
         <article className="max-w-[720px] 2xl-memo:flex-1 2xl-memo:min-w-0 2xl-memo:max-w-none 2xl-memo:pr-8">
           {/* Default header (no splash image) */}

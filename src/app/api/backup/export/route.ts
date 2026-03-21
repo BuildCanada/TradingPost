@@ -24,11 +24,12 @@ function toCsv(rows: Record<string, unknown>[]): string {
 
 export async function POST() {
   try {
-    const [feedItems, memos, teamMembers, testimonials] = await Promise.all([
+    const [feedItems, memos, teamMembers, testimonials, projects] = await Promise.all([
       prisma.feedItem.findMany({ orderBy: { createdAt: "desc" } }),
       prisma.memo.findMany({ orderBy: { createdAt: "desc" } }),
       prisma.teamMember.findMany({ orderBy: { order: "asc" } }),
       prisma.testimonial.findMany({ orderBy: { order: "asc" } }),
+      prisma.project.findMany({ orderBy: { order: "asc" } }),
     ]);
 
     const backupsDir = path.join(process.cwd(), "backups");
@@ -43,6 +44,7 @@ export async function POST() {
       { name: "memos", data: memos as unknown as Record<string, unknown>[] },
       { name: "team_members", data: teamMembers as unknown as Record<string, unknown>[] },
       { name: "testimonials", data: testimonials as unknown as Record<string, unknown>[] },
+      { name: "projects", data: projects as unknown as Record<string, unknown>[] },
     ];
 
     for (const { name, data } of datasets) {
@@ -61,7 +63,7 @@ export async function POST() {
       success: true,
       timestamp,
       files,
-      total: feedItems.length + memos.length + teamMembers.length + testimonials.length,
+      total: feedItems.length + memos.length + teamMembers.length + testimonials.length + projects.length,
     });
   } catch (error) {
     console.error("Backup export error:", error);

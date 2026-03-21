@@ -75,6 +75,7 @@ interface TeamMemberItem {
   id: string;
   name: string;
   title: string;
+  role: string;
   photo: string | null;
   xUrl: string | null;
   linkedinUrl: string | null;
@@ -93,6 +94,7 @@ interface TestimonialItem {
 const EMPTY_TEAM_MEMBER = {
   name: "",
   title: "",
+  role: "CORE",
   photo: "",
   xUrl: "",
   linkedinUrl: "",
@@ -143,7 +145,31 @@ export default function AdminPage() {
   const [memoForm, setMemoForm] = useState(EMPTY_MEMO);
   const [editingMemoSlug, setEditingMemoSlug] = useState<string | null>(null);
   const [memoUploading, setMemoUploading] = useState(false);
-  const [activeSection, setActiveSection] = useState<"feed" | "memos" | "about">("feed");
+  const [activeSection, setActiveSection] = useState<"feed" | "memos" | "about" | "projects">("feed");
+
+  // Projects state
+  interface ProjectItem {
+    id: string;
+    slug: string;
+    title: string;
+    description: string | null;
+    externalUrl: string;
+    size: string;
+    featured: boolean;
+    order: number;
+    accentColor: string | null;
+  }
+  const [projects, setProjects] = useState<ProjectItem[]>([]);
+  const [projectForm, setProjectForm] = useState({
+    slug: "",
+    title: "",
+    description: "",
+    externalUrl: "",
+    featured: false,
+    order: 0,
+    accentColor: "",
+  });
+  const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
 
   // About Us state
   const [teamMembers, setTeamMembers] = useState<TeamMemberItem[]>([]);
@@ -181,12 +207,19 @@ export default function AdminPage() {
     setTestimonials(await res.json());
   }, []);
 
+  const loadProjects = useCallback(async () => {
+    const res = await fetch("/api/projects");
+    if (!res.ok) return;
+    setProjects(await res.json());
+  }, []);
+
   useEffect(() => {
     loadItems();
     loadMemos();
     loadTeamMembers();
     loadTestimonials();
-  }, [loadItems, loadMemos, loadTeamMembers, loadTestimonials]);
+    loadProjects();
+  }, [loadItems, loadMemos, loadTeamMembers, loadTestimonials, loadProjects]);
 
   async function handleUpload(
     e: React.ChangeEvent<HTMLInputElement>,
@@ -458,6 +491,7 @@ export default function AdminPage() {
     setTeamForm({
       name: m.name,
       title: m.title,
+      role: m.role || "CORE",
       photo: m.photo || "",
       xUrl: m.xUrl || "",
       linkedinUrl: m.linkedinUrl || "",
@@ -528,6 +562,75 @@ export default function AdminPage() {
       body: JSON.stringify({ id }),
     });
     loadTestimonials();
+  }
+
+  // ── Project handlers ──
+  const EMPTY_PROJECT = {
+    slug: "",
+    title: "",
+    description: "",
+    externalUrl: "",
+    featured: false,
+    order: 0,
+    accentColor: "",
+  };
+
+  async function handleProjectSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (editingProjectId) {
+      await fetch("/api/projects", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: editingProjectId, ...projectForm }),
+      });
+    } else {
+      await fetch("/api/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(projectForm),
+      });
+    }
+    setProjectForm(EMPTY_PROJECT);
+    setEditingProjectId(null);
+    loadProjects();
+  }
+
+  function startEditProject(p: ProjectItem) {
+    setEditingProjectId(p.id);
+    setProjectForm({
+      slug: p.slug,
+      title: p.title,
+      description: p.description || "",
+      externalUrl: p.externalUrl,
+      featured: p.featured,
+      order: p.order,
+      accentColor: p.accentColor || "",
+    });
+    setActiveSection("projects");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  async function handleDeleteProject(id: string) {
+    if (!confirm("Delete this project?")) return;
+    await fetch("/api/projects", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    if (editingProjectId === id) {
+      setProjectForm(EMPTY_PROJECT);
+      setEditingProjectId(null);
+    }
+    loadProjects();
+  }
+
+  async function toggleProjectFeatured(p: ProjectItem) {
+    await fetch("/api/projects", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...p, featured: !p.featured }),
+    });
+    loadProjects();
   }
 
   const showFullForm = isBlogType(form.type);
@@ -671,38 +774,19 @@ export default function AdminPage() {
         )}
       </div>
 
-      {/* Section tabs */}
-      <div className="flex gap-4 mb-8">
-        <button
-          onClick={() => setActiveSection("feed")}
-          className={`text-2xl font-bold pb-1 border-b-2 transition-colors ${
-            activeSection === "feed"
-              ? "border-black text-black"
-              : "border-transparent text-gray-300 hover:text-gray-500"
-          }`}
+      {/* Section selector */}
+      <div className="mb-8">
+        <select
+          value={activeSection}
+          onChange={(e) => setActiveSection(e.target.value as typeof activeSection)}
+          className="text-2xl font-bold bg-transparent border-b-2 border-black pb-1 pr-8 appearance-none cursor-pointer focus:outline-none"
+          style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M3 5l3 3 3-3' fill='none' stroke='%23000' stroke-width='1.5'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 0 center" }}
         >
-          Feed CMS
-        </button>
-        <button
-          onClick={() => setActiveSection("memos")}
-          className={`text-2xl font-bold pb-1 border-b-2 transition-colors ${
-            activeSection === "memos"
-              ? "border-black text-black"
-              : "border-transparent text-gray-300 hover:text-gray-500"
-          }`}
-        >
-          Memos CMS
-        </button>
-        <button
-          onClick={() => setActiveSection("about")}
-          className={`text-2xl font-bold pb-1 border-b-2 transition-colors ${
-            activeSection === "about"
-              ? "border-black text-black"
-              : "border-transparent text-gray-300 hover:text-gray-500"
-          }`}
-        >
-          About Us CMS
-        </button>
+          <option value="feed">Feed CMS</option>
+          <option value="memos">Memos CMS</option>
+          <option value="projects">Projects CMS</option>
+          <option value="about">About Us CMS</option>
+        </select>
       </div>
 
       {activeSection === "feed" && (<>
@@ -1634,6 +1718,18 @@ export default function AdminPage() {
               />
             </div>
           </div>
+          <div>
+            <label className="block text-xs font-medium mb-1">Role *</label>
+            <select
+              value={teamForm.role}
+              onChange={(e) => setTeamForm((f) => ({ ...f, role: e.target.value }))}
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+            >
+              <option value="CORE">Core Team</option>
+              <option value="ADVISOR">Advisor</option>
+              <option value="BOARD">Board</option>
+            </select>
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium mb-1">X (Twitter) URL</label>
@@ -1703,6 +1799,7 @@ export default function AdminPage() {
                 <p className="text-sm font-medium truncate">{m.name}</p>
                 <p className="text-xs text-gray-500 truncate">{m.title}</p>
               </div>
+              <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 shrink-0">{m.role || "CORE"}</span>
               <span className="text-xs text-gray-400 shrink-0">#{m.order}</span>
               <div className="flex gap-1 shrink-0">
                 <button
@@ -1832,6 +1929,211 @@ export default function AdminPage() {
             <p className="text-sm text-gray-400 text-center py-4">No testimonials yet.</p>
           )}
         </div>
+      </>)}
+
+      {/* ════════════════════════════════════════════ */}
+      {/* PROJECTS CMS                                */}
+      {/* ════════════════════════════════════════════ */}
+      {activeSection === "projects" && (<>
+
+      <form
+        onSubmit={handleProjectSubmit}
+        className="border border-gray-200 rounded p-6 mb-10 space-y-4"
+      >
+        <h2 className="text-lg font-semibold">
+          {editingProjectId ? "Edit Project" : "New Project"}
+        </h2>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs uppercase tracking-wide text-gray-500 mb-1">
+              Title *
+            </label>
+            <input
+              type="text"
+              required
+              value={projectForm.title}
+              onChange={(e) => {
+                const title = e.target.value;
+                setProjectForm((f) => ({
+                  ...f,
+                  title,
+                  slug: editingProjectId ? f.slug : title.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, ""),
+                }));
+              }}
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+              placeholder="Project title"
+            />
+          </div>
+          <div>
+            <label className="block text-xs uppercase tracking-wide text-gray-500 mb-1">
+              Slug
+            </label>
+            <input
+              type="text"
+              value={projectForm.slug}
+              onChange={(e) => setProjectForm((f) => ({ ...f, slug: e.target.value }))}
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm font-mono"
+              placeholder="project-slug"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-xs uppercase tracking-wide text-gray-500 mb-1">
+            Description
+          </label>
+          <textarea
+            value={projectForm.description}
+            onChange={(e) => setProjectForm((f) => ({ ...f, description: e.target.value }))}
+            rows={2}
+            className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+            placeholder="Short description"
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs uppercase tracking-wide text-gray-500 mb-1">
+            External URL *
+          </label>
+          <input
+            type="url"
+            required
+            value={projectForm.externalUrl}
+            onChange={(e) => setProjectForm((f) => ({ ...f, externalUrl: e.target.value }))}
+            className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+            placeholder="https://..."
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs uppercase tracking-wide text-gray-500 mb-1">
+              Display Order
+            </label>
+            <input
+              type="number"
+              value={projectForm.order}
+              onChange={(e) => setProjectForm((f) => ({ ...f, order: parseInt(e.target.value) || 0 }))}
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-xs uppercase tracking-wide text-gray-500 mb-1">
+              Accent Color
+            </label>
+            <input
+              type="text"
+              value={projectForm.accentColor}
+              onChange={(e) => setProjectForm((f) => ({ ...f, accentColor: e.target.value }))}
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+              placeholder="#ff0000"
+            />
+          </div>
+        </div>
+
+        {/* Featured toggle */}
+        <div className="flex items-center gap-3 pt-2">
+          <button
+            type="button"
+            onClick={() => setProjectForm((f) => ({ ...f, featured: !f.featured }))}
+            className={`w-10 h-5 rounded-full relative transition-colors ${
+              projectForm.featured ? "bg-black" : "bg-gray-300"
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${
+                projectForm.featured ? "left-5" : "left-0.5"
+              }`}
+            />
+          </button>
+          <span className="text-sm text-gray-600">Featured Project</span>
+        </div>
+
+        <div className="flex gap-3 pt-2">
+          <button
+            type="submit"
+            className="bg-black text-white text-sm px-5 py-2 rounded hover:bg-gray-800"
+          >
+            {editingProjectId ? "Save Changes" : "Create Project"}
+          </button>
+          {editingProjectId && (
+            <button
+              type="button"
+              onClick={() => {
+                setProjectForm(EMPTY_PROJECT);
+                setEditingProjectId(null);
+              }}
+              className="text-sm text-gray-500 px-4 py-2 border border-gray-300 rounded hover:border-gray-500"
+            >
+              Cancel
+            </button>
+          )}
+        </div>
+      </form>
+
+      {/* Projects list */}
+      <h2 className="text-lg font-semibold mb-4">
+        All Projects ({projects.length})
+      </h2>
+      {projects.length === 0 && (
+        <p className="text-gray-400 text-sm">No projects yet. Create one above.</p>
+      )}
+      <div className="space-y-3">
+        {projects.map((p) => (
+          <div
+            key={p.id}
+            className="border border-gray-200 rounded p-4 flex items-start gap-4"
+          >
+            <div className="w-10 h-10 bg-gray-100 rounded border shrink-0 flex items-center justify-center text-[10px] text-gray-400 uppercase">
+              {p.featured ? "F" : "P"}
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-[10px] uppercase tracking-wide px-1.5 py-0.5 border rounded text-gray-500 font-mono">
+                  {p.slug}
+                </span>
+                {p.featured && (
+                  <span className="text-[10px] uppercase tracking-wide px-1.5 py-0.5 bg-black text-white rounded">
+                    Featured
+                  </span>
+                )}
+                <span className="text-[10px] text-gray-400">#{p.order}</span>
+              </div>
+              <p className="font-medium text-sm truncate">{p.title}</p>
+              {p.description && (
+                <p className="text-xs text-gray-500 truncate">{p.description}</p>
+              )}
+              <p className="text-xs text-gray-400 mt-0.5 truncate">{p.externalUrl}</p>
+            </div>
+            <div className="flex flex-col gap-1.5 shrink-0">
+              <button
+                onClick={() => toggleProjectFeatured(p)}
+                className={`text-[10px] px-2 py-1 rounded border transition-colors ${
+                  p.featured
+                    ? "bg-black text-white border-black hover:bg-gray-700"
+                    : "text-gray-500 border-gray-300 hover:border-black hover:text-black"
+                }`}
+              >
+                {p.featured ? "Unfeature" : "Feature"}
+              </button>
+              <button
+                onClick={() => startEditProject(p)}
+                className="text-[10px] px-2 py-1 rounded border border-gray-300 text-gray-500 hover:border-black hover:text-black"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => handleDeleteProject(p.id)}
+                className="text-[10px] px-2 py-1 rounded border border-gray-300 text-red-400 hover:border-red-500 hover:text-red-600"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
       </>)}
     </div>
   );

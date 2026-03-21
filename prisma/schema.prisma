@@ -28,6 +28,7 @@ model TeamMember {
   id        String  @id @default(cuid())
   name      String
   title     String
+  role      String  @default("CORE") // CORE, ADVISOR, BOARD
   photo     String?
   xUrl      String? // X (Twitter) profile link
   linkedinUrl String? // LinkedIn profile link
@@ -43,6 +44,20 @@ model Testimonial {
   profilePhoto String? // small profile picture
   splashPhoto  String? // larger splash/background photo
   order       Int     @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String?
+  externalUrl String
+  size        String   @default("small") // "small" | "big"
+  featured    Boolean  @default(false)
+  order       Int      @default(0)
+  accentColor String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }

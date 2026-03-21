@@ -60,7 +60,7 @@ export default async function FeedItemPage({
 
   return (
     <div className="mx-[10px] my-[10px] border border-[var(--color-border-light)] bg-[var(--color-bg)]">
-    <article className="max-w-2xl mx-auto px-5 pt-[50px] pb-[60px]">
+    <article className="animate-fade-in max-w-2xl mx-auto px-5 pt-[50px] pb-[60px]">
       <Link
         href="/feed"
         className="type-label text-[var(--color-text-muted)] hover:text-[var(--color-dark)] transition-colors"

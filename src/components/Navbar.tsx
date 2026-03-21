@@ -68,7 +68,7 @@ export default function Navbar() {
           Feed
         </Link>
         <Link
-          href="#"
+          href="/projects"
           className="flex items-center px-5 border-l border-[var(--color-border)] type-label text-[var(--color-dark)] hover:bg-[var(--color-dark)] hover:text-[var(--color-bg)] transition-colors"
         >
           Projects
@@ -167,7 +167,7 @@ export default function Navbar() {
               Feed
             </Link>
             <Link
-              href="#"
+              href="/projects"
               className="px-5 py-4 border-b border-[var(--color-border-light)] type-label text-[var(--color-dark)] hover:bg-[var(--color-dark)] hover:text-[var(--color-bg)] transition-colors"
               onClick={() => setMenuOpen(false)}
             >

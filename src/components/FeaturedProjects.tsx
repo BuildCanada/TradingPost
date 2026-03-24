@@ -5,8 +5,8 @@ import ProjectsGrid from "@/components/ProjectsGrid";
 export default function FeaturedProjects() {
   return (
     <section className="px-5 pt-[26px] pb-[36px] border-b border-[var(--color-border-light)]">
-      <SectionLabel>Projects</SectionLabel>
       <div className="max-w-[1080px] mx-auto">
+        <SectionLabel>Projects</SectionLabel>
         <ProjectsGrid featured maxItems={4} />
         <div className="flex justify-center mt-4">
           <Link

@@ -11,7 +11,7 @@ export default function BuilderMPWidget({ project }: WidgetProps) {
           {project.title}
         </span>
         <p className="type-caption text-[var(--color-text-secondary)] mt-0.5">
-          A trained LLM which reviews bills and determines if they&apos;re builder approved.
+          A trained LLM which reviews bills and determines if they&apos;re Pro-Growth.
         </p>
       </div>
 

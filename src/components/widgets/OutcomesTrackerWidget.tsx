@@ -3,10 +3,10 @@
 import { WidgetProps } from "./types";
 
 const statuses = [
-  { label: "Not Started", count: 407, color: "#9ca3af" },
-  { label: "In Progress", count: 183, color: "#d97706" },
-  { label: "Completed", count: 10, color: "#8b2332" },
-  { label: "Abandoned", count: 3, color: "#374151" },
+  { label: "Not Started", count: 131, color: "#9ca3af" },
+  { label: "In Progress", count: 420, color: "#d97706" },
+  { label: "Completed", count: 47, color: "#8b2332" },
+  { label: "Abandoned", count: 5, color: "#374151" },
 ];
 
 const total = statuses.reduce((sum, s) => sum + s.count, 0);
@@ -20,13 +20,11 @@ export default function OutcomesTrackerWidget({ project }: WidgetProps) {
           {project.title}
         </span>
         <p className="type-heading text-[17px] text-[var(--color-dark)] mt-1">
-          Keeping Tabs on Government Performance
+          Keeping Tabs on Federal Government Performance
         </p>
-        {project.description && (
-          <p className="type-caption text-[var(--color-text-secondary)] mt-0.5">
-            {project.description}
-          </p>
-        )}
+        <p className="type-caption text-[var(--color-text-secondary)] mt-0.5">
+          Tracking the 603 Liberal government commitments from promise to completion.
+        </p>
       </div>
 
       {/* Stacked horizontal bar */}

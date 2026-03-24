@@ -6,11 +6,11 @@ import ProjectsGrid from "@/components/ProjectsGrid";
 export const metadata: Metadata = {
   title: "Projects",
   description:
-    "Data-driven research and interactive tools exploring Canada's biggest challenges.",
+    "Transparent government data and better tools for pro-growth voices.",
   openGraph: {
     title: "Projects",
     description:
-      "Data-driven research and interactive tools exploring Canada's biggest challenges.",
+      "Transparent government data and better tools for pro-growth voices.",
     type: "website",
   },
   twitter: {
@@ -36,7 +36,7 @@ export default function ProjectsPage() {
             <SectionLabel className="text-white/60">Projects</SectionLabel>
             <h1 className="type-title mb-1 text-white">Projects</h1>
             <p className="type-body text-white/70">
-              Data-driven research and interactive tools exploring Canada&apos;s biggest challenges.
+              Transparent government data and better tools for pro-growth voices.
             </p>
           </div>
         </section>

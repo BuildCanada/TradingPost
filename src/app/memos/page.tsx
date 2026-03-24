@@ -68,9 +68,9 @@ export default async function MemosPage() {
           />
           <div className="relative max-w-[900px] mx-auto py-[60px] md:pt-[140px] md:pb-[80px] lg:pt-[180px]">
             <SectionLabel className="text-white/60">Memos</SectionLabel>
-            <h1 className="type-title mb-1 text-white">Ideas Worth Building On</h1>
+            <h1 className="type-title mb-1 text-white">Ideas for a Better Canada</h1>
             <p className="type-body text-white/70">
-              Bold thinking from Canada&apos;s builders, reformers, and leaders.
+              Bold thinking from Canada&apos;s leading builders and doers.
             </p>
           </div>
         </section>

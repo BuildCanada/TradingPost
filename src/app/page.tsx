@@ -143,13 +143,12 @@ function BrandMessaging() {
         Old thinking won&apos;t save us.
       </h2>
       <p className="type-body mb-5">
-        In a changing world, Canada must reinvent itself. Builders are those
-        scaffolding out the blueprint drawings. Build Canada spreads their
-        philosophies.{" "}
+        By almost every measure of growth and prosperity, Canada is falling
+        behind. It doesn&apos;t have to be this way.{" "}
         <span style={{ backgroundColor: "#F1B0B0", fontWeight: "bold" }}>
-          We platforms the policy, ideas, and narratives of Canadians
-        </span>{" "}
-        at the forefront of the new Canadian economy.
+          Build Canada platforms the policy, ideas, and narratives of Builders
+          who believe Canada&apos;s best days are ahead.
+        </span>
       </p>
       <div className="flex items-center gap-3">
         <Link

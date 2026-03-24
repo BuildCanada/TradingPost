@@ -276,11 +276,9 @@ export default function CanadaSpendsWidget({ project }: WidgetProps) {
         <p className="type-heading text-[17px] text-[var(--color-dark)] mt-1">
           Diving into Government Financials
         </p>
-        {project.description && (
-          <p className="type-caption text-[var(--color-text-secondary)] mt-0.5">
-            {project.description}
-          </p>
-        )}
+        <p className="type-caption text-[var(--color-text-secondary)] mt-0.5">
+          Transparent data on how federal, provincial, and municipal goverments spend your money.
+        </p>
       </div>
 
       {/* Sankey */}

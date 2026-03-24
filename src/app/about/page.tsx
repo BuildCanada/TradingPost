@@ -33,11 +33,10 @@ function HeroBlock() {
       <div className="relative z-10 max-w-[1080px] w-full mx-auto">
         <SectionLabel className="pb-2 !text-[var(--color-bg)] !opacity-60">Who We Are</SectionLabel>
         <h1 className="type-title mb-4 max-w-[700px] text-[var(--color-bg)]">
-          Building a bolder Canada.
+          Building a Better Canada.
         </h1>
         <p className="type-body max-w-[600px] text-[var(--color-bg)] opacity-70">
-          <span className="hidden min-[425px]:inline">Canada must get ahead. It will require ambitious thinking, bold choices, and decisive action. Shaping this conversation properly is no small feat; and takes the qualified perspectives of thousands of Canadians. This is our method.</span>
-          <span className="inline min-[425px]:hidden">Canada must get ahead. Shaping this conversation properly is no small feat. Here is our method.</span>
+          Build Canada is a civic organization on a mission to make Canada the most prosperous country in the world. We publish bold policy research, build transparency tools, and bring together Canadian builders who are ready to act.
         </p>
       </div>
     </section>
@@ -58,7 +57,7 @@ const storyItems = [
     content: (
       <div className="space-y-4">
         <p className="type-body text-[var(--color-dark)] leading-relaxed">
-          There is no argument that Canada&apos;s productivity is slipping. GDP per Capita, Worker Productivity, Inflation, and other domestic economic measures of health across the board are declining.
+          Canada&apos;s productivity is slipping. GDP per Capita, Worker Productivity, Inflation, and other domestic economic measures of health across the board are declining.
         </p>
 
         {/* Exhibit images */}
@@ -76,11 +75,7 @@ const storyItems = [
         </div>
 
         <p className="type-body text-[var(--color-dark)] leading-relaxed">
-          In late 2024, a group of top Canadian Founders expressed their concern regarding these troubling statistics in a group chat. In classic Builder fashion, instead of just sitting on their problems, they decided that something should be done about it. In an effort to enact change, Build Canada began as a passion project.
-        </p>
-
-        <p className="type-body text-[var(--color-dark)] leading-relaxed">
-          Build Canada began publishing bold policy ideas backed by builders to encourage conversation about what could be done, should Canada choose to be ambitious about what its future could entail. The concept spread across traditional and social media like wildfire.
+          Build Canada started because a group of founders looked at the data — falling productivity, declining investment, rising brain drain — and decided to stop waiting for someone else to fix it. What began as a conversation became a movement: bold policy ideas that spread across the country and sparked a national conversation about the Canada we could build.
         </p>
 
         {/* First 3 memos */}
@@ -103,10 +98,6 @@ const storyItems = [
             ))}
           </div>
         </div>
-
-        <p className="type-body text-[var(--color-dark)] leading-relaxed">
-          The ideas resonated with thousands of builders &amp; ambitious Canadians. A movement was born. Builders across the country began to rally behind expanding the concept.
-        </p>
       </div>
     ),
   },
@@ -125,6 +116,25 @@ const storyItems = [
           <p className="type-label text-[var(--color-accent)]">Success Story: SR&amp;ED Reforms</p>
         </div>
 
+        {/* Shopify policy reform photo */}
+        <div className="max-w-[480px]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/assets/images/shopify-sred-policy-reform-article.webp" alt="Canadian Press article headline: Shopify helps feds with key piece of budget policy on SR&ED reform" className="w-full border border-[var(--color-border-light)]" />
+          <p className="type-label-sm text-[var(--color-text-muted)] mt-1">Source: <a href="https://www.thecanadianpressnews.ca/national/ottawa-is-rebooting-its-relationship-with-the-tech-industry-advocates-say/article_38f627a3-3087-58a1-bb49-aeeb1993582e.html" target="_blank" rel="noopener noreferrer" className="underline hover:text-[var(--color-accent)] transition-colors">The Canadian Press</a>, Nov 2025</p>
+        </div>
+
+        <p className="type-body text-[var(--color-dark)] leading-relaxed">
+          Back in July of 2025, the Federal Government approached Shopify seeking their input for a series of desired SR&amp;ED reforms. Shopify President Harley Finkelstein had already published a memo on Build Canada&apos;s platform criticizing the program&apos;s complexity.
+        </p>
+
+        <p className="type-body text-[var(--color-dark)] leading-relaxed">
+          Shopify handed back a complete SR&amp;ED redesign based on what was in Harley&apos;s Build Canada memo within 48 hours. As Prime Minister Mark Carney later <a href="https://panow.com/2025/11/22/ottawa-is-rebooting-its-relationship-with-the-tech-industry-advocates-say/" target="_blank" rel="noopener noreferrer" className="underline hover:text-[var(--color-accent)] transition-colors">told the Chamber of Commerce of Metropolitan Montreal</a>: &ldquo;We went to Shopify and said, &apos;Can you help us redesign this process?&apos; Somewhat embarrassingly, they came back in 48 hours and said, &apos;Do this.&apos;&rdquo;
+        </p>
+
+        <p className="type-body text-[var(--color-dark)] leading-relaxed">
+          The result: Budget 2025 included sweeping SR&amp;ED reforms — upfront funding approval instead of rebates, doubled annual expenditure limits to $6 million, and AI-powered audits to reduce bureaucratic burden. A $4.5 billion program that had become bogged down by consultants absorbing 25–33% of every dollar was finally getting fixed — and it started with a Build Canada memo.
+        </p>
+
         {/* SR&ED memo link */}
         <Link
           href="/memos/fix-sred"
@@ -138,27 +148,8 @@ const storyItems = [
           </p>
         </Link>
 
-        {/* Shopify policy reform photo */}
-        <div className="max-w-[480px]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/assets/images/shopify-sred-policy-reform-article.webp" alt="Canadian Press article headline: Shopify helps feds with key piece of budget policy on SR&ED reform" className="w-full border border-[var(--color-border-light)]" />
-          <p className="type-label-sm text-[var(--color-text-muted)] mt-1">Source: <a href="https://www.thecanadianpressnews.ca/national/ottawa-is-rebooting-its-relationship-with-the-tech-industry-advocates-say/article_38f627a3-3087-58a1-bb49-aeeb1993582e.html" target="_blank" rel="noopener noreferrer" className="underline hover:text-[var(--color-accent)] transition-colors">The Canadian Press</a>, Nov 2025</p>
-        </div>
-
         <p className="type-body text-[var(--color-dark)] leading-relaxed">
-          Back in July of 2025, the Federal Government approached Shopify seeking their input for a series of desired SR&amp;ED reforms. Shopify President Harley Finkelstein had already published a memo on Build Canada&apos;s platform criticizing the program&apos;s complexity — and hand-delivered it to Finance Minister François-Philippe Champagne.
-        </p>
-
-        <p className="type-body text-[var(--color-dark)] leading-relaxed">
-          Shopify came back in 48 hours with a complete redesign. As Prime Minister Mark Carney later told the Chamber of Commerce of Metropolitan Montreal: &ldquo;We went to Shopify and said, &apos;Can you help us redesign this process?&apos; Somewhat embarrassingly, they came back in 48 hours and said, &apos;Do this.&apos;&rdquo;
-        </p>
-
-        <p className="type-body text-[var(--color-dark)] leading-relaxed">
-          The result: Budget 2025 included sweeping SR&amp;ED reforms — upfront funding approval instead of rebates, doubled annual expenditure limits to $6 million, and AI-powered audits to reduce bureaucratic burden. A $4.5 billion program that had become bogged down by consultants absorbing 25–33% of every dollar was finally getting fixed — and it started with a Build Canada memo.
-        </p>
-
-        <p className="type-body text-[var(--color-dark)] leading-relaxed">
-          There are many more stories like this now, and more unravelling. Together we can enable the policy which makes us sovereign, prosperous, and (most importantly) fast.
+          There are many more stories like this now, and more unravelling. Together we can bring into existence the policy which makes us sovereign, prosperous, and (most importantly) fast.
         </p>
       </div>
     ),
@@ -170,7 +161,7 @@ const storyItems = [
     content: (
       <div className="space-y-4">
         <p className="type-body text-[var(--color-dark)] leading-relaxed">
-          Policy alone won&apos;t fix Canada — culture has to shift too. We&apos;re working to rebuild a national identity rooted in ambition, competence, and urgency. That means celebrating builders, challenging complacency, and making it unacceptable to settle for mediocrity. The conversation is changing, and we intend to keep pushing it forward.
+          Policy alone won&apos;t fix Canada — culture has to shift too. We&apos;re working to rebuild a national identity rooted in ambition, competence, and urgency. That means celebrating builders, challenging complacency, and making it unacceptable to settle for mediocrity. We are a nation of Builders, after all.
         </p>
 
         {/* Embedded tweet */}
@@ -368,34 +359,34 @@ function OurStoryBlock() {
 const platformItems = [
   {
     title: "Sovereign",
-    description: "Strengthening our independence in trade, defence, and strategic decision-making.",
+    description: "Control our supply chains, defend our borders, and depend on no one.",
     color: "#7B23CD",
     icon: "/assets/icons/newmapleleaf.svg",
-    expandedHeader: "A strong Canada answers to no one. True sovereignty means controlling our own supply chains, defending our own borders, and making strategic decisions without foreign dependency.",
+    expandedHeader: "We believe in a patriotism rooted not in exclusion but in ambition — the conviction that Canada can and should be among the most prosperous, innovative, and free nations on earth.",
     expandedBullets: [
-      "Reduce reliance on single-nation trade relationships by diversifying export markets",
+      "True sovereignty comes from the ability to build what we need ourselves — energy, technology, defence, and infrastructure",
       "Invest in domestic defence manufacturing and Arctic infrastructure",
-      "Secure critical supply chains for energy, food, and technology on Canadian soil",
+      "Build housing, infrastructure, energy, and industry at the pace and scale the country demands",
     ],
   },
   {
     title: "Opportunistic",
-    description: "Free markets and freedom to pursue opportunity — for every builder.",
+    description: "Free markets, merit-based systems, and a fair starting line for every Canadian.",
     color: "#BE4A10",
     icon: "/assets/icons/increase.svg",
-    expandedHeader: "Opportunity belongs to everyone willing to build. Canada thrives when markets are open, barriers are low, and every entrepreneur — regardless of background — has a fair shot at success.",
+    expandedHeader: "Canada thrives when markets are open, competition is real, and merit is the standard. We champion the removal of genuine barriers while preserving the rewards that flow from effort and ability. The question is always the same: Can you do the work?",
     expandedBullets: [
+      "Defend free markets and merit-based systems that let the best ideas and businesses win",
       "Remove regulatory barriers that prevent small businesses and startups from competing",
-      "Open trade corridors that give Canadian builders direct access to global markets",
       "Create tax incentives that reward risk-taking, investment, and job creation",
     ],
   },
   {
     title: "Prosperous",
-    description: "Ensuring prosperity at home through smart infrastructure, housing, and fiscal policy.",
+    description: "An economy where starting a business is simple, growing one is possible, and success is celebrated.",
     color: "#1F5F7F",
     icon: "/assets/icons/crane.svg",
-    expandedHeader: "Prosperity starts at home. Canadians deserve affordable housing, world-class infrastructure, and a fiscal environment where hard work is rewarded — not taxed into oblivion.",
+    expandedHeader: "We stand for lower regulatory burden, competitive taxation, faster permitting, and a government that sees enterprise as the engine of national prosperity — not a resource to be extracted from.",
     expandedBullets: [
       "Accelerate housing construction by cutting zoning restrictions and permitting delays",
       "Modernize national infrastructure — transit, broadband, and energy grids",
@@ -404,10 +395,10 @@ const platformItems = [
   },
   {
     title: "Fast",
-    description: "Cutting red tape and accelerating the pace of government and institutional action.",
+    description: "Impatient with decline. Impatient with managed expectations. Build with urgency.",
     color: "#1B7A33",
     icon: "/assets/icons/fast.svg",
-    expandedHeader: "Speed is a competitive advantage — and Canada is losing it. The countries that move fastest on permits, procurement, and policy will win the next decade. Canada must be one of them.",
+    expandedHeader: "The countries that move fastest on permits, procurement, and policy will win the next decade. We must remove the obstacles — regulatory, ideological, and bureaucratic — that have turned Canada into a country where it takes years to approve what should take months.",
     expandedBullets: [
       "Set hard deadlines on government approvals — no project should wait years for a permit",
       "Digitize and streamline procurement so public dollars move at the speed of business",
@@ -753,22 +744,22 @@ const qnaItems = [
   {
     question: "Is Build Canada affiliated with a political party?",
     answer:
-      "No. Build Canada is fully nonpartisan. We don\u2019t endorse, fund, or align with any federal, provincial, or municipal political party. Our work is driven by one question: how do we make Canada more competitive?",
+      "No. Build Canada is non-partisan. Our work is driven by one question: how do we make Canada the most prosperous country in the world?",
   },
   {
     question: "How is Build Canada funded?",
     answer:
-      "We\u2019re funded by individual and corporate donations from Canadians who believe in building a stronger country. We don\u2019t accept government grants or public funding, which keeps us independent.",
+      "We\u2019re a federally incorporated non-profit organization funded by over 60 individual donors who believe in building a stronger country. We don\u2019t accept government grants or public funding, which keeps us independent.",
   },
   {
     question: "Is Build Canada a lobby group?",
     answer:
-      "No. We don\u2019t lobby government on behalf of any industry or interest group. We produce research, build community among Canadian founders and operators, and push ideas into the public conversation \u2014 but we don\u2019t work the halls of Parliament.",
+      "No. We produce research, build community among Canadian founders and operators, and share policy ideas in public.",
   },
   {
     question: "Do you support a specific policy platform?",
     answer:
-      "We\u2019re not ideological. We support policies that make Canada a better place to build \u2014 whether that means tax reform, talent retention, infrastructure investment, or regulatory modernization. If it helps Canadian builders compete globally, we\u2019re interested. If you want to learn more about where we stand and what we\u2019re pushing for, follow along with our content \u2014 we\u2019re always publishing new ideas and perspectives from builders across the country.",
+      "We champion ideas that make Canada a better place to build and grow our economy \u2014 whether that means tax reform, talent retention, infrastructure investment, or regulatory modernization. If you want to learn more about where we stand and our latest ideas, follow along with our content \u2014 we\u2019re always publishing new ideas and perspectives from builders across the country.",
   },
 ];
 

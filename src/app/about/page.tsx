@@ -643,16 +643,16 @@ const roleGroups = [
 
 function TeamMemberCard({ m }: { m: TeamMember }) {
   return (
-    <div className="flex flex-col items-center text-center gap-2.5">
+    <div className="flex flex-col items-center text-center gap-2.5 border border-[var(--color-border-light)] -ml-px -mt-px p-4">
       {m.photo ? (
         /* eslint-disable-next-line @next/next/no-img-element */
         <img
           src={m.photo}
           alt={m.name}
-          className="w-[80px] h-[80px] rounded-full object-cover border border-[var(--color-border-light)]"
+          className="w-[80px] h-[80px] object-cover border border-[var(--color-border-light)]"
         />
       ) : (
-        <div className="w-[80px] h-[80px] rounded-full bg-[var(--color-border-light)] border border-[var(--color-border-light)]" />
+        <div className="w-[80px] h-[80px] bg-[var(--color-border-light)] border border-[var(--color-border-light)]" />
       )}
       <div>
         <p className="type-heading text-[15px] leading-tight">{m.name}</p>
@@ -701,12 +701,14 @@ function TeamBlock({ members }: { members: TeamMember[] }) {
       <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px] border-b border-[var(--color-border-light)]">
         <div className="max-w-[1080px] mx-auto">
           <SectionLabel>Team</SectionLabel>
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-4 mt-2">
+          <div className="flex flex-wrap pl-px pt-px mt-2">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="flex flex-col items-center gap-2">
-                <div className="w-[52px] h-[52px] rounded-full bg-[var(--color-border-light)] border border-[var(--color-border-light)]" />
-                <div className="h-[7px] bg-[var(--color-border-light)] rounded-sm w-[65%]" />
-                <div className="h-[6px] bg-[var(--color-border-light)] rounded-sm w-[80%]" />
+              <div key={i} className="basis-1/3 md:basis-1/6 flex-grow">
+                <div className="flex flex-col items-center gap-2 border border-[var(--color-border-light)] -ml-px -mt-px p-4">
+                  <div className="w-[52px] h-[52px] bg-[var(--color-border-light)] border border-[var(--color-border-light)]" />
+                  <div className="h-[7px] bg-[var(--color-border-light)] rounded-sm w-[65%]" />
+                  <div className="h-[6px] bg-[var(--color-border-light)] rounded-sm w-[80%]" />
+                </div>
               </div>
             ))}
           </div>
@@ -726,9 +728,14 @@ function TeamBlock({ members }: { members: TeamMember[] }) {
             return (
               <div key={key}>
                 <h3 className="type-heading text-[14px] text-[var(--color-text-secondary)] mb-4">{label}</h3>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-x-5 gap-y-8">
+                <div className="flex flex-wrap pl-px pt-px">
                   {group.map((m) => (
-                    <TeamMemberCard key={m.id} m={m} />
+                    <div
+                      key={m.id}
+                      className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 flex-grow"
+                    >
+                      <TeamMemberCard m={m} />
+                    </div>
                   ))}
                 </div>
               </div>

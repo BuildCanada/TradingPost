@@ -62,10 +62,10 @@ export default function Navbar() {
           Memos
         </Link>
         <Link
-          href="/feed"
+          href="/content"
           className="flex items-center px-5 border-l border-[var(--color-border)] type-label text-[var(--color-dark)] hover:bg-[var(--color-dark)] hover:text-[var(--color-bg)] transition-colors"
         >
-          Feed
+          Content
         </Link>
         <Link
           href="/projects"
@@ -128,13 +128,13 @@ export default function Navbar() {
 
       {/* Mobile hamburger */}
       <button
-        className="md:hidden ml-auto flex flex-col gap-1.5 justify-center px-5 border-l border-[var(--color-border)]"
+        className="md:hidden ml-auto flex flex-col gap-1.5 justify-center px-5 border-l border-[var(--color-border)] hover:bg-[var(--color-dark)] transition-colors group"
         onClick={() => setMenuOpen(!menuOpen)}
         aria-label="Toggle menu"
       >
-        <span className="w-5 h-[2px] bg-[var(--color-dark)] block" />
-        <span className="w-5 h-[2px] bg-[var(--color-dark)] block" />
-        <span className="w-5 h-[2px] bg-[var(--color-dark)] block" />
+        <span className="w-5 h-[2px] bg-[var(--color-dark)] group-hover:bg-[var(--color-bg)] transition-colors block" />
+        <span className="w-5 h-[2px] bg-[var(--color-dark)] group-hover:bg-[var(--color-bg)] transition-colors block" />
+        <span className="w-5 h-[2px] bg-[var(--color-dark)] group-hover:bg-[var(--color-bg)] transition-colors block" />
       </button>
 
       {/* Mobile menu */}
@@ -160,11 +160,11 @@ export default function Navbar() {
               Memos
             </Link>
             <Link
-              href="/feed"
+              href="/content"
               className="px-5 py-4 border-b border-[var(--color-border-light)] type-label text-[var(--color-dark)] hover:bg-[var(--color-dark)] hover:text-[var(--color-bg)] transition-colors"
               onClick={() => setMenuOpen(false)}
             >
-              Feed
+              Content
             </Link>
             <Link
               href="/projects"

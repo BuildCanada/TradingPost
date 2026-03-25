@@ -40,22 +40,38 @@ export default function GreatBuildersWidget({ project }: WidgetProps) {
   }, []);
 
   return (
-    <div className="h-full flex">
-      {/* Left: title + quote + author */}
-      <div className="flex-1 flex flex-col justify-between p-4 min-w-0">
-        {/* Top: title + description */}
-        <div>
-          <span className="type-label font-bold text-[10px] text-[var(--color-text-secondary)]">
-            {project.title}
-          </span>
-          {project.description && (
-            <p className="type-caption text-[var(--color-text-secondary)] mt-0.5">
-              {project.description}
-            </p>
-          )}
+    <div className="flex flex-col md:flex-row">
+      {/* GIF — on top for mobile, right side for desktop */}
+      <div className="w-full h-[200px] md:hidden relative">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={builder.gif}
+          alt={`${builder.name} — ${builder.tagline}`}
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute bottom-2 right-2 flex gap-1">
+          {builders.map((_, i) => (
+            <span
+              key={i}
+              className={`block rounded-full transition-all ${
+                i === index
+                  ? "w-[10px] h-[5px] bg-white"
+                  : "w-[5px] h-[5px] bg-white/40"
+              }`}
+            />
+          ))}
         </div>
-        {/* Middle: quote — flex-1 to fill space evenly between title and author */}
-        <div className="relative flex-1 flex items-center py-3">
+      </div>
+      {/* Left: description + quote + author */}
+      <div className="flex-1 flex flex-col justify-between p-4 min-w-0">
+        {/* Top: description */}
+        {project.description && (
+          <p className="type-caption text-[var(--color-text-secondary)]">
+            {project.description}
+          </p>
+        )}
+        {/* Middle: quote */}
+        <div className="relative flex-1 flex items-center py-2">
           {builders.map((b, i) => (
             <div
               key={b.name}
@@ -63,10 +79,7 @@ export default function GreatBuildersWidget({ project }: WidgetProps) {
               style={{ visibility: i === index ? "visible" : "hidden" }}
               aria-hidden={i !== index}
             >
-              <p
-                className="text-[12px] leading-snug text-[var(--color-dark)] line-clamp-4"
-                style={{ fontFamily: '"Test Financier Text", serif', fontStyle: "italic" }}
-              >
+              <p className="type-caption font-sans font-medium text-[var(--color-dark)] line-clamp-3">
                 &ldquo;{b.quote}&rdquo;
               </p>
             </div>
@@ -74,27 +87,26 @@ export default function GreatBuildersWidget({ project }: WidgetProps) {
         </div>
         {/* Bottom: author */}
         <div>
-          <p className="type-heading text-[13px] text-[var(--color-dark)] leading-tight">
+          <p className="type-heading text-[13px] text-[var(--color-dark)] leading-tight mb-1">
             {builder.name}
           </p>
-          <p className="text-[10px] font-mono text-[var(--color-text-secondary)] truncate">
+          <p className="type-label-sm text-[var(--color-text-secondary)] uppercase truncate">
             {builder.tagline}
           </p>
         </div>
       </div>
 
-      {/* Divider */}
-      <div className="w-px bg-[var(--color-border-light)] shrink-0" />
+      {/* Divider — desktop only */}
+      <div className="hidden md:block w-px bg-[var(--color-border-light)] shrink-0" />
 
-      {/* Right: gif fills the space, with dot indicators overlaid */}
-      <div className="w-[45%] shrink-0 relative">
+      {/* Right: gif — desktop only */}
+      <div className="hidden md:block w-[45%] shrink-0 relative min-h-[180px]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={builder.gif}
           alt={`${builder.name} — ${builder.tagline}`}
           className="absolute inset-0 w-full h-full object-cover"
         />
-        {/* Dot indicators */}
         <div className="absolute bottom-2 right-2 flex gap-1">
           {builders.map((_, i) => (
             <span

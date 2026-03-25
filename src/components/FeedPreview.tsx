@@ -31,8 +31,8 @@ function feedImage(item: FeedItem): string | null {
 }
 
 function itemHref(item: FeedItem): string {
-  if (item.type === "BLOG") return `/feed/${item.id}`;
-  return item.url || "/feed";
+  if (item.type === "BLOG") return `/content/${item.id}`;
+  return item.url || "/content";
 }
 
 function stripHtml(html: string): string {
@@ -46,7 +46,7 @@ function isIGVideo(item: FeedItem): boolean {
 function IGCard({ item }: { item: FeedItem }) {
   return (
     <Link
-      href={item.url || "/feed"}
+      href={item.url || "/content"}
       target="_blank"
       rel="noopener noreferrer"
       className="border border-[#dbdbdb] bg-white flex flex-col group overflow-hidden"
@@ -132,7 +132,7 @@ function IGCard({ item }: { item: FeedItem }) {
 function XCard({ item }: { item: FeedItem }) {
   return (
     <Link
-      href={item.url || "/feed"}
+      href={item.url || "/content"}
       target="_blank"
       rel="noopener noreferrer"
       className="border border-[#2f3336] bg-black flex flex-col group overflow-hidden"
@@ -209,7 +209,7 @@ function XCard({ item }: { item: FeedItem }) {
 function TikTokCard({ item }: { item: FeedItem }) {
   return (
     <Link
-      href={item.url || "/feed"}
+      href={item.url || "/content"}
       target="_blank"
       rel="noopener noreferrer"
       className="border border-[#2f2f2f] bg-[#121212] flex flex-col group overflow-hidden"
@@ -286,7 +286,7 @@ function TikTokCard({ item }: { item: FeedItem }) {
 function SubstackCard({ item }: { item: FeedItem }) {
   return (
     <Link
-      href={item.url || "/feed"}
+      href={item.url || "/content"}
       target="_blank"
       rel="noopener noreferrer"
       className="border border-[#e8e2d9] bg-[#fffdf7] flex flex-col group overflow-hidden"
@@ -440,7 +440,7 @@ export default function FeedPreview() {
     <div className="pt-[26px] pb-0">
       <div className="max-w-[768px] mx-auto">
       <span className="type-label font-bold text-[var(--color-text-secondary)] block pb-2">
-        Feed
+        Content Feed
       </span>
       <div className="grid grid-cols-1 compact:grid-cols-2 gap-3">
         {items.length > 0

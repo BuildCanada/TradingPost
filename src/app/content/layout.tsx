@@ -1,24 +1,24 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Feed",
+  title: "Content",
   description:
     "Follow Build Canada across all platforms. Aggregated posts from X, TikTok, Instagram, Substack, and more.",
   openGraph: {
-    title: "Feed",
+    title: "Content",
     description:
       "Follow Build Canada across all platforms.",
     type: "website",
   },
   twitter: {
     card: "summary",
-    title: "Feed",
+    title: "Content",
     description:
       "Follow Build Canada across all platforms.",
   },
 };
 
-export default function FeedLayout({
+export default function ContentLayout({
   children,
 }: {
   children: React.ReactNode;

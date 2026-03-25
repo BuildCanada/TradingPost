@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { PlatformIcon } from "@/components/PlatformIcon";
+import GreatBuildersWidget from "@/components/widgets/GreatBuildersWidget";
 
 interface FeedItem {
   id: string;
@@ -20,7 +21,7 @@ interface FeedItem {
 }
 
 function itemHref(item: FeedItem): string | null {
-  if (item.type === "BLOG") return `/feed/${item.id}`;
+  if (item.type === "BLOG") return `/content/${item.id}`;
   return item.url || null;
 }
 
@@ -61,9 +62,9 @@ function FeedHeader() {
         priority
       />
       <div className="relative max-w-[1080px] mx-auto py-[60px] md:pt-[140px] md:pb-[80px] lg:pt-[180px]">
-        <SectionLabel className="text-white/60">Feed</SectionLabel>
+        <SectionLabel className="text-white/60">Content</SectionLabel>
         <h1 className="type-title mb-1 text-white">
-          Builders Move Fast by Design.
+          Builders Move Fast by Design
         </h1>
         <p className="type-body text-white/70">
           Don&apos;t miss a beat. Check out Build Canada content below or follow us on your preferred socials channel.
@@ -298,12 +299,36 @@ function EmptyState() {
   );
 }
 
-export default function FeedPage() {
+const BUILDERS_PROJECT = {
+  id: "great-builders",
+  slug: "great-builders",
+  title: "Great Canadian Builders",
+  description: "Read short stories celebrating the incredible builders who shaped Canada.",
+  externalUrl: "",
+  size: "big" as const,
+  featured: false,
+  order: 0,
+  accentColor: null,
+};
+
+function GreatBuildersSection() {
+  return (
+    <section className="px-5 pt-[26px] pb-[36px] border-b border-[var(--color-border-light)]">
+      <div className="max-w-[1080px] mx-auto">
+        <SectionLabel>Great Canadian Builders</SectionLabel>
+        <div className="border border-[var(--color-border-light)]">
+          <GreatBuildersWidget project={BUILDERS_PROJECT} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+export default function ContentPage() {
   const [items, setItems] = useState<FeedItem[]>([]);
   const [activeFilter, setActiveFilter] = useState("All");
   const [loading, setLoading] = useState(true);
   const [allPostsPage, setAllPostsPage] = useState(0);
-
   const loadItems = useCallback(async () => {
     setLoading(true);
     const res = await fetch("/api/feed");
@@ -414,6 +439,10 @@ export default function FeedPage() {
             })()}
           </div>
         </section>
+      </div>
+
+      <div className="animate-fade-in" style={{ animationDelay: "1.2s" }}>
+        <GreatBuildersSection />
       </div>
     </div>
   );

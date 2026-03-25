@@ -12,45 +12,55 @@ interface Testimonial {
   order: number;
 }
 
-function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
-  return (
-    <div className="w-full border border-[var(--color-border-light)] overflow-hidden bg-[var(--color-bg)]">
-      {/* Image with quote overlay — uses background-image to keep text in normal flow */}
-      <div
-        className="h-[220px] md:h-[260px] flex flex-col justify-end p-5 md:p-6 bg-[#2a2a2a]"
-        style={testimonial.splashPhoto ? {
-          backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${testimonial.splashPhoto})`,
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        } : undefined}
-      >
-        <p className="type-body text-white font-medium break-words" style={{ lineHeight: 1.25, textShadow: "0 1px 4px rgba(0,0,0,0.6)" }}>
-          &ldquo;{testimonial.quote}&rdquo;
-        </p>
-      </div>
+function getCompanyLogo(name: string): string | null {
+  if (name.includes("Harley")) return "/assets/logos/shopify-logo.svg";
+  return null;
+}
 
-      {/* Attribution + title */}
-      <div className="p-5 md:p-6 pt-4 md:pt-4">
-        <div className="flex items-center gap-3">
-          {testimonial.profilePhoto ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img
-              src={testimonial.profilePhoto}
-              alt={testimonial.name}
-              className="w-[32px] h-[32px] rounded-full object-cover"
-            />
-          ) : (
-            <div className="w-[32px] h-[32px] rounded-full bg-[var(--color-border-light)]" />
-          )}
-          <div>
-            <p className="type-heading text-[14px]">{testimonial.name}</p>
-            <p className="text-[12px] text-[var(--color-accent)] font-mono uppercase tracking-wide mt-0.5">
-              {testimonial.name.includes("Harley") ? "CEO of Shopify" :
-               testimonial.name.includes("Jeff") || testimonial.name.includes("Adamson") ? "CEO of Neo Financial" :
-               testimonial.name.includes("Helena") || testimonial.name.includes("Lee") ? "Zander's Best Friend & Fiancée" :
-               "TITLE"}
-            </p>
-          </div>
+function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
+  const companyLogo = getCompanyLogo(testimonial.name);
+  return (
+    <div className="w-full border border-[var(--color-border-light)] overflow-hidden bg-[var(--color-bg)] p-6 md:p-8 flex flex-col relative">
+      {/* Company logo background */}
+      {companyLogo && (
+        <div
+          className="absolute inset-0 pointer-events-none flex items-center justify-end"
+          style={{ opacity: 0.04, transform: "rotate(-30deg) translateY(30px)", right: "-20px" }}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={companyLogo}
+            alt=""
+            className="w-[180px] h-[180px] object-contain"
+          />
+        </div>
+      )}
+
+      {/* Quote */}
+      <p className="type-body break-words relative" style={{ lineHeight: 1.2 }}>
+        &ldquo;{testimonial.quote}&rdquo;
+      </p>
+
+      {/* Attribution */}
+      <div className="flex items-center gap-3 mt-5 relative">
+        {testimonial.profilePhoto ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
+          <img
+            src={testimonial.profilePhoto}
+            alt={testimonial.name}
+            className="w-[40px] h-[40px] rounded-full object-cover"
+          />
+        ) : (
+          <div className="w-[40px] h-[40px] rounded-full bg-[var(--color-border-light)]" />
+        )}
+        <div>
+          <p className="type-heading text-[14px]">{testimonial.name}</p>
+          <p className="text-[12px] text-[var(--color-accent)] font-mono uppercase tracking-wide mt-0.5">
+            {testimonial.name.includes("Harley") ? "CEO of Shopify" :
+             testimonial.name.includes("Jeff") || testimonial.name.includes("Adamson") ? "CEO of Neo Financial" :
+             testimonial.name.includes("Helena") || testimonial.name.includes("Lee") ? "Zander's Best Friend & Fiancée" :
+             "TITLE"}
+          </p>
         </div>
       </div>
     </div>
@@ -85,7 +95,7 @@ export default function TestimonialsBlock({ testimonials }: { testimonials: Test
 
   const ready = containerWidth > 0;
   // Card width: 450px max, with 40px breathing room so edges don't clip
-  const cardW = ready ? Math.min(450, containerWidth - 40) : 450;
+  const cardW = ready ? Math.min(380, containerWidth - 40) : 380;
   // Center current card within measured container
   const trackOffset = ready
     ? (containerWidth - cardW) / 2 - current * (cardW + gap)
@@ -136,7 +146,7 @@ export default function TestimonialsBlock({ testimonials }: { testimonials: Test
         <div className="max-w-[1080px] mx-auto">
           <SectionLabel>Testimonials</SectionLabel>
           <div className="flex justify-center mt-2">
-            <div className="border border-[var(--color-border-light)] w-[450px] max-w-[90vw]">
+            <div className="border border-[var(--color-border-light)] w-[380px] max-w-[90vw]">
               <div className="p-5">
                 <div className="space-y-2 mb-4">
                   <div className="h-[7px] bg-[var(--color-border-light)] rounded-sm w-[95%]" />

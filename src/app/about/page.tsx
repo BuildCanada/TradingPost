@@ -35,8 +35,11 @@ function HeroBlock() {
         <h1 className="type-title mb-4 max-w-[700px] text-[var(--color-bg)]">
           Building a Better Canada.
         </h1>
-        <p className="type-body max-w-[600px] text-[var(--color-bg)] opacity-70">
+        <p className="type-body max-w-[600px] text-[var(--color-bg)] opacity-70 hidden md:block">
           Build Canada is a civic organization on a mission to make Canada the most prosperous country in the world. We publish bold policy research, build transparency tools, and bring together Canadian builders who are ready to act.
+        </p>
+        <p className="type-body max-w-[600px] text-[var(--color-bg)] opacity-70 md:hidden">
+          Build Canada publishes bold policy research, build transparency tools, and brings together Canadian builders who are ready to act.
         </p>
       </div>
     </section>
@@ -103,7 +106,7 @@ const storyItems = [
   },
   {
     key: "publishing",
-    title: "Publishing Policy",
+    title: "Ideas for a Better Canada",
     icon: "/assets/icons/court-list-icon.svg",
     content: (
       <div className="space-y-4">
@@ -358,30 +361,6 @@ function OurStoryBlock() {
 
 const platformItems = [
   {
-    title: "Sovereign",
-    description: "Control our supply chains, defend our borders, and depend on no one.",
-    color: "#7B23CD",
-    icon: "/assets/icons/newmapleleaf.svg",
-    expandedHeader: "We believe in a patriotism rooted not in exclusion but in ambition — the conviction that Canada can and should be among the most prosperous, innovative, and free nations on earth.",
-    expandedBullets: [
-      "True sovereignty comes from the ability to build what we need ourselves — energy, technology, defence, and infrastructure",
-      "Invest in domestic defence manufacturing and Arctic infrastructure",
-      "Build housing, infrastructure, energy, and industry at the pace and scale the country demands",
-    ],
-  },
-  {
-    title: "Opportunistic",
-    description: "Free markets, merit-based systems, and a fair starting line for every Canadian.",
-    color: "#BE4A10",
-    icon: "/assets/icons/increase.svg",
-    expandedHeader: "Canada thrives when markets are open, competition is real, and merit is the standard. We champion the removal of genuine barriers while preserving the rewards that flow from effort and ability. The question is always the same: Can you do the work?",
-    expandedBullets: [
-      "Defend free markets and merit-based systems that let the best ideas and businesses win",
-      "Remove regulatory barriers that prevent small businesses and startups from competing",
-      "Create tax incentives that reward risk-taking, investment, and job creation",
-    ],
-  },
-  {
     title: "Prosperous",
     description: "An economy where starting a business is simple, growing one is possible, and success is celebrated.",
     color: "#1F5F7F",
@@ -395,14 +374,38 @@ const platformItems = [
   },
   {
     title: "Fast",
-    description: "Impatient with decline. Impatient with managed expectations. Build with urgency.",
+    description: "Impatient with decline when builders have all the right tools to help Canada succeed.",
     color: "#1B7A33",
     icon: "/assets/icons/fast.svg",
-    expandedHeader: "The countries that move fastest on permits, procurement, and policy will win the next decade. We must remove the obstacles — regulatory, ideological, and bureaucratic — that have turned Canada into a country where it takes years to approve what should take months.",
+    expandedHeader: "The countries that move fastest on policy, permits, and delivery will win the next decade. We must remove the obstacles — bureaucratic, regulatory, and cultural — that have turned Canada into a country where it takes years to accomplish what should take months.",
     expandedBullets: [
-      "Set hard deadlines on government approvals — no project should wait years for a permit",
-      "Digitize and streamline procurement so public dollars move at the speed of business",
-      "Empower agencies to ship reforms in months, not parliamentary cycles",
+      "Remove ideological and partisan borders on policy that makes it easier to build",
+      "Push public service to move faster and more efficient",
+      "Shape our national conversation towards identifying areas of contention and platforming powerful solutions",
+    ],
+  },
+  {
+    title: "Free",
+    description: "Free markets, merit-based systems, and a fair starting line for every Canadian builder.",
+    color: "#BE4A10",
+    icon: "/assets/icons/increase.svg",
+    expandedHeader: "Canada thrives when markets are open, competition is real, and merit is the standard. We champion the removal of genuine barriers while preserving the rewards that flow from effort and ability. The question is always the same: Can you do the work?",
+    expandedBullets: [
+      "Defend free markets and merit-based systems that let the best ideas and businesses win",
+      "Remove regulatory barriers that prevent small businesses and startups from competing",
+      "Create tax incentives that reward risk-taking, investment, and job creation",
+    ],
+  },
+  {
+    title: "Sovereign",
+    description: "Own our supply chains, defend our borders, and build for Canadians.",
+    color: "#7B23CD",
+    icon: "/assets/icons/newmapleleaf.svg",
+    expandedHeader: "No one can beat you when ambition translates to excellence. This country was built with intention and it will continue as such. We believe we must build to get ahead.",
+    expandedBullets: [
+      "True sovereignty comes from the ability to build what we need ourselves — energy, technology, defence, and infrastructure",
+      "Invest in domestic defence manufacturing and Arctic infrastructure",
+      "Build housing, infrastructure, energy, and industry at the pace and scale the country demands",
     ],
   },
 ];
@@ -534,6 +537,19 @@ function PlatformCard({ item, isOpen, onToggle }: { item: typeof platformItems[n
 
   const handleHoverEnter = useCallback(() => {
     animateOpen();
+    if (iconRef.current) {
+      gsap.to(iconRef.current, {
+        keyframes: [
+          { rotation: 0, duration: 0 },
+          { rotation: -15, duration: 0.08 },
+          { rotation: 15, duration: 0.08 },
+          { rotation: -10, duration: 0.07 },
+          { rotation: 10, duration: 0.07 },
+          { rotation: 0, duration: 0.1 },
+        ],
+        ease: "power2.out",
+      });
+    }
   }, [animateOpen]);
 
   const handleHoverLeave = useCallback(() => {

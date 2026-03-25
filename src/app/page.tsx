@@ -207,10 +207,10 @@ function SocialLinks() {
         ))}
         <div className="w-px h-[18px] bg-[var(--color-border-light)] mx-0.5" />
         <Link
-          href="/feed"
+          href="/content"
           className="h-7 px-2.5 border border-[var(--color-border-light)] flex items-center type-label text-[var(--color-dark)] hover:border-[var(--color-dark)] transition-colors"
         >
-          Full Feed →
+          Full Content Feed →
         </Link>
       </div>
     </div>

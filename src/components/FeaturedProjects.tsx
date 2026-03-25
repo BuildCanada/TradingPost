@@ -7,8 +7,8 @@ export default function FeaturedProjects() {
     <section className="px-5 pt-[26px] pb-[36px] border-b border-[var(--color-border-light)]">
       <div className="max-w-[1080px] mx-auto">
         <SectionLabel>Projects</SectionLabel>
-        <ProjectsGrid featured maxItems={4} />
-        <div className="flex justify-center mt-4">
+        <ProjectsGrid featured maxItems={4} excludeSlugs={["great-builders"]} />
+        <div className="flex justify-start mt-4">
           <Link
             href="/projects"
             className="h-7 px-2.5 border border-[var(--color-border-light)] flex items-center type-label text-[var(--color-dark)] hover:border-[var(--color-dark)] transition-colors"

@@ -13,7 +13,7 @@ export async function generateMetadata({
   const item = await prisma.feedItem.findUnique({ where: { id } });
 
   if (!item || item.type !== "BLOG") {
-    return { title: "Feed | Build Canada" };
+    return { title: "Content | Build Canada" };
   }
 
   const title = `${item.title || "Post"} | Build Canada`;
@@ -39,7 +39,7 @@ export async function generateMetadata({
   };
 }
 
-export default async function FeedItemPage({
+export default async function ContentItemPage({
   params,
 }: {
   params: Promise<{ id: string }>;
@@ -54,18 +54,18 @@ export default async function FeedItemPage({
     if (item.url) {
       redirect(item.url);
     }
-    // No URL set — go back to feed
-    redirect("/feed");
+    // No URL set — go back to content
+    redirect("/content");
   }
 
   return (
     <div className="mx-[10px] my-[10px] border border-[var(--color-border-light)] bg-[var(--color-bg)]">
     <article className="animate-fade-in max-w-2xl mx-auto px-5 pt-[50px] pb-[60px]">
       <Link
-        href="/feed"
+        href="/content"
         className="type-label text-[var(--color-text-muted)] hover:text-[var(--color-dark)] transition-colors"
       >
-        &larr; Back to Feed
+        &larr; Back to Content
       </Link>
 
       {item.image && (

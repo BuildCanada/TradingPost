@@ -23,10 +23,12 @@ export default function ProjectsGrid({
   featured,
   maxItems,
   filter,
+  excludeSlugs,
 }: {
   featured?: boolean;
   maxItems?: number;
   filter?: "featured" | "non-featured";
+  excludeSlugs?: string[];
 }) {
   const [projects, setProjects] = useState<ProjectData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -48,12 +50,17 @@ export default function ProjectsGrid({
             typed = typed.filter((p) => !p.featured);
           }
 
+          if (excludeSlugs?.length) {
+            const excluded = new Set(excludeSlugs);
+            typed = typed.filter((p) => !excluded.has(p.slug));
+          }
+
           setProjects(maxItems ? typed.slice(0, maxItems) : typed);
         }
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [featured, maxItems, filter]);
+  }, [featured, maxItems, filter, excludeSlugs]);
 
   if (loading) {
     return (

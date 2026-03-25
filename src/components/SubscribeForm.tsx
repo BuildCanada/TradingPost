@@ -7,7 +7,7 @@ export default function SubscribeForm() {
       <span className="type-label font-bold text-[var(--color-text-secondary)] block pb-1">
         Subscribe
       </span>
-      <p className="type-body text-[var(--color-text-secondary)] mb-4 mt-1">
+      <p className="type-body mb-4 mt-1">
         Stay informed on bold ideas for Canada.
       </p>
       <form className="flex flex-col gap-3" onSubmit={(e) => e.preventDefault()}>

@@ -170,6 +170,7 @@ export default async function MemoDetailPage({
                     height={40}
                     className="w-full h-full object-cover"
                     unoptimized
+                    priority
                   />
                 )}
               </div>
@@ -225,6 +226,7 @@ export default async function MemoDetailPage({
                       height={40}
                       className="w-full h-full object-cover"
                       unoptimized
+                      priority
                     />
                   )}
                 </div>

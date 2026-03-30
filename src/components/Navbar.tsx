@@ -3,11 +3,13 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
+import { useSubscribeStore } from "@/components/subscribe/store";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [showEmoji, setShowEmoji] = useState(false);
   const hasScrolled = useRef(false);
+  const openModal = useSubscribeStore((s) => s.openModal);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -118,12 +120,12 @@ export default function Navbar() {
             </a>
           ))}
         </div>
-        <Link
-          href="#subscribe"
-          className="flex items-center self-stretch px-5 border-l border-[var(--color-border)] bg-[var(--color-dark)] type-label text-[var(--color-bg)] hover:bg-[var(--color-accent)] transition-colors"
+        <button
+          onClick={() => openModal("navbar")}
+          className="flex items-center self-stretch px-5 border-l border-[var(--color-border)] bg-[var(--color-dark)] type-label text-[var(--color-bg)] hover:bg-[var(--color-accent)] transition-colors cursor-pointer"
         >
           Subscribe
-        </Link>
+        </button>
       </div>
 
       {/* Mobile hamburger */}
@@ -189,13 +191,15 @@ export default function Navbar() {
             >
               Shop
             </a>
-            <Link
-              href="#subscribe"
-              className="px-5 py-4 bg-[var(--color-dark)] type-label text-[var(--color-bg)]"
-              onClick={() => setMenuOpen(false)}
+            <button
+              className="px-5 py-4 bg-[var(--color-dark)] type-label text-[var(--color-bg)] text-left cursor-pointer"
+              onClick={() => {
+                setMenuOpen(false);
+                openModal("navbar");
+              }}
             >
               Subscribe
-            </Link>
+            </button>
           </div>
         </div>
       </div>

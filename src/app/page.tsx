@@ -3,9 +3,10 @@ import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import FeedPreview from "@/components/FeedPreview";
 import FeaturedMemos from "@/components/FeaturedMemos";
-import SubscribeForm from "@/components/SubscribeForm";
+import { SubscribeSection, ExitIntentHandler } from "@/components/subscribe";
 import SectionLabel from "@/components/SectionLabel";
 import FeaturedProjects from "@/components/FeaturedProjects";
+import { LinkButton } from "@/components/ui/link-button";
 
 export const dynamic = "force-dynamic";
 
@@ -29,7 +30,7 @@ function HeroSection() {
   const o = 0.2;
 
   return (
-    <section className="w-full bg-[var(--color-dark)] flex items-center justify-center h-[280px] md:h-[420px] relative overflow-hidden">
+    <section className="w-full bg-dark flex items-center justify-center h-[280px] md:h-[420px] relative overflow-hidden">
       {/* Autoplay video */}
       <video
         autoPlay
@@ -142,7 +143,7 @@ function HeroSection() {
 
 function BrandSection() {
   return (
-    <section className="border-b border-[var(--color-border-light)]">
+    <section className="border-b border-border-light">
       <div className="max-w-[1080px] w-full mx-auto lg:flex">
         <BrandMessaging />
         <Image
@@ -174,24 +175,12 @@ function BrandMessaging() {
         </span>
       </p>
       <div className="flex items-center gap-3">
-        <Link
-          href="/about"
-          className="inline-flex items-center gap-2 type-label px-3 py-1 border border-[var(--color-dark)] text-[var(--color-dark)] bg-[var(--color-bg)] hover:bg-[var(--color-dark)] hover:text-[var(--color-bg)] transition-colors"
-        >
+        <LinkButton href="/about" variant="primary" showArrow>
           About Us
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
-            <path d="M4 12l8-8M6 4h6v6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </Link>
-        <Link
-          href="#subscribe"
-          className="inline-flex items-center gap-2 type-label px-3 py-1 border border-[var(--color-accent)] text-white bg-[var(--color-accent)] hover:opacity-80 transition-opacity"
-        >
+        </LinkButton>
+        <LinkButton href="#subscribe" variant="accent" showArrow>
           Subscribe
-          <svg width="12" height="12" viewBox="0 0 16 16" fill="none">
-            <path d="M4 12l8-8M6 4h6v6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </Link>
+        </LinkButton>
       </div>
       </div>
     </div>
@@ -216,7 +205,7 @@ function SocialLinks() {
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-7 h-7 border border-[var(--color-border-light)] flex items-center justify-center hover:border-[var(--color-dark)] transition-colors group"
+            className="w-7 h-7 border border-border-light flex items-center justify-center hover:border-dark transition-colors group"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -228,13 +217,10 @@ function SocialLinks() {
             />
           </a>
         ))}
-        <div className="w-px h-[18px] bg-[var(--color-border-light)] mx-0.5" />
-        <Link
-          href="/content"
-          className="h-7 px-2.5 border border-[var(--color-border-light)] flex items-center type-label text-[var(--color-dark)] hover:border-[var(--color-dark)] transition-colors"
-        >
+        <div className="w-px h-[18px] bg-border-light mx-0.5" />
+        <LinkButton href="/content" variant="primary" >
           Full Content Feed →
-        </Link>
+        </LinkButton>
       </div>
     </div>
   );
@@ -243,7 +229,7 @@ function SocialLinks() {
 
 function FeedAndEvents() {
   return (
-    <section className="px-5 border-b border-[var(--color-border-light)]">
+    <section className="px-5 border-b border-border-light">
       <div className="max-w-[1080px] mx-auto flex flex-wrap justify-center gap-[20px]">
         {/* Feed + Social */}
         <div className="w-full md:w-auto md:flex-1 md:max-w-[768px] min-w-0">
@@ -253,7 +239,7 @@ function FeedAndEvents() {
 
         {/* Divider between feed and events (visible only when stacked) */}
         <div className="w-full md:hidden -mx-5 px-0" style={{ width: "calc(100% + 40px)" }}>
-          <div className="border-t border-[var(--color-border-light)]" />
+          <div className="border-t border-border-light" />
         </div>
 
         {/* Events */}
@@ -278,7 +264,7 @@ function FeedAndEvents() {
 export default async function Home() {
   const memos = await getMemos();
   return (
-    <div className="mx-[10px] my-[10px] border border-[var(--color-border-light)] bg-[var(--color-bg)]">
+    <div className="mx-[10px] my-[10px] border border-border-light bg-bg">
       <HeroSection />
       <div className="animate-fade-in" style={{ animationDelay: "0.4s" }}>
         <BrandSection />
@@ -293,8 +279,9 @@ export default async function Home() {
         <FeaturedProjects />
       </div>
       <div className="animate-fade-in" style={{ animationDelay: "2.0s" }}>
-        <SubscribeForm />
+        <SubscribeSection />
       </div>
+      <ExitIntentHandler />
     </div>
   );
 }

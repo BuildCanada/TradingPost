@@ -1,7 +1,12 @@
 @import "tailwindcss";
 
+@import "../styles/colours.css";
+@import "../styles/typography.css";
+
 html {
   scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 /* ─── Page entrance animation ─── */
@@ -61,83 +66,103 @@ html {
   }
 }
 
+@keyframes wiggle {
+  0% { transform: rotate(0deg); }
+  20% { transform: rotate(-15deg); }
+  40% { transform: rotate(15deg); }
+  60% { transform: rotate(-10deg); }
+  80% { transform: rotate(10deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.accordion-expand {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 300ms ease-out, opacity 300ms ease-out;
+  opacity: 0;
+}
+
+.accordion-expand[data-state="open"] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.accordion-expand > div {
+  overflow: hidden;
+}
+
+[data-state="open"] .story-chevron {
+  transform: rotate(180deg);
+}
+
+[data-state="open"] .qna-close {
+  display: flex;
+}
+
+[data-state="open"] .qna-open {
+  display: none;
+}
+
+.platform-icon-wiggle:hover {
+  animation: wiggle 0.4s ease;
+}
+
 /* ─── Font Faces ─── */
 
-/* Söhne — Headlines */
+/* Söhne Kraftig — Display/Headlines (primary brand font) */
 @font-face {
-  font-family: "Test Soehne";
-  src: url("/assets/fonts/test-soehne/test-soehne-buch.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Test Soehne";
-  src: url("/assets/fonts/test-soehne/test-soehne-buch-kursiv.woff2") format("woff2");
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Test Soehne";
+  font-family: "Soehne Kraftig";
   src: url("/assets/fonts/test-soehne/test-soehne-kraftig.woff2") format("woff2");
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: "Test Soehne";
+  font-family: "Soehne Kraftig";
   src: url("/assets/fonts/test-soehne/test-soehne-kraftig-kursiv.woff2") format("woff2");
   font-weight: 500;
   font-style: italic;
   font-display: swap;
 }
 @font-face {
-  font-family: "Test Soehne";
+  font-family: "Soehne Kraftig";
   src: url("/assets/fonts/test-soehne/test-soehne-dreiviertelfett.woff2") format("woff2");
   font-weight: 600;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: "Test Soehne";
+  font-family: "Soehne Kraftig";
   src: url("/assets/fonts/test-soehne/test-soehne-fett.woff2") format("woff2");
   font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Test Soehne";
-  src: url("/assets/fonts/test-soehne/test-soehne-leicht.woff2") format("woff2");
-  font-weight: 300;
   font-style: normal;
   font-display: swap;
 }
 
 /* Financier Text — Body copy */
 @font-face {
-  font-family: "Test Financier Text";
+  font-family: "Financier Text";
   src: url("/assets/fonts/Test Financier Text/test-financier-text-regular.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: "Test Financier Text";
+  font-family: "Financier Text";
   src: url("/assets/fonts/Test Financier Text/test-financier-text-regular-italic.woff2") format("woff2");
   font-weight: 400;
   font-style: italic;
   font-display: swap;
 }
 @font-face {
-  font-family: "Test Financier Text";
+  font-family: "Financier Text";
   src: url("/assets/fonts/Test Financier Text/test-financier-text-medium.woff2") format("woff2");
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: "Test Financier Text";
+  font-family: "Financier Text";
   src: url("/assets/fonts/Test Financier Text/test-financier-text-bold.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
@@ -146,28 +171,28 @@ html {
 
 /* Founders Grotesk Mono — Buttons, labels, meta */
 @font-face {
-  font-family: "Test Founders Grotesk Mono";
+  font-family: "Founders Grotesk Mono";
   src: url("/assets/fonts/Test Founders Grotesk Mono/test-founders-grotesk-mono-regular.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: "Test Founders Grotesk Mono";
+  font-family: "Founders Grotesk Mono";
   src: url("/assets/fonts/Test Founders Grotesk Mono/test-founders-grotesk-mono-medium.woff2") format("woff2");
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: "Test Founders Grotesk Mono";
+  font-family: "Founders Grotesk Mono";
   src: url("/assets/fonts/Test Founders Grotesk Mono/test-founders-grotesk-mono-semibold.woff2") format("woff2");
   font-weight: 600;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
-  font-family: "Test Founders Grotesk Mono";
+  font-family: "Founders Grotesk Mono";
   src: url("/assets/fonts/Test Founders Grotesk Mono/test-founders-grotesk-mono-bold.woff2") format("woff2");
   font-weight: 700;
   font-style: normal;
@@ -177,10 +202,21 @@ html {
 /* ─── Tailwind Theme ─── */
 
 @theme inline {
-  --font-sans: "Test Soehne", sans-serif;
-  --font-serif: "Test Financier Text", serif;
-  --font-mono: "Test Founders Grotesk Mono", monospace;
+  --font-sans: "Soehne Kraftig", system-ui, sans-serif;
+  --font-serif: "Financier Text", Georgia, serif;
+  --font-mono: "Founders Grotesk Mono", monospace;
   --breakpoint-md: 956px;
+  
+  --color-bg: var(--color-linen-100);
+  --color-bg-alt: var(--color-linen-50);
+  --color-text: var(--color-charcoal-1000);
+  --color-text-secondary: var(--color-charcoal-600);
+  --color-text-muted: var(--color-charcoal-400);
+  --color-accent: var(--color-auburn-800);
+  --color-accent-hover: var(--color-auburn-700);
+  --color-border: var(--color-charcoal-1000);
+  --color-border-light: var(--color-charcoal-300);
+  --color-dark: var(--color-charcoal-1000);
 }
 
 @custom-variant compact (@media (min-width: 425px));
@@ -188,95 +224,61 @@ html {
 @custom-variant cards (@media (min-width: 612px));
 @custom-variant wide (@media (min-width: 956px));
 
-/* ─── Design Tokens ─── */
-
-:root {
-  --color-bg: #f6ebe3;
-  --color-dark: #272727;
-  --color-accent: #932f2f;
-  --color-border: #272727;
-  --color-border-light: #cdc4bd;
-  --color-text: #272727;
-  --color-text-secondary: #7a6f66;
-  --color-text-muted: #cdc4bd;
-}
-
 body {
   background: var(--color-bg);
   color: var(--color-text);
-  font-family: "Test Financier Text", serif;
-}
-
-/* ─── Typography Scale ─── */
-
-.type-display {
-  font-family: "Test Soehne", sans-serif;
-  font-weight: 700;
-  font-size: clamp(36px, 6vw, 72px);
-  line-height: 1.1;
-}
-
-.type-title {
-  font-family: "Test Soehne", sans-serif;
-  font-weight: 700;
-  font-size: clamp(28px, 5vw, 48px);
-  line-height: 1.1;
-}
-
-.type-heading {
-  font-family: "Test Soehne", sans-serif;
-  font-weight: 500;
-  font-size: 20px;
-  line-height: 1.2;
-}
-
-.type-body {
-  font-family: "Test Financier Text", serif;
-  font-size: 18px;
-  line-height: 1.6;
-}
-
-.type-caption {
-  font-family: "Test Financier Text", serif;
-  font-size: 15px;
-  line-height: 1.5;
-}
-
-.type-label {
-  font-family: "Test Founders Grotesk Mono", monospace;
-  font-size: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
-}
-
-.type-label-sm {
-  font-family: "Test Founders Grotesk Mono", monospace;
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.14em;
+  font-family: var(--font-serif);
 }
 
 /* ─── Markdown Prose for Memos ─── */
 
-.prose-bc h1,
-.prose-bc h2,
-.prose-bc h3,
-.prose-bc h4 {
-  font-family: "Test Soehne", sans-serif;
-  font-weight: 600;
+.prose-bc {
+}
+
+.prose-bc h1 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(2.5rem, 5vw, 4.625rem);
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  margin-top: 1.8em;
+  margin-bottom: 0.6em;
+}
+
+.prose-bc h2 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.95rem;
+  line-height: 1.1;
+  letter-spacing: -0.015em;
+  margin-top: 1.8em;
+  margin-bottom: 0.6em;
+}
+
+.prose-bc h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.5rem;
   line-height: 1.2;
   margin-top: 1.8em;
   margin-bottom: 0.6em;
 }
-.prose-bc h1 { font-size: 32px; }
-.prose-bc h2 { font-size: 26px; }
-.prose-bc h3 { font-size: 21px; }
-.prose-bc h4 { font-size: 18px; }
+
+.prose-bc h4 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.125rem;
+  line-height: 1.3;
+  margin-top: 1.8em;
+  margin-bottom: 0.6em;
+}
 
 .prose-bc p {
-  font-family: "Test Financier Text", serif;
-  font-size: 18px;
+  font-family: var(--font-body);
+  font-size: clamp(1.25rem, 1.071rem + 0.476vw, 1.5rem);
   line-height: 1.6;
+  font-weight: 400;
+  letter-spacing: -0.015rem;
   margin-bottom: 1.2em;
 }
 
@@ -285,9 +287,10 @@ body {
   padding-left: 1.4em;
   margin-bottom: 1.2em;
 }
+
 .prose-bc li {
-  font-family: "Test Financier Text", serif;
-  font-size: 18px;
+  font-family: var(--font-body);
+  font-size: clamp(1.125rem, 1rem + 0.3vw, 1.375rem);
   line-height: 1.6;
   margin-bottom: 0.4em;
 }
@@ -297,7 +300,7 @@ body {
   padding-left: 1em;
   margin: 1.4em 0;
   font-style: italic;
-  color: var(--color-text-muted);
+  color: var(--color-text-secondary);
 }
 
 .prose-bc a {
@@ -306,15 +309,12 @@ body {
 }
 
 .prose-bc code {
-  font-family: "Test Founders Grotesk Mono", monospace;
-  font-size: 16px;
+  font-family: var(--font-mono);
+  font-size: 0.9em;
   background: var(--color-border-light);
   padding: 2px 5px;
   border-radius: 3px;
 }
-
-/* Hide scrollbar for scroll-snap carousels (webkit) */
-.snap-x::-webkit-scrollbar { display: none; }
 
 .prose-bc pre {
   background: var(--color-dark);
@@ -324,6 +324,7 @@ body {
   overflow-x: auto;
   margin-bottom: 1.2em;
 }
+
 .prose-bc pre code {
   background: none;
   padding: 0;

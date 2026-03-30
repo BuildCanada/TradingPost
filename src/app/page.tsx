@@ -1,9 +1,28 @@
 import Link from "next/link";
+import Image from "next/image";
+import { prisma } from "@/lib/prisma";
 import FeedPreview from "@/components/FeedPreview";
 import FeaturedMemos from "@/components/FeaturedMemos";
 import SubscribeForm from "@/components/SubscribeForm";
 import SectionLabel from "@/components/SectionLabel";
 import FeaturedProjects from "@/components/FeaturedProjects";
+
+export const dynamic = "force-dynamic";
+
+async function getMemos() {
+  const memos = await prisma.memo.findMany({
+    orderBy: { createdAt: "desc" },
+  });
+  return memos.map((m) => ({
+    ...m,
+    authorImage:
+      m.author === "Build Canada"
+        ? "/assets/logos/Logocircle.webp"
+        : m.authorImage,
+    publishedAt: m.publishedAt?.toISOString() ?? null,
+    createdAt: m.createdAt.toISOString(),
+  }));
+}
 
 function HeroSection() {
   const s = "var(--color-bg)";
@@ -17,10 +36,12 @@ function HeroSection() {
         muted
         loop
         playsInline
+        preload="auto"
+        poster="/assets/images/hero-poster.webp"
         className="absolute inset-0 w-full h-full object-cover brightness-[0.35]"
       >
         <source
-          src="/assets/IntroVideo_4k_buildcanada_splash.mp4"
+          src="/assets/videos/IntroVideo_buildcanada_splash.mp4"
           type="video/mp4"
         />
       </video>
@@ -124,13 +145,13 @@ function BrandSection() {
     <section className="border-b border-[var(--color-border-light)]">
       <div className="max-w-[1080px] w-full mx-auto lg:flex">
         <BrandMessaging />
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
+        <Image
           src="/assets/images/canadian-flag-waving.webp"
           alt="Canadian flag waving against a blue sky"
-          width={7792}
-          height={5564}
+          width={3896}
+          height={2782}
           className="hidden lg:block lg:w-[30%] object-cover"
+          sizes="(min-width: 1024px) 30vw, 0px"
         />
       </div>
     </section>
@@ -254,7 +275,8 @@ function FeedAndEvents() {
   );
 }
 
-export default function Home() {
+export default async function Home() {
+  const memos = await getMemos();
   return (
     <div className="mx-[10px] my-[10px] border border-[var(--color-border-light)] bg-[var(--color-bg)]">
       <HeroSection />
@@ -262,7 +284,7 @@ export default function Home() {
         <BrandSection />
       </div>
       <div className="animate-fade-in" style={{ animationDelay: "0.8s" }}>
-        <FeaturedMemos heading="Featured + Latest Memos" />
+        <FeaturedMemos heading="Featured + Latest Memos" memos={memos} />
       </div>
       <div className="animate-fade-in" style={{ animationDelay: "1.2s" }}>
         <FeedAndEvents />

@@ -37,7 +37,7 @@ export default function QnaBlock() {
       <div className="max-w-[1080px] mx-auto">
         <SectionLabel>Q&amp;A</SectionLabel>
         <div className="mt-2">
-          <Accordion type="single" collapsible>
+          <Accordion>
             {qnaItems.map((item, i) => (
               <AccordionItem
                 key={i}

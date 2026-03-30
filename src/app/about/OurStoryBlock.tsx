@@ -153,11 +153,11 @@ const socialLinks = [
 ];
 
 export default function OurStoryBlock() {
-  const [openValue, setOpenValue] = useState("");
+  const [openValue, setOpenValue] = useState<string[]>([]);
   const [twitterLoaded, setTwitterLoaded] = useState(false);
 
   useEffect(() => {
-    if (openValue === "culture" && !twitterLoaded) {
+    if (openValue.includes("culture") && !twitterLoaded) {
       setTwitterLoaded(true);
     }
   }, [openValue, twitterLoaded]);
@@ -167,9 +167,9 @@ export default function OurStoryBlock() {
       <div className="max-w-[1080px] mx-auto">
         <SectionLabel>Our Story</SectionLabel>
         <div className="mt-4">
-          <Accordion type="single" collapsible value={openValue} onValueChange={setOpenValue}>
+            <Accordion value={openValue} onValueChange={setOpenValue}>
             {storyItems.map((item, i) => {
-              const isOpen = openValue === item.key;
+              const isOpen = openValue.includes(item.key);
               const isLast = i === storyItems.length - 1;
 
               return (
@@ -233,8 +233,7 @@ export default function OurStoryBlock() {
                       >
                         <div className="mt-4">
                           {item.content}
-                          {item.key === "culture" && (
-                            <div className="space-y-4">
+                          {item.key === "culture" && (                            <div className="space-y-4">
                               <p className="type-body text-[var(--color-dark)] leading-relaxed">
                                 Policy alone won&apos;t fix Canada — culture has to shift too. We&apos;re working to rebuild a national identity rooted in ambition, competence, and urgency. That means celebrating builders, challenging complacency, and making it unacceptable to settle for mediocrity. We are a nation of Builders, after all.
                               </p>

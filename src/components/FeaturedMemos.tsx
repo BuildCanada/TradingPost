@@ -22,29 +22,9 @@ interface Memo {
   createdAt: string;
 }
 
-export default function FeaturedMemos({ heading }: { heading?: string }) {
-  const [memos, setMemos] = useState<Memo[]>([]);
+export default function FeaturedMemos({ heading, memos }: { heading?: string; memos: Memo[] }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isFading, setIsFading] = useState(false);
-
-  useEffect(() => {
-    fetch("/api/memos")
-      .then((r) => r.json())
-      .then((data: Memo[]) => {
-        data.sort((a, b) => {
-          const da = new Date(a.publishedAt || a.createdAt).getTime();
-          const db = new Date(b.publishedAt || b.createdAt).getTime();
-          return db - da;
-        });
-        setMemos(
-          data.map((m) =>
-            m.author === "Build Canada"
-              ? { ...m, authorImage: "/assets/logos/Logocircle.webp" }
-              : m
-          )
-        );
-      });
-  }, []);
 
   // Pick up to two featured memos
   const featuredMemos: Memo[] = [];
@@ -89,7 +69,19 @@ export default function FeaturedMemos({ heading }: { heading?: string }) {
   const firstThree = latestSix.slice(0, 3);
   const secondThree = latestSix.slice(3, 6);
 
-  if (memos.length === 0) return null;
+  if (memos.length === 0) {
+    return (
+      <section className="px-5 pt-[26px] pb-[36px] border-b border-[var(--color-border-light)]">
+        <div className="max-w-[1080px] mx-auto">
+          <div className="flex items-center justify-between pb-1">
+            <span className="type-label font-bold text-[var(--color-text-secondary)] block">
+              {heading || "Featured + Latest"}
+            </span>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="px-5 pt-[26px] pb-[36px] border-b border-[var(--color-border-light)]">

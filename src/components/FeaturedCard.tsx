@@ -15,9 +15,11 @@ interface Memo {
 export default function FeaturedCard({
   memo,
   label,
+  priority = false,
 }: {
   memo: Memo;
   label: string;
+  priority?: boolean;
 }) {
   return (
     <Link
@@ -32,6 +34,7 @@ export default function FeaturedCard({
             fill
             className="object-cover opacity-40 group-hover:opacity-50 transition-opacity"
             unoptimized
+            priority={priority}
           />
         )}
       </div>

@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { TwitterEmbed, MemoSubscribe, RelatedMemos } from "./MemoClientParts";
+import { ShareSection } from "@/components/share";
 
 /* ─── Static Params (pre-render all memo pages) ─── */
 
@@ -96,18 +97,26 @@ export default async function MemoDetailPage({
     },
   };
 
+  const fullUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "https://buildcanada.ca"}/memos/${memo.slug}`;
+
   const sidebar = (
     <div className="space-y-5">
+      <ShareSection
+        title={memo.title}
+        description={memo.keyMessage1}
+        image={memo.seoImage || memo.splashImage}
+        url={fullUrl}
+      />
+      <MemoSubscribe />
+      <RelatedMemos category={memo.category} currentSlug={memo.slug} />
       {memo.twitterEmbed && (
         <div>
           <span className="type-label text-[var(--color-text-secondary)] block mb-3">
-            Share
+            Embedded Post
           </span>
           <TwitterEmbed html={memo.twitterEmbed} />
         </div>
       )}
-      <MemoSubscribe />
-      <RelatedMemos category={memo.category} currentSlug={memo.slug} />
     </div>
   );
 
@@ -286,7 +295,7 @@ export default async function MemoDetailPage({
         </article>
 
         {/* Right column: sidebar (desktop only) */}
-        <aside className="hidden 2xl-memo:block w-[400px] shrink-0 px-[50px] sticky top-[70px] self-start">
+        <aside className="hidden 2xl-memo:block w-[400px] shrink-0 px-[50px] sticky top-[70px] self-start max-h-[calc(100vh-90px)] overflow-y-auto">
           {sidebar}
         </aside>
       </div>

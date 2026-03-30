@@ -3,14 +3,18 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ScrollToTop from "@/components/ScrollToTop";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: {
     default: "Build Canada",
     template: "%s | Build Canada",
   },
-  description: "Canada's Voice for Builders. Bold thinking from builders, reformers, and leaders pushing Canada to new frontiers.",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://buildcanada.ca"),
+  description:
+    "Canada's Voice for Builders. Bold thinking from builders, reformers, and leaders pushing Canada to new frontiers.",
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "https://buildcanada.ca"
+  ),
   openGraph: {
     type: "website",
     siteName: "Build Canada",
@@ -42,6 +46,7 @@ export default function RootLayout({
           <main>{children}</main>
           <Footer />
         </div>
+        <Toaster position="bottom-right" />
       </body>
     </html>
   );

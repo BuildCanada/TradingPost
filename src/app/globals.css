@@ -82,7 +82,7 @@ html {
   opacity: 0;
 }
 
-.accordion-expand[data-state="open"] {
+.accordion-expand[data-open] {
   grid-template-rows: 1fr;
   opacity: 1;
 }
@@ -91,15 +91,15 @@ html {
   overflow: hidden;
 }
 
-[data-state="open"] .story-chevron {
+[data-open] .story-chevron {
   transform: rotate(180deg);
 }
 
-[data-state="open"] .qna-close {
+[data-open] .qna-close {
   display: flex;
 }
 
-[data-state="open"] .qna-open {
+[data-open] .qna-open {
   display: none;
 }
 

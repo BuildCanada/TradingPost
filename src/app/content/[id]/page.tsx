@@ -75,6 +75,7 @@ export default async function ContentItemPage({
             alt={item.title || ""}
             fill
             className="object-cover"
+            priority
           />
         </div>
       )}
@@ -96,6 +97,7 @@ export default async function ContentItemPage({
               width={36}
               height={36}
               className="rounded-full object-cover"
+              priority
             />
           ) : (
             <div className="w-9 h-9 rounded-full bg-[var(--color-border-light)] flex items-center justify-center type-label-sm text-[var(--color-text-secondary)]">

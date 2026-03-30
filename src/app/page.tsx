@@ -128,6 +128,8 @@ function BrandSection() {
         <img
           src="/assets/images/canadian-flag-waving.webp"
           alt="Canadian flag waving against a blue sky"
+          width={7792}
+          height={5564}
           className="hidden lg:block lg:w-[30%] object-cover"
         />
       </div>

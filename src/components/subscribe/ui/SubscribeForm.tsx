@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useSubscribeStore } from "../store";
 
 interface SubscribeFormProps {
-  source: "inline" | "navbar" | "exit-intent";
+  source: "inline" | "navbar" | "exit-intent" | "footer";
   onSuccess?: () => void;
 }
 
@@ -53,17 +53,17 @@ export function SubscribeForm({ source, onSuccess }: SubscribeFormProps) {
         onChange={(e) => setEmail(e.target.value)}
         placeholder="Email"
         required
-        className="border border-[var(--color-border-light)] bg-white px-3 py-2.5 type-body placeholder:text-[var(--color-text-muted)] outline-none focus:border-[var(--color-dark)] transition-colors"
+        className="border border-charcoal-300 bg-white px-3 py-2.5 type-body placeholder:text-charcoal-400 outline-none focus:border-charcoal-1000 transition-colors"
       />
       <button
         type="submit"
         disabled={loading}
-        className="bg-[var(--color-dark)] text-[var(--color-bg)] type-label px-5 py-3 hover:bg-[var(--color-accent)] transition-colors self-start disabled:opacity-50 cursor-pointer"
+        className="bg-charcoal-1000 text-linen-100 type-label px-5 py-3 hover:bg-auburn-800 transition-colors self-start disabled:opacity-50 cursor-pointer"
       >
         {loading ? "Subscribing..." : "Subscribe"}
       </button>
       {error && (
-        <p className="type-label-sm text-[var(--color-accent)]">{error}</p>
+        <p className="type-label-sm text-auburn-800">{error}</p>
       )}
     </form>
   );

@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { cn } from "@/lib/utils";
 import SectionLabel from "@/components/SectionLabel";
 import FeaturedCard from "@/components/FeaturedCard";
 import PickCard from "@/components/PickCard";
@@ -43,10 +44,9 @@ function MemoCard({ memo }: { memo: MemoItem }) {
   return (
     <Link
       href={`/memos/${memo.slug}`}
-      className="flex items-start gap-3 py-3.5 border-b border-[var(--color-border-light)] group"
+      className="flex items-start gap-3 py-3.5 border-b border-border-light group"
     >
-      {/* Author thumbnail */}
-      <div className="w-10 h-10 rounded bg-[var(--color-border-light)] shrink-0 overflow-hidden mt-0.5">
+      <div className="w-10 h-10 rounded bg-border-light shrink-0 overflow-hidden mt-0.5">
         {memo.authorImage && (
           <Image
             src={memo.authorImage}
@@ -59,33 +59,31 @@ function MemoCard({ memo }: { memo: MemoItem }) {
         )}
       </div>
 
-      {/* Text */}
       <div className="flex-1 min-w-0">
-        <h3 className="type-heading !text-[18px] group-hover:text-[var(--color-accent)] transition-colors line-clamp-1">
+        <h3 className="type-h4 group-hover:text-accent transition-colors line-clamp-1">
           {memo.title}
         </h3>
         <div className="flex items-center gap-2 mt-0.5">
-          <p className="type-label text-[var(--color-text-secondary)]">
+          <p className="type-label text-text-secondary">
             <span className="hidden min-[900px]:inline">{memo.author}</span>
             <span className="min-[900px]:hidden">{shortenName(memo.author)}</span>
           </p>
-          <span className="text-[var(--color-text-secondary)]">&middot;</span>
-          <p className="type-label-sm text-[var(--color-text-secondary)]">
+          <span className="text-text-secondary">&middot;</span>
+          <p className="type-label-sm text-text-secondary">
             {formatDate(memo.publishedAt, memo.createdAt)}
           </p>
         </div>
-        <p className="type-caption text-[var(--color-text-secondary)] mt-1 line-clamp-2">
+        <p className="type-caption text-text-secondary mt-1 line-clamp-2">
           {memo.keyMessage1}
         </p>
       </div>
 
-      {/* Arrow */}
       <svg
         width="14"
         height="14"
         viewBox="0 0 14 14"
         fill="none"
-        className="shrink-0 mt-1 text-[var(--color-text-muted)] group-hover:text-[var(--color-accent)] transition-colors"
+        className="shrink-0 mt-1 text-text-secondary group-hover:text-accent transition-colors"
       >
         <path
           d="M2 7h9M8 3l4 4-4 4"
@@ -177,80 +175,67 @@ export default function MemosListClient({ memos }: { memos: MemoItem[] }) {
 
   const featuredIds = new Set(featuredMemos.map((m) => m.id));
   const latestSix = memos.filter((m) => !featuredIds.has(m.id)).slice(0, 6);
-  const firstThree = latestSix.slice(0, 3);
-  const secondThree = latestSix.slice(3, 6);
 
   return (
     <>
-      {/* Featured + Latest */}
       {memos.length > 0 && (
         <div className="animate-fade-in" style={{ animationDelay: "0.4s" }}>
-          <section className="px-5 pt-[26px] pb-[36px] border-b border-[var(--color-border-light)]">
+          <section className="px-5 py-10 border-b border-border-light">
             <div className="max-w-[1080px] mx-auto">
-              <SectionLabel as="h2">Featured + Latest</SectionLabel>
-              <div className="grid grid-cols-1 cards:grid-cols-[1.5fr_1fr] wide:grid-cols-[1.5fr_1fr_1fr] gap-2.5 mt-1">
-                <div className="relative h-full">
-                  {featuredMemos[0] && (
-                    <div
-                      className="transition-opacity duration-300 h-full"
-                      style={{ opacity: isFading ? 0 : 1 }}
-                    >
-                      <FeaturedCard memo={featuredMemos[activeIndex]} label="Featured" />
-                    </div>
-                  )}
-                  {hasTwoFeatured && (
-                    <div className="absolute top-3 right-3 z-20 flex gap-1.5">
-                      {[0, 1].map((i) => (
-                        <button
-                          key={i}
-                          onClick={() => switchTo(i)}
-                          className="h-[3px] w-5 rounded-full transition-opacity duration-300"
-                          style={{
-                            backgroundColor: "var(--color-bg)",
-                            opacity: activeIndex === i ? 0.9 : 0.35,
-                          }}
-                          aria-label={`Show featured memo ${i + 1}`}
-                        />
-                      ))}
-                    </div>
-                  )}
-                </div>
-                <div className="flex flex-col gap-2.5">
-                  {firstThree.map((m) => (
-                    <PickCard key={m.id} memo={m} />
-                  ))}
-                  {Array.from({ length: Math.max(0, 3 - firstThree.length) }).map((_, i) => (
-                    <div key={i} className="flex-1 border border-[var(--color-border-light)] rounded-[3px] min-h-[58px]" />
-                  ))}
-                </div>
-                <div className="hidden wide:flex flex-col gap-2.5">
-                  {secondThree.map((m) => (
-                    <PickCard key={m.id} memo={m} />
-                  ))}
-                  {Array.from({ length: Math.max(0, 3 - secondThree.length) }).map((_, i) => (
-                    <div key={i} className="flex-1 border border-[var(--color-border-light)] rounded-[3px] min-h-[58px]" />
-                  ))}
-                </div>
+              <div className="flex items-center justify-between mb-6">
+                <SectionLabel as="h2">Featured + Latest</SectionLabel>
               </div>
+              <div className="relative">
+                {featuredMemos[0] && (
+                  <div
+                    className="transition-opacity duration-300"
+                    style={{ opacity: isFading ? 0 : 1 }}
+                  >
+                    <FeaturedCard memo={featuredMemos[activeIndex]} label="Featured" wide />
+                  </div>
+                )}
+                {hasTwoFeatured && (
+                  <div className="absolute top-4 right-4 z-20 flex gap-1.5">
+                    {[0, 1].map((i) => (
+                      <button
+                        key={i}
+                        onClick={() => switchTo(i)}
+                        className={cn(
+                          "h-[3px] w-5 bg-bg transition-opacity duration-300",
+                          activeIndex === i ? "opacity-90" : "opacity-35"
+                        )}
+                        aria-label={`Show featured memo ${i + 1}`}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+              {latestSix.length > 0 && (
+                <div className="grid grid-cols-1 cards:grid-cols-2 wide:grid-cols-3 gap-0 border-t border-border-light">
+                  {latestSix.map((m, i) => (
+                    <PickCard key={m.id} memo={m} isLatest={i === 0} />
+                  ))}
+                </div>
+              )}
             </div>
           </section>
         </div>
       )}
 
-      {/* Category filter */}
       <div className="animate-fade-in" style={{ animationDelay: "0.8s" }}>
-        <div className="px-5 pt-[22px] pb-[32px] border-b border-[var(--color-border-light)]">
+        <div className="px-5 py-8 border-b border-border-light">
           <div className="max-w-[900px] mx-auto flex items-center gap-2 flex-wrap">
-            <span className="type-label-sm text-[var(--color-text-muted)] mr-1">
+            <span className="type-label-sm text-text-secondary mr-1">
               Category
             </span>
             <button
               onClick={() => setActiveCategory(null)}
-              className={`h-7 px-3.5 rounded-full type-label border transition-colors ${
+              className={cn(
+                "h-7 px-3.5 rounded-full type-label border transition-colors",
                 activeCategory === null
-                  ? "bg-[var(--color-dark)] text-[var(--color-bg)] border-[var(--color-dark)]"
-                  : "bg-transparent text-[var(--color-dark)] border-[var(--color-border-light)] hover:border-[var(--color-dark)]"
-              }`}
+                  ? "bg-dark text-bg border-dark"
+                  : "bg-transparent text-dark border-border-light hover:border-dark"
+              )}
             >
               All
             </button>
@@ -260,11 +245,12 @@ export default function MemosListClient({ memos }: { memos: MemoItem[] }) {
                 onClick={() =>
                   setActiveCategory(activeCategory === cat ? null : cat)
                 }
-                className={`h-7 px-3.5 rounded-full type-label border transition-colors ${
+                className={cn(
+                  "h-7 px-3.5 rounded-full type-label border transition-colors",
                   activeCategory === cat
-                    ? "bg-[var(--color-dark)] text-[var(--color-bg)] border-[var(--color-dark)]"
-                    : "bg-transparent text-[var(--color-dark)] border-[var(--color-border-light)] hover:border-[var(--color-dark)]"
-                }`}
+                    ? "bg-dark text-bg border-dark"
+                    : "bg-transparent text-dark border-border-light hover:border-dark"
+                )}
               >
                 {cat.replace(/-/g, " ")}
               </button>
@@ -273,25 +259,24 @@ export default function MemosListClient({ memos }: { memos: MemoItem[] }) {
         </div>
       </div>
 
-      {/* Search */}
       <div className="animate-fade-in" style={{ animationDelay: "1.2s" }}>
-        <div className="px-5 pt-[24px] pb-[34px] border-b border-[var(--color-border-light)]">
+        <div className="px-5 py-8 border-b border-border-light">
           <div className="max-w-[900px] mx-auto">
             <SectionLabel as="h2">Search</SectionLabel>
-            <div className="h-[38px] border border-[var(--color-border-light)] rounded flex items-center px-3 gap-2 mt-1 bg-[#fafafa]">
+            <div className="h-[38px] border border-border-light rounded flex items-center px-3 gap-2 mt-1 bg-bg">
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search memos..."
-                className="flex-1 bg-transparent type-caption outline-none placeholder:text-[var(--color-text-muted)]"
+                className="flex-1 bg-transparent type-caption outline-none placeholder:text-text-secondary"
               />
               <svg
                 width="14"
                 height="14"
                 viewBox="0 0 14 14"
                 fill="none"
-                className="shrink-0 text-[var(--color-text-muted)]"
+                className="shrink-0 text-text-secondary"
               >
                 <circle
                   cx="6"
@@ -312,9 +297,8 @@ export default function MemosListClient({ memos }: { memos: MemoItem[] }) {
         </div>
       </div>
 
-      {/* Article Feed */}
       <div className="animate-fade-in" style={{ animationDelay: "1.6s" }}>
-        <section className="px-5 pt-[24px] pb-[34px] border-b border-[var(--color-border-light)]">
+        <section className="px-5 py-10 border-b border-border-light">
           <div className="max-w-[900px] mx-auto">
             <SectionLabel as="h2">
               {activeCategory
@@ -322,12 +306,12 @@ export default function MemosListClient({ memos }: { memos: MemoItem[] }) {
                 : "All Memos"}
             </SectionLabel>
             {filtered.length === 0 && memos.length > 0 && (
-              <p className="type-caption text-[var(--color-text-muted)] py-4">
+              <p className="type-caption text-text-secondary py-4">
                 No memos match your filters.
               </p>
             )}
             {filtered.length === 0 && memos.length === 0 && (
-              <p className="type-caption text-[var(--color-text-muted)] py-4">
+              <p className="type-caption text-text-secondary py-4">
                 No memos yet.
               </p>
             )}
@@ -339,7 +323,7 @@ export default function MemosListClient({ memos }: { memos: MemoItem[] }) {
             {visibleCount < filtered.length && (
               <button
                 onClick={() => setVisibleCount((c) => c + 10)}
-                className="mt-4 mx-auto flex items-center gap-2 h-9 px-4 border border-[var(--color-border-light)] rounded-full type-label text-[var(--color-text-secondary)] hover:text-[var(--color-dark)] hover:border-[var(--color-dark)] transition-colors"
+                className="mt-4 mx-auto flex items-center gap-2 h-9 px-4 border border-border-light rounded-full type-label text-text-secondary hover:text-dark hover:border-dark transition-colors"
               >
                 Show More
                 <svg

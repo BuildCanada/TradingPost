@@ -1,12 +1,12 @@
-import Link from "next/link";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import FeedPreview from "@/components/FeedPreview";
 import FeaturedMemos from "@/components/FeaturedMemos";
-import { SubscribeSection, ExitIntentHandler } from "@/components/subscribe";
+import { ExitIntentHandler } from "@/components/subscribe";
 import SectionLabel from "@/components/SectionLabel";
 import FeaturedProjects from "@/components/FeaturedProjects";
 import { LinkButton } from "@/components/ui/link-button";
+import { SubscribeButton } from "@/components/ui/subscribe-button";
 
 export const dynamic = "force-dynamic";
 
@@ -178,9 +178,9 @@ function BrandMessaging() {
         <LinkButton href="/about" variant="primary" showArrow>
           About Us
         </LinkButton>
-        <LinkButton href="#subscribe" variant="accent" showArrow>
+        <SubscribeButton variant="accent" showArrow source="inline">
           Subscribe
-        </LinkButton>
+        </SubscribeButton>
       </div>
       </div>
     </div>
@@ -279,7 +279,7 @@ export default async function Home() {
         <FeaturedProjects />
       </div>
       <div className="animate-fade-in" style={{ animationDelay: "2.0s" }}>
-        <SubscribeSection />
+        <FeaturedProjects />
       </div>
       <ExitIntentHandler />
     </div>

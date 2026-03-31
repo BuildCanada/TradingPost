@@ -17,7 +17,7 @@ export function SubscribeSection() {
           <SubscribeSuccess />
         ) : (
           <>
-            <span className="type-label font-bold text-[var(--color-text-secondary)] block pb-1">
+            <span className="type-label font-bold text-charcoal-600 block pb-1">
               Subscribe
             </span>
             <p className="type-body mb-4 mt-1">

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useRef, useState, useEffect } from "react";
+import { useSubscribeStore } from "@/components/subscribe/store";
 
 const socials = [
   {
@@ -35,6 +36,7 @@ const socials = [
 export default function Footer() {
   const footerRef = useRef<HTMLElement>(null);
   const [leafVisible, setLeafVisible] = useState(false);
+  const openModal = useSubscribeStore((s) => s.openModal);
 
   useEffect(() => {
     const el = footerRef.current;
@@ -55,7 +57,7 @@ export default function Footer() {
   return (
     <footer
       ref={footerRef}
-      className="bg-[var(--color-dark)] px-5 py-16 md:py-24 lg:pb-10 flex flex-col items-center text-center relative overflow-hidden lg:min-h-[600px]"
+      className="bg-charcoal-1000 px-5 py-16 md:py-24 lg:pb-10 flex flex-col items-center text-center relative overflow-hidden lg:min-h-[600px]"
     >
       {/* Maple leaf background decoration */}
       <svg
@@ -98,7 +100,7 @@ export default function Footer() {
         <div className="flex justify-center">
           <div className="relative inline-block">
             <h2
-              className="text-[var(--color-bg)] text-[clamp(36px,10vw,120px)]"
+              className="text-linen-100 text-[clamp(36px,10vw,120px)]"
               style={{
                 fontFamily: '"Test Soehne Fett", "Test Soehne", sans-serif',
                 fontWeight: 500,
@@ -130,22 +132,22 @@ export default function Footer() {
         {/* CTA buttons + quote cluster — first on mobile, right-aligned on lg */}
         <div className="max-w-[600px] text-center lg:text-left mb-16 lg:mb-0 mx-auto lg:mx-0 lg:order-2 lg:ml-auto">
           <div className="flex items-center justify-center lg:justify-start gap-4 mb-5">
-            <Link
-              href="#subscribe"
-              className="type-label px-6 py-3.5 bg-[var(--color-bg)] text-[var(--color-dark)] hover:bg-white transition-colors"
+            <button
+              onClick={() => openModal("footer")}
+              className="type-label px-6 py-3.5 bg-linen-100 text-charcoal-1000 hover:bg-white transition-colors"
             >
               Subscribe
-            </Link>
+            </button>
             <Link
               href="https://buy.stripe.com/3cI5kCdi8a2K2xY2bgdZ600"
-              className="type-label px-6 py-3.5 text-[var(--color-bg)] hover:text-white transition-colors"
+              className="type-label px-6 py-3.5 text-linen-100 hover:text-white transition-colors"
             >
               Donate
             </Link>
           </div>
 
           <p
-            className="text-[var(--color-text-muted)] mb-3"
+            className="text-charcoal-400 mb-3"
             style={{
               fontFamily: '"Test Financier Text", serif',
               fontSize: "14px",
@@ -156,7 +158,7 @@ export default function Footer() {
             boldness... Canada shall be the star towards which all men who love
             progress and freedom shall come.
           </p>
-          <span className="type-label text-[var(--color-text-muted)] font-bold">
+          <span className="type-label text-charcoal-400 font-bold">
             — Laurier
           </span>
         </div>
@@ -184,7 +186,7 @@ export default function Footer() {
               </a>
             ))}
           </div>
-          <p className="type-label text-[var(--color-text-muted)]">
+           <p className="type-label text-charcoal-400">
             🏗️🇨🇦 Copyright Build Canada 2026
           </p>
         </div>

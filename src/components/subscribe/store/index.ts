@@ -7,7 +7,7 @@ interface SubscribeState {
   dismissed: number | null;
   triggerSource: "navbar" | "exit-intent" | "footer" | "inline" | null;
 
-  openModal: (source: "navbar" | "exit-intent" | "footer") => void;
+  openModal: (source: "navbar" | "exit-intent" | "footer" | "inline") => void;
   closeModal: () => void;
   setSubscribed: () => void;
   setDismissed: () => void;

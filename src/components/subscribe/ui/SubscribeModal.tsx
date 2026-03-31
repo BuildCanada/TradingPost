@@ -23,15 +23,26 @@ export function SubscribeModal() {
     <Dialog.Root open={isOpen} onOpenChange={(open) => { if (!open) handleClose(); }}>
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 bg-black/50 z-[60]" />
-        <Dialog.Popup className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-[var(--color-bg)] border border-[var(--color-border)] p-8 w-[90vw] max-w-md z-[60]">
-          <Dialog.Title className="type-title mb-2">
-            {subscribed ? "You're in." : "Subscribe"}
+        <Dialog.Popup className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-linen-100 border border-charcoal-300 w-[90vw] max-w-md z-[60]" style={{ padding: "clamp(1.5rem, 4vw, 2.5rem)" }}>
+          <Dialog.Title className="type-title" style={{ marginBottom: "clamp(0.375rem, 1.5vw, 0.75rem)" }}>
+            {subscribed ? "You're in." : "Build Canada"}
           </Dialog.Title>
-          <Dialog.Description className="type-body text-[var(--color-text-secondary)] mb-5">
-            {subscribed
-              ? "Thanks for subscribing."
-              : "Stay informed on bold ideas for Canada."}
-          </Dialog.Description>
+          <div style={{ marginBottom: "clamp(1rem, 3vw, 1.5rem)" }}>
+            {subscribed ? (
+              <Dialog.Description className="type-body text-charcoal-600">
+                Thanks for subscribing.
+              </Dialog.Description>
+            ) : (
+              <>
+                <Dialog.Description className="type-body" style={{ marginBottom: "clamp(0.375rem, 1.5vw, 0.75rem)" }}>
+                  We believe Canada should be the most prosperous country in the world 🏗️🇨🇦
+                </Dialog.Description>
+                <p className="type-label font-bold text-charcoal-600">
+                  Over 10,000 subscribers
+                </p>
+              </>
+            )}
+          </div>
           {subscribed ? (
             <SubscribeSuccess onClose={handleClose} />
           ) : (
@@ -40,7 +51,7 @@ export function SubscribeModal() {
               onSuccess={handleClose}
             />
           )}
-          <Dialog.Close className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center type-label text-[var(--color-text-muted)] hover:text-[var(--color-dark)] cursor-pointer">
+          <Dialog.Close className="absolute w-8 h-8 flex items-center justify-center type-label text-charcoal-400 hover:text-charcoal-1000 cursor-pointer" style={{ top: "clamp(1rem, 3vw, 1.5rem)", right: "clamp(1rem, 3vw, 1.5rem)" }}>
             ✕
           </Dialog.Close>
         </Dialog.Popup>

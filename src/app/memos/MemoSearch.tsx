@@ -9,17 +9,10 @@ export default function MemoSearch() {
 
   return (
     <div className="animate-fade-in" style={{ animationDelay: "1.2s" }}>
-      <div className="px-5 py-8 border-b border-border-light">
-        <div className="max-w-[900px] mx-auto">
+      <div className="px-5 py-10 border-b border-border-light">
+        <div className="max-w-[1080px] mx-auto">
           <SectionLabel as="h2">Search</SectionLabel>
-          <div className="h-[38px] border border-border-light rounded flex items-center px-3 gap-2 mt-1 bg-bg">
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search memos..."
-              className="flex-1 bg-transparent type-caption outline-none placeholder:text-text-secondary"
-            />
+          <div className="h-11 border border-border-light flex items-center px-4 gap-3 mt-4 bg-bg">
             <svg
               width="14"
               height="14"
@@ -41,6 +34,34 @@ export default function MemoSearch() {
                 strokeLinecap="round"
               />
             </svg>
+            <input
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search memos..."
+              className="flex-1 bg-transparent type-caption outline-none placeholder:text-text-secondary"
+            />
+            {search && (
+              <button
+                onClick={() => setSearch("")}
+                className="shrink-0 text-text-secondary hover:text-dark transition-colors"
+                aria-label="Clear search"
+              >
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                >
+                  <path
+                    d="M3 3l8 8M11 3l-8 8"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </button>
+            )}
           </div>
         </div>
       </div>

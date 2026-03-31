@@ -180,7 +180,7 @@ export function MemoCard({
       href={`/memos/${memo.slug}`}
       className={cn(
         "flex flex-col group relative overflow-hidden h-full",
-        !isDark && (gridItem ? "border-b border-r border-border-light" : "border border-border-light"),
+        !isDark && (gridItem ? "border-b border-r border-l border-border-light" : "border border-border-light"),
         isDark && !isFeatured && "justify-end min-h-[280px] lg:min-h-[320px]"
       )}
     >

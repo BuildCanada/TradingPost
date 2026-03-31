@@ -2,10 +2,11 @@
 
 import { useState, useRef, useEffect } from "react";
 import { WidgetProps } from "./types";
+import WidgetHeader from "./WidgetHeader";
 
-const BLUE = "#1F5F7F";
-const RED = "#8b2332";
-const DEFICIT_GRAY = "#374151";
+const BLUE = "var(--color-lake-700)";
+const RED = "var(--color-auburn-800)";
+const DEFICIT_GRAY = "var(--color-charcoal-900)";
 
 const revenue = {
   total: 449.2,
@@ -37,10 +38,10 @@ const deficit = Math.round((spending.total - revenue.total) * 10) / 10;
 interface Tooltip { label: string; amount: number; x: number; y: number }
 
 const BAR_H = 22;
-const ROW_GAP = 10;
+const ROW_GAP = 20;
 const ITEM_GAP = 2;
-const TEXT_PAD = 3;
-const CHAR_W = 6.6; // approx width of one 11px mono char
+const TEXT_PAD = 6;
+const CHAR_W = 6.6;
 
 function textFits(amount: number, barWidth: number) {
   const str = `$${amount.toFixed(1)}B`;
@@ -55,6 +56,7 @@ function BarSegment({
   amount,
   onHover,
   onLeave,
+  textColor = "white",
 }: {
   width: number;
   color: string;
@@ -62,6 +64,7 @@ function BarSegment({
   amount: number;
   onHover: (e: React.MouseEvent, label: string, amount: number) => void;
   onLeave: () => void;
+  textColor?: string;
 }) {
   const [hovered, setHovered] = useState(false);
   const showText = textFits(amount, width);
@@ -73,7 +76,6 @@ function BarSegment({
         width,
         height: BAR_H,
         backgroundColor: color,
-        opacity: 0.7,
         borderRadius: 1,
         filter: hovered ? "brightness(0.75)" : "none",
       }}
@@ -88,8 +90,8 @@ function BarSegment({
     >
       {showText && (
         <span
-          className="absolute inset-0 flex items-center justify-center text-white font-mono font-bold leading-none"
-          style={{ fontSize: 11, padding: `0 ${TEXT_PAD}px` }}
+          className={`absolute inset-0 flex items-center justify-center type-mono-sm font-bold leading-none`}
+          style={{ padding: `0 ${TEXT_PAD}px`, color: textColor }}
         >
           ${amount.toFixed(1)}B
         </span>
@@ -98,7 +100,6 @@ function BarSegment({
   );
 }
 
-/** Distributes items proportionally within a fixed targetW (including gaps) */
 function computeSegments(
   items: { label: string; amount: number }[],
   total: number,
@@ -142,29 +143,23 @@ function SankeyDiagram() {
     });
   };
 
-  // Revenue main bar + deficit: 2 children, 1 gap
   const mainGap = ITEM_GAP;
   const mainAvail = containerW - mainGap;
   const revMainW = (revenue.total / maxTotal) * mainAvail;
   const deficitMainW = mainAvail - revMainW;
 
-  // Revenue breakdown: fits exactly within revMainW
   const revBreakdown = computeSegments(revenue.sources, revenue.total, revMainW);
-
-  // Expenditure breakdown: fills full containerW
   const expBreakdown = computeSegments(spending.categories, spending.total, containerW);
 
   return (
     <div className="relative" data-sankey onMouseLeave={() => setTooltip(null)}>
-      {/* Revenue */}
       <div className="flex flex-col md:flex-row md:items-center" style={{ gap: 8 }}>
-        <div className="flex items-baseline gap-2 md:block shrink-0 md:w-[80px]">
-          <span className="text-[11px] font-mono font-bold" style={{ color: BLUE }}>
-            Revenues
-          </span>
-        </div>
-        <div ref={containerRef} className="flex-1 flex flex-col" style={{ gap: 4 }}>
-          {/* Main bar + deficit */}
+          <div className="flex items-baseline gap-2 md:block shrink-0 md:w-[100px]">
+            <span className="type-mono-sm font-bold" style={{ color: BLUE }}>
+              Revenues
+            </span>
+          </div>
+          <div ref={containerRef} className="flex-1 flex flex-col" style={{ gap: 4 }}>
           <div className="flex" style={{ height: BAR_H, gap: `${ITEM_GAP}px` }}>
             <div
               className="relative overflow-hidden"
@@ -172,8 +167,8 @@ function SankeyDiagram() {
             >
               {textFits(revenue.total, revMainW) && (
                 <span
-                  className="absolute inset-0 flex items-center justify-center text-white font-mono font-bold leading-none"
-                  style={{ fontSize: 11, padding: `0 ${TEXT_PAD}px` }}
+                  className="absolute inset-0 flex items-center justify-center text-white type-mono-sm font-bold leading-none"
+                  style={{ padding: `0 ${TEXT_PAD}px` }}
                 >
                   ${revenue.total}B
                 </span>
@@ -188,13 +183,13 @@ function SankeyDiagram() {
               onLeave={() => setTooltip(null)}
             />
           </div>
-          {/* Breakdown */}
           <div className="flex" style={{ height: BAR_H, gap: `${ITEM_GAP}px` }}>
             {revBreakdown.map((seg) => (
               <BarSegment
                 key={seg.label}
                 width={seg.w}
-                color={BLUE}
+                color="var(--color-lake-200)"
+                textColor="var(--color-charcoal-1000)"
                 label={seg.label}
                 amount={seg.amount}
                 onHover={handleHover}
@@ -205,38 +200,35 @@ function SankeyDiagram() {
         </div>
       </div>
 
-      {/* Gap */}
       <div style={{ height: ROW_GAP }} />
 
-      {/* Expenditure */}
       <div className="flex flex-col md:flex-row md:items-center" style={{ gap: 8 }}>
-        <div className="flex items-baseline gap-2 md:block shrink-0 md:w-[80px]">
-          <span className="text-[11px] font-mono font-bold" style={{ color: RED }}>
-            Expenditures
-          </span>
-        </div>
-        <div className="flex-1 flex flex-col" style={{ gap: 4 }}>
-          {/* Main bar */}
+          <div className="flex items-baseline gap-2 md:block shrink-0 md:w-[100px]">
+            <span className="type-mono-sm font-bold" style={{ color: RED }}>
+              Expenditures
+            </span>
+          </div>
+          <div className="flex-1 flex flex-col" style={{ gap: 4 }}>
           <div
             className="relative overflow-hidden"
             style={{ width: "100%", height: BAR_H, backgroundColor: RED, borderRadius: 1 }}
           >
             {textFits(spending.total, containerW) && (
               <span
-                className="absolute inset-0 flex items-center justify-center text-white font-mono font-bold leading-none"
-                style={{ fontSize: 11, padding: `0 ${TEXT_PAD}px` }}
+                className="absolute inset-0 flex items-center justify-center text-white type-mono-sm font-bold leading-none"
+                style={{ padding: `0 ${TEXT_PAD}px` }}
               >
                 ${spending.total}B
               </span>
             )}
           </div>
-          {/* Breakdown */}
           <div className="flex" style={{ height: BAR_H, gap: `${ITEM_GAP}px` }}>
             {expBreakdown.map((seg) => (
               <BarSegment
                 key={seg.label}
                 width={seg.w}
-                color={RED}
+                color="var(--color-auburn-300)"
+                textColor="var(--color-charcoal-1000)"
                 label={seg.label}
                 amount={seg.amount}
                 onHover={handleHover}
@@ -247,15 +239,14 @@ function SankeyDiagram() {
         </div>
       </div>
 
-      {/* Tooltip */}
       {tooltip && (
         <div
-          className="absolute pointer-events-none px-2 py-1 rounded text-[10px] font-mono text-white whitespace-nowrap z-10"
+          className="absolute pointer-events-none px-2 py-1 rounded text-white type-mono-sm whitespace-nowrap z-10"
           style={{
             left: tooltip.x,
             top: tooltip.y,
             transform: "translateX(-50%)",
-            backgroundColor: "#1e293b",
+            backgroundColor: "var(--color-charcoal-1000)",
           }}
         >
           {tooltip.label}: ${tooltip.amount.toFixed(1)}B
@@ -267,24 +258,16 @@ function SankeyDiagram() {
 
 export default function CanadaSpendsWidget({ project }: WidgetProps) {
   return (
-    <div className="p-5 h-full flex flex-col gap-3">
-      {/* Header */}
-      <div>
-        <span className="type-label font-bold text-[10px] text-[var(--color-text-secondary)]">
-          {project.title}
-        </span>
-        <p className="type-heading text-[17px] text-[var(--color-dark)] mt-1">
-          Diving into Government Financials
-        </p>
-        <p className="type-caption text-[var(--color-text-secondary)] mt-0.5">
-          Transparent data on how federal, provincial, and municipal goverments spend your money.
-        </p>
-      </div>
+    <div className="p-8 lg:p-10 h-full flex flex-col gap-4">
+      <WidgetHeader
+        project={project}
+        heading="Diving into Government Financials"
+        description="Transparent data on how federal, provincial, and municipal governments spend your money."
+      />
 
-      {/* Sankey */}
       <SankeyDiagram />
 
-      <p className="text-[9px] font-mono text-[var(--color-text-secondary)] opacity-60 text-right mt-auto">
+      <p className="type-mono-sm text-[var(--color-text-secondary)] opacity-60 text-right mt-auto pt-4">
         Source: canadaspends.com
       </p>
     </div>

@@ -40,8 +40,7 @@ export default function GreatBuildersWidget({ project }: WidgetProps) {
   }, []);
 
   return (
-    <div className="flex flex-col md:flex-row">
-      {/* GIF — on top for mobile, right side for desktop */}
+    <div className="flex flex-col md:flex-row h-full">
       <div className="w-full h-[200px] md:hidden relative">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -62,16 +61,15 @@ export default function GreatBuildersWidget({ project }: WidgetProps) {
           ))}
         </div>
       </div>
-      {/* Left: description + quote + author */}
-      <div className="flex-1 flex flex-col justify-between p-4 min-w-0">
-        {/* Top: description */}
+
+      <div className="flex-1 flex flex-col justify-between p-8 lg:p-10 min-w-0">
         {project.description && (
-          <p className="type-caption text-[var(--color-text-secondary)]">
+          <p className="type-body-sm text-[var(--color-text-secondary)]">
             {project.description}
           </p>
         )}
-        {/* Middle: quote */}
-        <div className="relative flex-1 flex items-center py-2">
+
+        <div className="relative flex-1 flex items-center py-4">
           {builders.map((b, i) => (
             <div
               key={b.name}
@@ -79,15 +77,15 @@ export default function GreatBuildersWidget({ project }: WidgetProps) {
               style={{ visibility: i === index ? "visible" : "hidden" }}
               aria-hidden={i !== index}
             >
-              <p className="type-caption font-sans font-medium text-[var(--color-dark)] line-clamp-3">
+              <p className="type-body-sm font-sans font-medium text-[var(--color-dark)] line-clamp-3">
                 &ldquo;{b.quote}&rdquo;
               </p>
             </div>
           ))}
         </div>
-        {/* Bottom: author */}
+
         <div>
-          <p className="type-heading text-[13px] text-[var(--color-dark)] leading-tight mb-1">
+          <p className="font-display text-[1.25rem] lg:text-[1.5rem] font-normal leading-[1.2] text-[var(--color-dark)] mb-1">
             {builder.name}
           </p>
           <p className="type-label-sm text-[var(--color-text-secondary)] uppercase truncate">
@@ -96,10 +94,8 @@ export default function GreatBuildersWidget({ project }: WidgetProps) {
         </div>
       </div>
 
-      {/* Divider — desktop only */}
       <div className="hidden md:block w-px bg-[var(--color-border-light)] shrink-0" />
 
-      {/* Right: gif — desktop only */}
       <div className="hidden md:block w-[45%] shrink-0 relative min-h-[180px]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img

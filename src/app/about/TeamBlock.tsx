@@ -10,7 +10,8 @@ const roleGroups = [
 
 function TeamMemberCard({ m }: { m: TeamMember }) {
   return (
-    <div className="flex flex-col items-start gap-1 border border-border-light -ml-px -mt-px p-6">
+    <div className="flex flex-col items-center border border-border-light -ml-px -mt-px p-6">
+      <div className="flex flex-col items-start gap-1">
       {m.photo ? (
         <Image
           src={m.photo}
@@ -60,6 +61,7 @@ function TeamMemberCard({ m }: { m: TeamMember }) {
           )}
         </div>
       )}
+      </div>
     </div>
   );
 }

@@ -11,60 +11,60 @@ function MemoGridRow({ memo }: { memo: MemoItem }) {
   return (
     <Link
       href={`/memos/${memo.slug}`}
-      className="flex items-start gap-4 p-5 border-b border-r border-border-light group hover:bg-linen-50 transition-colors"
+      className="flex flex-col border-b border-r border-border-light group hover:bg-linen-50 transition-colors"
     >
-      <div
-        className="w-10 h-10 bg-border-light shrink-0 overflow-hidden mt-0.5"
-        style={{ borderRadius: "2px" }}
-      >
-        {memo.authorImage && (
-          <Image
-            src={memo.authorImage}
-            alt={memo.author}
-            width={40}
-            height={40}
-            className="w-full h-full object-cover"
-            unoptimized
-          />
-        )}
-      </div>
+      <div className="flex items-start gap-4 p-5 flex-1">
+        <div
+          className="w-10 h-10 bg-border-light shrink-0 overflow-hidden mt-0.5"
+          style={{ borderRadius: "2px" }}
+        >
+          {memo.authorImage && (
+            <Image
+              src={memo.authorImage}
+              alt={memo.author}
+              width={40}
+              height={40}
+              className="w-full h-full object-cover"
+              unoptimized
+            />
+          )}
+        </div>
 
-      <div className="flex-1 min-w-0">
-        <h3 className="type-h4 group-hover:text-accent transition-colors line-clamp-1">
-          {memo.title}
-        </h3>
-        <div className="flex items-center gap-2 mt-1">
-          <p className="type-label text-text-secondary">
-            <span className="hidden wide:inline">{memo.author}</span>
-            <span className="wide:hidden">
-              {shortenName(memo.author)}
-            </span>
-          </p>
-          <span className="text-text-secondary">&middot;</span>
-          <p className="type-label-sm text-text-secondary">
-            {formatDate(memo.publishedAt, memo.createdAt)}
+        <div className="flex-1 min-w-0">
+          <h3 className="type-h4 group-hover:text-accent transition-colors line-clamp-1">
+            {memo.title}
+          </h3>
+          <div className="flex items-center gap-2 mt-1">
+            <p className="type-label text-text-secondary">
+              <span className="hidden wide:inline">{memo.author}</span>
+              <span className="wide:hidden">
+                {shortenName(memo.author)}
+              </span>
+            </p>
+            <span className="text-text-secondary">&middot;</span>
+            <p className="type-label-sm text-text-secondary">
+              {formatDate(memo.publishedAt, memo.createdAt)}
+            </p>
+          </div>
+          <p className="type-caption text-text-secondary mt-1.5 line-clamp-3">
+            {memo.keyMessage1}
           </p>
         </div>
-        <p className="type-caption text-text-secondary mt-1.5 line-clamp-2">
-          {memo.keyMessage1}
-        </p>
       </div>
 
-      <svg
-        width="14"
-        height="14"
-        viewBox="0 0 14 14"
-        fill="none"
-        className="shrink-0 mt-1.5 text-text-muted group-hover:text-accent transition-colors"
-      >
-        <path
-          d="M2 7h9M8 3l4 4-4 4"
+      <div className="border-t border-border-light px-5 py-3 flex items-center gap-2 group/cta">
+        <span className="type-label text-text-secondary group-hover/cta:text-accent transition-colors">
+          Read More
+        </span>
+        <svg
+          className="w-4 h-4 text-text-secondary group-hover/cta:text-accent group-hover/cta:translate-x-1 transition-all"
+          fill="none"
+          viewBox="0 0 24 24"
           stroke="currentColor"
-          strokeWidth="1.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </div>
     </Link>
   );
 }

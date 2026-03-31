@@ -121,7 +121,7 @@ export default function FeaturedMemos({ heading, memos }: { heading?: string; me
           )}
         </div>
         {latestFour.length > 0 && (
-          <div className="grid grid-cols-1 cards:grid-cols-2 wide:grid-cols-4 gap-0 mt-6">
+          <div className="grid grid-cols-1 cards:grid-cols-2 wide:grid-cols-4 gap-0 border-t border-border-light">
             {latestFour.map((m, i) => (
               <PickCard key={m.id} memo={m} isLatest={i === 0} />
             ))}

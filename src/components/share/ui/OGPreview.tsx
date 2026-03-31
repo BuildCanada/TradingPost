@@ -14,9 +14,9 @@ export function OGPreview({ title, description, image, url }: OGPreviewProps) {
   }
 
   return (
-    <div className="border border-[var(--color-border-light)] overflow-hidden">
+    <div className="border border-border-light overflow-hidden">
       {image && (
-        <div className="aspect-video overflow-hidden bg-[var(--color-border-light)]">
+        <div className="aspect-video overflow-hidden bg-border-light">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={image}
@@ -27,10 +27,10 @@ export function OGPreview({ title, description, image, url }: OGPreviewProps) {
       )}
       <div className="p-3 space-y-1">
         <p className="type-caption font-medium line-clamp-2">{title}</p>
-        <p className="type-label-sm text-[var(--color-text-secondary)] line-clamp-2">
+        <p className="type-label-sm text-text-secondary line-clamp-2">
           {description}
         </p>
-        <p className="type-label-sm text-[var(--color-text-muted)]">{domain}</p>
+        <p className="type-label-sm text-text-muted">{domain}</p>
       </div>
     </div>
   );

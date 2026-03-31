@@ -3,10 +3,11 @@
 import { useState } from "react";
 import SectionLabel from "@/components/SectionLabel";
 import {
-  Collapsible,
-  CollapsibleTrigger,
-  CollapsibleContent,
-} from "@/components/ui/collapsible";
+  Accordion,
+  AccordionItem,
+  AccordionTrigger,
+  AccordionContent,
+} from "@/components/ui/accordion";
 
 const platformItems = [
   {
@@ -59,101 +60,90 @@ const platformItems = [
   },
 ];
 
-const baseFontSize = 18;
-const expandedFontSize = Math.round(baseFontSize * 1.5);
-
 export default function PlatformBlock() {
-  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [openValue, setOpenValue] = useState<string[]>([]);
 
   return (
-    <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px] border-b border-[var(--color-border-light)]">
+    <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px] border-b border-border-light">
       <div className="max-w-[1080px] mx-auto">
         <SectionLabel>Our Principles</SectionLabel>
-        <h2 className="type-heading text-[var(--color-dark)] mt-2 mb-1">Builders believe Canada should be...</h2>
-        <div className="flex flex-col gap-3 mt-3">
-          {platformItems.map((item, i) => {
-            const isOpen = openIndex === i;
+        <h2 className="type-h3 text-dark mt-2 mb-1">Builders believe Canada should be...</h2>
+        <div className="mt-4 border border-border-light">
+          <Accordion value={openValue} onValueChange={setOpenValue}>
+            {platformItems.map((item) => {
+              const isOpen = openValue.includes(item.title);
 
-            return (
-              <Collapsible
-                key={item.title}
-                open={isOpen}
-                onOpenChange={(open) => setOpenIndex(open ? i : null)}
-              >
-                <div
-                  className="border flex cursor-pointer transition-colors duration-200 hover:bg-[var(--color-border-light)]/20"
-                  style={{ borderColor: isOpen ? item.color : undefined }}
-                  onClick={() => setOpenIndex(isOpen ? null : i)}
-                >
-                  <div
-                    className="w-[56px] shrink-0 flex items-center justify-center border-r transition-colors duration-200"
-                    style={{
-                      backgroundColor: isOpen ? item.color : undefined,
-                      borderColor: isOpen ? item.color : undefined,
-                    }}
-                  >
-                    <div
-                      className="platform-icon-wiggle w-[20px] h-[20px] transition-colors duration-200"
-                      style={{
-                        backgroundColor: isOpen ? "#ffffff" : item.color,
-                        maskImage: `url(${item.icon})`,
-                        maskSize: "contain",
-                        maskRepeat: "no-repeat",
-                        maskPosition: "center",
-                        WebkitMaskImage: `url(${item.icon})`,
-                        WebkitMaskSize: "contain",
-                        WebkitMaskRepeat: "no-repeat",
-                        WebkitMaskPosition: "center",
-                      }}
-                    />
-                  </div>
-                  <div className="min-w-0 flex-1 px-5 py-4">
-                    <svg
-                      className="overflow-visible block"
-                      height={24}
-                      style={{
-                        transformOrigin: "left center",
-                        willChange: "transform",
-                        transform: isOpen ? "scaleX(1.25) scaleY(0.82)" : undefined,
-                        transition: "transform 150ms cubic-bezier(0.175, 0.885, 0.32, 1.275)",
-                      }}
-                    >
-                      <text
-                        y="18"
-                        style={{
-                          fontFamily: '"Test Soehne", sans-serif',
-                          fontSize: isOpen ? expandedFontSize : baseFontSize,
-                          fontWeight: isOpen ? 700 : 500,
-                          fill: isOpen ? item.color : "var(--color-dark)",
-                          transition: "font-size 150ms cubic-bezier(0.175, 0.885, 0.32, 1.275), font-weight 150ms, fill 150ms",
-                        }}
+              return (
+                <AccordionItem key={item.title} value={item.title} className="border-b-0 p-6">
+                  <div className="flex gap-4">
+                    <div className="flex flex-col items-center">
+                      <div
+                        className={`w-[36px] h-[36px] mt-1 rounded-full border-2 flex items-center justify-center shrink-0 transition-all duration-200 ${
+                          isOpen
+                            ? "bg-accent border-accent text-bg"
+                            : "bg-bg border-border-light text-text-secondary hover:border-accent hover:text-accent"
+                        }`}
                       >
-                        {item.title}
-                      </text>
-                    </svg>
-                    <p className="type-caption text-[var(--color-text-secondary)] mt-1">{item.description}</p>
-                  </div>
-                </div>
-                <CollapsibleContent className="accordion-expand">
-                  <div>
-                    <div className="px-5 py-3 border-x border-b" style={{ borderColor: isOpen ? item.color : undefined }}>
-                      <p className="type-body text-[var(--color-dark)] mb-3 leading-relaxed">
-                        {item.expandedHeader}
-                      </p>
-                      <ul className="space-y-1.5">
-                        {item.expandedBullets.map((bullet, j) => (
-                          <li key={j} className="type-caption text-[var(--color-text-secondary)] flex items-start gap-2">
-                            <span className="mt-[5px] w-[5px] h-[5px] rounded-full shrink-0" style={{ backgroundColor: item.color }} />
-                            {bullet}
-                          </li>
-                        ))}
-                      </ul>
+                        <div
+                          className="w-[16px] h-[16px]"
+                          style={{
+                            backgroundColor: "currentColor",
+                            maskImage: `url(${item.icon})`,
+                            maskSize: "contain",
+                            maskRepeat: "no-repeat",
+                            maskPosition: "center",
+                            WebkitMaskImage: `url(${item.icon})`,
+                            WebkitMaskSize: "contain",
+                            WebkitMaskRepeat: "no-repeat",
+                            WebkitMaskPosition: "center",
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex-1">
+                      <AccordionTrigger
+                        className="[&_[data-slot=accordion-trigger-icon]]:hidden flex items-center justify-between cursor-pointer group w-full text-left h-[44px] px-3 transition-colors rounded-none border-transparent hover:no-underline py-0 [&]:bg-transparent"
+                      >
+                        <h3
+                          className={`type-h2 transition-colors duration-200 ${
+                            isOpen ? "text-accent" : "text-dark group-hover:text-accent"
+                          }`}
+                        >
+                          {item.title}
+                        </h3>
+                        <span
+                          className={`story-chevron transition-transform duration-200 ${
+                            isOpen ? "text-accent" : "text-text-secondary"
+                          }`}
+                        >
+                          &#x25BE;
+                        </span>
+                      </AccordionTrigger>
+                      <AccordionContent
+                        panelClassName="accordion-expand"
+                        className="overflow-hidden"
+                      >
+                        <div className="mt-4">
+                          <p className="type-body text-dark leading-relaxed">
+                            {item.expandedHeader}
+                          </p>
+                          <ul className="space-y-2 mt-3">
+                            {item.expandedBullets.map((bullet, j) => (
+                              <li key={j} className="type-body text-dark flex items-start gap-2">
+                                <span className="mt-[7px] w-[5px] h-[5px] rounded-full shrink-0 bg-accent" />
+                                {bullet}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </AccordionContent>
                     </div>
                   </div>
-                </CollapsibleContent>
-              </Collapsible>
-            );
-          })}
+                </AccordionItem>
+              );
+            })}
+          </Accordion>
         </div>
       </div>
     </section>

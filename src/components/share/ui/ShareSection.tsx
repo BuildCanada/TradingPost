@@ -18,9 +18,9 @@ export function ShareSection({
 }: ShareSectionProps) {
   return (
     <div className="space-y-3">
-      <span className="type-label text-text-secondary block">
+      <h2 className="type-label text-text-secondary block m-0">
         Share
-      </span>
+      </h2>
       <ShareButtons title={title} url={url} />
       <OGPreview
         title={title}

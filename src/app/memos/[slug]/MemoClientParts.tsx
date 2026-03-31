@@ -35,9 +35,9 @@ export function TwitterEmbed({ html }: { html: string }) {
 export function MemoSubscribe() {
   return (
     <div className="border border-[var(--color-border-light)] p-5">
-      <span className="type-label text-[var(--color-text-secondary)] block mb-2">
+      <h2 className="type-label text-[var(--color-text-secondary)] block mb-2 m-0">
         Subscribe
-      </span>
+      </h2>
       <p className="type-body text-[var(--color-text-secondary)] mb-3">
         Stay informed on bold ideas for Canada.
       </p>
@@ -105,9 +105,9 @@ export function RelatedMemos({
 
   return (
     <div className="border border-[var(--color-border-light)] p-5">
-      <span className="type-label text-[var(--color-text-secondary)] block mb-3">
+      <h2 className="type-label text-[var(--color-text-secondary)] block mb-3 m-0">
         Related Memos
-      </span>
+      </h2>
       <div className="space-y-3">
         {related.map((m) => (
           <Link
@@ -126,9 +126,9 @@ export function RelatedMemos({
               )}
             </div>
             <div className="min-w-0">
-              <h4 className="type-caption font-sans font-medium leading-[1.3] group-hover:text-[var(--color-accent)] transition-colors line-clamp-2">
+              <h3 className="type-caption font-sans font-medium leading-[1.3] group-hover:text-[var(--color-accent)] transition-colors line-clamp-2">
                 {m.title}
-              </h4>
+              </h3>
               <p className="type-label-sm text-[var(--color-text-secondary)] mt-0.5">
                 {m.author}
               </p>

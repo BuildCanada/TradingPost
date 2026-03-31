@@ -27,8 +27,8 @@ export default function MemoListItem({ memo }: { memo: MemoItem }) {
         </h3>
         <div className="flex items-center gap-2 mt-0.5">
           <p className="type-label text-text-secondary">
-            <span className="hidden min-[900px]:inline">{memo.author}</span>
-            <span className="min-[900px]:hidden">
+            <span className="hidden wide:inline">{memo.author}</span>
+            <span className="wide:hidden">
               {shortenName(memo.author)}
             </span>
           </p>

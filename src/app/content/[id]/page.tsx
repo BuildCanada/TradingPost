@@ -59,17 +59,17 @@ export default async function ContentItemPage({
   }
 
   return (
-    <div className="mx-[10px] my-[10px] border border-[var(--color-border-light)] bg-[var(--color-bg)]">
+    <div className="mx-[10px] my-[10px] border border-border-light bg-bg">
     <article className="animate-fade-in max-w-2xl mx-auto px-5 pt-[50px] pb-[60px]">
       <Link
         href="/content"
-        className="type-label text-[var(--color-text-muted)] hover:text-[var(--color-dark)] transition-colors"
+        className="type-label text-text-muted hover:text-dark transition-colors"
       >
         &larr; Back to Content
       </Link>
 
       {item.image && (
-        <div className="relative w-full h-[240px] md:h-[360px] mt-6 rounded overflow-hidden bg-[var(--color-border-light)]">
+        <div className="relative w-full h-[240px] md:h-[360px] mt-6 rounded overflow-hidden bg-border-light">
           <Image
             src={item.image}
             alt={item.title || ""}
@@ -85,11 +85,11 @@ export default async function ContentItemPage({
       </h1>
 
       {item.subtitle && (
-        <p className="type-body text-[var(--color-text-secondary)] mt-2">{item.subtitle}</p>
+        <p className="type-body text-text-secondary mt-2">{item.subtitle}</p>
       )}
 
       {item.author && (
-        <div className="flex items-center gap-3 mt-5 pb-5 border-b border-[var(--color-border-light)]">
+        <div className="flex items-center gap-3 mt-5 pb-5 border-b border-border-light">
           {item.authorPhoto ? (
             <Image
               src={item.authorPhoto}
@@ -100,13 +100,13 @@ export default async function ContentItemPage({
               priority
             />
           ) : (
-            <div className="w-9 h-9 rounded-full bg-[var(--color-border-light)] flex items-center justify-center type-label-sm text-[var(--color-text-secondary)]">
+            <div className="w-9 h-9 rounded-full bg-border-light flex items-center justify-center type-label-sm text-text-secondary">
               {item.author.charAt(0).toUpperCase()}
             </div>
           )}
           <div>
             <p className="type-label font-medium">{item.author}</p>
-            <p className="type-label-sm text-[var(--color-text-muted)]">
+            <p className="type-label-sm text-text-muted">
               {new Date(item.createdAt).toLocaleDateString("en-CA", {
                 year: "numeric",
                 month: "long",

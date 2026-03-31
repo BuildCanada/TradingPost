@@ -18,7 +18,7 @@ export function ShareSection({
 }: ShareSectionProps) {
   return (
     <div className="space-y-3">
-      <span className="type-label text-[var(--color-text-secondary)] block">
+      <span className="type-label text-text-secondary block">
         Share
       </span>
       <ShareButtons title={title} url={url} />

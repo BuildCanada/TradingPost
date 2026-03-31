@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import Link from "next/link";
 import FeaturedCard from "@/components/FeaturedCard";
 import PickCard from "@/components/PickCard";
+import { LinkButton } from "@/components/ui/link-button";
 
 interface Memo {
   id: string;
@@ -65,16 +65,14 @@ export default function FeaturedMemos({ heading, memos }: { heading?: string; me
   }, [hasTwoFeatured, activeIndex, switchTo]);
 
   const featuredIds = new Set(featuredMemos.map((m) => m.id));
-  const latestSix = memos.filter((m) => !featuredIds.has(m.id)).slice(0, 6);
-  const firstThree = latestSix.slice(0, 3);
-  const secondThree = latestSix.slice(3, 6);
+  const latestFour = memos.filter((m) => !featuredIds.has(m.id)).slice(0, 4);
 
   if (memos.length === 0) {
     return (
-      <section className="px-5 pt-[26px] pb-[36px] border-b border-[var(--color-border-light)]">
+      <section className="px-5 pt-[26px] pb-[36px] border-b border-border-light">
         <div className="max-w-[1080px] mx-auto">
           <div className="flex items-center justify-between pb-1">
-            <span className="type-label font-bold text-[var(--color-text-secondary)] block">
+            <span className="type-label font-bold text-text-secondary block">
               {heading || "Featured + Latest"}
             </span>
           </div>
@@ -84,23 +82,20 @@ export default function FeaturedMemos({ heading, memos }: { heading?: string; me
   }
 
   return (
-    <section className="px-5 pt-[26px] pb-[36px] border-b border-[var(--color-border-light)]">
+    <section className="px-5 pt-[26px] pb-[36px] border-b border-border-light">
       <div className="max-w-[1080px] mx-auto">
       <div className="flex items-center justify-between pb-1">
-        <span className="type-label font-bold text-[var(--color-text-secondary)] block">
+        <span className="type-label font-bold text-text-secondary block">
           {heading || "Featured + Latest"}
         </span>
         {heading && (
-          <Link
-            href="/memos"
-            className="hidden compact:flex h-7 px-2.5 border border-[var(--color-border-light)] items-center type-label text-[var(--color-dark)] hover:border-[var(--color-dark)] transition-colors"
-          >
+          <LinkButton href="/memos"  variant="primary" className="hidden compact:flex">
             See All Memos →
-          </Link>
+          </LinkButton>
         )}
       </div>
-      <div className="grid grid-cols-1 cards:grid-cols-[1.5fr_1fr] wide:grid-cols-[1.5fr_2fr] gap-2.5 mt-1">
-        <div className="relative h-full">
+      <div className="grid grid-cols-1 cards:grid-cols-[1.5fr_1fr] wide:grid-cols-[1.5fr_2fr] gap-0 mt-1">
+        <div className="relative h-full border border-border-light">
           {featuredMemos[0] && (
             <div
               className="transition-opacity duration-300 h-full"
@@ -126,30 +121,19 @@ export default function FeaturedMemos({ heading, memos }: { heading?: string; me
             </div>
           )}
         </div>
-        <div className="grid grid-cols-1 wide:grid-cols-2 wide:grid-rows-3 wide:grid-flow-col gap-2.5">
-          {firstThree.map((m, i) => (
+        <div className="grid grid-cols-1 wide:grid-cols-2 wide:grid-rows-2 gap-0 border-t border-l border-border-light">
+          {latestFour.map((m, i) => (
             <PickCard key={m.id} memo={m} isLatest={i === 0} />
           ))}
-          {Array.from({ length: Math.max(0, 3 - firstThree.length) }).map((_, i) => (
-            <div key={`placeholder-first-${i}`} className="border border-[var(--color-border-light)] min-h-[58px]" />
-          ))}
-          {secondThree.map((m) => (
-            <div key={m.id} className="hidden wide:block h-full">
-              <PickCard memo={m} />
-            </div>
-          ))}
-          {Array.from({ length: Math.max(0, 3 - secondThree.length) }).map((_, i) => (
-            <div key={`placeholder-second-${i}`} className="hidden wide:block border border-[var(--color-border-light)] min-h-[58px]" />
+          {Array.from({ length: Math.max(0, 4 - latestFour.length) }).map((_, i) => (
+            <div key={`placeholder-${i}`} className="border-b border-r border-border-light min-h-[200px]" />
           ))}
         </div>
       </div>
       {heading && (
-        <Link
-          href="/memos"
-          className="compact:hidden flex w-full justify-center h-7 mt-2.5 border border-[var(--color-border-light)] items-center type-label text-[var(--color-dark)] hover:border-[var(--color-dark)] transition-colors"
-        >
+        <LinkButton href="/memos" className="compact:hidden flex w-full justify-center mt-2.5">
           See All Memos →
-        </Link>
+        </LinkButton>
       )}
       </div>
     </section>

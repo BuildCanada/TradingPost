@@ -32,7 +32,7 @@ export function ShareButtons({ title, url }: ShareButtonsProps) {
             `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`
           )
         }
-        className="w-10 h-10 flex items-center justify-center bg-[var(--color-dark)] text-white hover:bg-[var(--color-accent)] transition-colors cursor-pointer"
+        className="w-10 h-10 flex items-center justify-center bg-dark text-white hover:bg-accent transition-colors cursor-pointer"
         aria-label="Share on X"
         type="button"
       >
@@ -46,7 +46,7 @@ export function ShareButtons({ title, url }: ShareButtonsProps) {
             `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`
           )
         }
-        className="w-10 h-10 flex items-center justify-center bg-[var(--color-dark)] text-white hover:bg-[var(--color-accent)] transition-colors cursor-pointer"
+        className="w-10 h-10 flex items-center justify-center bg-dark text-white hover:bg-accent transition-colors cursor-pointer"
         aria-label="Share on LinkedIn"
         type="button"
       >
@@ -60,7 +60,7 @@ export function ShareButtons({ title, url }: ShareButtonsProps) {
             `https://www.threads.net/intent?postText=${encodedTitle}%20${encodedUrl}`
           )
         }
-        className="w-10 h-10 flex items-center justify-center bg-[var(--color-dark)] text-white hover:bg-[var(--color-accent)] transition-colors cursor-pointer"
+        className="w-10 h-10 flex items-center justify-center bg-dark text-white hover:bg-accent transition-colors cursor-pointer"
         aria-label="Share on Threads"
         type="button"
       >
@@ -70,7 +70,7 @@ export function ShareButtons({ title, url }: ShareButtonsProps) {
       </button>
       <button
         onClick={handleCopyLink}
-        className="w-10 h-10 flex items-center justify-center bg-[var(--color-dark)] text-white hover:bg-[var(--color-accent)] transition-colors cursor-pointer"
+        className="w-10 h-10 flex items-center justify-center bg-dark text-white hover:bg-accent transition-colors cursor-pointer"
         aria-label="Copy link"
         type="button"
       >

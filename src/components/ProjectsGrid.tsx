@@ -7,10 +7,10 @@ import { ProjectData } from "./widgets/types";
 function WidgetSkeleton({ big }: { big?: boolean }) {
   return (
     <div
-      className={`border border-[var(--color-border-light)] p-4 ${
+      className={`border border-[var(--color-border-light)] p-8 lg:p-10 ${
         big
           ? "min-h-[280px] md:min-h-[180px] md:col-span-2"
-          : "min-h-[140px]"
+          : "min-h-[200px]"
       }`}
     >
       <div className="h-2.5 w-1/3 bg-[var(--color-border-light)] animate-pulse mb-3" />
@@ -64,7 +64,7 @@ export default function ProjectsGrid({
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
         <WidgetSkeleton />
         <WidgetSkeleton />
         <WidgetSkeleton big />
@@ -77,7 +77,7 @@ export default function ProjectsGrid({
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
       {projects.map((project) => (
         <WidgetCard key={project.id} project={project} />
       ))}

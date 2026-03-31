@@ -4,8 +4,8 @@ export default function WidgetPlaceholder({ project }: { project: ProjectData })
   const isBig = project.featured;
 
   return (
-    <div className="p-4 h-full flex flex-col">
-      <span className="type-label text-[var(--color-text-secondary)] text-[10px] mb-2">
+    <div className="p-8 lg:p-10 h-full flex flex-col">
+      <span className="type-label font-bold text-[var(--color-text-secondary)] mb-3">
         {project.title}
       </span>
       {isBig ? (
@@ -20,7 +20,7 @@ export default function WidgetPlaceholder({ project }: { project: ProjectData })
             ))}
           </div>
           {project.description && (
-            <p className="type-caption text-[var(--color-text-secondary)] mt-2 line-clamp-1">
+            <p className="type-body-sm text-[var(--color-text-secondary)] mt-3 line-clamp-1">
               {project.description}
             </p>
           )}

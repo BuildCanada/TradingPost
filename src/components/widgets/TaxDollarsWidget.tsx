@@ -1,16 +1,17 @@
 "use client";
 
 import { WidgetProps } from "./types";
+import WidgetHeader from "./WidgetHeader";
 
 const income = 100000;
 
 const segments = [
-  { label: "Take Home", amount: 72592, color: "#d1d5db" },
-  { label: "Federal Income Tax", amount: 14719, color: "#3b82f6" },
-  { label: "CPP / CPP2", amount: 4430, color: "#6366f1" },
-  { label: "EI", amount: 1077, color: "#8b5cf6" },
-  { label: "Provincial Income Tax", amount: 6338, color: "#f59e0b" },
-  { label: "ON Surtax + Health", amount: 844, color: "#f97316" },
+  { label: "Take Home", amount: 72592, color: "var(--color-charcoal-200)" },
+  { label: "Federal Income Tax", amount: 14719, color: "var(--color-lake-500)" },
+  { label: "CPP / CPP2", amount: 4430, color: "var(--color-lake-600)" },
+  { label: "EI", amount: 1077, color: "var(--color-lake-700)" },
+  { label: "Provincial Income Tax", amount: 6338, color: "var(--color-copper-500)" },
+  { label: "ON Surtax + Health", amount: 844, color: "var(--color-copper-600)" },
 ];
 
 function DonutChart() {
@@ -21,7 +22,7 @@ function DonutChart() {
   let offset = 0;
 
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="shrink-0">
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="shrink-0" aria-hidden="true">
       {segments.map((seg) => {
         const pct = seg.amount / income;
         const dash = pct * circumference;
@@ -48,7 +49,7 @@ function DonutChart() {
         y={size / 2 - 3}
         textAnchor="middle"
         dominantBaseline="central"
-        style={{ fontSize: "13px", fontWeight: 700, fill: "#1e293b", fontFamily: "system-ui, sans-serif" }}
+        style={{ fontSize: "13px", fontWeight: 700, fill: "var(--color-charcoal-1000)", fontFamily: "var(--font-label)" }}
       >
         $72.6K
       </text>
@@ -57,7 +58,7 @@ function DonutChart() {
         y={size / 2 + 10}
         textAnchor="middle"
         dominantBaseline="central"
-        style={{ fontSize: "8px", fill: "#64748b", fontFamily: "system-ui, sans-serif" }}
+        style={{ fontSize: "8px", fill: "var(--color-steel-500)", fontFamily: "var(--font-label)" }}
       >
         take home
       </text>
@@ -67,46 +68,33 @@ function DonutChart() {
 
 export default function TaxDollarsWidget({ project }: WidgetProps) {
   return (
-    <div className="p-4 h-full flex flex-col gap-3">
-      {/* Widget title */}
-      <div>
-        <span className="type-label font-bold text-[10px] text-[var(--color-text-secondary)]">
-          {project.title}
-        </span>
-        {project.description && (
-          <p className="type-caption text-[var(--color-text-secondary)] mt-0.5">
-            {project.description}
-          </p>
-        )}
-      </div>
+    <div className="p-8 lg:p-10 h-full flex flex-col gap-4">
+      <WidgetHeader project={project} />
 
-      {/* Content container */}
-      <div className="flex-1 bg-white rounded-xl border border-[#e5e7eb] flex flex-col gap-3 px-5 py-4">
-        <div className="flex-1 flex items-center gap-3.5">
-          <DonutChart />
+      <div className="flex-1 flex items-center gap-4">
+        <DonutChart />
 
-          <div className="flex flex-col gap-[3px] min-w-0 flex-1">
-            {segments.map((seg) => (
-              <div key={seg.label} className="flex items-center gap-1.5">
-                <span
-                  className="w-[7px] h-[7px] rounded-[2px] shrink-0"
-                  style={{ backgroundColor: seg.color }}
-                />
-                <span className="text-[10px] font-mono text-[var(--color-text-secondary)] truncate">
-                  {seg.label}
-                </span>
-                <span className="text-[10px] font-mono font-bold text-[var(--color-dark)] ml-auto shrink-0">
-                  ${seg.amount.toLocaleString()}
-                </span>
-              </div>
-            ))}
-          </div>
+        <div className="flex flex-col gap-1 min-w-0 flex-1">
+          {segments.map((seg) => (
+            <div key={seg.label} className="flex items-center gap-1.5">
+              <span
+                className="w-[7px] h-[7px] rounded-[2px] shrink-0"
+                style={{ backgroundColor: seg.color }}
+              />
+              <span className="type-mono-sm text-[var(--color-text-secondary)] truncate">
+                {seg.label}
+              </span>
+              <span className="type-mono-sm font-bold text-[var(--color-dark)] ml-auto shrink-0">
+                ${seg.amount.toLocaleString()}
+              </span>
+            </div>
+          ))}
         </div>
-
-        <p className="text-[9px] font-mono text-[var(--color-text-secondary)] opacity-60 text-right">
-          ON resident &middot; $100K income &middot; 2025
-        </p>
       </div>
+
+      <p className="type-mono-sm text-[var(--color-text-secondary)] opacity-60 text-right">
+        ON resident &middot; $100K income &middot; 2025
+      </p>
     </div>
   );
 }

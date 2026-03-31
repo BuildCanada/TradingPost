@@ -116,9 +116,9 @@ export default async function MemoDetailPage({
       <RelatedMemos category={memo.category} currentSlug={memo.slug} />
       {memo.twitterEmbed && (
         <div>
-          <span className="type-label text-text-secondary block mb-3">
+          <h2 className="type-label text-text-secondary block mb-3 m-0">
             Embedded Post
-          </span>
+          </h2>
           <TwitterEmbed html={memo.twitterEmbed} />
         </div>
       )}

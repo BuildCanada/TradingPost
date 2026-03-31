@@ -6,6 +6,7 @@ import OurStoryBlock from "./OurStoryBlock";
 import PlatformBlock from "./PlatformBlock";
 import TeamBlock from "./TeamBlock";
 import QnaBlock from "./QnaBlock";
+import { buildGraph, createOrganization, createFAQPage, type FAQItem } from "@/lib/schemas";
 
 export const dynamic = "force-dynamic";
 
@@ -15,8 +16,36 @@ export default async function AboutPage() {
     prisma.testimonial.findMany({ orderBy: { order: "asc" } }).catch(() => []),
   ]);
 
+  const qnaItems: FAQItem[] = [
+    {
+      question: "Is Build Canada affiliated with a political party?",
+      answer: "No. Build Canada is non-partisan. Our work is driven by one question: how do we make Canada the most prosperous country in the world?",
+    },
+    {
+      question: "How is Build Canada funded?",
+      answer: "We're a federally incorporated non-profit organization funded by over 60 individual donors who believe in building a stronger country. We don't accept government grants or public funding, which keeps us independent.",
+    },
+    {
+      question: "Is Build Canada a lobby group?",
+      answer: "No. We produce research, build community among Canadian founders and operators, and share policy ideas in public.",
+    },
+    {
+      question: "Do you support a specific policy platform?",
+      answer: "We champion ideas that make Canada a better place to build and grow our economy — whether that means tax reform, talent retention, infrastructure investment, or regulatory modernization. If you want to learn more about where we stand and our latest ideas, follow along with our content — we're always publishing new ideas and perspectives from builders across the country.",
+    },
+  ];
+
+  const jsonLd = buildGraph(
+    createOrganization(),
+    createFAQPage(qnaItems)
+  );
+
   return (
     <div className="mx-[10px] my-[10px] border border-[var(--color-border-light)] bg-[var(--color-bg)] overflow-x-clip">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <section className="relative px-5 min-h-[280px] md:min-h-[420px] flex items-center border-b border-[var(--color-border-light)] overflow-hidden bg-[#3a3a3a]">
         <Image
           src="/assets/images/canadian-pacific-railway-rocky-mountains.webp"

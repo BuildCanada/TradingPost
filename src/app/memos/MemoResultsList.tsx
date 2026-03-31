@@ -1,10 +1,73 @@
 "use client";
 
 import { useMemo } from "react";
+import Link from "next/link";
+import Image from "next/image";
 import SectionLabel from "@/components/SectionLabel";
 import { useMemosFilter } from "./store";
-import { MemoItem } from "./types";
-import { MemoCard } from "@/components/ui/memo-card";
+import { MemoItem, formatDate, shortenName } from "./types";
+
+function MemoGridRow({ memo }: { memo: MemoItem }) {
+  return (
+    <Link
+      href={`/memos/${memo.slug}`}
+      className="flex items-start gap-4 p-5 border-b border-r border-border-light group hover:bg-linen-50 transition-colors"
+    >
+      <div
+        className="w-10 h-10 bg-border-light shrink-0 overflow-hidden mt-0.5"
+        style={{ borderRadius: "2px" }}
+      >
+        {memo.authorImage && (
+          <Image
+            src={memo.authorImage}
+            alt={memo.author}
+            width={40}
+            height={40}
+            className="w-full h-full object-cover"
+            unoptimized
+          />
+        )}
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <h3 className="type-h4 group-hover:text-accent transition-colors line-clamp-1">
+          {memo.title}
+        </h3>
+        <div className="flex items-center gap-2 mt-1">
+          <p className="type-label text-text-secondary">
+            <span className="hidden wide:inline">{memo.author}</span>
+            <span className="wide:hidden">
+              {shortenName(memo.author)}
+            </span>
+          </p>
+          <span className="text-text-secondary">&middot;</span>
+          <p className="type-label-sm text-text-secondary">
+            {formatDate(memo.publishedAt, memo.createdAt)}
+          </p>
+        </div>
+        <p className="type-caption text-text-secondary mt-1.5 line-clamp-2">
+          {memo.keyMessage1}
+        </p>
+      </div>
+
+      <svg
+        width="14"
+        height="14"
+        viewBox="0 0 14 14"
+        fill="none"
+        className="shrink-0 mt-1.5 text-text-muted group-hover:text-accent transition-colors"
+      >
+        <path
+          d="M2 7h9M8 3l4 4-4 4"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </Link>
+  );
+}
 
 export default function MemoResultsList({ memos }: { memos: MemoItem[] }) {
   const search = useMemosFilter((s) => s.search);
@@ -48,9 +111,9 @@ export default function MemoResultsList({ memos }: { memos: MemoItem[] }) {
                 : "No memos match your filters."}
             </p>
           )}
-          <div className="grid grid-cols-1 cards:grid-cols-2 wide:grid-cols-3 border-t border-border-light mt-4">
+          <div className="grid grid-cols-1 wide:grid-cols-2 wide:gap-x-0 border-t border-l border-border-light mt-4">
             {filtered.slice(0, visibleCount).map((memo) => (
-              <MemoCard key={memo.id} memo={memo} variant="light" gridItem />
+              <MemoGridRow key={memo.id} memo={memo} />
             ))}
           </div>
           {visibleCount < filtered.length && (

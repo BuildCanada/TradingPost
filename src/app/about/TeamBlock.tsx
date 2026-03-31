@@ -10,21 +10,23 @@ const roleGroups = [
 
 function TeamMemberCard({ m }: { m: TeamMember }) {
   return (
-    <div className="flex flex-col items-center text-center gap-0.5 border border-[var(--color-border-light)] -ml-px -mt-px p-4">
+    <div className="flex flex-col items-center text-center gap-0.5 border border-border-light -ml-px -mt-px p-4">
       {m.photo ? (
         <Image
           src={m.photo}
           alt={m.name}
           width={80}
           height={80}
-          className="w-[80px] h-[80px] object-cover border border-[var(--color-border-light)] mb-1.5"
+          className="w-[80px] h-[80px] object-cover border border-border-light mb-1.5"
         />
       ) : (
-        <div className="w-[80px] h-[80px] bg-[var(--color-border-light)] border border-[var(--color-border-light)] mb-1.5" />
+        <div className="w-[80px] h-[80px] bg-border-light/30 border border-border-light mb-1.5 flex items-center justify-center">
+          <div className="w-[32px] h-[32px] opacity-20" style={{ backgroundColor: "currentColor", maskImage: "url(/assets/icons/newmapleleaf.svg)", maskSize: "contain", maskRepeat: "no-repeat", maskPosition: "center", WebkitMaskImage: "url(/assets/icons/newmapleleaf.svg)", WebkitMaskSize: "contain", WebkitMaskRepeat: "no-repeat", WebkitMaskPosition: "center" }} />
+        </div>
       )}
       <div>
-        <p className="type-heading text-[15px] leading-tight">{m.name}</p>
-        <p className="type-caption text-[var(--color-text-secondary)] mt-0.5">{m.title}</p>
+        <p className="type-h4 leading-tight">{m.name}</p>
+        <p className="type-body-sm text-text-secondary mt-0.5">{m.title}</p>
       </div>
       {(m.xUrl || m.linkedinUrl) && (
         <div className="flex items-center gap-0.5">
@@ -64,7 +66,7 @@ function TeamMemberCard({ m }: { m: TeamMember }) {
 
 export default function TeamBlock({ members }: { members: TeamMember[] }) {
   return (
-    <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px] border-b border-[var(--color-border-light)]">
+    <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px] border-b border-border-light">
       <div className="max-w-[1080px] mx-auto">
         <SectionLabel as="h2">Team</SectionLabel>
         <div className="mt-4 space-y-10">
@@ -73,7 +75,7 @@ export default function TeamBlock({ members }: { members: TeamMember[] }) {
             if (group.length === 0) return null;
             return (
               <div key={key}>
-                <h3 className="type-heading text-[14px] text-[var(--color-text-secondary)] mb-4">{label}</h3>
+                <h3 className="type-label text-text-secondary mb-4">{label}</h3>
                 <div className="flex flex-wrap pl-px pt-px">
                   {group.map((m) => (
                     <div

@@ -10,18 +10,18 @@ const roleGroups = [
 
 function TeamMemberCard({ m }: { m: TeamMember }) {
   return (
-    <div className="flex flex-col items-center text-center gap-0.5 border border-border-light -ml-px -mt-px p-4">
+    <div className="flex flex-col items-start gap-1 border border-border-light -ml-px -mt-px p-6">
       {m.photo ? (
         <Image
           src={m.photo}
           alt={m.name}
-          width={80}
-          height={80}
-          className="w-[80px] h-[80px] object-cover border border-border-light mb-1.5"
+          width={160}
+          height={160}
+          className="w-[160px] h-[160px] object-cover border border-border-light mb-2"
         />
       ) : (
-        <div className="w-[80px] h-[80px] bg-border-light/30 border border-border-light mb-1.5 flex items-center justify-center">
-          <div className="w-[32px] h-[32px] opacity-20" style={{ backgroundColor: "currentColor", maskImage: "url(/assets/icons/newmapleleaf.svg)", maskSize: "contain", maskRepeat: "no-repeat", maskPosition: "center", WebkitMaskImage: "url(/assets/icons/newmapleleaf.svg)", WebkitMaskSize: "contain", WebkitMaskRepeat: "no-repeat", WebkitMaskPosition: "center" }} />
+        <div className="w-[160px] h-[160px] bg-border-light/30 border border-border-light mb-2 flex items-center justify-center">
+          <div className="w-[64px] h-[64px] opacity-20" style={{ backgroundColor: "currentColor", maskImage: "url(/assets/icons/newmapleleaf.svg)", maskSize: "contain", maskRepeat: "no-repeat", maskPosition: "center", WebkitMaskImage: "url(/assets/icons/newmapleleaf.svg)", WebkitMaskSize: "contain", WebkitMaskRepeat: "no-repeat", WebkitMaskPosition: "center" }} />
         </div>
       )}
       <div>
@@ -80,7 +80,7 @@ export default function TeamBlock({ members }: { members: TeamMember[] }) {
                   {group.map((m) => (
                     <div
                       key={m.id}
-                      className="basis-1/2 sm:basis-1/3 md:basis-1/4 lg:basis-1/5 flex-grow"
+                      className="basis-1/2 sm:basis-1/3 md:basis-1/4 flex-grow"
                     >
                       <TeamMemberCard m={m} />
                     </div>

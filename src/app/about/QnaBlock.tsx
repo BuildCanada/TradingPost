@@ -1,11 +1,13 @@
 "use client";
 
+import { useState } from "react";
 import SectionLabel from "@/components/SectionLabel";
 import {
   Accordion,
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
+  AccordionChevron,
 } from "@/components/ui/accordion";
 
 const qnaItems = [
@@ -32,39 +34,49 @@ const qnaItems = [
 ];
 
 export default function QnaBlock() {
+  const [openValue, setOpenValue] = useState<string[]>([]);
+
   return (
-    <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px] border-b border-[var(--color-border-light)]">
+    <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px] border-b border-border-light">
       <div className="max-w-[1080px] mx-auto">
         <SectionLabel as="h2">Q&amp;A</SectionLabel>
-        <div className="mt-2">
-          <Accordion>
-            {qnaItems.map((item, i) => (
-              <AccordionItem
-                key={i}
-                value={`qna-${i}`}
-                className="py-3 border-b border-[var(--color-border-light)] last:border-b-0"
-              >
-                <AccordionTrigger
-                  className="[&_[data-slot=accordion-trigger-icon]]:hidden w-full flex items-center justify-between gap-3 text-left cursor-pointer group rounded-none border-transparent py-0 hover:no-underline"
+        <div className="mt-4 border border-border-light">
+          <Accordion value={openValue} onValueChange={setOpenValue}>
+            {qnaItems.map((item, i) => {
+              const value = `qna-${i}`;
+              const isOpen = openValue.includes(value);
+
+              return (
+                <AccordionItem
+                  key={i}
+                  value={value}
+                  className="border-b-0 p-6"
                 >
-                  <span className="type-heading text-[15px] text-[var(--color-dark)] group-hover:opacity-70 transition-opacity">
-                    {item.question}
-                  </span>
-                  <span className="w-[18px] h-[18px] border border-[var(--color-border-light)] flex items-center justify-center text-[12px] text-[var(--color-text-muted)] shrink-0 transition-colors group-hover:border-[var(--color-dark)]">
-                    <span className="qna-open">+</span>
-                    <span className="qna-close hidden">\u2212</span>
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent
-                  panelClassName="accordion-expand"
-                  className="overflow-hidden"
-                >
-                  <p className="type-body text-[var(--color-dark)] pt-2 leading-relaxed">
-                    {item.answer}
-                  </p>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
+                  <AccordionTrigger
+                    className="[&_[data-slot=accordion-trigger-icon]]:hidden flex items-center justify-between cursor-pointer group w-full text-left h-[44px] px-3 transition-colors rounded-none border-transparent hover:no-underline py-0 [&]:bg-transparent"
+                  >
+                    <h3
+                      className={`type-h2 transition-colors duration-200 ${
+                        isOpen ? "text-accent" : "text-dark group-hover:text-accent"
+                      }`}
+                    >
+                      {item.question}
+                    </h3>
+                    <AccordionChevron isOpen={isOpen} />
+                  </AccordionTrigger>
+                  <AccordionContent
+                    panelClassName="accordion-expand"
+                    className="overflow-hidden"
+                  >
+                    <div className="mt-4">
+                      <p className="type-body text-dark leading-relaxed">
+                        {item.answer}
+                      </p>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            })}
           </Accordion>
         </div>
       </div>

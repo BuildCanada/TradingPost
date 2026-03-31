@@ -7,6 +7,9 @@ import {
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
+  AccordionIconCircle,
+  AccordionChevron,
+  AccordionBulletList,
 } from "@/components/ui/accordion";
 
 const platformItems = [
@@ -77,28 +80,7 @@ export default function PlatformBlock() {
                 <AccordionItem key={item.title} value={item.title} className="border-b-0 p-6">
                   <div className="flex gap-4">
                     <div className="flex flex-col items-center">
-                      <div
-                        className={`w-[36px] h-[36px] mt-1 rounded-full border-2 flex items-center justify-center shrink-0 transition-all duration-200 ${
-                          isOpen
-                            ? "bg-accent border-accent text-bg"
-                            : "bg-bg border-border-light text-text-secondary hover:border-accent hover:text-accent"
-                        }`}
-                      >
-                        <div
-                          className="w-[16px] h-[16px]"
-                          style={{
-                            backgroundColor: "currentColor",
-                            maskImage: `url(${item.icon})`,
-                            maskSize: "contain",
-                            maskRepeat: "no-repeat",
-                            maskPosition: "center",
-                            WebkitMaskImage: `url(${item.icon})`,
-                            WebkitMaskSize: "contain",
-                            WebkitMaskRepeat: "no-repeat",
-                            WebkitMaskPosition: "center",
-                          }}
-                        />
-                      </div>
+                      <AccordionIconCircle icon={item.icon} isOpen={isOpen} />
                     </div>
 
                     <div className="flex-1">
@@ -112,13 +94,7 @@ export default function PlatformBlock() {
                         >
                           {item.title}
                         </h3>
-                        <span
-                          className={`story-chevron transition-transform duration-200 ${
-                            isOpen ? "text-accent" : "text-text-secondary"
-                          }`}
-                        >
-                          &#x25BE;
-                        </span>
+                        <AccordionChevron isOpen={isOpen} />
                       </AccordionTrigger>
                       <AccordionContent
                         panelClassName="accordion-expand"
@@ -128,14 +104,7 @@ export default function PlatformBlock() {
                           <p className="type-body text-dark leading-relaxed">
                             {item.expandedHeader}
                           </p>
-                          <ul className="space-y-2 mt-3">
-                            {item.expandedBullets.map((bullet, j) => (
-                              <li key={j} className="type-body text-dark flex items-start gap-2">
-                                <span className="mt-[clamp(0.75rem,0.75rem+0.25vw,1rem)] w-[5px] h-[5px] rounded-full shrink-0 bg-accent" />
-                                {bullet}
-                              </li>
-                            ))}
-                          </ul>
+                          <AccordionBulletList items={item.expandedBullets} />
                         </div>
                       </AccordionContent>
                     </div>

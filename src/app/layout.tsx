@@ -23,7 +23,7 @@ export const metadata: Metadata = {
     description: "Canada's Voice for Builders.",
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     site: "@build_canada",
   },
   robots: {

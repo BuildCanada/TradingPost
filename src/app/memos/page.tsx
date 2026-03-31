@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     type: "website",
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "Memos",
     description:
       "Bold thinking from Canada's builders, reformers, and leaders.",
@@ -55,10 +55,9 @@ export default async function MemosPage() {
   }));
 
   return (
-    <div className="mx-[10px] my-[10px] border border-[var(--color-border-light)] bg-[var(--color-bg)]">
-      {/* Statement — server-rendered for SEO */}
+    <div className="mx-[10px] my-[10px] border border-border-light bg-bg">
       <div className="animate-fade-in" style={{ animationDelay: "0s" }}>
-        <section className="relative px-5 border-b border-[var(--color-border-light)] overflow-hidden">
+        <section className="relative px-5 border-b border-border-light overflow-hidden">
           <Image
             src="/assets/images/build-canada-founder-meetup-shopify.webp"
             alt="Harley Finkelstein and Lucy Hargreaves speaking at Shopify HQ on Build Canada and the future of Canada"

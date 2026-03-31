@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     type: "website",
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "About",
     description:
       "Build Canada exists to platform the bold.",

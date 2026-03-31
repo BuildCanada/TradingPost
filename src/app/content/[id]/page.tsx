@@ -31,7 +31,7 @@ export async function generateMetadata({
       ...(item.image && { images: [{ url: item.image }] }),
     },
     twitter: {
-      card: item.image ? "summary_large_image" : "summary",
+      card: "summary_large_image",
       title,
       description,
       ...(item.image && { images: [item.image] }),

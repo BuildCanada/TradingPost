@@ -165,7 +165,7 @@ export default function OurStoryBlock() {
   return (
     <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px] border-b border-[var(--color-border-light)]">
       <div className="max-w-[1080px] mx-auto">
-        <SectionLabel>Our Story</SectionLabel>
+        <SectionLabel as="h2">Our Story</SectionLabel>
         <div className="mt-4">
             <Accordion value={openValue} onValueChange={setOpenValue}>
             {storyItems.map((item, i) => {

@@ -708,6 +708,7 @@ export default function AdminPage() {
 
   return (
     <div className="max-w-4xl mx-auto py-10 px-5">
+      <h1 className="text-xl font-bold m-0 mb-6">Admin Dashboard</h1>
       {/* Backup & Restore controls */}
       <div className="border border-gray-200 rounded mb-6 bg-gray-50">
         <button

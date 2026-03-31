@@ -168,27 +168,19 @@ export default function OurStoryBlock() {
     <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px] border-b border-border-light">
       <div className="max-w-[1080px] mx-auto">
         <SectionLabel as="h2">Our Story</SectionLabel>
-        <div className="mt-4">
+        <div className="mt-4 border border-border-light">
           <Accordion value={openValue} onValueChange={setOpenValue}>
-            {storyItems.map((item, i) => {
+            {storyItems.map((item) => {
               const isOpen = openValue.includes(item.key);
-              const isLast = i === storyItems.length - 1;
 
               return (
-                <AccordionItem key={item.key} value={item.key} className="border-b-0">
+                <AccordionItem key={item.key} value={item.key} className="border-b-0 p-6">
                   <div className="flex gap-4">
                     <div className="flex flex-col items-center">
                       <AccordionIconCircle icon={item.icon} isOpen={isOpen} />
-                      {!isLast && (
-                        <div
-                          className={`w-[2px] flex-1 rounded-full transition-colors duration-300 mt-1.5 mb-1.5 ${
-                            isOpen ? "bg-accent" : "bg-border-light"
-                          }`}
-                        />
-                      )}
                     </div>
 
-                    <div className={`flex-1 ${isLast ? "" : "pb-5"}`}>
+                    <div className="flex-1">
                       <AccordionTrigger
                         className="[&_[data-slot=accordion-trigger-icon]]:hidden flex items-center justify-between cursor-pointer group w-full text-left h-[44px] px-3 transition-colors rounded-none border-transparent hover:no-underline py-0 [&]:bg-transparent"
                       >

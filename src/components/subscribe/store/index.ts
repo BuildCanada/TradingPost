@@ -5,9 +5,9 @@ interface SubscribeState {
   isOpen: boolean;
   subscribed: boolean;
   dismissed: number | null;
-  triggerSource: "navbar" | "exit-intent" | "inline" | null;
+  triggerSource: "navbar" | "exit-intent" | "footer" | "inline" | null;
 
-  openModal: (source: "navbar" | "exit-intent") => void;
+  openModal: (source: "navbar" | "exit-intent" | "footer") => void;
   closeModal: () => void;
   setSubscribed: () => void;
   setDismissed: () => void;

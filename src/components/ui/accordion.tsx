@@ -75,4 +75,56 @@ function AccordionContent({
   )
 }
 
-export { Accordion, AccordionItem, AccordionTrigger, AccordionContent }
+function AccordionIconCircle({ icon, isOpen }: { icon: string; isOpen: boolean }) {
+  return (
+    <div
+      className={`w-[36px] h-[36px] mt-1 rounded-full border-2 flex items-center justify-center shrink-0 transition-all duration-200 ${
+        isOpen
+          ? "bg-accent border-accent text-bg"
+          : "bg-bg border-border-light text-text-secondary hover:border-accent hover:text-accent"
+      }`}
+    >
+      <div
+        className="w-[16px] h-[16px]"
+        style={{
+          backgroundColor: "currentColor",
+          maskImage: `url(${icon})`,
+          maskSize: "contain",
+          maskRepeat: "no-repeat",
+          maskPosition: "center",
+          WebkitMaskImage: `url(${icon})`,
+          WebkitMaskSize: "contain",
+          WebkitMaskRepeat: "no-repeat",
+          WebkitMaskPosition: "center",
+        }}
+      />
+    </div>
+  )
+}
+
+function AccordionChevron({ isOpen }: { isOpen: boolean }) {
+  return (
+    <span
+      className={`story-chevron transition-transform duration-200 ${
+        isOpen ? "text-accent" : "text-text-secondary"
+      }`}
+    >
+      &#x25BE;
+    </span>
+  )
+}
+
+function AccordionBulletList({ items }: { items: string[] }) {
+  return (
+    <ul className="space-y-2 mt-3">
+      {items.map((text, i) => (
+        <li key={i} className="type-body text-dark flex items-start gap-2">
+          <span className="mt-[clamp(0.75rem,0.75rem+0.25vw,1rem)] w-[5px] h-[5px] rounded-full shrink-0 bg-accent" />
+          {text}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+export { Accordion, AccordionItem, AccordionTrigger, AccordionContent, AccordionIconCircle, AccordionChevron, AccordionBulletList }

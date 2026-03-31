@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import SectionLabel from "@/components/SectionLabel";
 import {
@@ -18,22 +18,64 @@ const firstMemos = [
   { title: "Use Industrial Policy to Claim Canada's Place in Space", slug: "claim-space", author: "Mina Mitry" },
 ];
 
-function TwitterEmbed() {
+function TwitterEmbedLazy({ visible }: { visible: boolean }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [mounted, setMounted] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
   useEffect(() => {
+    if (visible && !mounted) {
+      setMounted(true);
+    }
+  }, [visible, mounted]);
+
+  useEffect(() => {
+    if (!visible || !mounted || !ref.current) return;
+
+    setLoaded(false);
+
+    const load = () => {
+      const win = window as unknown as Record<string, unknown>;
+      const twttr = win.twttr as { widgets: { load: (el: HTMLElement) => void } } | undefined;
+      if (twttr?.widgets) {
+        twttr.widgets.load(ref.current!);
+      }
+    };
+
+    const observer = new MutationObserver(() => {
+      if (ref.current?.querySelector("iframe")) {
+        setLoaded(true);
+        observer.disconnect();
+      }
+    });
+    observer.observe(ref.current, { childList: true, subtree: true });
+
     if (!document.querySelector('script[src="https://platform.twitter.com/widgets.js"]')) {
       const s = document.createElement("script");
       s.src = "https://platform.twitter.com/widgets.js";
       s.async = true;
+      s.onload = load;
       document.body.appendChild(s);
+    } else {
+      load();
     }
-  }, []);
+
+    return () => observer.disconnect();
+  }, [visible, mounted]);
+
+  if (!mounted) return null;
 
   return (
-    <div className="max-w-[480px]">
-      <blockquote className="twitter-tweet" data-theme="light">
-        <p lang="en" dir="ltr">Canada is a Nation of Builders 🇨🇦🏗️ <a href="https://t.co/DCud9QpINW">pic.twitter.com/DCud9QpINW</a></p>
-        &mdash; Build Canada (@build_canada) <a href="https://twitter.com/build_canada/status/1996331071885992086">December 3, 2025</a>
-      </blockquote>
+    <div ref={ref} className="max-w-[480px] relative">
+      {!loaded && (
+        <div className="w-[426px] h-[459px] rounded-lg border border-border-light bg-bg animate-pulse" />
+      )}
+      <div className={loaded ? "" : "sr-only"}>
+        <blockquote className="twitter-tweet" data-theme="light">
+          <p lang="en" dir="ltr">Canada is a Nation of Builders 🇨🇦🏗️ <a href="https://t.co/DCud9QpINW">pic.twitter.com/DCud9QpINW</a></p>
+          &mdash; Build Canada (@build_canada) <a href="https://twitter.com/build_canada/status/1996331071885992086">December 3, 2025</a>
+        </blockquote>
+      </div>
     </div>
   );
 }
@@ -156,13 +198,6 @@ const socialLinks = [
 
 export default function OurStoryBlock() {
   const [openValue, setOpenValue] = useState<string[]>([]);
-  const [twitterLoaded, setTwitterLoaded] = useState(false);
-
-  useEffect(() => {
-    if (openValue.includes("culture") && !twitterLoaded) {
-      setTwitterLoaded(true);
-    }
-  }, [openValue, twitterLoaded]);
 
   return (
     <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px] border-b border-border-light">
@@ -205,7 +240,7 @@ export default function OurStoryBlock() {
                                 Policy alone won&apos;t fix Canada — culture has to shift too. We&apos;re working to rebuild a national identity rooted in ambition, competence, and urgency. That means celebrating builders, challenging complacency, and making it unacceptable to settle for mediocrity. We are a nation of Builders, after all.
                               </p>
 
-                              {twitterLoaded && <TwitterEmbed />}
+                              <TwitterEmbedLazy visible={isOpen} />
 
                               <div className="flex items-center gap-3 pt-1">
                                 <p className="type-label-sm text-dark">Follow us on socials:</p>

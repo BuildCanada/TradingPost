@@ -68,7 +68,7 @@ export default function QnaBlock() {
                     panelClassName="accordion-expand"
                     className="overflow-hidden"
                   >
-                    <div className="mt-4">
+                    <div className="mt-4 px-3">
                       <p className="type-body text-dark leading-relaxed">
                         {item.answer}
                       </p>

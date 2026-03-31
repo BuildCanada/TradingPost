@@ -80,7 +80,7 @@ export default function TeamBlock({ members }: { members: TeamMember[] }) {
                   {group.map((m) => (
                     <div
                       key={m.id}
-                      className="basis-1/2 sm:basis-1/3 md:basis-1/4 flex-grow"
+                      className="basis-1/2 sm:basis-1/3 lg:basis-1/4 flex-grow"
                     >
                       <TeamMemberCard m={m} />
                     </div>

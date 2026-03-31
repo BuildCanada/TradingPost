@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import SectionLabel from "@/components/SectionLabel";
 import { useMemosFilter } from "./store";
 import { MemoItem } from "./types";
-import MemoListItem from "./MemoListItem";
+import { MemoCard } from "@/components/ui/memo-card";
 
 export default function MemoResultsList({ memos }: { memos: MemoItem[] }) {
   const search = useMemosFilter((s) => s.search);
@@ -48,9 +48,9 @@ export default function MemoResultsList({ memos }: { memos: MemoItem[] }) {
                 : "No memos match your filters."}
             </p>
           )}
-          <div className="grid grid-cols-1 wide:grid-cols-2 wide:gap-x-6">
+          <div className="grid grid-cols-1 cards:grid-cols-2 wide:grid-cols-3 border-t border-border-light mt-4">
             {filtered.slice(0, visibleCount).map((memo) => (
-              <MemoListItem key={memo.id} memo={memo} />
+              <MemoCard key={memo.id} memo={memo} variant="light" gridItem />
             ))}
           </div>
           {visibleCount < filtered.length && (

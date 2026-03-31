@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Prevent CSS vars in Tailwind arbitrary values
+# e.g. text-[var(--color-text)] should use design tokens instead
+
+STAGED=$(git diff --cached --name-only --diff-filter=ACM -- '*.tsx' '*.ts')
+
+if [ -z "$STAGED" ]; then
+  exit 0
+fi
+
+echo "$STAGED" | xargs rg -e '[a-z]+-\[var\(--' 2>/dev/null
+
+if [ $? -eq 0 ]; then
+  echo ""
+  echo "FAIL: Inline CSS vars in Tailwind detected in staged files."
+  echo "Use design tokens instead of -[var(--color-*)]."
+  echo "Run: npm run lint:tokens"
+  exit 1
+fi

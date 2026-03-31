@@ -291,7 +291,7 @@ function GreatBuildersSection() {
   return (
     <section className="px-5 pt-[26px] pb-[36px] border-b border-[var(--color-border-light)]">
       <div className="max-w-[1080px] mx-auto">
-        <SectionLabel>Great Canadian Builders</SectionLabel>
+        <SectionLabel as="h2">Great Canadian Builders</SectionLabel>
         <div className="border border-[var(--color-border-light)]">
           <GreatBuildersWidget project={BUILDERS_PROJECT} />
         </div>
@@ -400,14 +400,14 @@ export default function ContentFeed() {
           <div className="max-w-[1080px] mx-auto">
             {featuredItem && (
               <>
-                <SectionLabel>Featured</SectionLabel>
+                <SectionLabel as="h2">Featured</SectionLabel>
                 <FeaturedPost item={featuredItem} />
               </>
             )}
 
             {recentItems.length > 0 && (
               <>
-                <SectionLabel>Recent</SectionLabel>
+                <SectionLabel as="h2">Recent</SectionLabel>
                 <div className="grid grid-cols-2 gap-2.5 mb-2.5">
                   {recentItems.map((item) => (
                     <RecentCard key={item.id} item={item} />
@@ -425,7 +425,7 @@ export default function ContentFeed() {
               return (
                 <>
                   <div className="flex items-center">
-                    <SectionLabel>All Posts</SectionLabel>
+                    <SectionLabel as="h2">All Posts</SectionLabel>
                     <PaginationArrows page={page} totalPages={totalPages} onPrev={onPrev} onNext={onNext} />
                   </div>
                   {pageItems.map((item) => (

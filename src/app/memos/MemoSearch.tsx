@@ -39,7 +39,7 @@ export default function MemoSearch() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search memos..."
-              className="flex-1 bg-transparent type-caption outline-none placeholder:text-text-secondary"
+              className="flex-1 bg-transparent font-mono text-base tracking-normal outline-none placeholder:text-text-muted"
             />
             {search && (
               <button

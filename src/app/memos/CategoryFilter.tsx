@@ -19,22 +19,25 @@ export default function CategoryFilter({
       <div className="px-5 py-10 border-b border-border-light">
         <div className="max-w-[1080px] mx-auto">
           <SectionLabel as="h2">Category</SectionLabel>
-          <div className="border-t border-l border-border-light mt-4 grid grid-cols-3 wide:grid-cols-5">
+          <div role="group" aria-label="Filter memos by category" className="border-t border-l border-border-light mt-4 grid grid-cols-3 wide:grid-cols-5">
             {allCategories.map((cat) => {
               const isAll = cat === "All";
               const isActive = isAll ? activeCategory === null : activeCategory === cat;
+              const display = cat.replace(/-/g, " ");
               return (
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(isAll ? null : activeCategory === cat ? null : cat)}
+                  aria-pressed={isActive}
+                  aria-label={isAll ? "Show all categories" : `Filter by ${display}`}
                   className={cn(
-                    "border-b border-r border-border-light h-11 flex items-center justify-center type-label transition-colors",
+                    "border-b border-r border-border-light h-11 flex items-center justify-center type-label cursor-pointer transition-colors",
                     isActive
                       ? "bg-dark text-bg"
                       : "bg-transparent text-dark hover:bg-accent hover:text-bg"
                   )}
                 >
-                  {cat.replace(/-/g, " ")}
+                  {display}
                 </button>
               );
             })}

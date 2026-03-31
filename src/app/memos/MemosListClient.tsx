@@ -187,7 +187,7 @@ export default function MemosListClient({ memos }: { memos: MemoItem[] }) {
         <div className="animate-fade-in" style={{ animationDelay: "0.4s" }}>
           <section className="px-5 pt-[26px] pb-[36px] border-b border-[var(--color-border-light)]">
             <div className="max-w-[1080px] mx-auto">
-              <SectionLabel>Featured + Latest</SectionLabel>
+              <SectionLabel as="h2">Featured + Latest</SectionLabel>
               <div className="grid grid-cols-1 cards:grid-cols-[1.5fr_1fr] wide:grid-cols-[1.5fr_1fr_1fr] gap-2.5 mt-1">
                 <div className="relative h-full">
                   {featuredMemos[0] && (
@@ -277,7 +277,7 @@ export default function MemosListClient({ memos }: { memos: MemoItem[] }) {
       <div className="animate-fade-in" style={{ animationDelay: "1.2s" }}>
         <div className="px-5 pt-[24px] pb-[34px] border-b border-[var(--color-border-light)]">
           <div className="max-w-[900px] mx-auto">
-            <SectionLabel>Search</SectionLabel>
+            <SectionLabel as="h2">Search</SectionLabel>
             <div className="h-[38px] border border-[var(--color-border-light)] rounded flex items-center px-3 gap-2 mt-1 bg-[#fafafa]">
               <input
                 type="text"
@@ -316,7 +316,7 @@ export default function MemosListClient({ memos }: { memos: MemoItem[] }) {
       <div className="animate-fade-in" style={{ animationDelay: "1.6s" }}>
         <section className="px-5 pt-[24px] pb-[34px] border-b border-[var(--color-border-light)]">
           <div className="max-w-[900px] mx-auto">
-            <SectionLabel>
+            <SectionLabel as="h2">
               {activeCategory
                 ? `${activeCategory.replace(/-/g, " ")} Memos`
                 : "All Memos"}

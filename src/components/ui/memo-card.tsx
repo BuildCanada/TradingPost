@@ -163,7 +163,7 @@ export function MemoCard({
               {memo.title}
             </h3>
             {memo.keyMessage1 && (
-              <p className="font-body text-[1rem] lg:text-[1.125rem] leading-[1.5] text-bg/60 line-clamp-2 max-w-2xl">
+              <p className="type-body-sm text-bg/60 line-clamp-2 max-w-2xl">
                 {memo.keyMessage1}
               </p>
             )}
@@ -195,7 +195,7 @@ export function MemoCard({
               {memo.title}
             </h3>
             {memo.keyMessage1 && (
-              <p className="font-body text-[1rem] lg:text-[1.125rem] leading-[1.5] text-bg/70 line-clamp-3">
+              <p className="type-body-sm text-bg/70 line-clamp-3">
                 {memo.keyMessage1}
               </p>
             )}
@@ -211,7 +211,7 @@ export function MemoCard({
                 {memo.title}
               </h3>
               {memo.keyMessage1 && (
-                <p className="font-body text-[0.875rem] lg:text-[1rem] leading-[1.5] text-text-secondary mt-2 line-clamp-2">
+                <p className="type-caption text-text-secondary mt-2 line-clamp-2">
                   {memo.keyMessage1}
                 </p>
               )}

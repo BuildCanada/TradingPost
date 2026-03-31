@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
+import { cn } from "@/lib/utils";
 import FeaturedCard from "@/components/FeaturedCard";
 import PickCard from "@/components/PickCard";
 import { LinkButton } from "@/components/ui/link-button";
@@ -69,9 +70,9 @@ export default function FeaturedMemos({ heading, memos }: { heading?: string; me
 
   if (memos.length === 0) {
     return (
-      <section className="px-5 pt-[26px] pb-[36px] border-b border-border-light">
+      <section className="px-5 py-10 border-b border-border-light">
         <div className="max-w-[1080px] mx-auto">
-          <div className="flex items-center justify-between pb-1">
+          <div className="flex items-center justify-between">
             <span className="type-label font-bold text-text-secondary block">
               {heading || "Featured + Latest"}
             </span>
@@ -82,59 +83,55 @@ export default function FeaturedMemos({ heading, memos }: { heading?: string; me
   }
 
   return (
-    <section className="px-5 pt-[26px] pb-[36px] border-b border-border-light">
+    <section className="px-5 py-10 border-b border-border-light">
       <div className="max-w-[1080px] mx-auto">
-      <div className="flex items-center justify-between pb-1">
-        <span className="type-label font-bold text-text-secondary block">
-          {heading || "Featured + Latest"}
-        </span>
-        {heading && (
-          <LinkButton href="/memos"  variant="primary" className="hidden compact:flex">
-            See All Memos →
-          </LinkButton>
-        )}
-      </div>
-      <div className="grid grid-cols-1 cards:grid-cols-[1.5fr_1fr] wide:grid-cols-[1.5fr_2fr] gap-0 mt-1">
-        <div className="relative h-full border border-border-light">
+        <div className="flex items-center justify-between mb-6">
+          <span className="type-label font-bold text-text-secondary block">
+            {heading || "Featured + Latest"}
+          </span>
+          {heading && (
+            <LinkButton href="/memos" variant="primary" className="hidden compact:flex">
+              See All Memos →
+            </LinkButton>
+          )}
+        </div>
+        <div className="relative">
           {featuredMemos[0] && (
             <div
-              className="transition-opacity duration-300 h-full"
+              className="transition-opacity duration-300"
               style={{ opacity: isFading ? 0 : 1 }}
             >
-              <FeaturedCard memo={featuredMemos[activeIndex]} label="Featured" />
+              <FeaturedCard memo={featuredMemos[activeIndex]} label="Featured" wide />
             </div>
           )}
           {hasTwoFeatured && (
-            <div className="absolute top-3 right-3 z-20 flex gap-1.5">
+            <div className="absolute top-4 right-4 z-20 flex gap-1.5">
               {[0, 1].map((i) => (
                 <button
                   key={i}
                   onClick={() => switchTo(i)}
-                  className="h-[3px] w-5 transition-opacity duration-300"
-                  style={{
-                    backgroundColor: "var(--color-bg)",
-                    opacity: activeIndex === i ? 0.9 : 0.35,
-                  }}
+                  className={cn(
+                    "h-[3px] w-5 bg-bg transition-opacity duration-300",
+                    activeIndex === i ? "opacity-90" : "opacity-35"
+                  )}
                   aria-label={`Show featured memo ${i + 1}`}
                 />
               ))}
             </div>
           )}
         </div>
-        <div className="grid grid-cols-1 wide:grid-cols-2 wide:grid-rows-2 gap-0 border-t border-l border-border-light">
-          {latestFour.map((m, i) => (
-            <PickCard key={m.id} memo={m} isLatest={i === 0} />
-          ))}
-          {Array.from({ length: Math.max(0, 4 - latestFour.length) }).map((_, i) => (
-            <div key={`placeholder-${i}`} className="border-b border-r border-border-light min-h-[200px]" />
-          ))}
-        </div>
-      </div>
-      {heading && (
-        <LinkButton href="/memos" className="compact:hidden flex w-full justify-center mt-2.5">
-          See All Memos →
-        </LinkButton>
-      )}
+        {latestFour.length > 0 && (
+          <div className="grid grid-cols-1 cards:grid-cols-2 wide:grid-cols-4 gap-0 mt-6">
+            {latestFour.map((m, i) => (
+              <PickCard key={m.id} memo={m} isLatest={i === 0} />
+            ))}
+          </div>
+        )}
+        {heading && (
+          <LinkButton href="/memos" className="compact:hidden flex w-full justify-center mt-6">
+            See All Memos →
+          </LinkButton>
+        )}
       </div>
     </section>
   );

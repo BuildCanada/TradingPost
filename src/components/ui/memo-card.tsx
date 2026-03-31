@@ -62,10 +62,11 @@ function CardCTA({ variant = 'light' }: CardCTAProps) {
 
 interface MemoCardProps {
   memo: Memo;
-  variant?: 'light' | 'dark';
+  variant?: 'light' | 'dark' | 'featured';
   isLatest?: boolean;
   showLabel?: string;
   priority?: boolean;
+  gridItem?: boolean;
 }
 
 export function MemoCard({ 
@@ -73,46 +74,119 @@ export function MemoCard({
   variant = 'light', 
   isLatest = false,
   showLabel,
-  priority = false 
+  priority = false,
+  gridItem = false,
 }: MemoCardProps) {
-  const isDark = variant === 'dark';
-  
+  const isDark = variant === 'dark' || variant === 'featured';
+  const isFeatured = variant === 'featured';
+
+  const imageEl = isDark && (memo.splashImage || memo.seoImage) ? (
+    <div className="absolute inset-0 bg-dark">
+      <Image
+        src={memo.splashImage || memo.seoImage!}
+        alt=""
+        fill
+        className={cn(
+          "object-cover transition-opacity duration-500",
+          isFeatured ? "opacity-30 group-hover:opacity-40" : "opacity-40 group-hover:opacity-50"
+        )}
+        unoptimized
+        priority={priority}
+      />
+    </div>
+  ) : null;
+
+  const labelEl = showLabel ? (
+    <span className={cn(
+      "absolute z-10 type-label bg-bg text-dark px-2 py-1",
+      isDark ? "top-4 left-4 lg:top-5 lg:left-5" : "top-4 right-4"
+    )}>
+      {showLabel}
+    </span>
+  ) : null;
+
+  const latestEl = isLatest && !isDark ? (
+    <span className="absolute top-4 right-4 type-label-sm bg-dark text-bg px-2 py-1">
+      Latest
+    </span>
+  ) : null;
+
+  const authorBlock = (
+    <div className="flex items-center gap-4">
+      {memo.authorImage && (
+        <div 
+          className={cn(
+            "bg-border-light overflow-hidden shrink-0",
+            isFeatured ? "w-14 h-14 lg:w-16 lg:h-16" : "w-12 h-12 lg:w-[60px] lg:h-[60px]"
+          )}
+          style={{ borderRadius: '2px' }}
+        >
+          <Image
+            src={memo.authorImage}
+            alt={memo.author}
+            width={64}
+            height={64}
+            className="w-full h-full object-cover"
+            unoptimized
+          />
+        </div>
+      )}
+      <div>
+        <p className={cn(
+          "font-display font-normal leading-[1.4]",
+          isDark ? "text-white" : "",
+          isFeatured ? "text-[1.125rem] lg:text-[1.25rem]" : "text-[1rem] lg:text-[1.125rem]"
+        )}>
+          {memo.author}
+        </p>
+        <p className={cn(
+          "type-label mt-0.5",
+          isDark ? "text-white/70" : "text-text-secondary"
+        )}>
+          {formatCategory(memo.category)}
+        </p>
+      </div>
+    </div>
+  );
+
+  if (isFeatured) {
+    return (
+      <Link
+        href={`/memos/${memo.slug}`}
+        className="flex flex-col justify-end group relative overflow-hidden min-h-[320px] lg:min-h-[400px] border border-border-light"
+      >
+        {imageEl}
+        {labelEl}
+        <div className="relative z-10 flex flex-col">
+          <div className="p-8 lg:p-12 flex flex-col gap-5">
+            <h3 className="font-display text-[1.75rem] lg:text-[2.25rem] font-normal leading-[1.15] text-white group-hover:text-bg transition-colors line-clamp-3">
+              {memo.title}
+            </h3>
+            {memo.keyMessage1 && (
+              <p className="font-body text-[1rem] lg:text-[1.125rem] leading-[1.5] text-white/70 line-clamp-2 max-w-2xl">
+                {memo.keyMessage1}
+              </p>
+            )}
+            {authorBlock}
+          </div>
+          <CardCTA variant="dark" />
+        </div>
+      </Link>
+    );
+  }
+
   return (
     <Link
       href={`/memos/${memo.slug}`}
       className={cn(
         "flex flex-col group relative overflow-hidden h-full",
-        !isDark && "border-b border-r border-border-light",
-        isDark && "justify-end min-h-[280px] lg:min-h-[320px]"
+        !isDark && (gridItem ? "border-b border-r border-border-light" : "border border-border-light"),
+        isDark && !isFeatured && "justify-end min-h-[280px] lg:min-h-[320px]"
       )}
     >
-      {isDark && (memo.splashImage || memo.seoImage) && (
-        <div className="absolute inset-0 bg-dark">
-          <Image
-            src={memo.splashImage || memo.seoImage!}
-            alt=""
-            fill
-            className="object-cover opacity-40 group-hover:opacity-50 transition-opacity"
-            unoptimized
-            priority={priority}
-          />
-        </div>
-      )}
-
-      {showLabel && (
-        <span className={cn(
-          "absolute z-10 type-label bg-bg text-dark px-2 py-1",
-          isDark ? "top-4 left-4 lg:top-5 lg:left-5" : "top-4 right-4"
-        )}>
-          {showLabel}
-        </span>
-      )}
-
-      {isLatest && !isDark && (
-        <span className="absolute top-4 right-4 type-label-sm bg-dark text-bg px-2 py-1">
-          Latest
-        </span>
-      )}
+      {imageEl}
+      {labelEl}
+      {latestEl}
 
       {isDark ? (
         <div className="relative z-10 flex flex-col">
@@ -125,65 +199,41 @@ export function MemoCard({
                 {memo.keyMessage1}
               </p>
             )}
-            <div className="flex items-center gap-4">
-              {memo.authorImage && (
-                <div 
-                  className="w-12 h-12 lg:w-[60px] lg:h-[60px] bg-border-light overflow-hidden shrink-0"
-                  style={{ borderRadius: '2px' }}
-                >
-                  <Image
-                    src={memo.authorImage}
-                    alt={memo.author}
-                    width={60}
-                    height={60}
-                    className="w-full h-full object-cover"
-                    unoptimized
-                  />
-                </div>
-              )}
-              <div>
-                <p className="font-display text-[1rem] lg:text-[1.125rem] font-normal leading-[1.4] text-white">
-                  {memo.author}
-                </p>
-                <p className="type-label text-white/70 mt-0.5">
-                  {formatCategory(memo.category)}
-                </p>
-              </div>
-            </div>
+            {authorBlock}
           </div>
           <CardCTA variant="dark" />
         </div>
       ) : (
         <>
-          <div className="p-8 lg:p-10 flex flex-col gap-6 flex-1">
+          <div className="p-6 lg:p-8 flex flex-col gap-4 flex-1">
             <div className="min-w-0">
-              <h3 className="font-display text-[1.25rem] lg:text-[1.5rem] font-normal leading-[1.2] tracking-normal group-hover:text-accent transition-colors line-clamp-3">
+              <h3 className="font-display text-[1.125rem] lg:text-[1.25rem] font-normal leading-[1.2] tracking-normal group-hover:text-accent transition-colors line-clamp-2">
                 {memo.title}
               </h3>
               {memo.keyMessage1 && (
-                <p className="font-body text-[1rem] lg:text-[1.125rem] leading-[1.5] text-text-secondary mt-3 line-clamp-3">
+                <p className="font-body text-[0.875rem] lg:text-[1rem] leading-[1.5] text-text-secondary mt-2 line-clamp-2">
                   {memo.keyMessage1}
                 </p>
               )}
             </div>
-            <div className="flex items-center gap-4 mt-auto">
+            <div className="flex items-center gap-3 mt-auto">
               {memo.authorImage && (
                 <div 
-                  className="w-12 h-12 lg:w-[60px] lg:h-[60px] bg-border-light overflow-hidden shrink-0"
+                  className="w-10 h-10 lg:w-12 lg:h-12 bg-border-light overflow-hidden shrink-0"
                   style={{ borderRadius: '2px' }}
                 >
                   <Image
                     src={memo.authorImage}
                     alt={memo.author}
-                    width={60}
-                    height={60}
+                    width={48}
+                    height={48}
                     className="w-full h-full object-cover"
                     unoptimized
                   />
                 </div>
               )}
               <div>
-                <p className="font-display text-[1rem] lg:text-[1.125rem] font-normal leading-[1.4]">
+                <p className="font-display text-[0.875rem] lg:text-[1rem] font-normal leading-[1.4]">
                   {memo.author}
                 </p>
                 <p className="type-label text-text-secondary mt-0.5">

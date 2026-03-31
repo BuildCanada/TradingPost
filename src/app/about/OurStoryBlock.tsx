@@ -197,7 +197,7 @@ export default function OurStoryBlock() {
                         panelClassName="accordion-expand"
                         className="overflow-hidden"
                       >
-                        <div className="mt-4">
+                        <div className="mt-4 px-3">
                           {item.content}
                           {item.key === "culture" && (
                             <div className="space-y-4">

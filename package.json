@@ -8,7 +8,8 @@
     "start": "next start -p 5050",
     "lint": "eslint",
     "postinstall": "prisma generate",
-    "seed": "DATABASE_URL=\"file:./dev.db\" tsx prisma/seed.ts"
+    "seed": "DATABASE_URL=\"file:./dev.db\" tsx prisma/seed.ts",
+    "lint:tokens": "rg --glob '*.tsx' --glob '*.ts' --glob '!*.d.ts' -e '[a-z]+-\\[var\\(--' src/ && echo 'FAIL: inline CSS vars in Tailwind found' && exit 1 || echo 'OK: no inline CSS vars'"
   },
   "prisma": {
     "seed": "DATABASE_URL=\"file:./dev.db\" tsx prisma/seed.ts"

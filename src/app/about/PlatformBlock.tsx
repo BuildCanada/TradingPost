@@ -131,7 +131,7 @@ export default function PlatformBlock() {
                           <ul className="space-y-2 mt-3">
                             {item.expandedBullets.map((bullet, j) => (
                               <li key={j} className="type-body text-dark flex items-start gap-2">
-                                <span className="mt-[3px] w-[5px] h-[5px] rounded-full shrink-0 bg-accent" />
+                                <span className="mt-[clamp(0.75rem,0.75rem+0.25vw,1rem)] w-[5px] h-[5px] rounded-full shrink-0 bg-accent" />
                                 {bullet}
                               </li>
                             ))}

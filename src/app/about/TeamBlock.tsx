@@ -66,7 +66,7 @@ export default function TeamBlock({ members }: { members: TeamMember[] }) {
   return (
     <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px] border-b border-[var(--color-border-light)]">
       <div className="max-w-[1080px] mx-auto">
-        <SectionLabel>Team</SectionLabel>
+        <SectionLabel as="h2">Team</SectionLabel>
         <div className="mt-4 space-y-10">
           {roleGroups.map(({ key, label }) => {
             const group = members.filter((m) => (m.role || "CORE") === key);

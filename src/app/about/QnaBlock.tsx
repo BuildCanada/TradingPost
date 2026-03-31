@@ -35,7 +35,7 @@ export default function QnaBlock() {
   return (
     <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px] border-b border-[var(--color-border-light)]">
       <div className="max-w-[1080px] mx-auto">
-        <SectionLabel>Q&amp;A</SectionLabel>
+        <SectionLabel as="h2">Q&amp;A</SectionLabel>
         <div className="mt-2">
           <Accordion>
             {qnaItems.map((item, i) => (

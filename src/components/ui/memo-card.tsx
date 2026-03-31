@@ -37,7 +37,7 @@ function CardCTA({ variant = 'light' }: CardCTAProps) {
       <span className={cn(
         "font-label text-xs uppercase tracking-wider transition-colors",
         isDark 
-          ? "text-white/60 group-hover/cta:text-bg" 
+          ? "text-bg/70 group-hover/cta:text-white" 
           : "text-text-secondary group-hover/cta:text-accent"
       )}>
         Read More
@@ -46,7 +46,7 @@ function CardCTA({ variant = 'light' }: CardCTAProps) {
         className={cn(
           "w-4 h-4 transition-all",
           isDark 
-            ? "text-white/60 group-hover/cta:text-bg" 
+            ? "text-bg/70 group-hover/cta:text-white" 
             : "text-text-secondary group-hover/cta:text-accent",
           "group-hover/cta:translate-x-1"
         )}
@@ -88,7 +88,7 @@ export function MemoCard({
         fill
         className={cn(
           "object-cover transition-opacity duration-500",
-          isFeatured ? "opacity-30 group-hover:opacity-40" : "opacity-40 group-hover:opacity-50"
+          isFeatured ? "opacity-40 group-hover:opacity-25" : "opacity-40 group-hover:opacity-50"
         )}
         unoptimized
         priority={priority}
@@ -134,14 +134,14 @@ export function MemoCard({
       <div>
         <p className={cn(
           "font-display font-normal leading-[1.4]",
-          isDark ? "text-white" : "",
+          isDark ? "text-bg" : "",
           isFeatured ? "text-[1.125rem] lg:text-[1.25rem]" : "text-[1rem] lg:text-[1.125rem]"
         )}>
           {memo.author}
         </p>
         <p className={cn(
           "type-label mt-0.5",
-          isDark ? "text-white/70" : "text-text-secondary"
+          isDark ? "text-bg/70" : "text-text-secondary"
         )}>
           {formatCategory(memo.category)}
         </p>
@@ -159,11 +159,11 @@ export function MemoCard({
         {labelEl}
         <div className="relative z-10 flex flex-col">
           <div className="p-8 lg:p-12 flex flex-col gap-5">
-            <h3 className="font-display text-[1.75rem] lg:text-[2.25rem] font-normal leading-[1.15] text-white group-hover:text-bg transition-colors line-clamp-3">
+            <h3 className="font-display text-[1.75rem] lg:text-[2.25rem] font-normal leading-[1.15] text-bg group-hover:text-white transition-colors line-clamp-3">
               {memo.title}
             </h3>
             {memo.keyMessage1 && (
-              <p className="font-body text-[1rem] lg:text-[1.125rem] leading-[1.5] text-white/70 line-clamp-2 max-w-2xl">
+              <p className="font-body text-[1rem] lg:text-[1.125rem] leading-[1.5] text-bg/60 line-clamp-2 max-w-2xl">
                 {memo.keyMessage1}
               </p>
             )}
@@ -191,11 +191,11 @@ export function MemoCard({
       {isDark ? (
         <div className="relative z-10 flex flex-col">
           <div className="p-8 lg:p-10 flex flex-col gap-4">
-            <h3 className="font-display text-[1.5rem] lg:text-[1.75rem] font-normal leading-[1.2] text-white group-hover:text-bg transition-colors line-clamp-3">
+            <h3 className="font-display text-[1.5rem] lg:text-[1.75rem] font-normal leading-[1.2] text-bg group-hover:text-white transition-colors line-clamp-3">
               {memo.title}
             </h3>
             {memo.keyMessage1 && (
-              <p className="font-body text-[1rem] lg:text-[1.125rem] leading-[1.5] text-white/80 line-clamp-3">
+              <p className="font-body text-[1rem] lg:text-[1.125rem] leading-[1.5] text-bg/70 line-clamp-3">
                 {memo.keyMessage1}
               </p>
             )}

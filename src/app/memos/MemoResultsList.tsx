@@ -35,23 +35,20 @@ export default function MemoResultsList({ memos }: { memos: MemoItem[] }) {
   return (
     <div className="animate-fade-in" style={{ animationDelay: "1.6s" }}>
       <section className="px-5 py-10 border-b border-border-light">
-        <div className="max-w-[900px] mx-auto">
+        <div className="max-w-[1080px] mx-auto">
           <SectionLabel as="h2">
             {activeCategory
               ? `${activeCategory.replace(/-/g, " ")} Memos`
               : "All Memos"}
           </SectionLabel>
-          {filtered.length === 0 && memos.length > 0 && (
-            <p className="type-caption text-text-secondary py-4">
-              No memos match your filters.
+          {filtered.length === 0 && (
+            <p className="type-body-sm text-text-secondary py-4">
+              {memos.length === 0
+                ? "No memos yet."
+                : "No memos match your filters."}
             </p>
           )}
-          {filtered.length === 0 && memos.length === 0 && (
-            <p className="type-caption text-text-secondary py-4">
-              No memos yet.
-            </p>
-          )}
-          <div className="grid grid-cols-1 min-[900px]:grid-cols-2 min-[900px]:gap-x-6">
+          <div className="grid grid-cols-1 wide:grid-cols-2 wide:gap-x-6">
             {filtered.slice(0, visibleCount).map((memo) => (
               <MemoListItem key={memo.id} memo={memo} />
             ))}
@@ -59,7 +56,7 @@ export default function MemoResultsList({ memos }: { memos: MemoItem[] }) {
           {visibleCount < filtered.length && (
             <button
               onClick={loadMore}
-              className="mt-4 mx-auto flex items-center gap-2 h-9 px-4 border border-border-light rounded-full type-label text-text-secondary hover:text-dark hover:border-dark transition-colors"
+              className="mt-6 mx-auto flex items-center gap-2 h-11 px-6 border border-border-light type-label text-text-secondary hover:text-dark hover:border-dark transition-colors"
             >
               Show More
               <svg

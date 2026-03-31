@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { TwitterEmbed, MemoSubscribe, RelatedMemos } from "./MemoClientParts";
 import { ShareSection } from "@/components/share";
+import { createAuthor } from "@/lib/schemas";
 
 /* ─── Static Params (pre-render all memo pages) ─── */
 
@@ -82,18 +83,22 @@ export default async function MemoDetailPage({
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "Article",
+    "@type": "Article" as const,
     headline: memo.title,
     description: memo.keyMessage1,
-    author: { "@type": "Person", name: memo.author },
+    author: createAuthor({
+      name: memo.author,
+      image: authorImage,
+    }),
     datePublished: (memo.publishedAt ?? memo.createdAt).toISOString(),
     dateModified: memo.updatedAt.toISOString(),
     ...(memo.seoImage || memo.splashImage
       ? { image: memo.seoImage || memo.splashImage }
       : {}),
     publisher: {
-      "@type": "Organization",
+      "@type": "Organization" as const,
       name: "Build Canada",
+      url: "https://buildcanada.ca",
     },
   };
 
@@ -111,7 +116,7 @@ export default async function MemoDetailPage({
       <RelatedMemos category={memo.category} currentSlug={memo.slug} />
       {memo.twitterEmbed && (
         <div>
-          <span className="type-label text-[var(--color-text-secondary)] block mb-3">
+          <span className="type-label text-text-secondary block mb-3">
             Embedded Post
           </span>
           <TwitterEmbed html={memo.twitterEmbed} />
@@ -121,7 +126,7 @@ export default async function MemoDetailPage({
   );
 
   return (
-    <div className="mx-[10px] my-[10px] border border-[var(--color-border-light)] bg-[var(--color-bg)]">
+    <div className="mx-[10px] my-[10px] border border-border-light bg-bg">
       {/* JSON-LD structured data */}
       <script
         type="application/ld+json"
@@ -159,7 +164,7 @@ export default async function MemoDetailPage({
             {memo.category && (
               <div className="flex items-center gap-2 mb-3">
                 <span className="type-label text-white/50">Category</span>
-                <span className="inline-block type-label text-[var(--color-dark)] bg-white/80 rounded-full px-3 py-0.5">
+                <span className="inline-block type-label text-dark bg-white/80 rounded-full px-3 py-0.5">
                   {memo.category.replace(/-/g, " ")}
                 </span>
               </div>
@@ -200,7 +205,7 @@ export default async function MemoDetailPage({
             <>
               <Link
                 href="/memos"
-                className="type-label text-[var(--color-text-muted)] hover:text-[var(--color-dark)] transition-colors flex items-center gap-1.5 mb-6"
+                className="type-label text-text-muted hover:text-dark transition-colors flex items-center gap-1.5 mb-6"
               >
                 <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
                   <path
@@ -216,8 +221,8 @@ export default async function MemoDetailPage({
 
               {memo.category && (
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="type-label text-[var(--color-text-muted)]">Category</span>
-                  <span className="inline-block type-label text-[var(--color-bg)] bg-[var(--color-dark)] rounded-full px-3 py-0.5">
+                  <span className="type-label text-text-muted">Category</span>
+                  <span className="inline-block type-label text-bg bg-dark rounded-full px-3 py-0.5">
                     {memo.category.replace(/-/g, " ")}
                   </span>
                 </div>
@@ -226,7 +231,7 @@ export default async function MemoDetailPage({
               <h1 className="type-title mb-4">{memo.title}</h1>
 
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-full bg-[var(--color-border-light)] overflow-hidden shrink-0">
+                <div className="w-10 h-10 rounded-full bg-border-light overflow-hidden shrink-0">
                   {authorImage && (
                     <Image
                       src={authorImage}
@@ -241,7 +246,7 @@ export default async function MemoDetailPage({
                 </div>
                 <div>
                   <p className="type-label font-medium">{memo.author}</p>
-                  <p className="type-label text-[var(--color-text-secondary)]">{date}</p>
+                  <p className="type-label text-text-secondary">{date}</p>
                 </div>
               </div>
             </>
@@ -249,8 +254,8 @@ export default async function MemoDetailPage({
 
           {/* Supporters */}
           {memo.supporters && (
-            <div className="mb-6 pb-6 border-b border-[var(--color-border-light)]">
-              <span className="type-label text-[var(--color-text-secondary)] block mb-2">
+            <div className="mb-6 pb-6 border-b border-border-light">
+              <span className="type-label text-text-secondary block mb-2">
                 Supporters
               </span>
               <div
@@ -261,8 +266,8 @@ export default async function MemoDetailPage({
           )}
 
           {/* Key Messages */}
-          <div className="mb-8 p-5 border-[3px] border-double border-[var(--color-border-light)] bg-[#f0e5dc] space-y-3">
-            <span className="type-label-sm text-[var(--color-text-muted)] block mb-2">
+          <div className="mb-8 p-5 border-[3px] border-double border-border-light bg-[#f0e5dc] space-y-3">
+            <span className="type-label-sm text-text-muted block mb-2">
               Key Messages
             </span>
             {keyMessages.map((msg, i) => (
@@ -271,10 +276,10 @@ export default async function MemoDetailPage({
                 className={`flex items-start gap-3 ${
                   i === 0
                     ? "type-body"
-                    : "type-body text-[var(--color-text-secondary)]"
+                    : "type-body text-text-secondary"
                 }`}
               >
-                <span className="type-label-sm text-[var(--color-text-muted)] mt-1.5 shrink-0">
+                <span className="type-label-sm text-text-muted mt-1.5 shrink-0">
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <p>{msg}</p>
@@ -289,7 +294,7 @@ export default async function MemoDetailPage({
           />
 
           {/* Mobile sidebar */}
-          <div className="2xl-memo:hidden mt-10 pt-8 border-t border-[var(--color-border-light)]">
+          <div className="2xl-memo:hidden mt-10 pt-8 border-t border-border-light">
             {sidebar}
           </div>
         </article>

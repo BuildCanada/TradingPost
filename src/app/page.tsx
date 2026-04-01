@@ -205,14 +205,13 @@ function SocialLinks() {
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-7 h-7 border border-border-light flex items-center justify-center hover:border-dark transition-colors group"
+            className="w-11 h-11 border border-border-light flex items-center justify-center hover:border-dark transition-colors group"
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={`/assets/icons/${icon === "X" ? "platform-x-twitter" : icon === "LINKEDIN" ? "platform-linkedin" : icon === "TIKTOK" ? "platform-tiktok" : icon === "IG" ? "platform-instagram" : icon === "SUBSTACK" ? "substack-icon" : "platform-youtube"}.svg`}
               alt={icon}
-              width={14}
-              height={14}
+              width={20}
+              height={20}
               className="brightness-0 opacity-40 group-hover:opacity-80 transition-opacity"
             />
           </a>

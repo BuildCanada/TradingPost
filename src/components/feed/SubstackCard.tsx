@@ -22,7 +22,7 @@ export function SubstackCard({ item }: { item: FeedItem }) {
         </div>
       )}
 
-      <div className="px-3 py-3 flex flex-col gap-2 flex-1">
+      <div className="px-5 py-4 flex flex-col gap-2 flex-1">
         <div className="flex items-center gap-1.5">
           <Image
             src="/assets/icons/substack-icon.svg"
@@ -48,7 +48,7 @@ export function SubstackCard({ item }: { item: FeedItem }) {
         </span>
       </div>
 
-      <div className="px-3 py-2.5 flex items-center justify-between border-t border-[#e8e2d9]">
+      <div className="px-5 py-3 flex items-center justify-between border-t border-[#e8e2d9]">
         <Image
           src="/assets/icons/substack-icon.svg"
           alt="Substack"

@@ -32,7 +32,7 @@ export function XCard({ item }: { item: FeedItem }) {
         avatarBorder={COLORS.avatarBorder}
       />
 
-      <div className="px-3 py-3 flex flex-col gap-2 flex-1">
+      <div className="px-5 py-4 flex flex-col gap-2 flex-1">
         <span className="inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.08em] font-medium text-[#71767b]">
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
             <path d="M4 4h16v12H5.17L4 17.17V4z" stroke="#71767b" strokeWidth="2" fill="none" strokeLinejoin="round" />
@@ -47,7 +47,7 @@ export function XCard({ item }: { item: FeedItem }) {
         )}
       </div>
 
-      <div className="px-3 py-2.5 flex items-center justify-between border-t border-[#2f3336]">
+      <div className="px-5 py-3 flex items-center justify-between border-t border-[#2f3336]">
         <Image
           src="/assets/icons/platform-x-twitter.svg"
           alt="X"

@@ -57,7 +57,7 @@ export function FeedCard({ item }: { item: FeedItem }) {
         )}
       </div>
 
-      <div className="p-4 flex flex-col gap-2.5 flex-1">
+      <div className="p-6 flex flex-col gap-2.5 flex-1">
         {item.title && (
           <h3 className="type-h4 group-hover:text-accent transition-colors line-clamp-4">
             {item.title}
@@ -70,7 +70,7 @@ export function FeedCard({ item }: { item: FeedItem }) {
         )}
       </div>
 
-      <div className="px-4 py-2.5 flex items-center justify-end border-t border-border-light">
+      <div className="px-6 py-3 flex items-center justify-end border-t border-border-light">
         <span className="inline-flex items-center gap-2 type-label px-3 py-1 border border-dark text-dark bg-bg group-hover:bg-dark group-hover:text-bg transition-colors">
           Read more
           <FeedChevron />

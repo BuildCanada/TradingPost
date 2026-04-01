@@ -32,7 +32,7 @@ export function IGCard({ item }: { item: FeedItem }) {
         avatarBorder={COLORS.avatarBorder}
       />
 
-      <div className="px-3 py-3 flex flex-col gap-2 flex-1">
+      <div className="px-5 py-4 flex flex-col gap-2 flex-1">
         <span
           className="inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.08em] font-medium"
           style={{ color: COLORS.muted }}
@@ -62,7 +62,7 @@ export function IGCard({ item }: { item: FeedItem }) {
       </div>
 
       <div
-        className="px-3 py-2.5 flex items-center justify-between border-t"
+        className="px-5 py-3 flex items-center justify-between border-t"
         style={{ borderColor: COLORS.headerBorder }}
       >
         <Image

@@ -5,7 +5,7 @@ export default function WidgetPlaceholder({ project }: { project: ProjectData })
 
   return (
     <div className="p-8 lg:p-10 h-full flex flex-col">
-      <span className="type-label font-bold text-[var(--color-text-secondary)] mb-3">
+      <span className="type-label font-bold text-text-secondary mb-3">
         {project.title}
       </span>
       {isBig ? (
@@ -14,13 +14,13 @@ export default function WidgetPlaceholder({ project }: { project: ProjectData })
             {["55%", "80%", "65%", "100%", "45%", "70%", "90%", "50%"].map((h, i) => (
               <div
                 key={i}
-                className="flex-1 bg-[var(--color-border-light)]"
+                className="flex-1 bg-border-light"
                 style={{ height: h }}
               />
             ))}
           </div>
           {project.description && (
-            <p className="type-body-sm text-[var(--color-text-secondary)] mt-3 line-clamp-1">
+            <p className="type-body-sm text-text-secondary mt-3 line-clamp-1">
               {project.description}
             </p>
           )}
@@ -30,7 +30,7 @@ export default function WidgetPlaceholder({ project }: { project: ProjectData })
           {["60%", "100%", "75%", "45%", "85%", "55%"].map((h, i) => (
             <div
               key={i}
-              className="flex-1 bg-[var(--color-border-light)]"
+              className="flex-1 bg-border-light"
               style={{ height: h }}
             />
           ))}

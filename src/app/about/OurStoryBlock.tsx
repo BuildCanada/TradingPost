@@ -20,19 +20,10 @@ const firstMemos = [
 
 function TwitterEmbedLazy({ visible }: { visible: boolean }) {
   const ref = useRef<HTMLDivElement>(null);
-  const [mounted, setMounted] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    if (visible && !mounted) {
-      setMounted(true);
-    }
-  }, [visible, mounted]);
-
-  useEffect(() => {
-    if (!visible || !mounted || !ref.current) return;
-
-    setLoaded(false);
+    if (!visible || !ref.current) return;
 
     const load = () => {
       const win = window as unknown as Record<string, unknown>;
@@ -61,9 +52,7 @@ function TwitterEmbedLazy({ visible }: { visible: boolean }) {
     }
 
     return () => observer.disconnect();
-  }, [visible, mounted]);
-
-  if (!mounted) return null;
+  }, [visible]);
 
   return (
     <div ref={ref} className="max-w-[480px] relative">

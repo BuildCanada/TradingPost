@@ -23,8 +23,8 @@ function Bar({ label, taxAmount, color }: { label: string; taxAmount: number; co
   const taxPct = (taxAmount / exitValue) * 100;
   return (
     <div className="flex items-center gap-2">
-      <span className="type-mono-sm text-[var(--color-text-secondary)] w-[28px] shrink-0">{label}</span>
-      <div className="flex-1 h-6 bg-[var(--color-steel-50)] overflow-hidden relative">
+      <span className="type-mono-sm text-text-secondary w-[28px] shrink-0">{label}</span>
+      <div className="flex-1 h-6 bg-steel-50 overflow-hidden relative">
         <div
           className="h-full flex items-center justify-end pr-2"
           style={{ width: `${taxPct}%`, backgroundColor: color }}
@@ -51,8 +51,8 @@ export default function ExitTaxWidget({ project }: WidgetProps) {
       </div>
 
       <div className="flex items-baseline gap-1.5">
-        <span className="font-display text-[1.25rem] font-bold text-[var(--color-auburn-800)]">+{fmt(difference)}</span>
-        <span className="type-mono-sm text-[var(--color-text-secondary)]">more tax in Canada on a $100M exit</span>
+        <span className="font-display text-[1.25rem] font-bold text-accent">+{fmt(difference)}</span>
+        <span className="type-mono-sm text-text-secondary">more tax in Canada on a $100M exit</span>
       </div>
     </div>
   );

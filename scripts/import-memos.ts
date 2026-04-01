@@ -91,7 +91,7 @@ async function main() {
     const builderSlug = (row["Builder"] || "").trim();
     const builder2Slug = (row["Builder 2"] || "").trim();
     const authorInfo = builderSlug ? authorMap.get(builderSlug) : undefined;
-    const _author2Info = builder2Slug ? authorMap.get(builder2Slug) : undefined;
+    if (builder2Slug) authorMap.get(builder2Slug);
 
     const authorId = builderSlug
       ? await resolveAuthorId(authorInfo?.name || builderSlug, authorInfo?.photo || null)

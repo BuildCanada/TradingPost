@@ -89,7 +89,7 @@ async function seedPeople(authorLookup: Map<string, string>) {
   }
 
   const teamCount = rows.filter(
-    (r: any) =>
+    (r: Record<string, string>) =>
       r["Role"] &&
       ["Team", "Board", "Volunteer"].includes(r["Role"].trim())
   ).length;

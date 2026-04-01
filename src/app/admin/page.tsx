@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 
 const RichTextEditor = dynamic(() => import("@/components/RichTextEditor"), {
   ssr: false,
@@ -1005,9 +1006,12 @@ export default function AdminPage() {
               </label>
               <div className="flex items-center gap-3">
                 {form.image && (
-                  <img
+                  <Image
                     src={form.image}
                     alt=""
+                    width={80}
+                    height={56}
+                    unoptimized
                     className="w-20 h-14 object-cover rounded border"
                   />
                 )}
@@ -1090,9 +1094,12 @@ export default function AdminPage() {
                 </label>
                 <div className="flex items-center gap-2">
                   {form.authorPhoto && (
-                    <img
+                    <Image
                       src={form.authorPhoto}
                       alt=""
+                      width={32}
+                      height={32}
+                      unoptimized
                       className="w-8 h-8 rounded-full object-cover border"
                     />
                   )}
@@ -1116,9 +1123,12 @@ export default function AdminPage() {
               </label>
               <div className="flex items-center gap-3">
                 {form.image && (
-                  <img
+                  <Image
                     src={form.image}
                     alt=""
+                    width={80}
+                    height={56}
+                    unoptimized
                     className="w-20 h-14 object-cover rounded border"
                   />
                 )}
@@ -1227,9 +1237,12 @@ export default function AdminPage() {
                     <label className="block text-xs uppercase tracking-wide text-gray-500 mb-1">
                       Image
                     </label>
-                    <img
+                    <Image
                       src={form.image}
                       alt=""
+                      width={128}
+                      height={96}
+                      unoptimized
                       className="w-32 h-24 object-cover rounded border"
                     />
                   </div>
@@ -1338,9 +1351,12 @@ export default function AdminPage() {
             className="border border-gray-200 rounded p-4 flex items-start gap-4"
           >
             {item.image ? (
-              <img
+              <Image
                 src={item.image}
                 alt=""
+                width={64}
+                height={64}
+                unoptimized
                 className="w-16 h-16 object-cover rounded border shrink-0"
               />
             ) : (
@@ -1585,9 +1601,12 @@ export default function AdminPage() {
           </label>
           <div className="flex items-center gap-3">
             {memoForm.splashImage && (
-              <img
+              <Image
                 src={memoForm.splashImage}
                 alt=""
+                width={80}
+                height={56}
+                unoptimized
                 className="w-20 h-14 object-cover rounded border"
               />
             )}
@@ -1610,9 +1629,12 @@ export default function AdminPage() {
           </label>
           <div className="flex items-center gap-3">
             {memoForm.seoImage && (
-              <img
+              <Image
                 src={memoForm.seoImage}
                 alt=""
+                width={80}
+                height={56}
+                unoptimized
                 className="w-20 h-14 object-cover rounded border"
               />
             )}
@@ -1731,9 +1753,12 @@ export default function AdminPage() {
             className="border border-gray-200 rounded p-4 flex items-start gap-4"
           >
             {memo.author?.photo ? (
-              <img
+              <Image
                 src={memo.author.photo}
                 alt=""
+                width={40}
+                height={40}
+                unoptimized
                 className="w-10 h-10 rounded-full object-cover border shrink-0"
               />
             ) : (
@@ -1866,7 +1891,7 @@ export default function AdminPage() {
             <div>
               <label className="block text-xs font-medium mb-1">Photo</label>
               {personForm.photo && (
-                <img src={personForm.photo} alt="" className="w-12 h-12 rounded-full object-cover mb-1" />
+                <Image src={personForm.photo} alt="" width={48} height={48} unoptimized className="w-12 h-12 rounded-full object-cover mb-1" />
               )}
               <input type="file" accept="image/*" onChange={handlePersonUpload} className="text-xs" />
               {teamUploading && <span className="text-xs text-gray-400">Uploading…</span>}
@@ -1901,7 +1926,7 @@ export default function AdminPage() {
           {people.map((m) => (
             <div key={m.id} className="flex items-center gap-3 border border-gray-200 rounded p-3">
               {m.photo ? (
-                <img src={m.photo} alt="" className="w-10 h-10 rounded-full object-cover shrink-0" />
+                <Image src={m.photo} alt="" width={40} height={40} unoptimized className="w-10 h-10 rounded-full object-cover shrink-0" />
               ) : (
                 <div className="w-10 h-10 rounded-full bg-gray-200 shrink-0" />
               )}
@@ -1967,7 +1992,7 @@ export default function AdminPage() {
             <div>
               <label className="block text-xs font-medium mb-1">Profile Photo</label>
               {testimonialForm.profilePhoto && (
-                <img src={testimonialForm.profilePhoto} alt="" className="w-10 h-10 rounded-full object-cover mb-1" />
+                <Image src={testimonialForm.profilePhoto} alt="" width={40} height={40} unoptimized className="w-10 h-10 rounded-full object-cover mb-1" />
               )}
               <input type="file" accept="image/*" onChange={(e) => handleTestimonialUpload(e, "profilePhoto")} className="text-xs" />
               {testimonialUploading === "profilePhoto" && <span className="text-xs text-gray-400">Uploading…</span>}
@@ -1975,7 +2000,7 @@ export default function AdminPage() {
             <div>
               <label className="block text-xs font-medium mb-1">Company Logo</label>
               {testimonialForm.companyLogo && (
-                <img src={testimonialForm.companyLogo} alt="" className="w-20 h-10 object-contain mb-1" />
+                <Image src={testimonialForm.companyLogo} alt="" width={80} height={40} unoptimized className="w-20 h-10 object-contain mb-1" />
               )}
               <input type="file" accept="image/*" onChange={async (e) => {
                 const file = e.target.files?.[0];
@@ -1993,7 +2018,7 @@ export default function AdminPage() {
           <div>
             <label className="block text-xs font-medium mb-1">Splash Photo</label>
             {testimonialForm.splashPhoto && (
-              <img src={testimonialForm.splashPhoto} alt="" className="w-full h-16 object-cover rounded mb-1" />
+              <Image src={testimonialForm.splashPhoto} alt="" width={800} height={64} unoptimized className="w-full h-16 object-cover rounded mb-1" />
             )}
             <input type="file" accept="image/*" onChange={(e) => handleTestimonialUpload(e, "splashPhoto")} className="text-xs" />
             {testimonialUploading === "splashPhoto" && <span className="text-xs text-gray-400">Uploading…</span>}
@@ -2045,8 +2070,7 @@ export default function AdminPage() {
             <div key={t.id} className="border border-gray-200 rounded p-3">
               <div className="flex items-start gap-3">
                 {t.profilePhoto ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={t.profilePhoto} alt="" className="w-10 h-10 rounded-full object-cover shrink-0" />
+                  <Image src={t.profilePhoto} alt="" width={40} height={40} unoptimized className="w-10 h-10 rounded-full object-cover shrink-0" />
                 ) : (
                   <div className="w-10 h-10 rounded-full bg-gray-200 shrink-0" />
                 )}
@@ -2074,8 +2098,7 @@ export default function AdminPage() {
                 </div>
               </div>
               {t.splashPhoto && (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img src={t.splashPhoto} alt="" className="w-full h-20 object-cover rounded mt-2" />
+                <Image src={t.splashPhoto} alt="" width={800} height={80} unoptimized className="w-full h-20 object-cover rounded mt-2" />
               )}
             </div>
           ))}

@@ -1,5 +1,4 @@
 import Image from "next/image";
-import SectionLabel from "@/components/SectionLabel";
 import { LumaEvent } from "@/lib/luma/types";
 
 function formatEventDate(iso: string, tz: string): string {
@@ -51,9 +50,9 @@ export default function EventCard({ event }: { event: LumaEvent }) {
     .filter(Boolean) as string[];
 
   return (
-    <div className="border border-border-light p-4 flex gap-4">
+    <div className="border-b border-r border-border-light p-6 flex gap-4">
       <div className="flex-1 min-w-0">
-        <SectionLabel>{eventDate}</SectionLabel>
+        <span className="type-label font-bold text-text-secondary block m-0 pb-1">{eventDate}</span>
         <p className="type-caption mt-1">
           {showUserTime ? (
             <>
@@ -61,7 +60,7 @@ export default function EventCard({ event }: { event: LumaEvent }) {
               <span className="text-text-secondary mx-1">·</span>
             </>
           ) : null}
-          <span className="text-auburn-800">{eventLocalTime}</span>
+          <span className="text-accent">{eventLocalTime}</span>
         </p>
         <a
           href={event.url}

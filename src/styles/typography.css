@@ -138,6 +138,15 @@ body {
   max-width: 65ch;
 }
 
+.type-default {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  font-weight: 400;
+  letter-spacing: -0.015rem;
+  max-width: 65ch;
+}
+
 /*******************************************************************************
  * Label Scale — Eyebrows, Buttons. Captions
  * 

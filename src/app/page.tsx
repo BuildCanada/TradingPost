@@ -7,6 +7,7 @@ import SectionLabel from "@/components/SectionLabel";
 import FeaturedProjects from "@/components/FeaturedProjects";
 import { LinkButton } from "@/components/ui/link-button";
 import { SubscribeButton } from "@/components/ui/subscribe-button";
+import EventsTimeline from "@/components/EventsTimeline";
 import { buildGraph } from "@/lib/schemas/graph";
 import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
 import { generateWebSiteSchema } from "@/lib/schemas/generators/website";
@@ -239,17 +240,7 @@ function FeedAndEvents() {
         </div>
 
         <div className="w-full md:w-[500px] pt-[26px] pb-[36px]">
-          <SectionLabel>Events</SectionLabel>
-          <iframe
-            src="https://luma.com/embed/calendar/cal-KUFO2yscrfWr7RV/events"
-            width="100%"
-            height="450"
-            frameBorder="0"
-            style={{ border: `1px solid var(--color-border-light)` }}
-            allowFullScreen
-            aria-hidden="false"
-            tabIndex={0}
-          />
+          <EventsTimeline />
         </div>
       <div className="w-full min-w-0">
       <SocialLinks />

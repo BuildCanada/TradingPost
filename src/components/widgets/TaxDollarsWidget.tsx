@@ -81,10 +81,10 @@ export default function TaxDollarsWidget({ project }: WidgetProps) {
                 className="w-[7px] h-[7px] rounded-[2px] shrink-0"
                 style={{ backgroundColor: seg.color }}
               />
-              <span className="type-mono-sm text-[var(--color-text-secondary)] truncate">
+              <span className="type-mono-sm text-charcoal-600 truncate">
                 {seg.label}
               </span>
-              <span className="type-mono-sm font-bold text-[var(--color-dark)] ml-auto shrink-0">
+              <span className="type-mono-sm font-bold text-charcoal-1000 ml-auto shrink-0">
                 ${seg.amount.toLocaleString()}
               </span>
             </div>
@@ -92,7 +92,7 @@ export default function TaxDollarsWidget({ project }: WidgetProps) {
         </div>
       </div>
 
-      <p className="type-mono-sm text-[var(--color-text-secondary)] opacity-60 text-right">
+      <p className="type-mono-sm text-charcoal-600 text-right">
         ON resident &middot; $100K income &middot; 2025
       </p>
     </div>

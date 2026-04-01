@@ -33,7 +33,7 @@ export default function OutcomesTrackerWidget({ project }: WidgetProps) {
               }}
             >
               {s.count / total > 0.06 && (
-                <span className="absolute inset-0 flex items-center justify-center type-mono-sm font-bold text-white/90">
+                <span className="absolute inset-0 flex items-center justify-center type-mono-sm font-bold text-white">
                   {s.count}
                 </span>
               )}
@@ -48,7 +48,7 @@ export default function OutcomesTrackerWidget({ project }: WidgetProps) {
                 className="w-2 h-2 rounded-full shrink-0"
                 style={{ backgroundColor: s.color }}
               />
-              <span className="type-mono-sm text-[var(--color-text-secondary)]">
+              <span className="type-mono-sm text-charcoal-600">
                 {s.label}
               </span>
             </div>

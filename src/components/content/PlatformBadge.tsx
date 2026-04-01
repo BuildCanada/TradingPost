@@ -25,7 +25,7 @@ export function PlatformBadge({ type }: { type: string }) {
             ? "substack-icon"
             : "platform-youtube";
   return (
-    <span className="bg-bg/80 text-dark px-1.5 py-0.5 rounded-sm flex items-center gap-1">
+    <span className="bg-bg/80 text-dark px-1.5 py-0.5 flex items-center gap-1">
       {hasSocialIcon && (
         <Image
           src={`/assets/icons/${iconFile}.svg`}

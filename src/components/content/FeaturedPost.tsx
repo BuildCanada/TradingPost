@@ -6,7 +6,7 @@ import { PlatformBadge } from "./PlatformBadge";
 export function FeaturedPost({ item }: { item: ContentFeedItem }) {
   const href = itemHref(item);
   const inner = (
-    <div className="w-full min-h-[160px] bg-black rounded mb-2.5 relative overflow-hidden group">
+    <div className="w-full min-h-[160px] bg-black mb-2.5 relative overflow-hidden group">
       {feedImage(item) && (
         <Image
           src={feedImage(item)!}

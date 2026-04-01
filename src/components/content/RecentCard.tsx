@@ -6,7 +6,7 @@ import { PlatformBadge } from "./PlatformBadge";
 export function RecentCard({ item }: { item: ContentFeedItem }) {
   const href = itemHref(item);
   const inner = (
-    <div className="h-[90px] bg-border-light border border-border-light rounded relative overflow-hidden">
+    <div className="h-[90px] bg-border-light border border-border-light relative overflow-hidden">
       {feedImage(item) && (
         <Image
           src={feedImage(item)!}

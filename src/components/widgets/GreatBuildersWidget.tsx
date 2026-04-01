@@ -52,7 +52,7 @@ export default function GreatBuildersWidget({ project }: WidgetProps) {
           {builders.map((_, i) => (
             <span
               key={i}
-              className={`block rounded-full transition-all ${
+              className={`block transition-all ${
                 i === index
                   ? "w-[10px] h-[5px] bg-white"
                   : "w-[5px] h-[5px] bg-white/40"
@@ -64,7 +64,7 @@ export default function GreatBuildersWidget({ project }: WidgetProps) {
 
       <div className="flex-1 flex flex-col justify-between p-8 lg:p-10 min-w-0">
         {project.description && (
-          <p className="type-body-sm text-[var(--color-text-secondary)]">
+          <p className="type-body-sm text-text-secondary">
             {project.description}
           </p>
         )}
@@ -77,7 +77,7 @@ export default function GreatBuildersWidget({ project }: WidgetProps) {
               style={{ visibility: i === index ? "visible" : "hidden" }}
               aria-hidden={i !== index}
             >
-              <p className="type-body-sm font-sans font-medium text-[var(--color-dark)] line-clamp-3">
+              <p className="type-body-sm font-sans font-medium text-dark line-clamp-3">
                 &ldquo;{b.quote}&rdquo;
               </p>
             </div>
@@ -85,16 +85,16 @@ export default function GreatBuildersWidget({ project }: WidgetProps) {
         </div>
 
         <div>
-          <p className="font-display text-[1.25rem] lg:text-[1.5rem] font-normal leading-[1.2] text-[var(--color-dark)] mb-1">
+          <p className="font-display text-[1.25rem] lg:text-[1.5rem] font-normal leading-[1.2] text-dark mb-1">
             {builder.name}
           </p>
-          <p className="type-label-sm text-[var(--color-text-secondary)] uppercase truncate">
+          <p className="type-label-sm text-text-secondary uppercase truncate">
             {builder.tagline}
           </p>
         </div>
       </div>
 
-      <div className="hidden md:block w-px bg-[var(--color-border-light)] shrink-0" />
+      <div className="hidden md:block w-px bg-border-light shrink-0" />
 
       <div className="hidden md:block w-[45%] shrink-0 relative min-h-[180px]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -107,7 +107,7 @@ export default function GreatBuildersWidget({ project }: WidgetProps) {
           {builders.map((_, i) => (
             <span
               key={i}
-              className={`block rounded-full transition-all ${
+              className={`block transition-all ${
                 i === index
                   ? "w-[10px] h-[5px] bg-white"
                   : "w-[5px] h-[5px] bg-white/40"

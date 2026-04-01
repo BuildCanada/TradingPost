@@ -15,6 +15,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "storage.googleapis.com",
       },
+      {
+        protocol: "https",
+        hostname: "img.cdn.luma.com",
+      },
     ],
   },
 };

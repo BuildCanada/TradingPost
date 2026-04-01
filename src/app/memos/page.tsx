@@ -65,7 +65,7 @@ export default async function MemosPage() {
             className="object-cover brightness-[0.35]"
             priority
           />
-          <div className="relative max-w-[900px] mx-auto py-[60px] md:pt-[140px] md:pb-[80px] lg:pt-[180px]">
+          <div className="relative max-w-[900px] mx-auto flex flex-col justify-center h-[45svh] md:h-[65svh]">
             <SectionLabel className="text-white/60">Memos</SectionLabel>
             <h1 className="type-title mb-1 text-white">Ideas for a Better Canada</h1>
             <p className="type-body text-white/70">

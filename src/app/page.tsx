@@ -30,7 +30,7 @@ function HeroSection() {
   const o = 0.2;
 
   return (
-    <section className="w-full bg-dark flex items-center justify-center h-[280px] md:h-[420px] relative overflow-hidden">
+    <section className="w-full bg-dark flex items-center justify-center h-[45svh] md:h-[65svh] relative overflow-hidden">
       {/* Autoplay video */}
       <video
         autoPlay
@@ -168,11 +168,11 @@ function BrandMessaging() {
       </h2>
       <p className="type-body mb-5">
         By almost every measure of growth and prosperity, Canada is falling
-        behind. It doesn&apos;t have to be this way.{" "}
-        <span style={{ backgroundColor: "#F1B0B0", fontWeight: "bold" }}>
+        behind. It doesn&apos;t have to be this way.<br />
+        <strong>
           Build Canada platforms the policy, ideas, and narratives of Builders
           who believe Canada&apos;s best days are ahead.
-        </span>
+        </strong>
       </p>
       <div className="flex items-center gap-3">
         <LinkButton href="/about" variant="primary" showArrow>
@@ -198,7 +198,7 @@ function SocialLinks() {
   ];
   return (
     <div className="pt-3 pb-[32px]">
-      <div className="max-w-[768px] mx-auto flex items-center gap-2 flex-wrap">
+      <div className="max-w-[1080px] mx-auto flex items-center gap-2 flex-wrap">
         {socials.map(({ icon, href }) => (
           <a
             key={icon}
@@ -233,7 +233,6 @@ function FeedAndEvents() {
         {/* Feed + Social */}
         <div className="w-full md:w-auto md:flex-1 md:max-w-[768px] min-w-0">
           <FeedPreview />
-          <SocialLinks />
         </div>
 
         {/* Divider between feed and events (visible only when stacked) */}
@@ -255,7 +254,11 @@ function FeedAndEvents() {
             tabIndex={0}
           />
         </div>
+      <div className="w-full min-w-0">
+      <SocialLinks />
       </div>
+      </div>
+
     </section>
   );
 }

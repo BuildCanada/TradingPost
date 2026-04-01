@@ -26,11 +26,11 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className="border-y-2 border-[var(--color-border)] flex items-stretch sticky top-[10px] z-50 bg-[var(--color-bg)]">
+    <nav className="border-y-2 border-border flex items-stretch sticky top-[10px] z-50 bg-bg">
       {/* Logo */}
       <Link
         href="/"
-        className="bg-[var(--color-accent)] flex items-center px-4 py-3 shrink-0 relative"
+        className="bg-accent flex items-center px-4 py-3 shrink-0 relative"
       >
         <Image
           src="/assets/logos/logo-standard.svg"
@@ -53,31 +53,31 @@ export default function Navbar() {
       <div className="hidden md:flex items-stretch">
         <Link
           href="/"
-          className="flex items-center px-5 border-l border-[var(--color-border)] type-label text-[var(--color-dark)] hover:bg-[var(--color-dark)] hover:text-[var(--color-bg)] transition-colors"
+          className="flex items-center px-5 border-l border-border type-label text-dark hover:bg-dark hover:text-bg transition-colors"
         >
           Home
         </Link>
         <Link
           href="/memos"
-          className="flex items-center px-5 border-l border-[var(--color-border)] type-label text-[var(--color-dark)] hover:bg-[var(--color-dark)] hover:text-[var(--color-bg)] transition-colors"
+          className="flex items-center px-5 border-l border-border type-label text-dark hover:bg-dark hover:text-bg transition-colors"
         >
           Memos
         </Link>
         <Link
           href="/content"
-          className="flex items-center px-5 border-l border-[var(--color-border)] type-label text-[var(--color-dark)] hover:bg-[var(--color-dark)] hover:text-[var(--color-bg)] transition-colors"
+          className="flex items-center px-5 border-l border-border type-label text-dark hover:bg-dark hover:text-bg transition-colors"
         >
           Content
         </Link>
         <Link
           href="/projects"
-          className="flex items-center px-5 border-l border-[var(--color-border)] type-label text-[var(--color-dark)] hover:bg-[var(--color-dark)] hover:text-[var(--color-bg)] transition-colors"
+          className="flex items-center px-5 border-l border-border type-label text-dark hover:bg-dark hover:text-bg transition-colors"
         >
           Projects
         </Link>
         <Link
           href="/about"
-          className="flex items-center px-5 border-l border-[var(--color-border)] type-label text-[var(--color-dark)] hover:bg-[var(--color-dark)] hover:text-[var(--color-bg)] transition-colors"
+          className="flex items-center px-5 border-l border-border type-label text-dark hover:bg-dark hover:text-bg transition-colors"
         >
           About Us
         </Link>
@@ -85,7 +85,7 @@ export default function Navbar() {
           href="https://shop.buildcanada.com"
           target="_blank"
           rel="noopener noreferrer"
-          className="flex items-center px-5 border-l border-[var(--color-border)] type-label text-[var(--color-dark)] hover:bg-[var(--color-dark)] hover:text-[var(--color-bg)] transition-colors"
+          className="flex items-center px-5 border-l border-border type-label text-dark hover:bg-dark hover:text-bg transition-colors"
         >
           Shop
         </a>
@@ -93,7 +93,7 @@ export default function Navbar() {
 
       {/* Desktop right: social icons + subscribe */}
       <div className="hidden md:flex items-center ml-auto">
-        <div className="flex items-center gap-1.5 px-4">
+        <div className="hidden min-[1166px]:flex items-center gap-1.5 px-4">
           {[
             { icon: "X", href: "https://x.com/build_canada", file: "platform-x-twitter" },
             { icon: "LINKEDIN", href: "https://www.linkedin.com/company/buildcanada", file: "platform-linkedin" },
@@ -107,7 +107,7 @@ export default function Navbar() {
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className="w-7 h-7 flex items-center justify-center hover:opacity-80 transition-opacity group"
+              className="w-12 h-12 flex items-center justify-center hover:opacity-80 transition-opacity group"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -122,7 +122,7 @@ export default function Navbar() {
         </div>
         <button
           onClick={() => openModal("navbar")}
-          className="flex items-center self-stretch px-5 border-l border-[var(--color-border)] bg-[var(--color-dark)] type-label text-[var(--color-bg)] hover:bg-[var(--color-accent)] transition-colors cursor-pointer"
+          className="flex items-center self-stretch px-5 border-l border-border bg-dark type-label text-bg hover:bg-accent transition-colors cursor-pointer"
         >
           Subscribe
         </button>
@@ -130,13 +130,13 @@ export default function Navbar() {
 
       {/* Mobile hamburger */}
       <button
-        className="md:hidden ml-auto flex flex-col gap-1.5 justify-center px-5 border-l border-[var(--color-border)] hover:bg-[var(--color-dark)] transition-colors group"
+        className="md:hidden ml-auto flex flex-col gap-1.5 justify-center px-5 border-l border-border hover:bg-dark transition-colors group"
         onClick={() => setMenuOpen(!menuOpen)}
         aria-label="Toggle menu"
       >
-        <span className="w-5 h-[2px] bg-[var(--color-dark)] group-hover:bg-[var(--color-bg)] transition-colors block" />
-        <span className="w-5 h-[2px] bg-[var(--color-dark)] group-hover:bg-[var(--color-bg)] transition-colors block" />
-        <span className="w-5 h-[2px] bg-[var(--color-dark)] group-hover:bg-[var(--color-bg)] transition-colors block" />
+        <span className="w-5 h-[2px] bg-dark group-hover:bg-bg transition-colors block" />
+        <span className="w-5 h-[2px] bg-dark group-hover:bg-bg transition-colors block" />
+        <span className="w-5 h-[2px] bg-dark group-hover:bg-bg transition-colors block" />
       </button>
 
       {/* Mobile menu */}
@@ -146,53 +146,53 @@ export default function Navbar() {
         }`}
       >
         <div className="overflow-hidden">
-          <div className="flex flex-col bg-[var(--color-bg)] border-y border-[var(--color-border)]">
+          <div className="flex flex-col bg-bg border-y border-border">
             <Link
               href="/"
-              className="px-5 py-4 border-b border-[var(--color-border-light)] type-label text-[var(--color-dark)] hover:bg-[var(--color-dark)] hover:text-[var(--color-bg)] transition-colors"
-              onClick={() => setMenuOpen(false)}
-            >
-              Home
-            </Link>
-            <Link
-              href="/memos"
-              className="px-5 py-4 border-b border-[var(--color-border-light)] type-label text-[var(--color-dark)] hover:bg-[var(--color-dark)] hover:text-[var(--color-bg)] transition-colors"
-              onClick={() => setMenuOpen(false)}
-            >
-              Memos
-            </Link>
-            <Link
-              href="/content"
-              className="px-5 py-4 border-b border-[var(--color-border-light)] type-label text-[var(--color-dark)] hover:bg-[var(--color-dark)] hover:text-[var(--color-bg)] transition-colors"
-              onClick={() => setMenuOpen(false)}
-            >
-              Content
-            </Link>
-            <Link
-              href="/projects"
-              className="px-5 py-4 border-b border-[var(--color-border-light)] type-label text-[var(--color-dark)] hover:bg-[var(--color-dark)] hover:text-[var(--color-bg)] transition-colors"
-              onClick={() => setMenuOpen(false)}
-            >
-              Projects
-            </Link>
-            <Link
-              href="/about"
-              className="px-5 py-4 border-b border-[var(--color-border-light)] type-label text-[var(--color-dark)] hover:bg-[var(--color-dark)] hover:text-[var(--color-bg)] transition-colors"
-              onClick={() => setMenuOpen(false)}
-            >
-              About Us
-            </Link>
-            <a
-              href="https://shop.buildcanada.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-5 py-4 border-b border-[var(--color-border-light)] type-label text-[var(--color-dark)] hover:bg-[var(--color-dark)] hover:text-[var(--color-bg)] transition-colors"
+               className="px-5 py-5 border-b border-border-light type-label text-dark hover:bg-dark hover:text-bg transition-colors"
+               onClick={() => setMenuOpen(false)}
+             >
+               Home
+             </Link>
+             <Link
+               href="/memos"
+               className="px-5 py-5 border-b border-border-light type-label text-dark hover:bg-dark hover:text-bg transition-colors"
+               onClick={() => setMenuOpen(false)}
+             >
+               Memos
+             </Link>
+             <Link
+               href="/content"
+               className="px-5 py-5 border-b border-border-light type-label text-dark hover:bg-dark hover:text-bg transition-colors"
+               onClick={() => setMenuOpen(false)}
+             >
+               Content
+             </Link>
+             <Link
+               href="/projects"
+               className="px-5 py-5 border-b border-border-light type-label text-dark hover:bg-dark hover:text-bg transition-colors"
+               onClick={() => setMenuOpen(false)}
+             >
+               Projects
+             </Link>
+             <Link
+               href="/about"
+               className="px-5 py-5 border-b border-border-light type-label text-dark hover:bg-dark hover:text-bg transition-colors"
+               onClick={() => setMenuOpen(false)}
+             >
+               About Us
+             </Link>
+             <a
+               href="https://shop.buildcanada.com"
+               target="_blank"
+               rel="noopener noreferrer"
+               className="px-5 py-5 border-b border-border-light type-label text-dark hover:bg-dark hover:text-bg transition-colors"
               onClick={() => setMenuOpen(false)}
             >
               Shop
             </a>
-            <button
-              className="px-5 py-4 bg-[var(--color-dark)] type-label text-[var(--color-bg)] text-left cursor-pointer"
+             <button
+                className="px-5 py-5 bg-dark type-label text-bg text-left cursor-pointer"
               onClick={() => {
                 setMenuOpen(false);
                 openModal("navbar");

@@ -36,11 +36,11 @@ export default function BuilderMPWidget({ project }: WidgetProps) {
           </span>
         </div>
 
-        <p className="font-display text-[1.25rem] font-normal leading-[1.2] text-[var(--color-dark)]">
+        <p className="font-display text-[1.25rem] font-normal leading-[1.2] text-charcoal-1000">
           Fixing Mobile Dead Zones and Coverage Maps
         </p>
 
-        <div className="flex items-center gap-2 type-mono-sm text-[var(--color-steel-500)]">
+        <div className="flex items-center gap-2 type-mono-sm text-charcoal-600">
           <span className="font-medium">Bill C-268</span>
           <span className="opacity-40">|</span>
           <span>Mar 12, 2026</span>
@@ -53,7 +53,7 @@ export default function BuilderMPWidget({ project }: WidgetProps) {
               className="type-mono-sm font-medium px-2 py-0.5 rounded-full"
               style={{
                 backgroundColor: "var(--color-steel-50)",
-                color: "var(--color-steel-600)",
+                color: "var(--color-charcoal-600)",
               }}
             >
               {tag}

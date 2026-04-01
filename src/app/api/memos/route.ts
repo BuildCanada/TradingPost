@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-export async function GET(req: NextRequest) {
+export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(req.url);
+    const { searchParams } = new URL(request.url);
     const featured = searchParams.get("featured");
 
     const where = featured === "true" ? { featured: true } : {};
@@ -13,6 +13,7 @@ export async function GET(req: NextRequest) {
     const memos = await prisma.memo.findMany({
       where,
       orderBy: { createdAt: "desc" },
+      include: { author: true },
     });
     return NextResponse.json(memos);
   } catch (err) {
@@ -21,26 +22,26 @@ export async function GET(req: NextRequest) {
   }
 }
 
-export async function POST(req: NextRequest) {
-  const data = await req.json();
+export async function POST(request: Request) {
+  const data = await request.json();
   const memo = await prisma.memo.create({
     data: {
       title: data.title,
       slug: data.slug,
-      author: data.author,
-      authorImage: data.authorImage || null,
+      authorId: data.authorId,
       keyMessage1: data.keyMessage1,
-      keyMessage2: data.keyMessage2 || null,
-      keyMessage3: data.keyMessage3 || null,
+      keyMessage2: data.keyMessage2 ?? null,
+      keyMessage3: data.keyMessage3 ?? null,
       body: data.body,
-      supporters: data.supporters || null,
-      splashImage: data.splashImage || null,
-      seoImage: data.seoImage || null,
-      category: data.category || null,
+      supporters: data.supporters ?? null,
+      splashImage: data.splashImage ?? null,
+      seoImage: data.seoImage ?? null,
+      category: data.category ?? null,
       publishedAt: data.publishedAt ? new Date(data.publishedAt) : null,
-      twitterEmbed: data.twitterEmbed || null,
+      twitterEmbed: data.twitterEmbed ?? null,
       featured: data.featured ?? false,
     },
+    include: { author: true },
   });
   return NextResponse.json(memo, { status: 201 });
 }

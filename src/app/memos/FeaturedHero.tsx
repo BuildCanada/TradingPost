@@ -81,12 +81,16 @@ export default function FeaturedHero({ memos }: { memos: MemoItem[] }) {
                   <button
                     key={i}
                     onClick={() => switchTo(i)}
-                    className={cn(
-                      "h-[3px] w-5 bg-bg transition-opacity duration-300",
-                      activeIndex === i ? "opacity-90" : "opacity-35"
-                    )}
+                    className="w-12 h-12 flex items-center justify-center cursor-pointer"
                     aria-label={`Show featured memo ${i + 1}`}
-                  />
+                  >
+                    <span
+                      className={cn(
+                        "block h-[3px] w-5 bg-bg transition-opacity duration-300",
+                        activeIndex === i ? "opacity-90" : "opacity-35"
+                      )}
+                    />
+                  </button>
                 ))}
               </div>
             )}

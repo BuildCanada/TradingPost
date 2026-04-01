@@ -106,17 +106,23 @@ export default function FeaturedMemos({ heading, memos }: { heading?: string; me
           )}
           {hasTwoFeatured && (
             <div className="absolute top-4 right-4 z-20 flex gap-1.5">
-              {[0, 1].map((i) => (
-                <button
-                  key={i}
-                  onClick={() => switchTo(i)}
-                  className={cn(
-                    "h-[3px] w-5 bg-bg transition-opacity duration-300",
-                    activeIndex === i ? "opacity-90" : "opacity-35"
-                  )}
-                  aria-label={`Show featured memo ${i + 1}`}
-                />
-              ))}
+               {[0, 1].map((i) => (
+                 <button
+                   key={i}
+                   onClick={() => switchTo(i)}
+                   className={cn(
+                     "w-12 h-12 flex items-center justify-center cursor-pointer"
+                   )}
+                   aria-label={`Show featured memo ${i + 1}`}
+                 >
+                   <span
+                     className={cn(
+                       "block h-[3px] w-5 bg-bg transition-opacity duration-300",
+                       activeIndex === i ? "opacity-90" : "opacity-35"
+                     )}
+                   />
+                 </button>
+               ))}
             </div>
           )}
         </div>

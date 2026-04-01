@@ -226,30 +226,34 @@ export default function TestimonialsBlock({ testimonials }: { testimonials: Test
         {testimonials.length > 1 && (
           <div className="flex items-center justify-center gap-4 mt-3">
             <button
-              aria-label="Previous testimonial"
-              onClick={goPrev}
-              className="w-[28px] h-[28px] border border-charcoal-300 flex items-center justify-center text-[15px] text-charcoal-600 hover:border-charcoal-1000 transition-colors"
-            >
-              &#8249;
-            </button>
-            <div className="flex gap-1.5">
-              {testimonials.map((_, i) => (
-                <button
-                  key={i}
-                  aria-label={`Go to testimonial ${i + 1}`}
-                  onClick={() => setCurrent(i)}
-                  className={`h-[6px] rounded-full transition-all ${
-                    i === current
-                      ? "w-[14px] bg-charcoal-1000"
-                      : "w-[6px] bg-charcoal-300 hover:bg-charcoal-600"
-                  }`}
-                />
-              ))}
-            </div>
-            <button
-              aria-label="Next testimonial"
-              onClick={goNext}
-              className="w-[28px] h-[28px] border border-charcoal-300 flex items-center justify-center text-[15px] text-charcoal-600 hover:border-charcoal-1000 transition-colors"
+               aria-label="Previous testimonial"
+               onClick={goPrev}
+               className="w-12 h-12 border border-charcoal-300 flex items-center justify-center text-[15px] text-charcoal-600 hover:border-charcoal-1000 transition-colors"
+             >
+               &#8249;
+             </button>
+             <div className="flex gap-1.5">
+               {testimonials.map((_, i) => (
+                 <button
+                   key={i}
+                   aria-label={`Go to testimonial ${i + 1}`}
+                   onClick={() => setCurrent(i)}
+                   className="w-12 h-12 flex items-center justify-center cursor-pointer"
+                 >
+                   <span
+                     className={`block rounded-full transition-all ${
+                       i === current
+                         ? "h-[6px] w-[14px] bg-charcoal-1000"
+                         : "h-[6px] w-[6px] bg-charcoal-300 hover:bg-charcoal-600"
+                     }`}
+                   />
+                 </button>
+               ))}
+             </div>
+             <button
+               aria-label="Next testimonial"
+               onClick={goNext}
+               className="w-12 h-12 border border-charcoal-300 flex items-center justify-center text-[15px] text-charcoal-600 hover:border-charcoal-1000 transition-colors"
             >
               &#8250;
             </button>

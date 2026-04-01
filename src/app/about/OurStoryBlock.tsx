@@ -95,12 +95,12 @@ const storyItems = [
           <div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/assets/images/productivity-growth-by-country-oecd.webp" alt="Bar chart showing OECD productivity growth by country from 2019 to 2024, with Canada ranking near the bottom at less than 0.5 percent" className="w-full border border-border-light" />
-            <p className="type-label-sm text-text-muted mt-1">Source: <a href="https://data.oecd.org/lprdty/gdp-per-hour-worked.htm" target="_blank" rel="noopener noreferrer" className="underline hover:text-accent transition-colors">OECD</a></p>
+            <p className="type-label-sm text-text-secondary mt-1">Source: <a href="https://data.oecd.org/lprdty/gdp-per-hour-worked.htm" target="_blank" rel="noopener noreferrer" className="underline hover:text-accent transition-colors">OECD</a></p>
           </div>
           <div>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/assets/images/canada-falling-standard-of-living.webp" alt="Line chart comparing Canada and U.S. real GDP per capita from 2016 to 2023, showing Canada's standard of living falling behind" className="w-full border border-border-light" />
-            <p className="type-label-sm text-text-muted mt-1">Source: <a href="https://www.theglobeandmail.com/business/commentary/article-cost-of-living-crisis-data-perception/" target="_blank" rel="noopener noreferrer" className="underline hover:text-accent transition-colors">The Globe and Mail</a>, NBF Economics and Strategy</p>
+            <p className="type-label-sm text-text-secondary mt-1">Source: <a href="https://www.theglobeandmail.com/business/commentary/article-cost-of-living-crisis-data-perception/" target="_blank" rel="noopener noreferrer" className="underline hover:text-accent transition-colors">The Globe and Mail</a>, NBF Economics and Strategy</p>
           </div>
         </div>
 
@@ -109,7 +109,7 @@ const storyItems = [
         </p>
 
         <div>
-          <p className="type-label-sm text-text-muted mb-2">The First 3 Build Canada Memos</p>
+          <p className="type-label-sm text-text-secondary mb-2">The First 3 Build Canada Memos</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             {firstMemos.map((memo) => (
               <Link
@@ -147,7 +147,7 @@ const storyItems = [
         <div className="max-w-[480px]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/assets/images/shopify-sred-policy-reform-article.webp" alt="Canadian Press article headline: Shopify helps feds with key piece of budget policy on SR&ED reform" className="w-full border border-border-light" />
-          <p className="type-label-sm text-text-muted mt-1">Source: <a href="https://www.thecanadianpressnews.ca/national/ottawa-is-rebooting-its-relationship-with-the-tech-industry-advocates-say/article_38f627a3-3087-58a1-bb49-aeeb1993582e.html" target="_blank" rel="noopener noreferrer" className="underline hover:text-accent transition-colors">The Canadian Press</a>, Nov 2025</p>
+          <p className="type-label-sm text-text-secondary mt-1">Source: <a href="https://www.thecanadianpressnews.ca/national/ottawa-is-rebooting-its-relationship-with-the-tech-industry-advocates-say/article_38f627a3-3087-58a1-bb49-aeeb1993582e.html" target="_blank" rel="noopener noreferrer" className="underline hover:text-accent transition-colors">The Canadian Press</a>, Nov 2025</p>
         </div>
 
         <p className="type-body text-dark leading-relaxed">
@@ -217,7 +217,7 @@ export default function OurStoryBlock() {
 
                     <div className="flex-1">
                       <AccordionTrigger
-                        className="[&_[data-slot=accordion-trigger-icon]]:hidden flex items-center justify-between cursor-pointer group w-full text-left h-[44px] px-3 transition-colors rounded-none border-transparent hover:no-underline py-0 [&]:bg-transparent"
+                         className="[&_[data-slot=accordion-trigger-icon]]:hidden flex items-center justify-between cursor-pointer group w-full text-left h-[48px] px-3 transition-colors rounded-none border-transparent hover:no-underline py-0 [&]:bg-transparent"
                       >
                         <h3
                           className={`type-h2 transition-colors duration-200 ${
@@ -252,7 +252,7 @@ export default function OurStoryBlock() {
                                       target="_blank"
                                       rel="noopener noreferrer"
                                       aria-label={label}
-                                      className="w-7 h-7 flex items-center justify-center hover:opacity-70 transition-opacity"
+                                       className="w-12 h-12 flex items-center justify-center hover:opacity-70 transition-opacity"
                                     >
                                       {/* eslint-disable-next-line @next/next/no-img-element */}
                                       <img src={icon} alt={label} width={16} height={16} className="brightness-0 opacity-50 hover:opacity-90 transition-opacity" />

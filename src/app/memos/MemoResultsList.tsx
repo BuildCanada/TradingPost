@@ -119,7 +119,7 @@ export default function MemoResultsList({ memos }: { memos: MemoItem[] }) {
           {visibleCount < filtered.length && (
             <button
               onClick={loadMore}
-              className="mt-6 mx-auto flex items-center gap-2 h-11 px-6 border border-border-light type-label text-text-secondary hover:text-dark hover:border-dark transition-colors"
+               className="mt-6 mx-auto flex items-center gap-2 h-12 px-6 border border-border-light type-label text-text-secondary hover:text-dark hover:border-dark transition-colors"
             >
               Show More
               <svg

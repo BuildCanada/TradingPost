@@ -69,7 +69,7 @@ export default async function ContentItemPage({
       </Link>
 
       {item.image && (
-        <div className="relative w-full h-[240px] md:h-[360px] mt-6 rounded overflow-hidden bg-border-light">
+        <div className="relative w-full h-[240px] md:h-[360px] mt-6 overflow-hidden bg-border-light">
           <Image
             src={item.image}
             alt={item.title || ""}
@@ -91,16 +91,24 @@ export default async function ContentItemPage({
       {item.author && (
         <div className="flex items-center gap-3 mt-5 pb-5 border-b border-border-light">
           {item.authorPhoto ? (
-            <Image
-              src={item.authorPhoto}
-              alt={item.author}
-              width={36}
-              height={36}
-              className="rounded-full object-cover"
-              priority
-            />
+            <div
+              className="w-9 h-9 overflow-hidden shrink-0"
+              style={{ borderRadius: 2 }}
+            >
+              <Image
+                src={item.authorPhoto}
+                alt={item.author}
+                width={36}
+                height={36}
+                className="object-cover"
+                priority
+              />
+            </div>
           ) : (
-            <div className="w-9 h-9 rounded-full bg-border-light flex items-center justify-center type-label-sm text-text-secondary">
+            <div
+              className="w-9 h-9 bg-border-light flex items-center justify-center type-label-sm text-text-secondary shrink-0"
+              style={{ borderRadius: 2 }}
+            >
               {item.author.charAt(0).toUpperCase()}
             </div>
           )}

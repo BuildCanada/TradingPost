@@ -1,46 +1,54 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(
-  _req: NextRequest,
+  _request: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
-  const memo = await prisma.memo.findUnique({ where: { slug } });
-  if (!memo) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  const memo = await prisma.memo.findUnique({
+    where: { slug },
+    include: { author: true },
+  });
+  if (!memo) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
   return NextResponse.json(memo);
 }
 
 export async function PATCH(
-  req: NextRequest,
+  request: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;
-  const data = await req.json();
+  const body = await request.json();
+  const data: Record<string, unknown> = {};
+  if (body.title !== undefined) data.title = body.title;
+  if (body.slug !== undefined) data.slug = body.slug;
+  if (body.authorId !== undefined) data.authorId = body.authorId;
+  if (body.keyMessage1 !== undefined) data.keyMessage1 = body.keyMessage1;
+  if (body.keyMessage2 !== undefined) data.keyMessage2 = body.keyMessage2;
+  if (body.keyMessage3 !== undefined) data.keyMessage3 = body.keyMessage3;
+  if (body.body !== undefined) data.body = body.body;
+  if (body.supporters !== undefined) data.supporters = body.supporters;
+  if (body.splashImage !== undefined) data.splashImage = body.splashImage;
+  if (body.seoImage !== undefined) data.seoImage = body.seoImage;
+  if (body.category !== undefined) data.category = body.category;
+  if (body.publishedAt !== undefined)
+    data.publishedAt = body.publishedAt ? new Date(body.publishedAt) : null;
+  if (body.twitterEmbed !== undefined) data.twitterEmbed = body.twitterEmbed;
+  if (body.featured !== undefined) data.featured = body.featured;
 
-  const update: Record<string, unknown> = {};
-  if (data.title !== undefined) update.title = data.title;
-  if (data.slug !== undefined) update.slug = data.slug;
-  if (data.author !== undefined) update.author = data.author;
-  if (data.authorImage !== undefined) update.authorImage = data.authorImage;
-  if (data.keyMessage1 !== undefined) update.keyMessage1 = data.keyMessage1;
-  if (data.keyMessage2 !== undefined) update.keyMessage2 = data.keyMessage2;
-  if (data.keyMessage3 !== undefined) update.keyMessage3 = data.keyMessage3;
-  if (data.body !== undefined) update.body = data.body;
-  if (data.supporters !== undefined) update.supporters = data.supporters;
-  if (data.splashImage !== undefined) update.splashImage = data.splashImage;
-  if (data.seoImage !== undefined) update.seoImage = data.seoImage;
-  if (data.category !== undefined) update.category = data.category;
-  if (data.publishedAt !== undefined) update.publishedAt = data.publishedAt ? new Date(data.publishedAt) : null;
-  if (data.twitterEmbed !== undefined) update.twitterEmbed = data.twitterEmbed;
-  if (data.featured !== undefined) update.featured = data.featured;
-
-  const memo = await prisma.memo.update({ where: { slug }, data: update });
+  const memo = await prisma.memo.update({
+    where: { slug },
+    data,
+    include: { author: true },
+  });
   return NextResponse.json(memo);
 }
 
 export async function DELETE(
-  _req: NextRequest,
+  _request: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params;

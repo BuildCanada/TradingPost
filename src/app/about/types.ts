@@ -1,4 +1,4 @@
-export interface TeamMember {
+export interface Person {
   id: string;
   name: string;
   title: string | null;
@@ -6,5 +6,7 @@ export interface TeamMember {
   photo: string | null;
   xUrl: string | null;
   linkedinUrl: string | null;
+  websiteUrl: string | null;
+  bio: string | null;
   order: number;
 }

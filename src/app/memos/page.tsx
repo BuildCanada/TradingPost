@@ -35,11 +35,13 @@ export default async function MemosPage() {
     id: m.id,
     title: m.title,
     slug: m.slug,
-    author: m.author.name,
-    authorImage:
-      m.author.name === "Build Canada"
-        ? "/assets/logos/Logocircle.webp"
-        : m.author.photo,
+    author: {
+      name: m.author.name,
+      photo:
+        m.author.name === "Build Canada"
+          ? "/assets/logos/Logocircle.webp"
+          : m.author.photo,
+    },
     keyMessage1: m.keyMessage1,
     keyMessage2: m.keyMessage2,
     keyMessage3: m.keyMessage3,

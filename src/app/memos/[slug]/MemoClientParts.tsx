@@ -67,8 +67,10 @@ interface RelatedMemo {
   id: string;
   title: string;
   slug: string;
-  author: string;
-  authorImage: string | null;
+  author: {
+    name: string;
+    photo: string | null;
+  };
   category: string | null;
 }
 
@@ -116,11 +118,11 @@ export function RelatedMemos({
             className="flex items-start gap-3 group"
           >
             <div className="w-8 h-8 rounded-full bg-charcoal-300 overflow-hidden shrink-0 mt-0.5">
-              {m.authorImage && (
+              {m.author.photo && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={m.authorImage}
-                  alt={m.author}
+                  src={m.author.photo}
+                  alt={m.author.name}
                   className="w-full h-full object-cover"
                 />
               )}
@@ -130,7 +132,7 @@ export function RelatedMemos({
                 {m.title}
               </h3>
               <p className="type-label-sm text-charcoal-600 mt-0.5">
-                {m.author}
+                {m.author.name}
               </p>
             </div>
           </Link>

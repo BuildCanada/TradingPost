@@ -7,18 +7,15 @@ interface Testimonial {
   id: string;
   name: string;
   quote: string;
+  title: string | null;
+  companyLogo: string | null;
   profilePhoto: string | null;
   splashPhoto: string | null;
   order: number;
 }
 
-function getCompanyLogo(name: string): string | null {
-  if (name.includes("Harley")) return "/assets/logos/shopify-logo.svg";
-  return null;
-}
-
 function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
-  const companyLogo = getCompanyLogo(testimonial.name);
+  const companyLogo = testimonial.companyLogo;
   return (
     <div className="w-full border border-charcoal-300 overflow-hidden bg-linen-100 p-6 md:p-8 flex flex-col relative">
       {/* Company logo background */}
@@ -56,10 +53,7 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
         <div>
           <p className="type-heading text-[14px]">{testimonial.name}</p>
           <p className="text-[12px] text-auburn-800 font-mono uppercase tracking-wide mt-0.5">
-            {testimonial.name.includes("Harley") ? "CEO of Shopify" :
-             testimonial.name.includes("Jeff") || testimonial.name.includes("Adamson") ? "CEO of Neo Financial" :
-             testimonial.name.includes("Helena") || testimonial.name.includes("Lee") ? "Zander's Best Friend & Fiancée" :
-             "TITLE"}
+            {testimonial.title || ""}
           </p>
         </div>
       </div>

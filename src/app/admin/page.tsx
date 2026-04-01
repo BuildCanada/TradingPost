@@ -1054,8 +1054,9 @@ export default function AdminPage() {
                       className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 bg-gray-100 border border-gray-200 rounded-full text-gray-600"
                     >
                       {tag.trim()}
-                      <button
+                       <button
                         type="button"
+                        aria-label={`Remove tag ${tag.trim()}`}
                         onClick={() => {
                           const tags = form.tags.split(",").map(t => t.trim()).filter((_, idx) => idx !== i);
                           setForm(f => ({ ...f, tags: tags.join(", ") }));
@@ -1165,6 +1166,8 @@ export default function AdminPage() {
         <div className="flex items-center gap-3 pt-2">
           <button
             type="button"
+            aria-label="Toggle featured post"
+            aria-pressed={form.featured}
             onClick={() => setForm((f) => ({ ...f, featured: !f.featured }))}
             className={`w-10 h-5 rounded-full relative transition-colors ${
               form.featured ? "bg-black" : "bg-gray-300"
@@ -1584,6 +1587,8 @@ export default function AdminPage() {
         <div className="flex items-center gap-3 pt-2">
           <button
             type="button"
+            aria-label="Toggle featured memo"
+            aria-pressed={memoForm.featured}
             onClick={() =>
               setMemoForm((f) => ({ ...f, featured: !f.featured }))
             }
@@ -2037,6 +2042,8 @@ export default function AdminPage() {
         <div className="flex items-center gap-3 pt-2">
           <button
             type="button"
+            aria-label="Toggle featured project"
+            aria-pressed={projectForm.featured}
             onClick={() => setProjectForm((f) => ({ ...f, featured: !f.featured }))}
             className={`w-10 h-5 rounded-full relative transition-colors ${
               projectForm.featured ? "bg-black" : "bg-gray-300"

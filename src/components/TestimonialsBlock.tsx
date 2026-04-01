@@ -20,7 +20,7 @@ function getCompanyLogo(name: string): string | null {
 function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
   const companyLogo = getCompanyLogo(testimonial.name);
   return (
-    <div className="w-full border border-[var(--color-border-light)] overflow-hidden bg-[var(--color-bg)] p-6 md:p-8 flex flex-col relative">
+    <div className="w-full border border-charcoal-300 overflow-hidden bg-linen-100 p-6 md:p-8 flex flex-col relative">
       {/* Company logo background */}
       {companyLogo && (
         <div
@@ -51,11 +51,11 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
             className="w-[40px] h-[40px] rounded-full object-cover"
           />
         ) : (
-          <div className="w-[40px] h-[40px] rounded-full bg-[var(--color-border-light)]" />
+          <div className="w-[40px] h-[40px] rounded-full bg-charcoal-300" />
         )}
         <div>
           <p className="type-heading text-[14px]">{testimonial.name}</p>
-          <p className="text-[12px] text-[var(--color-accent)] font-mono uppercase tracking-wide mt-0.5">
+          <p className="text-[12px] text-auburn-800 font-mono uppercase tracking-wide mt-0.5">
             {testimonial.name.includes("Harley") ? "CEO of Shopify" :
              testimonial.name.includes("Jeff") || testimonial.name.includes("Adamson") ? "CEO of Neo Financial" :
              testimonial.name.includes("Helena") || testimonial.name.includes("Lee") ? "Zander's Best Friend & Fiancée" :
@@ -142,22 +142,22 @@ export default function TestimonialsBlock({ testimonials }: { testimonials: Test
 
   if (testimonials.length === 0) {
     return (
-      <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px] border-b border-[var(--color-border-light)]">
+      <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px] border-b border-charcoal-300">
         <div className="max-w-[1080px] mx-auto">
           <SectionLabel>Testimonials</SectionLabel>
           <div className="flex justify-center mt-2">
-            <div className="border border-[var(--color-border-light)] w-[380px] max-w-[90vw]">
+            <div className="border border-charcoal-300 w-[380px] max-w-[90vw]">
               <div className="p-5">
                 <div className="space-y-2 mb-4">
-                  <div className="h-[7px] bg-[var(--color-border-light)] rounded-sm w-[95%]" />
-                  <div className="h-[7px] bg-[var(--color-border-light)] rounded-sm w-[80%]" />
-                  <div className="h-[7px] bg-[var(--color-border-light)] rounded-sm w-[60%]" />
+                  <div className="h-[7px] bg-charcoal-300 rounded-sm w-[95%]" />
+                  <div className="h-[7px] bg-charcoal-300 rounded-sm w-[80%]" />
+                  <div className="h-[7px] bg-charcoal-300 rounded-sm w-[60%]" />
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="w-[28px] h-[28px] rounded-full bg-[var(--color-border-light)]" />
+                  <div className="w-[28px] h-[28px] rounded-full bg-charcoal-300" />
                   <div>
-                    <div className="h-[6px] bg-[var(--color-border-light)] rounded-sm w-[70px] mb-1.5" />
-                    <div className="h-[6px] bg-[var(--color-border-light)] rounded-sm w-[50px]" />
+                    <div className="h-[6px] bg-charcoal-300 rounded-sm w-[70px] mb-1.5" />
+                    <div className="h-[6px] bg-charcoal-300 rounded-sm w-[50px]" />
                   </div>
                 </div>
               </div>
@@ -169,7 +169,7 @@ export default function TestimonialsBlock({ testimonials }: { testimonials: Test
   }
 
   return (
-    <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px] border-b border-[var(--color-border-light)]">
+    <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px] border-b border-charcoal-300">
       <div className="max-w-[1080px] mx-auto">
         <SectionLabel>Testimonials</SectionLabel>
 
@@ -226,8 +226,9 @@ export default function TestimonialsBlock({ testimonials }: { testimonials: Test
         {testimonials.length > 1 && (
           <div className="flex items-center justify-center gap-4 mt-3">
             <button
+              aria-label="Previous testimonial"
               onClick={goPrev}
-              className="w-[28px] h-[28px] border border-[var(--color-border-light)] flex items-center justify-center text-[15px] text-[var(--color-text-secondary)] hover:border-[var(--color-dark)] transition-colors"
+              className="w-[28px] h-[28px] border border-charcoal-300 flex items-center justify-center text-[15px] text-charcoal-600 hover:border-charcoal-1000 transition-colors"
             >
               &#8249;
             </button>
@@ -235,18 +236,20 @@ export default function TestimonialsBlock({ testimonials }: { testimonials: Test
               {testimonials.map((_, i) => (
                 <button
                   key={i}
+                  aria-label={`Go to testimonial ${i + 1}`}
                   onClick={() => setCurrent(i)}
                   className={`h-[6px] rounded-full transition-all ${
                     i === current
-                      ? "w-[14px] bg-[var(--color-dark)]"
-                      : "w-[6px] bg-[var(--color-border-light)] hover:bg-[var(--color-text-secondary)]"
+                      ? "w-[14px] bg-charcoal-1000"
+                      : "w-[6px] bg-charcoal-300 hover:bg-charcoal-600"
                   }`}
                 />
               ))}
             </div>
             <button
+              aria-label="Next testimonial"
               onClick={goNext}
-              className="w-[28px] h-[28px] border border-[var(--color-border-light)] flex items-center justify-center text-[15px] text-[var(--color-text-secondary)] hover:border-[var(--color-dark)] transition-colors"
+              className="w-[28px] h-[28px] border border-charcoal-300 flex items-center justify-center text-[15px] text-charcoal-600 hover:border-charcoal-1000 transition-colors"
             >
               &#8250;
             </button>

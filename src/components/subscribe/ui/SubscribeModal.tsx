@@ -51,7 +51,7 @@ export function SubscribeModal() {
               onSuccess={handleClose}
             />
           )}
-          <Dialog.Close className="absolute w-8 h-8 flex items-center justify-center type-label text-charcoal-400 hover:text-charcoal-1000 cursor-pointer" style={{ top: "clamp(1rem, 3vw, 1.5rem)", right: "clamp(1rem, 3vw, 1.5rem)" }}>
+          <Dialog.Close aria-label="Close dialog" className="absolute w-8 h-8 flex items-center justify-center type-label text-charcoal-400 hover:text-charcoal-1000 cursor-pointer" style={{ top: "clamp(1rem, 3vw, 1.5rem)", right: "clamp(1rem, 3vw, 1.5rem)" }}>
             ✕
           </Dialog.Close>
         </Dialog.Popup>

@@ -19,16 +19,18 @@ function DonutChart() {
   const stroke = 12;
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
-  let offset = 0;
+
+  const dashes = segments.map((seg) => (seg.amount / income) * circumference);
+  const offsets = dashes.reduce<number[]>((acc, dash, i) => {
+    acc.push(i === 0 ? 0 : acc[i - 1] + dashes[i - 1]);
+    return acc;
+  }, []);
 
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="shrink-0" aria-hidden="true">
-      {segments.map((seg) => {
-        const pct = seg.amount / income;
-        const dash = pct * circumference;
+      {segments.map((seg, i) => {
+        const dash = dashes[i];
         const gap = circumference - dash;
-        const currentOffset = offset;
-        offset += dash;
         return (
           <circle
             key={seg.label}
@@ -39,7 +41,7 @@ function DonutChart() {
             stroke={seg.color}
             strokeWidth={stroke}
             strokeDasharray={`${dash} ${gap}`}
-            strokeDashoffset={-currentOffset}
+            strokeDashoffset={-offsets[i]}
             style={{ transform: "rotate(-90deg)", transformOrigin: "center" }}
           />
         );

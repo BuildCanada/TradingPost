@@ -206,12 +206,13 @@ function SocialLinks() {
             rel="noopener noreferrer"
             className="w-[53px] h-[53px] border border-border-light flex items-center justify-center hover:border-dark transition-colors group"
           >
-            <img
+            <Image
               src={`/assets/icons/${icon === "X" ? "platform-x-twitter" : icon === "LINKEDIN" ? "platform-linkedin" : icon === "TIKTOK" ? "platform-tiktok" : icon === "IG" ? "platform-instagram" : icon === "SUBSTACK" ? "substack-icon" : "platform-youtube"}.svg`}
               alt={icon}
               width={20}
               height={20}
               className="brightness-0 opacity-40 group-hover:opacity-80 transition-opacity"
+              unoptimized
             />
           </a>
         ))}

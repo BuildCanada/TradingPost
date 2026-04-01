@@ -41,7 +41,7 @@ export default function TradeBarriersWidget({ project }: WidgetProps) {
                 onMouseLeave={() => setHovered(null)}
               >
                 {hovered === s.label && (
-                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 bg-[var(--color-charcoal-1000)] text-white type-mono-sm rounded whitespace-nowrap z-50 pointer-events-none">
+                  <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-2 py-1 bg-dark text-white type-mono-sm rounded whitespace-nowrap z-50 pointer-events-none">
                     {s.count} {s.label}
                   </div>
                 )}
@@ -58,7 +58,7 @@ export default function TradeBarriersWidget({ project }: WidgetProps) {
                   className="w-[7px] h-[7px] rounded-full shrink-0"
                   style={{ backgroundColor: s.color }}
                 />
-                <span className="type-mono-sm text-[var(--color-text-secondary)]">
+                <span className="type-mono-sm text-text-secondary">
                   {s.label}
                 </span>
               </div>

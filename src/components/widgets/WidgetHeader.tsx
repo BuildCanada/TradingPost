@@ -13,16 +13,16 @@ export default function WidgetHeader({
 
   return (
     <div>
-      <span className="type-label font-bold text-[var(--color-text-secondary)]">
+      <span className="type-label font-bold text-text-secondary">
         {project.title}
       </span>
       {heading && (
-        <h3 className="font-display text-[1.25rem] lg:text-[1.5rem] font-normal leading-[1.2] text-[var(--color-dark)] mt-2">
+        <h3 className="font-display text-[1.25rem] lg:text-[1.5rem] font-normal leading-[1.2] text-dark mt-2">
           {heading}
         </h3>
       )}
       {desc && (
-        <p className="type-body-sm text-[var(--color-text-secondary)] mt-2">
+        <p className="type-body-sm text-text-secondary mt-2">
           {desc}
         </p>
       )}

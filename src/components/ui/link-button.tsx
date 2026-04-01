@@ -17,8 +17,7 @@ export function LinkButton({
   showArrow = false 
 }: LinkButtonProps) {
   const baseStyles = "type-mono uppercase inline-flex items-center gap-2 py-4 px-5 border transition-colors";
-  const textStyle = { fontSize: 'clamp(.75rem, .571rem + .476vw, .9rem)' };
-  
+
   const variants = {
     primary: "border-charcoal-900 text-bg bg-charcoal-900 hover:bg-dark hover:text-bg",
     accent: "border-accent text-white bg-accent hover:opacity-80 transition-opacity",

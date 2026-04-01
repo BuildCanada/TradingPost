@@ -14,10 +14,10 @@ export default async function EventsTimeline() {
   } catch {}
 
   return (
-    <div className="py-12">
+    <div className="py-12 flex flex-col h-full">
       <span className="type-label text-dark block pb-4">Events</span>
-      {events.length === 0 ? (
-        <div className="border-t border-l border-border-light">
+      <div className="border-t border-l border-border-light flex-1">
+        {events.length === 0 ? (
           <div className="border-b border-r border-border-light p-6 text-center">
             <p className="type-caption text-text-secondary">
               No upcoming events
@@ -31,24 +31,24 @@ export default async function EventsTimeline() {
               View all events →
             </a>
           </div>
-        </div>
-      ) : (
-        <div className="border-t border-l border-border-light">
-          {events.map((event) => (
-            <EventCard key={event.id} event={event} />
-          ))}
-          <div className="border-b border-r border-border-light p-4">
-            <a
-              href="https://lu.ma/cal-KUFO2yscrfWr7RV"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="type-label text-accent hover:underline"
-            >
-              View all events →
-            </a>
-          </div>
-        </div>
-      )}
+        ) : (
+          <>
+            {events.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
+            <div className="border-b border-r border-border-light p-4">
+              <a
+                href="https://lu.ma/cal-KUFO2yscrfWr7RV"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="type-label text-accent hover:underline"
+              >
+                View all events →
+              </a>
+            </div>
+          </>
+        )}
+      </div>
     </div>
   );
 }

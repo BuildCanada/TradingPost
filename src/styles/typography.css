@@ -27,11 +27,11 @@ body {
 /*******************************************************************************
  * Display Scale — Hero/Feature Headlines
  * 
- * Uses Söhne Kraftig (weight 500)
- * Fluid sizing for clamp) for marketing/content pages
+ * Uses Söhne Kraftig (weight 400)
+ * Fluid sizing clamp() for marketing/content pages
  ******************************************************************************/
 
-.type-display {
+@utility type-display {
   font-family: var(--font-display);
   font-weight: 400;
   font-size: clamp(2.5rem, 6vw, 4.5rem);
@@ -39,7 +39,7 @@ body {
   letter-spacing: -0.126rem;
 }
 
-.type-display-sm {
+@utility type-display-sm {
   font-family: var(--font-display);
   font-weight: 500;
   font-size: clamp(2rem, 5vw, 3rem);
@@ -54,14 +54,14 @@ body {
  * Fluid sizing for marketing/content pages
  ******************************************************************************/
 
-.type-title {
+@utility type-title {
   font-family: var(--font-display);
   font-weight: 500;
   font-size: clamp(1.75rem, 4vw, 2.5rem);
   line-height: 1.2;
 }
 
-.type-title-sm {
+@utility type-title-sm {
   font-family: var(--font-display);
   font-weight: 500;
   font-size: clamp(1.5rem, 3vw, 2rem);
@@ -71,11 +71,11 @@ body {
 /*******************************************************************************
  * Heading Scale — Component Headings
  * 
- * Uses Söhne Kraftig (weight 500-600)
+ * Uses Söhne Kraftig (weight 400)
  * Fixed rem scale for consistent UI
  ******************************************************************************/
 
-.type-h1 {
+@utility type-h1 {
   font-family: var(--font-display);
   font-weight: 400;
   font-size: 1.75rem;
@@ -83,7 +83,7 @@ body {
   letter-spacing: -0.015em;
 }
 
-.type-h2 {
+@utility type-h2 {
   font-family: var(--font-display);
   font-weight: 400;
   font-size: 1.95rem;
@@ -91,14 +91,14 @@ body {
   letter-spacing: -0.015em;
 }
 
-.type-h3 {
+@utility type-h3 {
   font-family: var(--font-display);
   font-weight: 400;
   font-size: 1.5rem;
   line-height: 1.2;
 }
 
-.type-h4 {
+@utility type-h4 {
   font-family: var(--font-display);
   font-weight: 400;
   font-size: 1.125rem;
@@ -113,7 +113,7 @@ body {
  * Includes measure control (65ch max)
  ******************************************************************************/
 
-.type-body {
+@utility type-body {
   font-family: var(--font-body);
   font-size: clamp(1.25rem, 1.071rem + 0.476vw, 1.5rem);
   line-height: 1.6;
@@ -122,7 +122,7 @@ body {
   max-width: 65ch;
 }
 
-.type-body-lg {
+@utility type-body-lg {
   font-family: var(--font-body);
   font-size: clamp(1.25rem, 1.071rem + 0.475vw, 1.5rem);
   line-height: 1.6;
@@ -130,7 +130,7 @@ body {
   max-width: 65ch;
 }
 
-.type-body-sm {
+@utility type-body-sm {
   font-family: var(--font-body);
   font-size: 1rem;
   line-height: 1.5;
@@ -138,7 +138,7 @@ body {
   max-width: 65ch;
 }
 
-.type-default {
+@utility type-default {
   font-family: var(--font-body);
   font-size: 1rem;
   line-height: 1.6;
@@ -148,13 +148,13 @@ body {
 }
 
 /*******************************************************************************
- * Label Scale — Eyebrows, Buttons. Captions
+ * Label Scale — Eyebrows, Buttons, Captions
  * 
  * Uses Founders Grotesk Mono (weight 500)
  * Uppercase with generous letter-spacing
  ******************************************************************************/
 
-.type-label {
+@utility type-label {
   font-family: var(--font-label);
   font-size: 0.75rem;
   line-height: 1.3;
@@ -163,7 +163,7 @@ body {
   letter-spacing: 0.14em;
 }
 
-.type-label-sm {
+@utility type-label-sm {
   font-family: var(--font-label);
   font-size: 0.625rem;
   line-height: 1.3;
@@ -178,7 +178,7 @@ body {
  * Uses Financier Text (weight 400)
  ******************************************************************************/
 
-.type-caption {
+@utility type-caption {
   font-family: var(--font-body);
   font-size: 0.875rem;
   line-height: 1.5;
@@ -192,14 +192,14 @@ body {
  * Tabular numbers for data alignment
  ******************************************************************************/
 
-.type-mono {
+@utility type-mono {
   font-family: var(--font-label);
   font-size: 0.875rem;
   line-height: 1.4;
   font-variant-numeric: tabular-nums;
 }
 
-.type-mono-sm {
+@utility type-mono-sm {
   font-family: var(--font-label);
   font-size: 0.75rem;
   line-height: 1.4;
@@ -210,7 +210,7 @@ body {
  * Data/Number Utilities
  ******************************************************************************/
 
-.type-data {
+@utility type-data {
   font-family: var(--font-label);
   font-variant-numeric: tabular-nums;
   font-size: inherit;
@@ -221,7 +221,7 @@ body {
  * Lead Text — Intro paragraphs, pull quotes
  ******************************************************************************/
 
-.type-lead {
+@utility type-lead {
   font-family: var(--font-body);
   font-size: clamp(1.125rem, 1rem + 0.3vw, 1.375rem);
   line-height: 1.5;
@@ -233,7 +233,7 @@ body {
  * Button Text
  ******************************************************************************/
 
-.type-button {
+@utility type-button {
   font-family: var(--font-label);
   font-size: 0.75rem;
   font-weight: 500;

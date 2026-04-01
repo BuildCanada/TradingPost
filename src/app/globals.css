@@ -251,49 +251,31 @@ body {
 }
 
 .prose-bc h1 {
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: clamp(2.5rem, 5vw, 4.625rem);
-  line-height: 1.1;
-  letter-spacing: -0.015em;
+  @apply type-display;
   margin-top: 1.8em;
   margin-bottom: 0.6em;
 }
 
 .prose-bc h2 {
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: 1.95rem;
-  line-height: 1.1;
-  letter-spacing: -0.015em;
+  @apply type-h2;
   margin-top: 1.8em;
   margin-bottom: 0.6em;
 }
 
 .prose-bc h3 {
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: 1.5rem;
-  line-height: 1.2;
+  @apply type-h3;
   margin-top: 1.8em;
   margin-bottom: 0.6em;
 }
 
 .prose-bc h4 {
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: 1.125rem;
-  line-height: 1.3;
+  @apply type-h4;
   margin-top: 1.8em;
   margin-bottom: 0.6em;
 }
 
 .prose-bc p {
-  font-family: var(--font-body);
-  font-size: clamp(1.25rem, 1.071rem + 0.476vw, 1.5rem);
-  line-height: 1.6;
-  font-weight: 400;
-  letter-spacing: -0.015rem;
+  @apply type-body;
   margin-bottom: 1.2em;
 }
 
@@ -304,9 +286,7 @@ body {
 }
 
 .prose-bc li {
-  font-family: var(--font-body);
-  font-size: clamp(1.125rem, 1rem + 0.3vw, 1.375rem);
-  line-height: 1.6;
+  @apply type-lead;
   margin-bottom: 0.4em;
 }
 
@@ -319,12 +299,11 @@ body {
 }
 
 .prose-bc a {
-  color: var(--color-accent);
-  text-decoration: underline;
+  @apply text-accent underline;
 }
 
 .prose-bc code {
-  font-family: var(--font-mono);
+  @apply type-mono;
   font-size: 0.9em;
   background: var(--color-border-light);
   padding: 2px 5px;

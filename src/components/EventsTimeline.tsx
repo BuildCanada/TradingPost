@@ -1,4 +1,3 @@
-import SectionLabel from "@/components/SectionLabel";
 import EventCard from "@/components/EventCard";
 import { LumaEvent } from "@/lib/luma/types";
 
@@ -15,11 +14,11 @@ export default async function EventsTimeline() {
   } catch {}
 
   return (
-    <>
-      <SectionLabel>Events</SectionLabel>
-      <div className="mt-2">
-        {events.length === 0 ? (
-          <div className="border border-border-light p-6 text-center">
+    <div className="py-12">
+      <span className="type-label text-dark block pb-4">Events</span>
+      {events.length === 0 ? (
+        <div className="border-t border-l border-border-light">
+          <div className="border-b border-r border-border-light p-6 text-center">
             <p className="type-caption text-text-secondary">
               No upcoming events
             </p>
@@ -32,22 +31,24 @@ export default async function EventsTimeline() {
               View all events →
             </a>
           </div>
-        ) : (
-          <div className="space-y-3">
-            {events.map((event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
+        </div>
+      ) : (
+        <div className="border-t border-l border-border-light">
+          {events.map((event) => (
+            <EventCard key={event.id} event={event} />
+          ))}
+          <div className="border-b border-r border-border-light p-4">
             <a
               href="https://lu.ma/cal-KUFO2yscrfWr7RV"
               target="_blank"
               rel="noopener noreferrer"
-              className="type-label text-accent hover:underline block pt-2"
+              className="type-label text-accent hover:underline"
             >
               View all events →
             </a>
           </div>
-        )}
-      </div>
-    </>
+        </div>
+      )}
+    </div>
   );
 }

@@ -238,7 +238,7 @@ function FeedAndEvents() {
           <div className="border-t border-border-light" />
         </div>
 
-        <div className="w-full md:w-[500px] pt-[26px] pb-[36px]">
+        <div className="w-full md:w-[500px]">
           <EventsTimeline />
         </div>
       <div className="w-full min-w-0">

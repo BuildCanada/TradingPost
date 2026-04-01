@@ -3,6 +3,9 @@ import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import SectionLabel from "@/components/SectionLabel";
 import MemosListClient from "./MemosListClient";
+import { buildGraph } from "@/lib/schemas/graph";
+import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
+import { generateBreadcrumbSchema } from "@/lib/schemas/generators/breadcrumb";
 
 export const metadata: Metadata = {
   title: "Memos",
@@ -25,37 +28,51 @@ export const metadata: Metadata = {
 export default async function MemosPage() {
   const memos = await prisma.memo.findMany({
     orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
-    select: {
-      id: true,
-      title: true,
-      slug: true,
-      author: true,
-      authorImage: true,
-      keyMessage1: true,
-      keyMessage2: true,
-      keyMessage3: true,
-      splashImage: true,
-      seoImage: true,
-      category: true,
-      featured: true,
-      publishedAt: true,
-      createdAt: true,
-    },
+    include: { author: true },
   });
 
-  // Serialize dates for the client component
   const serialized = memos.map((m) => ({
-    ...m,
+    id: m.id,
+    title: m.title,
+    slug: m.slug,
+    author: m.author.name,
     authorImage:
-      m.author === "Build Canada"
+      m.author.name === "Build Canada"
         ? "/assets/logos/Logocircle.webp"
-        : m.authorImage,
+        : m.author.photo,
+    keyMessage1: m.keyMessage1,
+    keyMessage2: m.keyMessage2,
+    keyMessage3: m.keyMessage3,
+    splashImage: m.splashImage,
+    seoImage: m.seoImage,
+    category: m.category,
+    featured: m.featured,
     publishedAt: m.publishedAt?.toISOString() ?? null,
     createdAt: m.createdAt.toISOString(),
   }));
 
+  let siteConfig = await prisma.siteConfig.findUnique({ where: { id: "site" } });
+  if (!siteConfig) {
+    siteConfig = await prisma.siteConfig.create({ data: { id: "site" } });
+  }
+  const configData = {
+    orgName: siteConfig.orgName,
+    orgDescription: siteConfig.orgDescription,
+    siteUrl: siteConfig.siteUrl,
+    logoUrl: siteConfig.logoUrl,
+    socialLinks: siteConfig.socialLinks,
+  };
+  const jsonLd = buildGraph(
+    generateOrganizationSchema(configData),
+    generateBreadcrumbSchema("/memos", "Memos", siteConfig.siteUrl)
+  );
+
   return (
     <div className="mx-[10px] my-[10px] border border-border-light bg-bg">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="animate-fade-in" style={{ animationDelay: "0s" }}>
         <section className="relative px-5 border-b border-border-light overflow-hidden">
           <Image

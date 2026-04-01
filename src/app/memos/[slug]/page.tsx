@@ -5,16 +5,15 @@ import Link from "next/link";
 import Image from "next/image";
 import { TwitterEmbed, MemoSubscribe, RelatedMemos } from "./MemoClientParts";
 import { ShareSection } from "@/components/share";
-import { createAuthor } from "@/lib/schemas";
-
-/* ─── Static Params (pre-render all memo pages) ─── */
+import { buildGraph } from "@/lib/schemas/graph";
+import { generateArticleSchema } from "@/lib/schemas/generators/article";
+import { generateBreadcrumbSchema } from "@/lib/schemas/generators/breadcrumb";
+import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
 
 export async function generateStaticParams() {
   const memos = await prisma.memo.findMany({ select: { slug: true } });
   return memos.map((m) => ({ slug: m.slug }));
 }
-
-/* ─── Dynamic Metadata ─── */
 
 export async function generateMetadata({
   params,
@@ -22,7 +21,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const memo = await prisma.memo.findUnique({ where: { slug } });
+  const memo = await prisma.memo.findUnique({ where: { slug }, include: { author: true } });
 
   if (!memo) {
     return { title: "Memo Not Found | Build Canada" };
@@ -40,7 +39,7 @@ export async function generateMetadata({
       description,
       type: "article",
       publishedTime: memo.publishedAt?.toISOString() ?? memo.createdAt.toISOString(),
-      authors: [memo.author],
+      authors: [memo.author.name],
       ...(image && { images: [{ url: image }] }),
     },
     twitter: {
@@ -52,22 +51,20 @@ export async function generateMetadata({
   };
 }
 
-/* ─── Page ─── */
-
 export default async function MemoDetailPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const memo = await prisma.memo.findUnique({ where: { slug } });
+  const memo = await prisma.memo.findUnique({ where: { slug }, include: { author: true } });
 
   if (!memo) notFound();
 
   const authorImage =
-    memo.author === "Build Canada"
+    memo.author.name === "Build Canada"
       ? "/assets/logos/Logocircle.webp"
-      : memo.authorImage;
+      : memo.author.photo;
 
   const keyMessages = [memo.keyMessage1, memo.keyMessage2, memo.keyMessage3].filter(
     Boolean
@@ -81,26 +78,45 @@ export default async function MemoDetailPage({
     day: "numeric",
   });
 
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Article" as const,
-    headline: memo.title,
-    description: memo.keyMessage1,
-    author: createAuthor({
-      name: memo.author,
-      image: authorImage,
-    }),
-    datePublished: (memo.publishedAt ?? memo.createdAt).toISOString(),
-    dateModified: memo.updatedAt.toISOString(),
-    ...(memo.seoImage || memo.splashImage
-      ? { image: memo.seoImage || memo.splashImage }
-      : {}),
-    publisher: {
-      "@type": "Organization" as const,
-      name: "Build Canada",
-      url: "https://buildcanada.ca",
-    },
+  let siteConfig = await prisma.siteConfig.findUnique({ where: { id: "site" } });
+  if (!siteConfig) {
+    siteConfig = await prisma.siteConfig.create({ data: { id: "site" } });
+  }
+
+  const configData = {
+    orgName: siteConfig.orgName,
+    orgDescription: siteConfig.orgDescription,
+    siteUrl: siteConfig.siteUrl,
+    logoUrl: siteConfig.logoUrl,
+    socialLinks: siteConfig.socialLinks,
   };
+
+  const jsonLd = buildGraph(
+    generateOrganizationSchema(configData),
+    generateArticleSchema(
+      {
+        title: memo.title,
+        slug: memo.slug,
+        keyMessage1: memo.keyMessage1,
+        seoImage: memo.seoImage,
+        splashImage: memo.splashImage,
+        publishedAt: memo.publishedAt,
+        createdAt: memo.createdAt,
+        updatedAt: memo.updatedAt,
+      },
+      {
+        name: memo.author.name,
+        title: memo.author.title,
+        photo: authorImage,
+        bio: memo.author.bio,
+        websiteUrl: memo.author.websiteUrl,
+        xUrl: memo.author.xUrl,
+        linkedinUrl: memo.author.linkedinUrl,
+      },
+      configData
+    ),
+    generateBreadcrumbSchema(`/memos/${memo.slug}`, memo.title, siteConfig.siteUrl)
+  );
 
   const fullUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "https://buildcanada.ca"}/memos/${memo.slug}`;
 
@@ -109,7 +125,7 @@ export default async function MemoDetailPage({
       <ShareSection
         title={memo.title}
         description={memo.keyMessage1}
-        image={memo.seoImage || memo.splashImage}
+        image={memo.seoImage || memo.splashImage || undefined}
         url={fullUrl}
       />
       <MemoSubscribe />
@@ -127,13 +143,11 @@ export default async function MemoDetailPage({
 
   return (
     <div className="mx-[10px] my-[10px] border border-border-light bg-bg">
-      {/* JSON-LD structured data */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* Splash Hero (when splash image exists) */}
       {memo.splashImage && (
         <div className="animate-fade-in relative overflow-hidden">
           <Image
@@ -146,8 +160,8 @@ export default async function MemoDetailPage({
           />
           <div className="relative z-10 max-w-[1400px] mx-auto px-5 pt-[42px] pb-[60px]">
              <Link
-               href="/memos"
-               className="type-label text-white/70 hover:text-white transition-colors flex items-center gap-1.5 mb-6 py-1"
+              href="/memos"
+              className="type-label text-white/70 hover:text-white transition-colors flex items-center gap-1.5 mb-6 py-1"
             >
               <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
                 <path
@@ -179,7 +193,7 @@ export default async function MemoDetailPage({
                 {authorImage && (
                   <Image
                     src={authorImage}
-                    alt={memo.author}
+                    alt={memo.author.name}
                     width={40}
                     height={40}
                     className="w-full h-full object-cover"
@@ -189,7 +203,7 @@ export default async function MemoDetailPage({
                 )}
               </div>
               <div>
-                <p className="type-label font-medium text-white">{memo.author}</p>
+                <p className="type-label font-medium text-white">{memo.author.name}</p>
                  <p className="type-label text-white/70">{date}</p>
               </div>
             </div>
@@ -198,9 +212,7 @@ export default async function MemoDetailPage({
       )}
 
       <div className="animate-fade-in max-w-[1400px] mx-auto px-5 pt-[42px] pb-[52px] 2xl-memo:flex 2xl-memo:gap-0" style={{ animationDelay: "0.3s" }}>
-        {/* Left column: main content */}
         <article className="max-w-[720px] 2xl-memo:flex-1 2xl-memo:min-w-0 2xl-memo:max-w-none 2xl-memo:pr-8">
-          {/* Default header (no splash image) */}
           {!memo.splashImage && (
             <>
                <Link
@@ -235,7 +247,7 @@ export default async function MemoDetailPage({
                   {authorImage && (
                     <Image
                       src={authorImage}
-                      alt={memo.author}
+                      alt={memo.author.name}
                       width={40}
                       height={40}
                       className="w-full h-full object-cover"
@@ -245,14 +257,13 @@ export default async function MemoDetailPage({
                   )}
                 </div>
                 <div>
-                  <p className="type-label font-medium">{memo.author}</p>
+                  <p className="type-label font-medium">{memo.author.name}</p>
                   <p className="type-label text-text-secondary">{date}</p>
                 </div>
               </div>
             </>
           )}
 
-          {/* Supporters */}
           {memo.supporters && (
             <div className="mb-6 pb-6 border-b border-border-light">
               <span className="type-label text-text-secondary block mb-2">
@@ -265,7 +276,6 @@ export default async function MemoDetailPage({
             </div>
           )}
 
-          {/* Key Messages */}
           <div className="mb-8 p-5 border-[3px] border-double border-border-light bg-[#f0e5dc] space-y-3">
             <span className="type-label-sm text-text-secondary block mb-2">
               Key Messages
@@ -287,19 +297,16 @@ export default async function MemoDetailPage({
             ))}
           </div>
 
-          {/* Body */}
           <div
             className="prose-bc"
             dangerouslySetInnerHTML={{ __html: memo.body }}
           />
 
-          {/* Mobile sidebar */}
           <div className="2xl-memo:hidden mt-10 pt-8 border-t border-border-light">
             {sidebar}
           </div>
         </article>
 
-        {/* Right column: sidebar (desktop only) */}
         <aside className="hidden 2xl-memo:block w-[400px] shrink-0 px-[50px] sticky top-[70px] self-start max-h-[calc(100vh-90px)] overflow-y-auto">
           {sidebar}
         </aside>

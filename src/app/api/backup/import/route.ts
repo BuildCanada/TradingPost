@@ -138,8 +138,7 @@ async function importMemos(rows: Record<string, string>[], mode: string) {
         id: row.id,
         title: row.title || "Untitled",
         slug: row.slug,
-        author: row.author || "Unknown",
-        authorImage: strOrNull(row.authorImage),
+        authorId: row.authorId,
         keyMessage1: row.keyMessage1 || "",
         keyMessage2: strOrNull(row.keyMessage2),
         keyMessage3: strOrNull(row.keyMessage3),
@@ -157,8 +156,7 @@ async function importMemos(rows: Record<string, string>[], mode: string) {
       update: {
         title: row.title || "Untitled",
         slug: row.slug,
-        author: row.author || "Unknown",
-        authorImage: strOrNull(row.authorImage),
+        authorId: row.authorId,
         keyMessage1: row.keyMessage1 || "",
         keyMessage2: strOrNull(row.keyMessage2),
         keyMessage3: strOrNull(row.keyMessage3),
@@ -178,34 +176,38 @@ async function importMemos(rows: Record<string, string>[], mode: string) {
   return imported;
 }
 
-async function importTeamMembers(rows: Record<string, string>[], mode: string) {
+async function importPeople(rows: Record<string, string>[], mode: string) {
   if (mode === "replace") {
-    await prisma.teamMember.deleteMany();
+    await prisma.person.deleteMany();
   }
   let imported = 0;
   for (const row of rows) {
     if (!row.id) continue;
-    await prisma.teamMember.upsert({
+    await prisma.person.upsert({
       where: { id: row.id },
       create: {
         id: row.id,
         name: row.name || "Unknown",
-        title: row.title || "",
+        title: strOrNull(row.title),
         role: row.role || "CORE",
         photo: strOrNull(row.photo),
         xUrl: strOrNull(row.xUrl),
         linkedinUrl: strOrNull(row.linkedinUrl),
+        websiteUrl: strOrNull(row.websiteUrl),
+        bio: strOrNull(row.bio),
         order: parseOptionalInt(row.order),
         createdAt: parseRequiredDate(row.createdAt),
         updatedAt: parseRequiredDate(row.updatedAt),
       },
       update: {
         name: row.name || "Unknown",
-        title: row.title || "",
+        title: strOrNull(row.title),
         role: row.role || "CORE",
         photo: strOrNull(row.photo),
         xUrl: strOrNull(row.xUrl),
         linkedinUrl: strOrNull(row.linkedinUrl),
+        websiteUrl: strOrNull(row.websiteUrl),
+        bio: strOrNull(row.bio),
         order: parseOptionalInt(row.order),
         updatedAt: parseRequiredDate(row.updatedAt),
       },
@@ -261,7 +263,7 @@ async function importProjects(rows: Record<string, string>[], mode: string) {
         id: row.id,
         slug: row.slug,
         title: row.title || "Untitled",
-        description: strOrNull(row.description),
+        description: row.description || "",
         externalUrl: row.externalUrl || "",
         size: row.size || "small",
         featured: parseBool(row.featured),
@@ -273,7 +275,7 @@ async function importProjects(rows: Record<string, string>[], mode: string) {
       update: {
         slug: row.slug,
         title: row.title || "Untitled",
-        description: strOrNull(row.description),
+        description: row.description || "",
         externalUrl: row.externalUrl || "",
         size: row.size || "small",
         featured: parseBool(row.featured),
@@ -314,7 +316,7 @@ export async function POST(request: Request) {
       });
       const sheets = google.sheets({ version: "v4", auth });
 
-      for (const name of ["feed_items", "memos", "team_members", "testimonials", "projects"]) {
+      for (const name of ["feed_items", "memos", "people", "testimonials", "projects"]) {
         try {
           const res = await sheets.spreadsheets.values.get({
             spreadsheetId,
@@ -329,13 +331,11 @@ export async function POST(request: Request) {
             return obj;
           });
         } catch {
-          // Sheet tab may not exist, skip
         }
       }
     } else {
-      // Read from local CSV files
       const backupsDir = path.join(process.cwd(), "backups");
-      for (const name of ["feed_items", "memos", "team_members", "testimonials", "projects"]) {
+      for (const name of ["feed_items", "memos", "people", "testimonials", "projects"]) {
         const csvPath = path.join(backupsDir, `${name}_latest.csv`);
         if (!fs.existsSync(csvPath)) continue;
         const content = fs.readFileSync(csvPath, "utf-8");
@@ -351,8 +351,8 @@ export async function POST(request: Request) {
     if (csvData.memos) {
       results.push({ model: "memos", imported: await importMemos(csvData.memos, mode) });
     }
-    if (csvData.team_members) {
-      results.push({ model: "team_members", imported: await importTeamMembers(csvData.team_members, mode) });
+    if (csvData.people) {
+      results.push({ model: "people", imported: await importPeople(csvData.people, mode) });
     }
     if (csvData.testimonials) {
       results.push({ model: "testimonials", imported: await importTestimonials(csvData.testimonials, mode) });

@@ -1,4 +1,8 @@
-export function stripNulls<T extends Record<string, unknown>>(obj: T): Partial<T> {
+type StripNull<T> = {
+  [K in keyof T]: Exclude<T[K], null | undefined>;
+};
+
+export function stripNulls<T extends Record<string, unknown>>(obj: T): StripNull<T> {
   const result: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(obj)) {
     if (value !== null && value !== undefined) {
@@ -12,7 +16,7 @@ export function stripNulls<T extends Record<string, unknown>>(obj: T): Partial<T
       }
     }
   }
-  return result as Partial<T>;
+  return result as StripNull<T>;
 }
 
 export function toAbsoluteUrl(url: string | null | undefined, baseUrl: string): string | null {

@@ -1,7 +1,7 @@
 export interface TeamMember {
   id: string;
   name: string;
-  title: string;
+  title: string | null;
   role: string;
   photo: string | null;
   xUrl: string | null;

@@ -3,6 +3,9 @@ import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { buildGraph } from "@/lib/schemas/graph";
+import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
+import { generateBreadcrumbSchema } from "@/lib/schemas/generators/breadcrumb";
 
 export async function generateMetadata({
   params,
@@ -49,17 +52,35 @@ export default async function ContentItemPage({
 
   if (!item) notFound();
 
-  // Non-blog types redirect to their external URL
   if (item.type !== "BLOG") {
     if (item.url) {
       redirect(item.url);
     }
-    // No URL set — go back to content
     redirect("/content");
   }
 
+  let siteConfig = await prisma.siteConfig.findUnique({ where: { id: "site" } });
+  if (!siteConfig) {
+    siteConfig = await prisma.siteConfig.create({ data: { id: "site" } });
+  }
+  const configData = {
+    orgName: siteConfig.orgName,
+    orgDescription: siteConfig.orgDescription,
+    siteUrl: siteConfig.siteUrl,
+    logoUrl: siteConfig.logoUrl,
+    socialLinks: siteConfig.socialLinks,
+  };
+  const jsonLd = buildGraph(
+    generateOrganizationSchema(configData),
+    generateBreadcrumbSchema(`/content/${item.id}`, item.title || "Content", siteConfig.siteUrl)
+  );
+
   return (
     <div className="mx-[10px] my-[10px] border border-border-light bg-bg">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
     <article className="animate-fade-in max-w-2xl mx-auto px-5 pt-[50px] pb-[60px]">
       <Link
         href="/content"

@@ -7,19 +7,34 @@ import SectionLabel from "@/components/SectionLabel";
 import FeaturedProjects from "@/components/FeaturedProjects";
 import { LinkButton } from "@/components/ui/link-button";
 import { SubscribeButton } from "@/components/ui/subscribe-button";
+import { buildGraph } from "@/lib/schemas/graph";
+import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
+import { generateWebSiteSchema } from "@/lib/schemas/generators/website";
+import { generateReviewSchema } from "@/lib/schemas/generators/review";
 
 export const dynamic = "force-dynamic";
 
 async function getMemos() {
   const memos = await prisma.memo.findMany({
     orderBy: { createdAt: "desc" },
+    include: { author: true },
   });
   return memos.map((m) => ({
-    ...m,
+    id: m.id,
+    title: m.title,
+    slug: m.slug,
+    author: m.author.name,
     authorImage:
-      m.author === "Build Canada"
+      m.author.name === "Build Canada"
         ? "/assets/logos/Logocircle.webp"
-        : m.authorImage,
+        : m.author.photo,
+    keyMessage1: m.keyMessage1,
+    keyMessage2: m.keyMessage2,
+    keyMessage3: m.keyMessage3,
+    splashImage: m.splashImage,
+    seoImage: m.seoImage,
+    category: m.category,
+    featured: m.featured,
     publishedAt: m.publishedAt?.toISOString() ?? null,
     createdAt: m.createdAt.toISOString(),
   }));
@@ -31,7 +46,6 @@ function HeroSection() {
 
   return (
     <section className="w-full bg-dark flex items-center justify-center h-[45svh] md:h-[65svh] relative overflow-hidden">
-      {/* Autoplay video */}
       <video
         autoPlay
         muted
@@ -47,9 +61,7 @@ function HeroSection() {
         />
       </video>
 
-      {/* Decorative overlay */}
       <div className="absolute inset-0 z-[5] pointer-events-none" aria-hidden="true">
-        {/* Left vertical line — draws top→bottom */}
         <div
           className="absolute top-0 bottom-0 left-[6.7%] w-px"
           style={{
@@ -59,7 +71,6 @@ function HeroSection() {
           }}
         />
 
-        {/* Right vertical line — draws bottom→top */}
         <div
           className="absolute top-0 bottom-0 right-[6.7%] w-px"
           style={{
@@ -69,7 +80,6 @@ function HeroSection() {
           }}
         />
 
-        {/* Top-left semicircles — draw top→bottom, start at 0.3s */}
         <svg className="absolute left-0 top-[calc(15%-15px)]" width="65" height="130" viewBox="0 0 65 130" fill="none">
           <path
             d="M0 0C35.899 0 65 29.101 65 65C65 100.899 35.899 130 0 130"
@@ -85,7 +95,6 @@ function HeroSection() {
           />
         </svg>
 
-        {/* Bottom-right semicircles — draw bottom→top (reverse), start at 0.3s */}
         <svg className="absolute right-0 bottom-[5%]" width="65" height="130" viewBox="0 0 65 130" fill="none">
           <path
             d="M65 0C29.101 0 0 29.101 0 65C0 100.899 29.101 130 65 130"
@@ -102,11 +111,9 @@ function HeroSection() {
         </svg>
       </div>
 
-      {/* Text with baseline-aligned horizontal lines */}
       <h1 className="relative z-10 type-display text-center">
         <span className="relative block">
           <span className="text-white">Canada&apos;s Voice</span>
-          {/* Top horizontal line — draws left→right, starts at 0.4s */}
           <span
             className="absolute left-1/2 -translate-x-1/2 bottom-[calc(0.2em-5px)] w-[200vw] h-px"
             style={{
@@ -125,7 +132,6 @@ function HeroSection() {
             for
           </span>{" "}
           <span className="text-white">Builders.</span>
-          {/* Bottom horizontal line — draws left→right, starts at 0.7s */}
           <span
             className="absolute left-1/2 -translate-x-1/2 bottom-[calc(0.2em-5px)] w-[200vw] h-px"
             style={{
@@ -230,17 +236,14 @@ function FeedAndEvents() {
   return (
     <section className="px-5 border-b border-border-light">
       <div className="max-w-[1080px] mx-auto flex flex-wrap justify-center gap-[20px]">
-        {/* Feed + Social */}
         <div className="w-full md:w-auto md:flex-1 md:max-w-[768px] min-w-0">
           <FeedPreview />
         </div>
 
-        {/* Divider between feed and events (visible only when stacked) */}
         <div className="w-full md:hidden -mx-5 px-0" style={{ width: "calc(100% + 40px)" }}>
           <div className="border-t border-border-light" />
         </div>
 
-        {/* Events */}
         <div className="w-full md:w-[500px] pt-[26px] pb-[36px]">
           <SectionLabel>Events</SectionLabel>
           <iframe
@@ -265,8 +268,51 @@ function FeedAndEvents() {
 
 export default async function Home() {
   const memos = await getMemos();
+
+  let siteConfig = await prisma.siteConfig.findUnique({ where: { id: "site" } });
+  if (!siteConfig) {
+    siteConfig = await prisma.siteConfig.create({ data: { id: "site" } });
+  }
+  const testimonials = await prisma.testimonial.findMany({
+    orderBy: { order: "asc" },
+    include: { person: true },
+  });
+
+  const configData = {
+    orgName: siteConfig.orgName,
+    orgDescription: siteConfig.orgDescription,
+    siteUrl: siteConfig.siteUrl,
+    logoUrl: siteConfig.logoUrl,
+    socialLinks: siteConfig.socialLinks,
+  };
+
+  const reviewSchemas = testimonials.map((t) =>
+    generateReviewSchema(
+      {
+        name: t.name,
+        quote: t.quote,
+        title: t.title,
+        profilePhoto: t.profilePhoto,
+        person: t.person
+          ? { name: t.person.name, title: t.person.title, photo: t.person.photo, bio: t.person.bio, websiteUrl: t.person.websiteUrl, xUrl: t.person.xUrl, linkedinUrl: t.person.linkedinUrl }
+          : null,
+      },
+      configData
+    )
+  );
+
+  const jsonLd = buildGraph(
+    generateOrganizationSchema(configData),
+    generateWebSiteSchema(configData),
+    ...reviewSchemas
+  );
+
   return (
     <div className="mx-[10px] my-[10px] border border-border-light bg-bg">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <HeroSection />
       <div className="animate-fade-in" style={{ animationDelay: "0.4s" }}>
         <BrandSection />

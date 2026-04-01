@@ -3,13 +3,25 @@ import { prisma } from "@/lib/prisma";
 import SectionLabel from "@/components/SectionLabel";
 import { type ContentFeedItem } from "@/components/content";
 import ContentFeedClient from "./ContentFeedClient";
+import { buildGraph } from "@/lib/schemas/graph";
+import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
+import { generateBreadcrumbSchema } from "@/lib/schemas/generators/breadcrumb";
 
 export const dynamic = "force-dynamic";
 
 export default async function ContentPage() {
-  const rawItems = await prisma.feedItem.findMany({
-    orderBy: { createdAt: "desc" },
-  });
+  const [rawItems, siteConfig] = await Promise.all([
+    prisma.feedItem.findMany({
+      orderBy: { createdAt: "desc" },
+    }),
+    (async () => {
+      let config = await prisma.siteConfig.findUnique({ where: { id: "site" } });
+      if (!config) {
+        config = await prisma.siteConfig.create({ data: { id: "site" } });
+      }
+      return config;
+    })(),
+  ]);
 
   const items: ContentFeedItem[] = rawItems.map((item) => ({
     ...item,
@@ -18,8 +30,24 @@ export default async function ContentPage() {
     createdAt: item.createdAt.toISOString(),
   }));
 
+  const configData = {
+    orgName: siteConfig.orgName,
+    orgDescription: siteConfig.orgDescription,
+    siteUrl: siteConfig.siteUrl,
+    logoUrl: siteConfig.logoUrl,
+    socialLinks: siteConfig.socialLinks,
+  };
+  const jsonLd = buildGraph(
+    generateOrganizationSchema(configData),
+    generateBreadcrumbSchema("/content", "Content", siteConfig.siteUrl)
+  );
+
   return (
     <div className="mx-[10px] my-[10px] border border-border-light bg-bg">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <section className="relative px-5 h-[45svh] md:h-[65svh] flex flex-col justify-center border-b border-border-light overflow-hidden">
         <Image
           src="/assets/images/build-canada-community-meetup.webp"

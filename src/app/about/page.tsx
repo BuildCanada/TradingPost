@@ -1,44 +1,62 @@
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import SectionLabel from "@/components/SectionLabel";
-import TestimonialsBlock from "@/components/TestimonialsBlock";
 import OurStoryBlock from "./OurStoryBlock";
 import PlatformBlock from "./PlatformBlock";
 import TeamBlock from "./TeamBlock";
+import TestimonialsBlock from "@/components/TestimonialsBlock";
 import QnaBlock from "./QnaBlock";
-import { buildGraph, createOrganization, createFAQPage, type FAQItem } from "@/lib/schemas";
+import { buildGraph } from "@/lib/schemas/graph";
+import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
+import { generateFAQPageSchema } from "@/lib/schemas/generators/faq-page";
+import { generateReviewSchema } from "@/lib/schemas/generators/review";
 
 export const dynamic = "force-dynamic";
 
+async function getSiteConfig() {
+  let config = await prisma.siteConfig.findUnique({ where: { id: "site" } });
+  if (!config) {
+    config = await prisma.siteConfig.create({ data: { id: "site" } });
+  }
+  return config;
+}
+
 export default async function AboutPage() {
-  const [teamMembers, testimonials] = await Promise.all([
-    prisma.teamMember.findMany({ orderBy: { order: "asc" } }).catch(() => []),
-    prisma.testimonial.findMany({ orderBy: { order: "asc" } }).catch(() => []),
+  const [people, testimonials, qandaItems, siteConfig] = await Promise.all([
+    prisma.person.findMany({ orderBy: { order: "asc" } }),
+    prisma.testimonial.findMany({ orderBy: { order: "asc" }, include: { person: true } }),
+    prisma.qandAItem.findMany({ where: { active: true }, orderBy: { order: "asc" } }),
+    getSiteConfig(),
   ]);
 
-  const qnaItems: FAQItem[] = [
-    {
-      question: "Is Build Canada affiliated with a political party?",
-      answer: "No. Build Canada is non-partisan. Our work is driven by one question: how do we make Canada the most prosperous country in the world?",
-    },
-    {
-      question: "How is Build Canada funded?",
-      answer: "We're a federally incorporated non-profit organization funded by over 60 individual donors who believe in building a stronger country. We don't accept government grants or public funding, which keeps us independent.",
-    },
-    {
-      question: "Is Build Canada a lobby group?",
-      answer: "No. We produce research, build community among Canadian founders and operators, and share policy ideas in public.",
-    },
-    {
-      question: "Do you support a specific policy platform?",
-      answer: "We champion ideas that make Canada a better place to build and grow our economy — whether that means tax reform, talent retention, infrastructure investment, or regulatory modernization. If you want to learn more about where we stand and our latest ideas, follow along with our content — we're always publishing new ideas and perspectives from builders across the country.",
-    },
-  ];
+  const configData = {
+    orgName: siteConfig.orgName,
+    orgDescription: siteConfig.orgDescription,
+    siteUrl: siteConfig.siteUrl,
+    logoUrl: siteConfig.logoUrl,
+    socialLinks: siteConfig.socialLinks,
+  };
 
-  const jsonLd = buildGraph(
-    createOrganization(),
-    createFAQPage(qnaItems)
+  const orgSchema = generateOrganizationSchema(configData);
+  const faqSchema = generateFAQPageSchema(
+    qandaItems.map((item) => ({ question: item.question, answer: item.answer }))
   );
+  const reviewSchemas = testimonials.map((t) =>
+    generateReviewSchema(
+      {
+        name: t.name,
+        quote: t.quote,
+        title: t.title,
+        profilePhoto: t.profilePhoto,
+        person: t.person
+          ? { name: t.person.name, title: t.person.title, photo: t.person.photo, bio: t.person.bio, websiteUrl: t.person.websiteUrl, xUrl: t.person.xUrl, linkedinUrl: t.person.linkedinUrl }
+          : null,
+      },
+      configData
+    )
+  );
+
+  const jsonLd = buildGraph(orgSchema, faqSchema, ...reviewSchemas);
 
   return (
     <div className="mx-[10px] my-[10px] border border-border-light bg-bg overflow-x-clip">
@@ -76,13 +94,13 @@ export default async function AboutPage() {
         <PlatformBlock />
       </div>
       <div className="animate-fade-in" style={{ animationDelay: "0.7s" }}>
-        <TeamBlock members={teamMembers} />
+        <TeamBlock members={people.filter((p) => p.role !== "AUTHOR")} />
       </div>
       <div className="animate-fade-in" style={{ animationDelay: "0.9s" }}>
         <TestimonialsBlock testimonials={testimonials} />
       </div>
       <div className="animate-fade-in" style={{ animationDelay: "1.1s" }}>
-        <QnaBlock />
+        <QnaBlock items={qandaItems} />
       </div>
     </div>
   );

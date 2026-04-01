@@ -5,7 +5,7 @@ export default auth((req) => {
   const { pathname } = req.nextUrl;
 
   const isAdminRoute = pathname.startsWith("/admin");
-  const publicApiRoutes = ["/api/auth", "/api/projects", "/api/team", "/api/testimonials", "/api/memos", "/api/feed"];
+  const publicApiRoutes = ["/api/auth", "/api/projects", "/api/team", "/api/testimonials", "/api/memos", "/api/feed", "/api/events"];
   const isPublicApi = publicApiRoutes.some((route) => pathname.startsWith(route)) && req.method === "GET";
   const isAdminApi = pathname.startsWith("/api/") && !isPublicApi && !pathname.startsWith("/api/auth");
   const isLoginPage = pathname === "/admin/login";

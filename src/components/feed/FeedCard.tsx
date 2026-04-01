@@ -27,7 +27,7 @@ export function FeedCard({ item }: { item: FeedItem }) {
       href={itemHref(item)}
       target={item.type !== "BLOG" ? "_blank" : undefined}
       rel={item.type !== "BLOG" ? "noopener noreferrer" : undefined}
-      className="border border-border-light flex flex-col group overflow-hidden"
+      className="border-b border-r border-border-light flex flex-col group overflow-hidden"
     >
       <div className="relative h-[100px] bg-dark">
         {feedImage(item) && (

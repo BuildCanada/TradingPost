@@ -27,7 +27,7 @@ export default function FeedPreview() {
         <span className="type-label text-dark block pb-4">
           Content Feed
         </span>
-        <div className="grid grid-cols-1 cards:grid-cols-2 gap-3">
+        <div className="border-t border-l border-border-light grid grid-cols-1 cards:grid-cols-2">
           {items.length > 0
             ? items.map((item) =>
                 item.type === "IG" ? (
@@ -45,7 +45,7 @@ export default function FeedPreview() {
             : [1, 2, 3, 4].map((i) => (
                 <div
                   key={i}
-                  className="h-[200px] border border-border-light"
+                  className="h-[200px] border-b border-r border-border-light"
                 />
               ))}
         </div>

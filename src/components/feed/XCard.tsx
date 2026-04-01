@@ -20,7 +20,7 @@ export function XCard({ item }: { item: FeedItem }) {
       href={item.url || "/content"}
       target="_blank"
       rel="noopener noreferrer"
-      className="border border-[#2f3336] bg-black flex flex-col group overflow-hidden"
+      className="border-b border-r border-border-light bg-black flex flex-col group overflow-hidden"
     >
       <SocialCardHeader
         item={item}

@@ -163,7 +163,7 @@ export function MemoCard({
               {memo.title}
             </h3>
             {memo.keyMessage1 && (
-              <p className="type-default text-bg/60 line-clamp-2 max-w-2xl">
+               <p className="type-default text-bg/80 line-clamp-2 max-w-2xl">
                 {memo.keyMessage1}
               </p>
             )}

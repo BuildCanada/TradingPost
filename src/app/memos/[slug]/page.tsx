@@ -145,9 +145,9 @@ export default async function MemoDetailPage({
             priority
           />
           <div className="relative z-10 max-w-[1400px] mx-auto px-5 pt-[42px] pb-[60px]">
-            <Link
-              href="/memos"
-              className="type-label text-white/50 hover:text-white transition-colors flex items-center gap-1.5 mb-6"
+             <Link
+               href="/memos"
+               className="type-label text-white/70 hover:text-white transition-colors flex items-center gap-1.5 mb-6 py-1"
             >
               <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
                 <path
@@ -163,7 +163,7 @@ export default async function MemoDetailPage({
 
             {memo.category && (
               <div className="flex items-center gap-2 mb-3">
-                <span className="type-label text-white/50">Category</span>
+                 <span className="type-label text-white/70">Category</span>
                 <span className="inline-block type-label text-dark bg-white/80 rounded-full px-3 py-0.5">
                   {memo.category.replace(/-/g, " ")}
                 </span>
@@ -190,7 +190,7 @@ export default async function MemoDetailPage({
               </div>
               <div>
                 <p className="type-label font-medium text-white">{memo.author}</p>
-                <p className="type-label text-white/60">{date}</p>
+                 <p className="type-label text-white/70">{date}</p>
               </div>
             </div>
           </div>
@@ -203,9 +203,9 @@ export default async function MemoDetailPage({
           {/* Default header (no splash image) */}
           {!memo.splashImage && (
             <>
-              <Link
+               <Link
                 href="/memos"
-                className="type-label text-text-muted hover:text-dark transition-colors flex items-center gap-1.5 mb-6"
+                className="type-label text-text-secondary hover:text-dark transition-colors flex items-center gap-1.5 mb-6 py-1"
               >
                 <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
                   <path
@@ -267,7 +267,7 @@ export default async function MemoDetailPage({
 
           {/* Key Messages */}
           <div className="mb-8 p-5 border-[3px] border-double border-border-light bg-[#f0e5dc] space-y-3">
-            <span className="type-label-sm text-text-muted block mb-2">
+            <span className="type-label-sm text-text-secondary block mb-2">
               Key Messages
             </span>
             {keyMessages.map((msg, i) => (
@@ -279,7 +279,7 @@ export default async function MemoDetailPage({
                     : "type-body text-text-secondary"
                 }`}
               >
-                <span className="type-label-sm text-text-muted mt-1.5 shrink-0">
+                <span className="type-label-sm text-text-secondary mt-1.5 shrink-0">
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <p>{msg}</p>

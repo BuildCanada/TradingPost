@@ -31,7 +31,7 @@ export default function CategoryFilter({
                   aria-pressed={isActive}
                   aria-label={isAll ? "Show all categories" : `Filter by ${display}`}
                   className={cn(
-                    "border-b border-r border-border-light h-11 flex items-center justify-center type-label cursor-pointer transition-colors",
+                    "border-b border-r border-border-light h-12 flex items-center justify-center type-label cursor-pointer transition-colors",
                     isActive
                       ? "bg-dark text-bg"
                       : "bg-transparent text-dark hover:bg-accent hover:text-bg"

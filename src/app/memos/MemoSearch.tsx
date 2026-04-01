@@ -12,7 +12,7 @@ export default function MemoSearch() {
       <div className="px-5 py-10 border-b border-border-light">
         <div className="max-w-[1080px] mx-auto">
           <SectionLabel as="h2">Search</SectionLabel>
-          <div className="h-11 border border-border-light flex items-center px-4 gap-3 mt-4 bg-bg">
+           <div className="h-12 border border-border-light flex items-center px-4 gap-3 mt-4 bg-bg">
             <svg
               width="14"
               height="14"
@@ -39,12 +39,12 @@ export default function MemoSearch() {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search memos..."
-              className="flex-1 bg-transparent font-mono text-base tracking-normal outline-none placeholder:text-text-muted"
+              className="flex-1 bg-transparent font-mono text-base tracking-normal outline-none placeholder:text-text-secondary"
             />
             {search && (
-              <button
+               <button
                 onClick={() => setSearch("")}
-                className="shrink-0 text-text-secondary hover:text-dark transition-colors"
+                className="shrink-0 min-w-[48px] min-h-[48px] flex items-center justify-center text-text-secondary hover:text-dark transition-colors"
                 aria-label="Clear search"
               >
                 <svg

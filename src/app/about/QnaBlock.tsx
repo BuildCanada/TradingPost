@@ -53,7 +53,7 @@ export default function QnaBlock() {
                   className="border-b-0 p-6"
                 >
                   <AccordionTrigger
-                    className="[&_[data-slot=accordion-trigger-icon]]:hidden flex items-center justify-between cursor-pointer group w-full text-left h-[44px] px-3 transition-colors rounded-none border-transparent hover:no-underline py-0 [&]:bg-transparent"
+                     className="[&_[data-slot=accordion-trigger-icon]]:hidden flex items-center justify-between cursor-pointer group w-full text-left h-[48px] px-3 transition-colors rounded-none border-transparent hover:no-underline py-0 [&]:bg-transparent"
                   >
                     <h3
                       className={`type-h2 transition-colors duration-200 ${

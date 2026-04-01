@@ -17,7 +17,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "https",
-        hostname: "img.cdn.luma.com",
+        hostname: "images.lumacdn.com",
       },
     ],
   },

@@ -25,7 +25,7 @@ function TeamMemberCard({ m }: { m: Person }) {
           <div className="w-[64px] h-[64px] opacity-20" style={{ backgroundColor: "currentColor", maskImage: "url(/assets/icons/newmapleleaf.svg)", maskSize: "contain", maskRepeat: "no-repeat", maskPosition: "center", WebkitMaskImage: "url(/assets/icons/newmapleleaf.svg)", WebkitMaskSize: "contain", WebkitMaskRepeat: "no-repeat", WebkitMaskPosition: "center" }} />
         </div>
       )}
-      <div>
+      <div className="text-center">
         <p className="type-h4 leading-tight">{m.name}</p>
         <p className="type-body-sm text-text-secondary mt-0.5">{m.title}</p>
       </div>

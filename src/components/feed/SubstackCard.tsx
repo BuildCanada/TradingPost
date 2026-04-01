@@ -9,7 +9,7 @@ export function SubstackCard({ item }: { item: FeedItem }) {
       href={item.url || "/content"}
       target="_blank"
       rel="noopener noreferrer"
-      className="border border-[#e8e2d9] bg-[#fffdf7] flex flex-col group overflow-hidden"
+      className="border-b border-r border-border-light bg-[#fffdf7] flex flex-col group overflow-hidden"
     >
       {isValidImage(item.image) && (
         <div className="relative h-[90px] bg-[#f7f5ef]">

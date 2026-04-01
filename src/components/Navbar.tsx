@@ -93,7 +93,7 @@ export default function Navbar() {
 
       {/* Desktop right: social icons + subscribe */}
       <div className="hidden md:flex items-center ml-auto">
-        <div className="hidden min-[1166px]:flex items-center gap-1.5 px-4">
+        <div className="hidden lg:flex items-center gap-1.5 px-4">
           {[
             { icon: "X", href: "https://x.com/build_canada", file: "platform-x-twitter" },
             { icon: "LINKEDIN", href: "https://www.linkedin.com/company/buildcanada", file: "platform-linkedin" },

@@ -112,6 +112,20 @@ html {
 /* Söhne Kraftig — Display/Headlines (primary brand font) */
 @font-face {
   font-family: "Soehne Kraftig";
+  src: url("/assets/fonts/test-soehne/test-soehne-buch.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Soehne Kraftig";
+  src: url("/assets/fonts/test-soehne/test-soehne-buch-kursiv.woff2") format("woff2");
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Soehne Kraftig";
   src: url("/assets/fonts/test-soehne/test-soehne-kraftig.woff2") format("woff2");
   font-weight: 500;
   font-style: normal;
@@ -206,6 +220,7 @@ html {
   --font-serif: "Financier Text", Georgia, serif;
   --font-mono: "Founders Grotesk Mono", monospace;
   --breakpoint-md: 956px;
+  --breakpoint-lg: 1166px;
   
   --color-bg: var(--color-linen-100);
   --color-bg-alt: var(--color-linen-50);

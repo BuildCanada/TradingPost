@@ -153,8 +153,8 @@ function SankeyDiagram() {
 
   return (
     <div className="relative" data-sankey onMouseLeave={() => setTooltip(null)}>
-      <div className="flex flex-col md:flex-row md:items-center" style={{ gap: 8 }}>
-          <div className="flex items-baseline gap-2 md:block shrink-0 md:w-[100px]">
+      <div className="flex flex-col lg:flex-row lg:items-center" style={{ gap: 8 }}>
+          <div className="flex items-baseline gap-2 lg:block shrink-0 lg:w-[100px]">
             <span className="type-mono-sm font-bold" style={{ color: BLUE }}>
               Revenues
             </span>
@@ -202,8 +202,8 @@ function SankeyDiagram() {
 
       <div style={{ height: ROW_GAP }} />
 
-      <div className="flex flex-col md:flex-row md:items-center" style={{ gap: 8 }}>
-          <div className="flex items-baseline gap-2 md:block shrink-0 md:w-[100px]">
+      <div className="flex flex-col lg:flex-row lg:items-center" style={{ gap: 8 }}>
+          <div className="flex items-baseline gap-2 lg:block shrink-0 lg:w-[100px]">
             <span className="type-mono-sm font-bold" style={{ color: RED }}>
               Expenditures
             </span>
@@ -267,7 +267,7 @@ export default function CanadaSpendsWidget({ project }: WidgetProps) {
 
       <SankeyDiagram />
 
-      <p className="type-mono-sm text-[var(--color-text-secondary)] opacity-60 text-right mt-auto pt-4">
+      <p className="type-mono-sm text-text-secondary text-right mt-auto pt-4">
         Source: canadaspends.com
       </p>
     </div>

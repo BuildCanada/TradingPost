@@ -1,6 +1,6 @@
 import Image from "next/image";
 import SectionLabel from "@/components/SectionLabel";
-import type { TeamMember } from "./types";
+import type { Person } from "./types";
 
 const roleGroups = [
   { key: "CORE", label: "Core Team" },
@@ -8,7 +8,7 @@ const roleGroups = [
   { key: "ADVISOR", label: "Advisors" },
 ] as const;
 
-function TeamMemberCard({ m }: { m: TeamMember }) {
+function TeamMemberCard({ m }: { m: Person }) {
   return (
     <div className="flex flex-col items-center border border-border-light -ml-px -mt-px p-6">
       <div className="flex flex-col items-start gap-1">
@@ -66,7 +66,7 @@ function TeamMemberCard({ m }: { m: TeamMember }) {
   );
 }
 
-export default function TeamBlock({ members }: { members: TeamMember[] }) {
+export default function TeamBlock({ members }: { members: Person[] }) {
   return (
     <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px] border-b border-border-light">
       <div className="max-w-[1080px] mx-auto">

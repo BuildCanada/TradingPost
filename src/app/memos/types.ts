@@ -2,8 +2,10 @@ export interface MemoItem {
   id: string;
   title: string;
   slug: string;
-  author: string;
-  authorImage: string | null;
+  author: {
+    name: string;
+    photo: string | null;
+  };
   keyMessage1: string;
   keyMessage2: string | null;
   keyMessage3: string | null;

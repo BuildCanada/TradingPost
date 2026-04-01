@@ -20,21 +20,14 @@ async function getMemos() {
     include: { author: true },
   });
   return memos.map((m) => ({
-    id: m.id,
-    title: m.title,
-    slug: m.slug,
-    author: m.author.name,
-    authorImage:
-      m.author.name === "Build Canada"
-        ? "/assets/logos/Logocircle.webp"
-        : m.author.photo,
-    keyMessage1: m.keyMessage1,
-    keyMessage2: m.keyMessage2,
-    keyMessage3: m.keyMessage3,
-    splashImage: m.splashImage,
-    seoImage: m.seoImage,
-    category: m.category,
-    featured: m.featured,
+    ...m,
+    author: {
+      name: m.author.name,
+      photo:
+        m.author.name === "Build Canada"
+          ? "/assets/logos/Logocircle.webp"
+          : m.author.photo,
+    },
     publishedAt: m.publishedAt?.toISOString() ?? null,
     createdAt: m.createdAt.toISOString(),
   }));

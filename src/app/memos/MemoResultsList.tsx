@@ -18,10 +18,10 @@ function MemoGridRow({ memo }: { memo: MemoItem }) {
           className="w-10 h-10 bg-border-light shrink-0 overflow-hidden mt-0.5"
           style={{ borderRadius: "2px" }}
         >
-          {memo.authorImage && (
+          {memo.author.photo && (
             <Image
-              src={memo.authorImage}
-              alt={memo.author}
+              src={memo.author.photo}
+              alt={memo.author.name}
               width={40}
               height={40}
               className="w-full h-full object-cover"
@@ -36,9 +36,9 @@ function MemoGridRow({ memo }: { memo: MemoItem }) {
           </h3>
           <div className="flex items-center gap-2 mt-1">
             <p className="type-label text-text-secondary">
-              <span className="hidden wide:inline">{memo.author}</span>
+              <span className="hidden wide:inline">{memo.author.name}</span>
               <span className="wide:hidden">
-                {shortenName(memo.author)}
+                {shortenName(memo.author.name)}
               </span>
             </p>
             <span className="text-text-secondary">&middot;</span>
@@ -87,7 +87,7 @@ export default function MemoResultsList({ memos }: { memos: MemoItem[] }) {
       list = list.filter(
         (m) =>
           m.title.toLowerCase().includes(q) ||
-          m.author.toLowerCase().includes(q) ||
+          m.author.name.toLowerCase().includes(q) ||
           m.keyMessage1.toLowerCase().includes(q)
       );
     }

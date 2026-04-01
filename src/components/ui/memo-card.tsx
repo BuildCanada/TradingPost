@@ -6,8 +6,10 @@ export interface Memo {
   id: string;
   title: string;
   slug: string;
-  author: string;
-  authorImage: string | null;
+  author: {
+    name: string;
+    photo: string | null;
+  };
   keyMessage1?: string | null;
   category?: string | null;
   splashImage?: string | null;
@@ -113,7 +115,7 @@ export function MemoCard({
 
   const authorBlock = (
     <div className="flex items-center gap-4">
-      {memo.authorImage && (
+      {memo.author.photo && (
         <div 
           className={cn(
             "bg-border-light overflow-hidden shrink-0",
@@ -122,8 +124,8 @@ export function MemoCard({
           style={{ borderRadius: '2px' }}
         >
           <Image
-            src={memo.authorImage}
-            alt={memo.author}
+            src={memo.author.photo}
+            alt={memo.author.name}
             width={64}
             height={64}
             className="w-full h-full object-cover"
@@ -137,7 +139,7 @@ export function MemoCard({
           isDark ? "text-bg" : "",
           isFeatured ? "text-[1.125rem] lg:text-[1.25rem]" : "text-[1rem] lg:text-[1.125rem]"
         )}>
-          {memo.author}
+          {memo.author.name}
         </p>
         <p className={cn(
           "type-label mt-0.5",
@@ -217,14 +219,14 @@ export function MemoCard({
               )}
             </div>
             <div className="flex items-center gap-3 mt-auto">
-              {memo.authorImage && (
+              {memo.author.photo && (
                 <div 
                   className="w-10 h-10 lg:w-12 lg:h-12 bg-border-light overflow-hidden shrink-0"
                   style={{ borderRadius: '2px' }}
                 >
                   <Image
-                    src={memo.authorImage}
-                    alt={memo.author}
+                    src={memo.author.photo}
+                    alt={memo.author.name}
                     width={48}
                     height={48}
                     className="w-full h-full object-cover"
@@ -234,7 +236,7 @@ export function MemoCard({
               )}
               <div>
                 <p className="font-display text-[0.875rem] lg:text-[1rem] font-normal leading-[1.4]">
-                  {memo.author}
+                  {memo.author.name}
                 </p>
                 <p className="type-label text-text-secondary mt-0.5">
                   {formatCategory(memo.category)}

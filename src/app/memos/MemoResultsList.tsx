@@ -46,7 +46,7 @@ function MemoGridRow({ memo }: { memo: MemoItem }) {
               {formatDate(memo.publishedAt, memo.createdAt)}
             </p>
           </div>
-          <p className="type-caption text-text-secondary mt-1.5 line-clamp-3">
+          <p className="type-default text-text-secondary mt-1.5 line-clamp-3">
             {memo.keyMessage1}
           </p>
         </div>

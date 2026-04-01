@@ -25,7 +25,6 @@ async function main() {
     skip_empty_lines: true,
   });
 
-  // Build map: slug → { name, photo }
   const authorMap = new Map<string, { name: string; photo: string }>();
   for (const row of authorRows) {
     const slug = (row["Slug"] || "").trim();
@@ -34,6 +33,28 @@ async function main() {
     if (slug) authorMap.set(slug, { name, photo });
   }
   console.log(`Loaded ${authorMap.size} authors.`);
+
+  const authorIdCache = new Map<string, string>();
+
+  async function resolveAuthorId(name: string, photo: string | null): Promise<string> {
+    if (authorIdCache.has(name)) return authorIdCache.get(name)!;
+    const existing = await prisma.person.findFirst({ where: { name } });
+    if (existing) {
+      authorIdCache.set(name, existing.id);
+      return existing.id;
+    }
+    const person = await prisma.person.create({
+      data: { name, photo: photo || null, role: "AUTHOR" },
+    });
+    authorIdCache.set(name, person.id);
+    return person.id;
+  }
+
+  const buildCanadaPerson = await prisma.person.upsert({
+    where: { id: "build-canada" },
+    update: {},
+    create: { id: "build-canada", name: "Build Canada", role: "CORE", order: -1 },
+  });
 
   // --- Parse memos CSV ---
   const memosRaw = fs.readFileSync(
@@ -72,9 +93,9 @@ async function main() {
     const authorInfo = builderSlug ? authorMap.get(builderSlug) : undefined;
     const author2Info = builder2Slug ? authorMap.get(builder2Slug) : undefined;
 
-    let authorName = authorInfo?.name || builderSlug || "Build Canada";
-    if (author2Info) authorName = `${authorName} & ${author2Info.name}`;
-    const authorImage = authorInfo?.photo || null;
+    const authorId = builderSlug
+      ? await resolveAuthorId(authorInfo?.name || builderSlug, authorInfo?.photo || null)
+      : buildCanadaPerson.id;
 
     const keyMessage1 = (row["Key Message 1"] || "").trim();
     const keyMessage2 = (row["Key Message 2"] || "").trim() || null;
@@ -104,8 +125,7 @@ async function main() {
         where: { slug },
         update: {
           title,
-          author: authorName,
-          authorImage,
+          authorId,
           keyMessage1,
           keyMessage2,
           keyMessage3,
@@ -120,8 +140,7 @@ async function main() {
         create: {
           title,
           slug,
-          author: authorName,
-          authorImage,
+          authorId,
           keyMessage1,
           keyMessage2,
           keyMessage3,
@@ -136,7 +155,7 @@ async function main() {
         },
       });
       imported++;
-      console.log(`  ✓ "${title}" (${builderSlug || "no builder"} → ${authorName})`);
+      console.log(`  ✓ "${title}" (${builderSlug || "no builder"} → authorId: ${authorId})`);
     } catch (err) {
       console.error(`  ✗ Failed "${title}": ${err}`);
       errors++;

@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import { prisma } from "@/lib/prisma";
 import SectionLabel from "@/components/SectionLabel";
 import ProjectsGrid from "@/components/ProjectsGrid";
+import { buildGraph } from "@/lib/schemas/graph";
+import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
+import { generateBreadcrumbSchema } from "@/lib/schemas/generators/breadcrumb";
 
 export const metadata: Metadata = {
   title: "Projects",
@@ -19,9 +23,31 @@ export const metadata: Metadata = {
   },
 };
 
-export default function ProjectsPage() {
+export const dynamic = "force-dynamic";
+
+export default async function ProjectsPage() {
+  let siteConfig = await prisma.siteConfig.findUnique({ where: { id: "site" } });
+  if (!siteConfig) {
+    siteConfig = await prisma.siteConfig.create({ data: { id: "site" } });
+  }
+  const configData = {
+    orgName: siteConfig.orgName,
+    orgDescription: siteConfig.orgDescription,
+    siteUrl: siteConfig.siteUrl,
+    logoUrl: siteConfig.logoUrl,
+    socialLinks: siteConfig.socialLinks,
+  };
+  const jsonLd = buildGraph(
+    generateOrganizationSchema(configData),
+    generateBreadcrumbSchema("/projects", "Projects", siteConfig.siteUrl)
+  );
+
   return (
     <div className="mx-[10px] my-[10px] border border-border-light bg-bg overflow-x-clip">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="animate-fade-in" style={{ animationDelay: "0s" }}>
         <section className="relative px-5 border-b border-border-light overflow-hidden">
           <Image

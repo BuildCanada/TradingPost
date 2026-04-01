@@ -8,7 +8,7 @@ const dbPath = path.join(process.cwd(), "dev.db");
 const adapter = new PrismaLibSql({ url: `file:${dbPath}` });
 const prisma = new PrismaClient({ adapter });
 
-function readCsv(filename: string) {
+function readCsv(filename: string): Record<string, string>[] {
   const filePath = path.join(process.cwd(), filename);
   const content = fs.readFileSync(filePath, "utf-8");
   return parse(content, {
@@ -17,7 +17,7 @@ function readCsv(filename: string) {
     relax_quotes: true,
     relax_column_count: true,
     trim: true,
-  });
+  }) as Record<string, string>[];
 }
 
 function parseDate(dateStr: string): Date | null {

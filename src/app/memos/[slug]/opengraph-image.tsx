@@ -7,13 +7,13 @@ export const contentType = "image/png";
 
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const memo = await prisma.memo.findUnique({ where: { slug } });
+  const memo = await prisma.memo.findUnique({ where: { slug }, include: { author: true } });
 
   return new ImageResponse(
     <BuildCanadaOGImage
       title={memo?.title || "Policy Memo"}
       description={memo?.keyMessage1 || undefined}
-      badge={memo?.author || undefined}
+      badge={memo?.author?.name || undefined}
       label="Policy Memo"
     />,
     { ...size }

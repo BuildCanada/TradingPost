@@ -37,43 +37,69 @@ function mapRole(csvRole: string): string {
   return "ADVISOR";
 }
 
-async function seedTeamMembers(authorLookup: Map<string, string>) {
+async function ensureBuildCanadaPerson(): Promise<string> {
+  const existing = await prisma.person.findFirst({ where: { name: "Build Canada" } });
+  if (existing) return existing.id;
+  const person = await prisma.person.create({
+    data: {
+      name: "Build Canada",
+      title: "Organization",
+      role: "CORE",
+      photo: null,
+      xUrl: null,
+      linkedinUrl: null,
+      websiteUrl: null,
+      bio: null,
+      order: -1,
+    },
+  });
+  return person.id;
+}
+
+async function seedPeople(authorLookup: Map<string, string>) {
   const rows = readCsv("authors.csv");
 
-  const teamRows = rows.filter(
-    (r: any) =>
-      r["Role"] &&
-      ["Team", "Board", "Volunteer"].includes(r["Role"].trim())
-  );
-
-  let order = 0;
-  for (const row of teamRows) {
+  for (const row of rows) {
     const name = row["Name"]?.trim();
+    const slug = row["Slug"]?.trim();
     if (!name) continue;
 
-    const member = await prisma.teamMember.create({
+    const csvRole = row["Role"]?.trim();
+    const isTeamMember = csvRole && ["Team", "Board", "Volunteer"].includes(csvRole);
+
+    const person = await prisma.person.create({
       data: {
         name,
-        title: row["Title"]?.trim() || "",
-        role: mapRole(row["Role"]),
+        title: row["Title"]?.trim() || null,
+        role: isTeamMember ? mapRole(csvRole) : "ADVISOR",
         photo: row["Profile Photo"]?.trim() || null,
         xUrl: row["Twitter"]?.trim() || null,
         linkedinUrl: row["LinkedIn"]?.trim() || null,
-        order: parseInt(row["Team Order"] || "0") || order,
+        websiteUrl: null,
+        bio: null,
+        order: isTeamMember
+          ? parseInt(row["Team Order"] || "0") || 0
+          : 0,
       },
     });
 
-    const slug = row["Slug"]?.trim();
     if (slug) {
-      authorLookup.set(slug, name);
+      authorLookup.set(slug, person.id);
     }
-    order++;
   }
 
-  console.log(`  Created ${teamRows.length} team members`);
+  const teamCount = rows.filter(
+    (r: any) =>
+      r["Role"] &&
+      ["Team", "Board", "Volunteer"].includes(r["Role"].trim())
+  ).length;
+  console.log(`  Created ${rows.length} people (${teamCount} team members)`);
 }
 
-async function seedMemos(authorLookup: Map<string, string>) {
+async function seedMemos(
+  authorLookup: Map<string, string>,
+  buildCanadaId: string
+) {
   const rows = readCsv("Memoscsv.csv");
 
   const featuredSlugs = ["canada-superpower", "g7s-best-economy", "go"];
@@ -86,9 +112,9 @@ async function seedMemos(authorLookup: Map<string, string>) {
     if (slug.startsWith("test")) continue;
 
     const builderSlug = row["Builder"]?.trim();
-    const authorName = builderSlug
-      ? authorLookup.get(builderSlug) || "Build Canada"
-      : "Build Canada";
+    const authorId = builderSlug
+      ? authorLookup.get(builderSlug) || buildCanadaId
+      : buildCanadaId;
 
     const body = row["Body"]?.trim() || "";
     const category = row["Category"]?.trim() || null;
@@ -97,8 +123,7 @@ async function seedMemos(authorLookup: Map<string, string>) {
     const publishedOn = row["Published On"]?.trim();
     const publishedAt = publishedOn ? parseDate(publishedOn) : null;
 
-    const keyMessage1 =
-      row["Key Message 1"]?.trim() || title;
+    const keyMessage1 = row["Key Message 1"]?.trim() || title;
     const keyMessage2 = row["Key Message 2"]?.trim() || null;
     const keyMessage3 =
       row["Key Message 3"]?.trim() ||
@@ -109,7 +134,7 @@ async function seedMemos(authorLookup: Map<string, string>) {
       data: {
         title,
         slug,
-        author: authorName,
+        authorId,
         keyMessage1,
         keyMessage2,
         keyMessage3,
@@ -359,24 +384,36 @@ async function seedTestimonials() {
       name: "Harley Finkelstein",
       quote:
         "Build Canada is giving builders a platform to present their ideas for a richer, stronger, and freer country. This is exactly what Canada needs right now.",
+      title: null,
+      companyLogo: null,
+      personId: null,
       order: 0,
     },
     {
       name: "Jeff Adamson",
       quote:
         "Canada has every advantage — talent, resources, geography. What we need is the political will to remove barriers and let builders build.",
+      title: null,
+      companyLogo: null,
+      personId: null,
       order: 1,
     },
     {
       name: "Tobi Lutke",
       quote:
         "The best time to invest in Canada's future was decades ago. The second best time is right now. Let's make Canada the best place in the world to build.",
+      title: null,
+      companyLogo: null,
+      personId: null,
       order: 2,
     },
     {
       name: "Daniel Eberhard",
       quote:
         "We have a historic opportunity to reform and rebuild. Canadians are demanding action, and the ideas are here. We just need the courage to execute.",
+      title: null,
+      companyLogo: null,
+      personId: null,
       order: 3,
     },
   ];
@@ -388,25 +425,82 @@ async function seedTestimonials() {
   console.log(`  Created ${testimonials.length} testimonials`);
 }
 
+async function seedSiteConfig() {
+  await prisma.siteConfig.upsert({
+    where: { id: "site" },
+    update: {},
+    create: {
+      id: "site",
+      orgName: "Build Canada",
+      orgDescription:
+        "Building the future of Canada through technology and entrepreneurship.",
+      logoUrl: "https://buildcanada.ca/assets/logos/Logocircle.webp",
+      siteUrl: "https://buildcanada.ca",
+      socialLinks: JSON.stringify([
+        "https://x.com/buildcanada",
+        "https://linkedin.com/company/buildcanada",
+        "https://instagram.com/buildcanada",
+        "https://tiktok.com/@buildcanada",
+        "https://buildcanada.substack.com",
+        "https://youtube.com/@buildcanada",
+      ]),
+    },
+  });
+
+  console.log("  Created SiteConfig");
+}
+
+async function seedQandAItems() {
+  const qandaItems = [
+    {
+      question: "Is Build Canada affiliated with a political party?",
+      answer:
+        "No. Build Canada is non-partisan. Our work is driven by one question: how do we make Canada the most prosperous country in the world?",
+      order: 0,
+      active: true,
+    },
+    {
+      question: "How is Build Canada funded?",
+      answer:
+        "We're a federally incorporated non-profit organization funded by over 60 individual donors who believe in building a stronger country. We don't accept government grants or public funding, which keeps us independent.",
+      order: 1,
+      active: true,
+    },
+    {
+      question: "Is Build Canada a lobby group?",
+      answer:
+        "No. We produce research, build community among Canadian founders and operators, and share policy ideas in public.",
+      order: 2,
+      active: true,
+    },
+    {
+      question: "Do you support a specific policy platform?",
+      answer:
+        "We champion ideas that make Canada a better place to build and grow our economy — whether that means tax reform, talent retention, infrastructure investment, or regulatory modernization. If you want to learn more about where we stand and our latest ideas, follow along with our content — we're always publishing new ideas and perspectives from builders across the country.",
+      order: 3,
+      active: true,
+    },
+  ];
+
+  for (const item of qandaItems) {
+    await prisma.qandAItem.create({ data: item });
+  }
+
+  console.log(`  Created ${qandaItems.length} Q&A items`);
+}
+
 async function main() {
   console.log("Seeding database...\n");
 
   const authorLookup = new Map<string, string>();
 
-  const allAuthors = readCsv("authors.csv");
-  for (const row of allAuthors) {
-    const slug = row["Slug"]?.trim();
-    const name = row["Name"]?.trim();
-    if (slug && name) {
-      authorLookup.set(slug, name);
-    }
-  }
+  console.log("1. People");
+  await seedPeople(authorLookup);
 
-  console.log("1. Team Members");
-  await seedTeamMembers(authorLookup);
+  const buildCanadaId = await ensureBuildCanadaPerson();
 
   console.log("\n2. Memos");
-  await seedMemos(authorLookup);
+  await seedMemos(authorLookup, buildCanadaId);
 
   console.log("\n3. Projects");
   await seedProjects();
@@ -416,6 +510,12 @@ async function main() {
 
   console.log("\n5. Testimonials");
   await seedTestimonials();
+
+  console.log("\n6. Site Config");
+  await seedSiteConfig();
+
+  console.log("\n7. Q&A Items");
+  await seedQandAItems();
 
   console.log("\nDone!");
 }

@@ -16,7 +16,7 @@ export default async function EventsTimeline() {
   return (
     <div className="py-12 flex flex-col h-full">
       <span className="type-label text-dark block pb-4">Events</span>
-      <div className="border-t border-l border-border-light flex-1">
+      <div className="border-t border-l border-border-light flex-1 flex flex-col">
         {events.length === 0 ? (
           <div className="border-b border-r border-border-light p-6 text-center">
             <p className="type-caption text-text-secondary">
@@ -36,7 +36,7 @@ export default async function EventsTimeline() {
             {events.map((event) => (
               <EventCard key={event.id} event={event} />
             ))}
-            <div className="border-b border-r border-border-light p-4">
+            <div className="border-b border-r border-border-light p-4 mt-auto">
               <a
                 href="https://lu.ma/cal-KUFO2yscrfWr7RV"
                 target="_blank"

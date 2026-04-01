@@ -8,7 +8,7 @@ datasource db {
 
 model FeedItem {
   id          String   @id @default(cuid())
-  type        String   // BLOG, SUBSTACK, X, TIKTOK, IG, YOUTUBE
+  type        String
   title       String?
   subtitle    String?
   author      String?
@@ -17,44 +17,53 @@ model FeedItem {
   body        String?
   url         String?
   embedCode   String?
-  sourceUrl   String?  @unique // for dedup of auto-imported social posts
-  tags        String?  // comma-separated tags for SEO
+  sourceUrl   String?  @unique
+  tags        String?
   featured    Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
 
-model TeamMember {
-  id        String  @id @default(cuid())
-  name      String
-  title     String
-  role      String  @default("CORE") // CORE, ADVISOR, BOARD
-  photo     String?
-  xUrl      String? // X (Twitter) profile link
-  linkedinUrl String? // LinkedIn profile link
-  order     Int     @default(0) // display order
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Person {
+  id          String   @id @default(cuid())
+  name        String
+  title       String?
+  role        String   @default("CORE")
+  photo       String?
+  xUrl        String?
+  linkedinUrl String?
+  websiteUrl  String?
+  bio         String?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  memos       Memo[]
+  testimonial Testimonial?
 }
 
 model Testimonial {
-  id          String  @id @default(cuid())
-  name        String
-  quote       String
-  profilePhoto String? // small profile picture
-  splashPhoto  String? // larger splash/background photo
-  order       Int     @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String   @id @default(cuid())
+  name         String
+  quote        String
+  title        String?
+  companyLogo  String?
+  profilePhoto String?
+  splashPhoto  String?
+  personId     String?  @unique
+  person       Person?  @relation(fields: [personId], references: [id])
+  order        Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
 }
 
 model Project {
   id          String   @id @default(cuid())
   slug        String   @unique
   title       String
-  description String?
-  externalUrl String
-  size        String   @default("small") // "small" | "big"
+  description String
+  externalUrl String?
+  size        String   @default("small")
   featured    Boolean  @default(false)
   order       Int      @default(0)
   accentColor String?
@@ -63,22 +72,43 @@ model Project {
 }
 
 model Memo {
-  id          String   @id @default(cuid())
-  title       String
-  slug        String   @unique
-  author      String
-  authorImage String?
-  keyMessage1 String   // main description
-  keyMessage2 String?
-  keyMessage3 String?
-  body        String   // markdown content
-  supporters  String?  // markdown content
-  splashImage String?
-  seoImage    String?
-  category    String?
-  publishedAt DateTime?
-  twitterEmbed String?  // generated embed HTML/text
-  featured    Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id           String    @id @default(cuid())
+  title        String
+  slug         String    @unique
+  authorId     String
+  author       Person    @relation(fields: [authorId], references: [id], onDelete: Restrict)
+  keyMessage1  String
+  keyMessage2  String?
+  keyMessage3  String?
+  body         String
+  supporters   String?
+  splashImage  String?
+  seoImage     String?
+  category     String?
+  publishedAt  DateTime?
+  twitterEmbed String?
+  featured     Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model SiteConfig {
+  id             String   @id @default("site")
+  orgName        String   @default("Build Canada")
+  orgDescription String?
+  logoUrl        String?
+  siteUrl        String   @default("https://buildcanada.ca")
+  socialLinks    String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model QandAItem {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String
+  order     Int      @default(0)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

@@ -71,7 +71,7 @@ async function seedPeople(authorLookup: Map<string, string>) {
       data: {
         name,
         title: row["Title"]?.trim() || null,
-        role: isTeamMember ? mapRole(csvRole) : "ADVISOR",
+        role: isTeamMember ? mapRole(csvRole) : "AUTHOR",
         photo: row["Profile Photo"]?.trim() || null,
         xUrl: row["Twitter"]?.trim() || null,
         linkedinUrl: row["LinkedIn"]?.trim() || null,

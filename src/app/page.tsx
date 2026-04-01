@@ -278,9 +278,6 @@ export default async function Home() {
       <div className="animate-fade-in" style={{ animationDelay: "1.6s" }}>
         <FeaturedProjects />
       </div>
-      <div className="animate-fade-in" style={{ animationDelay: "2.0s" }}>
-        <FeaturedProjects />
-      </div>
       <ExitIntentHandler />
     </div>
   );

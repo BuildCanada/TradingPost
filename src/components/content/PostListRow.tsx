@@ -37,7 +37,7 @@ export function PostListRow({ item }: { item: ContentFeedItem }) {
   const inner = (
     <div className="group/row flex items-center gap-3 py-2.5 border-b border-border-light last:border-b-0 transition-colors">
       <div
-        className={`w-[52px] h-[52px] rounded shrink-0 relative overflow-hidden ${
+        className={`w-[52px] h-[52px] shrink-0 relative overflow-hidden ${
           feedImage(item) === "/assets/logos/logo-standard.svg"
             ? "bg-accent"
             : "bg-border-light"
@@ -70,7 +70,7 @@ export function PostListRow({ item }: { item: ContentFeedItem }) {
         )}
       </div>
       <span
-        className={`border border-border-light rounded px-1.5 py-1 shrink-0 flex items-center justify-center transition-all duration-200 ${hoverClasses}`}
+        className={`border border-border-light px-1.5 py-1 shrink-0 flex items-center justify-center transition-all duration-200 ${hoverClasses}`}
       >
         <span
           className={`transition-all duration-200 brightness-0 opacity-40 group-hover/row:opacity-100 ${INVERT_ICON_ON_HOVER.has(item.type) ? "group-hover/row:invert" : ""}`}

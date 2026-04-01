@@ -16,7 +16,7 @@ export function FilterChips({
           <button
             key={f}
             onClick={() => onSelect(f)}
-            className={`h-7 px-3.5 rounded-full type-label border transition-colors ${
+            className={`h-7 px-3.5 type-label border transition-colors ${
               active === f
                 ? "bg-dark text-bg border-dark"
                 : "bg-transparent text-dark border-border-light hover:border-dark"

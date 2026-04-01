@@ -11,7 +11,7 @@ export default function SectionLabel({
 }: SectionLabelProps) {
   return (
     <Tag
-      className={`type-label font-bold text-[var(--color-text-secondary)] block m-0 pb-1 ${className}`}
+      className={`type-label font-bold text-text-secondary block m-0 pb-1 ${className}`}
     >
       {children}
     </Tag>

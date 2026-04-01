@@ -1,5 +1,3 @@
-"use client";
-
 import Image from "next/image";
 import SectionLabel from "@/components/SectionLabel";
 import { LumaEvent } from "@/lib/luma/types";

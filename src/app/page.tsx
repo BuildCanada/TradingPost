@@ -3,7 +3,6 @@ import { prisma } from "@/lib/prisma";
 import FeedPreview from "@/components/FeedPreview";
 import FeaturedMemos from "@/components/FeaturedMemos";
 import { ExitIntentHandler } from "@/components/subscribe";
-import SectionLabel from "@/components/SectionLabel";
 import FeaturedProjects from "@/components/FeaturedProjects";
 import { LinkButton } from "@/components/ui/link-button";
 import { SubscribeButton } from "@/components/ui/subscribe-button";

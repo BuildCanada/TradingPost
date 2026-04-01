@@ -147,18 +147,13 @@ export default function Footer() {
           </div>
 
           <p
-            className="text-charcoal-400 mb-3"
-            style={{
-              fontFamily: '"Test Financier Text", serif',
-              fontSize: "14px",
-              lineHeight: 1.45,
-            }}
+            className="type-default text-linen-100 mb-3"
           >
             Whatever our errors are otherwise, we shall not err for want of
             boldness... Canada shall be the star towards which all men who love
             progress and freedom shall come.
           </p>
-          <span className="type-label text-charcoal-400 font-bold">
+          <span className="type-label text-linen-100 font-bold">
             — Laurier
           </span>
         </div>

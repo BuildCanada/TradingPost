@@ -31,7 +31,7 @@ export function TikTokCard({ item }: { item: FeedItem }) {
         avatarBorder={COLORS.avatarBorder}
       />
 
-      <div className="px-3 py-3 flex flex-col gap-2 flex-1">
+      <div className="px-5 py-4 flex flex-col gap-2 flex-1">
         <span className="inline-flex items-center gap-1 text-[11px] uppercase tracking-[0.08em] font-medium text-[#8a8b91]">
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none">
             <path d="M8 5.14v13.72a1 1 0 001.5.86l11.24-6.86a1 1 0 000-1.72L9.5 4.28A1 1 0 008 5.14z" fill="#8a8b91" />
@@ -46,7 +46,7 @@ export function TikTokCard({ item }: { item: FeedItem }) {
         )}
       </div>
 
-      <div className="px-3 py-2.5 flex items-center justify-between border-t border-[#2f2f2f]">
+      <div className="px-5 py-3 flex items-center justify-between border-t border-[#2f2f2f]">
         <Image
           src="/assets/icons/platform-tiktok.svg"
           alt="TikTok"

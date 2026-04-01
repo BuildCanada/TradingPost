@@ -21,7 +21,7 @@ export function SocialCardHeader({
   avatarBorder,
 }: SocialCardHeaderProps) {
   return (
-    <div className="flex items-center gap-2.5 px-3 py-2.5 border-b" style={{ borderColor }}>
+    <div className="flex items-center gap-2.5 px-5 py-3 border-b" style={{ borderColor }}>
       <div
         className="w-8 h-8 overflow-hidden shrink-0"
         style={{ borderRadius: 2, border: `2px solid ${avatarBorder}` }}

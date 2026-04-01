@@ -55,8 +55,11 @@ interface MemoItem {
   id: string;
   title: string;
   slug: string;
-  author: string;
-  authorImage: string | null;
+  author: {
+    id: string;
+    name: string;
+    photo: string | null;
+  };
   keyMessage1: string;
   keyMessage2: string | null;
   keyMessage3: string | null;
@@ -71,14 +74,16 @@ interface MemoItem {
   createdAt: string;
 }
 
-interface TeamMemberItem {
+interface PersonItem {
   id: string;
   name: string;
-  title: string;
+  title: string | null;
   role: string;
   photo: string | null;
   xUrl: string | null;
   linkedinUrl: string | null;
+  websiteUrl: string | null;
+  bio: string | null;
   order: number;
 }
 
@@ -86,34 +91,41 @@ interface TestimonialItem {
   id: string;
   name: string;
   quote: string;
+  title: string | null;
+  companyLogo: string | null;
   profilePhoto: string | null;
   splashPhoto: string | null;
+  personId: string | null;
   order: number;
 }
 
-const EMPTY_TEAM_MEMBER = {
+const EMPTY_PERSON = {
   name: "",
   title: "",
   role: "CORE",
   photo: "",
   xUrl: "",
   linkedinUrl: "",
+  websiteUrl: "",
+  bio: "",
   order: 0,
 };
 
 const EMPTY_TESTIMONIAL = {
   name: "",
   quote: "",
+  title: "",
+  companyLogo: "",
   profilePhoto: "",
   splashPhoto: "",
+  personId: "",
   order: 0,
 };
 
 const EMPTY_MEMO = {
   title: "",
   slug: "",
-  author: "",
-  authorImage: "",
+  authorId: "",
   keyMessage1: "",
   keyMessage2: "",
   keyMessage3: "",
@@ -145,7 +157,7 @@ export default function AdminPage() {
   const [memoForm, setMemoForm] = useState(EMPTY_MEMO);
   const [editingMemoSlug, setEditingMemoSlug] = useState<string | null>(null);
   const [memoUploading, setMemoUploading] = useState(false);
-  const [activeSection, setActiveSection] = useState<"feed" | "memos" | "about" | "projects">("feed");
+  const [activeSection, setActiveSection] = useState<"feed" | "memos" | "about" | "projects" | "site" | "qanda">("feed");
 
   // Projects state
   interface ProjectItem {
@@ -172,15 +184,35 @@ export default function AdminPage() {
   const [editingProjectId, setEditingProjectId] = useState<string | null>(null);
 
   // About Us state
-  const [teamMembers, setTeamMembers] = useState<TeamMemberItem[]>([]);
-  const [teamForm, setTeamForm] = useState(EMPTY_TEAM_MEMBER);
-  const [editingTeamId, setEditingTeamId] = useState<string | null>(null);
+  const [people, setPeople] = useState<PersonItem[]>([]);
+  const [personForm, setPersonForm] = useState(EMPTY_PERSON);
+  const [editingPersonId, setEditingPersonId] = useState<string | null>(null);
   const [teamUploading, setTeamUploading] = useState(false);
 
   const [testimonials, setTestimonials] = useState<TestimonialItem[]>([]);
   const [testimonialForm, setTestimonialForm] = useState(EMPTY_TESTIMONIAL);
   const [editingTestimonialId, setEditingTestimonialId] = useState<string | null>(null);
   const [testimonialUploading, setTestimonialUploading] = useState<"profilePhoto" | "splashPhoto" | null>(null);
+
+  const [siteConfig, setSiteConfig] = useState({
+    orgName: "",
+    orgDescription: "",
+    logoUrl: "",
+    siteUrl: "",
+    socialLinks: [] as string[],
+  });
+  const [configLoading, setConfigLoading] = useState(false);
+
+  interface QandAItemData {
+    id: string;
+    question: string;
+    answer: string;
+    order: number;
+    active: boolean;
+  }
+  const [qandaItems, setQandaItems] = useState<QandAItemData[]>([]);
+  const [qandaForm, setQandaForm] = useState({ question: "", answer: "", order: 0, active: true });
+  const [editingQandaId, setEditingQandaId] = useState<string | null>(null);
 
   const loadItems = useCallback(async () => {
     const res = await fetch("/api/feed");
@@ -195,10 +227,10 @@ export default function AdminPage() {
     setMemos(data);
   }, []);
 
-  const loadTeamMembers = useCallback(async () => {
-    const res = await fetch("/api/team");
+  const loadPeople = useCallback(async () => {
+    const res = await fetch("/api/people");
     if (!res.ok) return;
-    setTeamMembers(await res.json());
+    setPeople(await res.json());
   }, []);
 
   const loadTestimonials = useCallback(async () => {
@@ -213,13 +245,34 @@ export default function AdminPage() {
     setProjects(await res.json());
   }, []);
 
+  const loadSiteConfig = useCallback(async () => {
+    const res = await fetch("/api/site-config");
+    if (!res.ok) return;
+    const data = await res.json();
+    setSiteConfig({
+      orgName: data.orgName || "",
+      orgDescription: data.orgDescription || "",
+      logoUrl: data.logoUrl || "",
+      siteUrl: data.siteUrl || "",
+      socialLinks: data.socialLinks ? JSON.parse(data.socialLinks) : [],
+    });
+  }, []);
+
+  const loadQanda = useCallback(async () => {
+    const res = await fetch("/api/qanda");
+    if (!res.ok) return;
+    setQandaItems(await res.json());
+  }, []);
+
   useEffect(() => {
     loadItems();
     loadMemos();
-    loadTeamMembers();
+    loadPeople();
     loadTestimonials();
     loadProjects();
-  }, [loadItems, loadMemos, loadTeamMembers, loadTestimonials, loadProjects]);
+    loadSiteConfig();
+    loadQanda();
+  }, [loadItems, loadMemos, loadPeople, loadTestimonials, loadProjects, loadSiteConfig, loadQanda]);
 
   async function handleUpload(
     e: React.ChangeEvent<HTMLInputElement>,
@@ -375,7 +428,7 @@ export default function AdminPage() {
 
   async function handleMemoUpload(
     e: React.ChangeEvent<HTMLInputElement>,
-    field: "authorImage" | "splashImage" | "seoImage"
+    field: "splashImage" | "seoImage"
   ) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -416,8 +469,7 @@ export default function AdminPage() {
     setMemoForm({
       title: memo.title,
       slug: memo.slug,
-      author: memo.author,
-      authorImage: memo.authorImage || "",
+      authorId: memo.author?.id || "",
       keyMessage1: memo.keyMessage1,
       keyMessage2: memo.keyMessage2 || "",
       keyMessage3: memo.keyMessage3 || "",
@@ -454,7 +506,7 @@ export default function AdminPage() {
   }
 
   // ── Team member handlers ──
-  async function handleTeamUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handlePersonUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     setTeamUploading(true);
@@ -462,50 +514,52 @@ export default function AdminPage() {
     fd.append("file", file);
     const res = await fetch("/api/upload", { method: "POST", body: fd });
     const data = await res.json();
-    setTeamForm((f) => ({ ...f, photo: data.url }));
+    setPersonForm((f) => ({ ...f, photo: data.url }));
     setTeamUploading(false);
   }
 
-  async function handleTeamSubmit(e: React.FormEvent) {
+  async function handlePersonSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (editingTeamId) {
-      await fetch("/api/team", {
+    if (editingPersonId) {
+      await fetch("/api/people", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: editingTeamId, ...teamForm }),
+        body: JSON.stringify({ id: editingPersonId, ...personForm }),
       });
     } else {
-      await fetch("/api/team", {
+      await fetch("/api/people", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(teamForm),
+        body: JSON.stringify(personForm),
       });
     }
-    setTeamForm(EMPTY_TEAM_MEMBER);
-    setEditingTeamId(null);
-    loadTeamMembers();
+    setPersonForm(EMPTY_PERSON);
+    setEditingPersonId(null);
+    loadPeople();
   }
 
-  function startEditTeam(m: TeamMemberItem) {
-    setEditingTeamId(m.id);
-    setTeamForm({
+  function startEditPerson(m: PersonItem) {
+    setEditingPersonId(m.id);
+    setPersonForm({
       name: m.name,
-      title: m.title,
+      title: m.title || "",
       role: m.role || "CORE",
       photo: m.photo || "",
       xUrl: m.xUrl || "",
       linkedinUrl: m.linkedinUrl || "",
+      websiteUrl: m.websiteUrl || "",
+      bio: m.bio || "",
       order: m.order,
     });
   }
 
-  async function handleDeleteTeam(id: string) {
-    await fetch("/api/team", {
+  async function handleDeletePerson(id: string) {
+    await fetch("/api/people", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ id }),
     });
-    loadTeamMembers();
+    loadPeople();
   }
 
   // ── Testimonial handlers ──
@@ -549,8 +603,11 @@ export default function AdminPage() {
     setTestimonialForm({
       name: t.name,
       quote: t.quote,
+      title: t.title || "",
+      companyLogo: t.companyLogo || "",
       profilePhoto: t.profilePhoto || "",
       splashPhoto: t.splashPhoto || "",
+      personId: t.personId || "",
       order: t.order,
     });
   }
@@ -633,6 +690,60 @@ export default function AdminPage() {
     loadProjects();
   }
 
+  async function handleSiteConfigSave(e: React.FormEvent) {
+    e.preventDefault();
+    setConfigLoading(true);
+    await fetch("/api/site-config", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...siteConfig,
+        socialLinks: JSON.stringify(siteConfig.socialLinks),
+      }),
+    });
+    setConfigLoading(false);
+  }
+
+  async function handleQandaSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (editingQandaId) {
+      await fetch("/api/qanda", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: editingQandaId, ...qandaForm }),
+      });
+    } else {
+      await fetch("/api/qanda", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(qandaForm),
+      });
+    }
+    setQandaForm({ question: "", answer: "", order: 0, active: true });
+    setEditingQandaId(null);
+    loadQanda();
+  }
+
+  async function handleDeleteQanda(id: string) {
+    await fetch("/api/qanda", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    loadQanda();
+  }
+
+  function startEditQanda(item: QandAItemData) {
+    setEditingQandaId(item.id);
+    setQandaForm({
+      question: item.question,
+      answer: item.answer,
+      order: item.order,
+      active: item.active,
+    });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   const showFullForm = isBlogType(form.type);
 
   // ── Backup state ──
@@ -695,7 +806,7 @@ export default function AdminPage() {
         // Reload all data
         loadItems();
         loadMemos();
-        loadTeamMembers();
+        loadPeople();
         loadTestimonials();
       } else {
         setBackupStatus(`Import failed: ${data.error}`);
@@ -787,6 +898,8 @@ export default function AdminPage() {
           <option value="memos">Memos CMS</option>
           <option value="projects">Projects CMS</option>
           <option value="about">About Us CMS</option>
+          <option value="site">Site Settings</option>
+          <option value="qanda">Q&amp;A</option>
         </select>
       </div>
 
@@ -1371,46 +1484,25 @@ export default function AdminPage() {
           />
         </div>
 
-        {/* Author + Author Image */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-xs uppercase tracking-wide text-gray-500 mb-1">
-              Author
-            </label>
-            <input
-              type="text"
-              value={memoForm.author}
-              onChange={(e) =>
-                setMemoForm((f) => ({ ...f, author: e.target.value }))
-              }
-              className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
-              placeholder="Author name"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-xs uppercase tracking-wide text-gray-500 mb-1">
-              Author Image
-            </label>
-            <div className="flex items-center gap-2">
-              {memoForm.authorImage && (
-                <img
-                  src={memoForm.authorImage}
-                  alt=""
-                  className="w-8 h-8 rounded-full object-cover border"
-                />
-              )}
-              <label className="cursor-pointer text-xs border border-gray-300 rounded px-3 py-2 hover:bg-gray-50">
-                {memoUploading ? "Uploading..." : "Upload"}
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={(e) => handleMemoUpload(e, "authorImage")}
-                />
-              </label>
-            </div>
-          </div>
+        <div>
+          <label className="block text-xs uppercase tracking-wide text-gray-500 mb-1">
+            Author
+          </label>
+          <select
+            value={memoForm.authorId}
+            onChange={(e) =>
+              setMemoForm((f) => ({ ...f, authorId: e.target.value }))
+            }
+            className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+            required
+          >
+            <option value="">Select author...</option>
+            {people.map((p) => (
+              <option key={p.id} value={p.id}>
+                {p.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Key Messages */}
@@ -1545,14 +1637,10 @@ export default function AdminPage() {
             <button
               type="button"
               onClick={() => {
-                // Build tweet body text from key message 1
                 const tweetBody = memoForm.keyMessage1.trim();
                 const readLink = `https://buildcanada.ca/memos/${memoForm.slug}`;
-                // Format author display name from slug (e.g. "john-ruffolo" -> "John Ruffolo")
-                const authorDisplay = memoForm.author
-                  .split("-")
-                  .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-                  .join(" ");
+                const authorPerson = people.find(p => p.id === memoForm.authorId);
+                const authorDisplay = authorPerson?.name || "Build Canada";
                 const embed = `<div data-rt-embed-type='true'><blockquote class="twitter-tweet"><p lang="en" dir="ltr">${tweetBody}<br><br>Read &quot;${memoForm.title}&quot; from ${authorDisplay}: <a href="${readLink}">${readLink}</a></p>&mdash; Build Canada (@build_canada) <a href="TWEET_URL_HERE">DATE_HERE</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script></div>`;
                 setMemoForm((f) => ({ ...f, twitterEmbed: embed }));
               }}
@@ -1642,9 +1730,9 @@ export default function AdminPage() {
             key={memo.id}
             className="border border-gray-200 rounded p-4 flex items-start gap-4"
           >
-            {memo.authorImage ? (
+            {memo.author?.photo ? (
               <img
-                src={memo.authorImage}
+                src={memo.author.photo}
                 alt=""
                 className="w-10 h-10 rounded-full object-cover border shrink-0"
               />
@@ -1665,7 +1753,7 @@ export default function AdminPage() {
                 )}
               </div>
               <p className="font-medium text-sm truncate">{memo.title}</p>
-              <p className="text-xs text-gray-400 mt-0.5">By {memo.author}</p>
+              <p className="text-xs text-gray-400 mt-0.5">By {memo.author?.name || "Unknown"}</p>
               <p className="text-xs text-gray-500 mt-1 line-clamp-1">
                 {memo.keyMessage1}
               </p>
@@ -1701,16 +1789,15 @@ export default function AdminPage() {
       </>)}
 
       {activeSection === "about" && (<>
-        {/* ── Team Members ── */}
-        <h2 className="text-xl font-bold mb-4">Team Members</h2>
-        <form onSubmit={handleTeamSubmit} className="border border-gray-200 rounded p-4 mb-6 space-y-3">
+        <h2 className="text-xl font-bold mb-4">People</h2>
+        <form onSubmit={handlePersonSubmit} className="border border-gray-200 rounded p-4 mb-6 space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium mb-1">Name *</label>
               <input
                 required
-                value={teamForm.name}
-                onChange={(e) => setTeamForm((f) => ({ ...f, name: e.target.value }))}
+                value={personForm.name}
+                onChange={(e) => setPersonForm((f) => ({ ...f, name: e.target.value }))}
                 className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
               />
             </div>
@@ -1718,8 +1805,8 @@ export default function AdminPage() {
               <label className="block text-xs font-medium mb-1">Title *</label>
               <input
                 required
-                value={teamForm.title}
-                onChange={(e) => setTeamForm((f) => ({ ...f, title: e.target.value }))}
+                value={personForm.title}
+                onChange={(e) => setPersonForm((f) => ({ ...f, title: e.target.value }))}
                 className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
               />
             </div>
@@ -1727,21 +1814,22 @@ export default function AdminPage() {
           <div>
             <label className="block text-xs font-medium mb-1">Role *</label>
             <select
-              value={teamForm.role}
-              onChange={(e) => setTeamForm((f) => ({ ...f, role: e.target.value }))}
+              value={personForm.role}
+              onChange={(e) => setPersonForm((f) => ({ ...f, role: e.target.value }))}
               className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
             >
               <option value="CORE">Core Team</option>
               <option value="ADVISOR">Advisor</option>
               <option value="BOARD">Board</option>
+              <option value="AUTHOR">Author</option>
             </select>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium mb-1">X (Twitter) URL</label>
               <input
-                value={teamForm.xUrl}
-                onChange={(e) => setTeamForm((f) => ({ ...f, xUrl: e.target.value }))}
+                value={personForm.xUrl}
+                onChange={(e) => setPersonForm((f) => ({ ...f, xUrl: e.target.value }))}
                 placeholder="https://x.com/..."
                 className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
               />
@@ -1749,41 +1837,58 @@ export default function AdminPage() {
             <div>
               <label className="block text-xs font-medium mb-1">LinkedIn URL</label>
               <input
-                value={teamForm.linkedinUrl}
-                onChange={(e) => setTeamForm((f) => ({ ...f, linkedinUrl: e.target.value }))}
+                value={personForm.linkedinUrl}
+                onChange={(e) => setPersonForm((f) => ({ ...f, linkedinUrl: e.target.value }))}
                 placeholder="https://linkedin.com/in/..."
                 className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
               />
             </div>
           </div>
+          <div>
+            <label className="block text-xs font-medium mb-1">Website URL</label>
+            <input
+              value={personForm.websiteUrl}
+              onChange={(e) => setPersonForm((f) => ({ ...f, websiteUrl: e.target.value }))}
+              placeholder="https://..."
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-medium mb-1">Bio</label>
+            <textarea
+              value={personForm.bio}
+              onChange={(e) => setPersonForm((f) => ({ ...f, bio: e.target.value }))}
+              rows={3}
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+            />
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium mb-1">Photo</label>
-              {teamForm.photo && (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img src={teamForm.photo} alt="" className="w-12 h-12 rounded-full object-cover mb-1" />
+              {personForm.photo && (
+                <img src={personForm.photo} alt="" className="w-12 h-12 rounded-full object-cover mb-1" />
               )}
-              <input type="file" accept="image/*" onChange={handleTeamUpload} className="text-xs" />
+              <input type="file" accept="image/*" onChange={handlePersonUpload} className="text-xs" />
               {teamUploading && <span className="text-xs text-gray-400">Uploading…</span>}
             </div>
             <div>
               <label className="block text-xs font-medium mb-1">Display Order</label>
               <input
                 type="number"
-                value={teamForm.order}
-                onChange={(e) => setTeamForm((f) => ({ ...f, order: parseInt(e.target.value) || 0 }))}
+                value={personForm.order}
+                onChange={(e) => setPersonForm((f) => ({ ...f, order: parseInt(e.target.value) || 0 }))}
                 className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
               />
             </div>
           </div>
           <div className="flex gap-2">
             <button type="submit" className="px-4 py-2 bg-black text-white rounded text-sm hover:bg-gray-800">
-              {editingTeamId ? "Update Member" : "Add Member"}
+              {editingPersonId ? "Update Person" : "Add Person"}
             </button>
-            {editingTeamId && (
+            {editingPersonId && (
               <button
                 type="button"
-                onClick={() => { setEditingTeamId(null); setTeamForm(EMPTY_TEAM_MEMBER); }}
+                onClick={() => { setEditingPersonId(null); setPersonForm(EMPTY_PERSON); }}
                 className="px-4 py-2 border border-gray-300 rounded text-sm hover:border-black"
               >
                 Cancel
@@ -1793,10 +1898,9 @@ export default function AdminPage() {
         </form>
 
         <div className="space-y-2 mb-10">
-          {teamMembers.map((m) => (
+          {people.map((m) => (
             <div key={m.id} className="flex items-center gap-3 border border-gray-200 rounded p-3">
               {m.photo ? (
-                /* eslint-disable-next-line @next/next/no-img-element */
                 <img src={m.photo} alt="" className="w-10 h-10 rounded-full object-cover shrink-0" />
               ) : (
                 <div className="w-10 h-10 rounded-full bg-gray-200 shrink-0" />
@@ -1809,13 +1913,13 @@ export default function AdminPage() {
               <span className="text-xs text-gray-400 shrink-0">#{m.order}</span>
               <div className="flex gap-1 shrink-0">
                 <button
-                  onClick={() => startEditTeam(m)}
+                  onClick={() => startEditPerson(m)}
                   className="text-[10px] px-2 py-1 rounded border border-gray-300 text-gray-500 hover:border-black hover:text-black"
                 >
                   Edit
                 </button>
                 <button
-                  onClick={() => handleDeleteTeam(m.id)}
+                  onClick={() => handleDeletePerson(m.id)}
                   className="text-[10px] px-2 py-1 rounded border border-gray-300 text-red-400 hover:border-red-500 hover:text-red-600"
                 >
                   Delete
@@ -1823,8 +1927,8 @@ export default function AdminPage() {
               </div>
             </div>
           ))}
-          {teamMembers.length === 0 && (
-            <p className="text-sm text-gray-400 text-center py-4">No team members yet.</p>
+          {people.length === 0 && (
+            <p className="text-sm text-gray-400 text-center py-4">No people yet.</p>
           )}
         </div>
 
@@ -1850,34 +1954,75 @@ export default function AdminPage() {
               className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
             />
           </div>
+          <div>
+            <label className="block text-xs font-medium mb-1">Title / Role</label>
+            <input
+              value={testimonialForm.title}
+              onChange={(e) => setTestimonialForm((f) => ({ ...f, title: e.target.value }))}
+              placeholder="e.g., CEO of Shopify"
+              className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+            />
+          </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-medium mb-1">Profile Photo</label>
               {testimonialForm.profilePhoto && (
-                /* eslint-disable-next-line @next/next/no-img-element */
                 <img src={testimonialForm.profilePhoto} alt="" className="w-10 h-10 rounded-full object-cover mb-1" />
               )}
               <input type="file" accept="image/*" onChange={(e) => handleTestimonialUpload(e, "profilePhoto")} className="text-xs" />
               {testimonialUploading === "profilePhoto" && <span className="text-xs text-gray-400">Uploading…</span>}
             </div>
             <div>
-              <label className="block text-xs font-medium mb-1">Splash Photo</label>
-              {testimonialForm.splashPhoto && (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img src={testimonialForm.splashPhoto} alt="" className="w-full h-16 object-cover rounded mb-1" />
+              <label className="block text-xs font-medium mb-1">Company Logo</label>
+              {testimonialForm.companyLogo && (
+                <img src={testimonialForm.companyLogo} alt="" className="w-20 h-10 object-contain mb-1" />
               )}
-              <input type="file" accept="image/*" onChange={(e) => handleTestimonialUpload(e, "splashPhoto")} className="text-xs" />
-              {testimonialUploading === "splashPhoto" && <span className="text-xs text-gray-400">Uploading…</span>}
+              <input type="file" accept="image/*" onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                setTestimonialUploading("profilePhoto");
+                const fd = new FormData();
+                fd.append("file", file);
+                const res = await fetch("/api/upload", { method: "POST", body: fd });
+                const data = await res.json();
+                setTestimonialForm((f) => ({ ...f, companyLogo: data.url }));
+                setTestimonialUploading(null);
+              }} className="text-xs" />
             </div>
           </div>
           <div>
-            <label className="block text-xs font-medium mb-1">Display Order</label>
-            <input
-              type="number"
-              value={testimonialForm.order}
-              onChange={(e) => setTestimonialForm((f) => ({ ...f, order: parseInt(e.target.value) || 0 }))}
-              className="w-24 border border-gray-300 rounded px-3 py-2 text-sm"
-            />
+            <label className="block text-xs font-medium mb-1">Splash Photo</label>
+            {testimonialForm.splashPhoto && (
+              <img src={testimonialForm.splashPhoto} alt="" className="w-full h-16 object-cover rounded mb-1" />
+            )}
+            <input type="file" accept="image/*" onChange={(e) => handleTestimonialUpload(e, "splashPhoto")} className="text-xs" />
+            {testimonialUploading === "splashPhoto" && <span className="text-xs text-gray-400">Uploading…</span>}
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-medium mb-1">Linked Person</label>
+              <select
+                value={testimonialForm.personId}
+                onChange={(e) => setTestimonialForm((f) => ({ ...f, personId: e.target.value }))}
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+              >
+                <option value="">None</option>
+                {people.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium mb-1">Display Order</label>
+              <input
+                type="number"
+                value={testimonialForm.order}
+                onChange={(e) => setTestimonialForm((f) => ({ ...f, order: parseInt(e.target.value) || 0 }))}
+                className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+              />
+            </div>
           </div>
           <div className="flex gap-2">
             <button type="submit" className="px-4 py-2 bg-black text-white rounded text-sm hover:bg-gray-800">
@@ -1907,6 +2052,9 @@ export default function AdminPage() {
                 )}
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium">{t.name}</p>
+                  {t.title && (
+                    <p className="text-xs text-gray-400">{t.title}</p>
+                  )}
                   <p className="text-xs text-gray-500 mt-1 line-clamp-2">&ldquo;{t.quote}&rdquo;</p>
                 </div>
                 <span className="text-xs text-gray-400 shrink-0">#{t.order}</span>
@@ -1936,6 +2084,104 @@ export default function AdminPage() {
           )}
         </div>
       </>)}
+
+      {activeSection === "site" && (
+        <form onSubmit={handleSiteConfigSave} className="border border-gray-200 rounded p-6 mb-10 space-y-4">
+          <h2 className="text-lg font-semibold">Site Settings</h2>
+          <div>
+            <label className="block text-xs uppercase tracking-wide text-gray-500 mb-1">Organization Name *</label>
+            <input type="text" required value={siteConfig.orgName} onChange={(e) => setSiteConfig(c => ({ ...c, orgName: e.target.value }))} className="w-full border border-gray-300 rounded px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label className="block text-xs uppercase tracking-wide text-gray-500 mb-1">Description</label>
+            <p className="text-[10px] text-gray-400 mb-1">150-200 character blurb for Google knowledge panels</p>
+            <textarea value={siteConfig.orgDescription || ""} onChange={(e) => setSiteConfig(c => ({ ...c, orgDescription: e.target.value }))} rows={3} className="w-full border border-gray-300 rounded px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label className="block text-xs uppercase tracking-wide text-gray-500 mb-1">Logo URL</label>
+            <p className="text-[10px] text-gray-400 mb-1">Must be a fully qualified URL (https://...)</p>
+            <input type="url" value={siteConfig.logoUrl || ""} onChange={(e) => setSiteConfig(c => ({ ...c, logoUrl: e.target.value }))} className="w-full border border-gray-300 rounded px-3 py-2 text-sm" placeholder="https://buildcanada.ca/assets/logos/..." />
+          </div>
+          <div>
+            <label className="block text-xs uppercase tracking-wide text-gray-500 mb-1">Site URL *</label>
+            <input type="url" required value={siteConfig.siteUrl} onChange={(e) => setSiteConfig(c => ({ ...c, siteUrl: e.target.value }))} className="w-full border border-gray-300 rounded px-3 py-2 text-sm" />
+          </div>
+          <div>
+            <label className="block text-xs uppercase tracking-wide text-gray-500 mb-1">Social Links</label>
+            {siteConfig.socialLinks.map((url, i) => (
+              <div key={i} className="flex items-center gap-2 mb-2">
+                <input type="url" value={url} onChange={(e) => {
+                  const links = [...siteConfig.socialLinks];
+                  links[i] = e.target.value;
+                  setSiteConfig(c => ({ ...c, socialLinks: links }));
+                }} className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm" />
+                <button type="button" onClick={() => {
+                  const links = siteConfig.socialLinks.filter((_, idx) => idx !== i);
+                  setSiteConfig(c => ({ ...c, socialLinks: links }));
+                }} className="text-xs text-red-400 hover:text-red-600 px-2 py-1">Remove</button>
+              </div>
+            ))}
+            <button type="button" onClick={() => setSiteConfig(c => ({ ...c, socialLinks: [...c.socialLinks, ""] }))} className="text-xs border border-gray-300 rounded px-3 py-2 hover:bg-gray-50">+ Add Link</button>
+          </div>
+          <button type="submit" disabled={configLoading} className="bg-black text-white text-sm px-5 py-2 rounded hover:bg-gray-800 disabled:opacity-40">
+            {configLoading ? "Saving..." : "Save Settings"}
+          </button>
+        </form>
+      )}
+
+      {activeSection === "qanda" && (
+        <>
+          <form onSubmit={handleQandaSubmit} className="border border-gray-200 rounded p-6 mb-10 space-y-4">
+            <h2 className="text-lg font-semibold">{editingQandaId ? "Edit Q&A Item" : "New Q&A Item"}</h2>
+            <div>
+              <label className="block text-xs uppercase tracking-wide text-gray-500 mb-1">Question *</label>
+              <input type="text" required value={qandaForm.question} onChange={(e) => setQandaForm(f => ({ ...f, question: e.target.value }))} className="w-full border border-gray-300 rounded px-3 py-2 text-sm" />
+            </div>
+            <div>
+              <label className="block text-xs uppercase tracking-wide text-gray-500 mb-1">Answer *</label>
+              <textarea required rows={3} value={qandaForm.answer} onChange={(e) => setQandaForm(f => ({ ...f, answer: e.target.value }))} className="w-full border border-gray-300 rounded px-3 py-2 text-sm" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs uppercase tracking-wide text-gray-500 mb-1">Order</label>
+                <input type="number" value={qandaForm.order} onChange={(e) => setQandaForm(f => ({ ...f, order: parseInt(e.target.value) || 0 }))} className="w-full border border-gray-300 rounded px-3 py-2 text-sm" />
+              </div>
+              <div className="flex items-center gap-3 pt-5">
+                <button type="button" onClick={() => setQandaForm(f => ({ ...f, active: !f.active }))} className={`w-10 h-5 rounded-full relative transition-colors ${qandaForm.active ? "bg-black" : "bg-gray-300"}`}>
+                  <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${qandaForm.active ? "left-5" : "left-0.5"}`} />
+                </button>
+                <span className="text-sm text-gray-600">Active</span>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <button type="submit" className="bg-black text-white text-sm px-5 py-2 rounded hover:bg-gray-800">{editingQandaId ? "Save Changes" : "Add Item"}</button>
+              {editingQandaId && (
+                <button type="button" onClick={() => { setQandaForm({ question: "", answer: "", order: 0, active: true }); setEditingQandaId(null); }} className="text-sm text-gray-500 px-4 py-2 border border-gray-300 rounded hover:border-gray-500">Cancel</button>
+              )}
+            </div>
+          </form>
+          <h2 className="text-lg font-semibold mb-4">All Q&A Items ({qandaItems.length})</h2>
+          <div className="space-y-3">
+            {qandaItems.map((item) => (
+              <div key={item.id} className="border border-gray-200 rounded p-4 flex items-start gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded" style={{ backgroundColor: item.active ? "#dcfce7" : "#f3f4f6", color: item.active ? "#16a34a" : "#9ca3af" }}>{item.active ? "Active" : "Inactive"}</span>
+                    <span className="text-[10px] text-gray-400">#{item.order}</span>
+                  </div>
+                  <p className="font-medium text-sm">{item.question}</p>
+                  <p className="text-xs text-gray-500 mt-1 line-clamp-2">{item.answer}</p>
+                </div>
+                <div className="flex flex-col gap-1.5 shrink-0">
+                  <button onClick={() => startEditQanda(item)} className="text-[10px] px-2 py-1 rounded border border-gray-300 text-gray-500 hover:border-black hover:text-black">Edit</button>
+                  <button onClick={() => handleDeleteQanda(item.id)} className="text-[10px] px-2 py-1 rounded border border-gray-300 text-red-400 hover:border-red-500 hover:text-red-600">Delete</button>
+                </div>
+              </div>
+            ))}
+            {qandaItems.length === 0 && <p className="text-sm text-gray-400 text-center py-4">No Q&A items yet.</p>}
+          </div>
+        </>
+      )}
 
       {/* ════════════════════════════════════════════ */}
       {/* PROJECTS CMS                                */}

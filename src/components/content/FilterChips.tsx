@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import { FILTERS } from "./types";
 
 export function FilterChips({
@@ -10,22 +11,30 @@ export function FilterChips({
   onSelect: (f: string) => void;
 }) {
   return (
-    <section className="px-5 pt-5 pb-8 border-b border-border-light">
-      <div className="max-w-[1080px] mx-auto flex gap-2 flex-wrap">
-        {FILTERS.map((f) => (
-          <button
-            key={f}
-            onClick={() => onSelect(f)}
-            className={`h-7 px-3.5 type-label border transition-colors ${
-              active === f
-                ? "bg-dark text-bg border-dark"
-                : "bg-transparent text-dark border-border-light hover:border-dark"
-            }`}
-          >
-            {f}
-          </button>
-        ))}
+    <div className="px-5 py-10 border-b border-border-light">
+      <div className="max-w-[1080px] mx-auto">
+        <div
+          role="group"
+          aria-label="Filter content by platform"
+          className="border-t border-l border-border-light grid grid-cols-3 wide:grid-cols-6"
+        >
+          {FILTERS.map((f) => (
+            <button
+              key={f}
+              onClick={() => onSelect(f)}
+              aria-pressed={active === f}
+              className={cn(
+                "border-b border-r border-border-light h-12 flex items-center justify-center type-label cursor-pointer transition-colors",
+                active === f
+                  ? "bg-dark text-bg"
+                  : "bg-transparent text-dark hover:bg-accent hover:text-bg"
+              )}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
       </div>
-    </section>
+    </div>
   );
 }

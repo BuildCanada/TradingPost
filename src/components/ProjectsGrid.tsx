@@ -1,25 +1,8 @@
-"use client";
-
-import { useEffect, useState } from "react";
+import { prisma } from "@/lib/prisma";
 import WidgetCard from "./widgets/WidgetCard";
 import { ProjectData } from "./widgets/types";
 
-function WidgetSkeleton({ big }: { big?: boolean }) {
-  return (
-    <div
-      className={`border border-[var(--color-border-light)] p-8 lg:p-10 ${
-        big
-          ? "min-h-[280px] md:min-h-[180px] md:col-span-2"
-          : "min-h-[200px]"
-      }`}
-    >
-      <div className="h-2.5 w-1/3 bg-[var(--color-border-light)] animate-pulse mb-3" />
-      <div className="h-12 w-full bg-[var(--color-border-light)] animate-pulse opacity-50" />
-    </div>
-  );
-}
-
-export default function ProjectsGrid({
+export default async function ProjectsGrid({
   featured,
   maxItems,
   filter,
@@ -30,51 +13,33 @@ export default function ProjectsGrid({
   filter?: "featured" | "non-featured";
   excludeSlugs?: string[];
 }) {
-  const [projects, setProjects] = useState<ProjectData[]>([]);
-  const [loading, setLoading] = useState(true);
+  const where = featured ? { featured: true } : undefined;
+  const raw = await prisma.project.findMany({
+    where,
+    orderBy: { order: "asc" },
+  });
 
-  useEffect(() => {
-    const url = featured ? "/api/projects?featured=true" : "/api/projects";
-    fetch(url)
-      .then((r) => r.json())
-      .then((data) => {
-        if (Array.isArray(data)) {
-          let typed = data.map((d: Record<string, unknown>) => ({
-            ...d,
-            size: d.size === "big" ? "big" : "small",
-          })) as ProjectData[];
+  let projects = raw.map((p) => ({
+    ...p,
+    size: p.size === "big" ? ("big" as const) : ("small" as const),
+  })) as ProjectData[];
 
-          if (filter === "featured") {
-            typed = typed.filter((p) => p.featured);
-          } else if (filter === "non-featured") {
-            typed = typed.filter((p) => !p.featured);
-          }
-
-          if (excludeSlugs?.length) {
-            const excluded = new Set(excludeSlugs);
-            typed = typed.filter((p) => !excluded.has(p.slug));
-          }
-
-          setProjects(maxItems ? typed.slice(0, maxItems) : typed);
-        }
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [featured, maxItems, filter, excludeSlugs]);
-
-  if (loading) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
-        <WidgetSkeleton />
-        <WidgetSkeleton />
-        <WidgetSkeleton big />
-      </div>
-    );
+  if (filter === "featured") {
+    projects = projects.filter((p) => p.featured);
+  } else if (filter === "non-featured") {
+    projects = projects.filter((p) => !p.featured);
   }
 
-  if (projects.length === 0) {
-    return null;
+  if (excludeSlugs?.length) {
+    const excluded = new Set(excludeSlugs);
+    projects = projects.filter((p) => !excluded.has(p.slug));
   }
+
+  if (maxItems) {
+    projects = projects.slice(0, maxItems);
+  }
+
+  if (projects.length === 0) return null;
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-0">

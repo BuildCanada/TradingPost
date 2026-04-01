@@ -1,25 +1,22 @@
-"use client";
-
-import { useEffect, useState } from "react";
+import { prisma } from "@/lib/prisma";
 import { type FeedItem } from "@/components/feed/types";
 import { IGCard, XCard, TikTokCard, SubstackCard, FeedCard } from "@/components/feed";
 
-export default function FeedPreview() {
-  const [items, setItems] = useState<FeedItem[]>([]);
+async function getFeedPicks(): Promise<FeedItem[]> {
+  const all = await prisma.feedItem.findMany({
+    orderBy: { createdAt: "desc" },
+  });
+  const picks: FeedItem[] = [];
+  const types = ["X", "IG", "SUBSTACK", "BLOG"];
+  for (const t of types) {
+    const match = all.find((d) => d.type === t);
+    if (match) picks.push({ ...match, createdAt: match.createdAt.toISOString() });
+  }
+  return picks;
+}
 
-  useEffect(() => {
-    fetch("/api/feed")
-      .then((r) => r.json())
-      .then((data: FeedItem[]) => {
-        const picks: FeedItem[] = [];
-        const types = ["X", "IG", "SUBSTACK", "BLOG"];
-        for (const t of types) {
-          const match = data.find((d) => d.type === t);
-          if (match) picks.push(match);
-        }
-        setItems(picks);
-      });
-  }, []);
+export default async function FeedPreview() {
+  const items = await getFeedPicks();
 
   return (
     <div className="py-12">

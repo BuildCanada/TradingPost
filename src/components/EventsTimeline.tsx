@@ -36,7 +36,7 @@ export default async function EventsTimeline() {
             {events.map((event) => (
               <EventCard key={event.id} event={event} />
             ))}
-            <div className="border-b border-r border-border-light p-4 mt-auto">
+            <div className="border-t border-b border-r border-border-light p-4 mt-auto">
               <a
                 href="https://lu.ma/cal-KUFO2yscrfWr7RV"
                 target="_blank"

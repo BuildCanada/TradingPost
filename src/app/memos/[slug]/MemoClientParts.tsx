@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 
 /* ─── Twitter Embed ─── */
@@ -74,35 +74,7 @@ interface RelatedMemo {
   category: string | null;
 }
 
-export function RelatedMemos({
-  category,
-  currentSlug,
-}: {
-  category: string | null;
-  currentSlug: string;
-}) {
-  const [related, setRelated] = useState<RelatedMemo[]>([]);
-
-  useEffect(() => {
-    fetch("/api/memos")
-      .then((r) => r.json())
-      .then((all: RelatedMemo[]) => {
-        const matches = all.filter(
-          (m) =>
-            m.slug !== currentSlug &&
-            category &&
-            m.category === category
-        );
-        if (matches.length > 0) {
-          setRelated(matches.slice(0, 2));
-        } else {
-          setRelated(
-            all.filter((m) => m.slug !== currentSlug).slice(0, 2)
-          );
-        }
-      });
-  }, [category, currentSlug]);
-
+export function RelatedMemos({ related }: { related: RelatedMemo[] }) {
   if (related.length === 0) return null;
 
   return (

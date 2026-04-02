@@ -120,6 +120,17 @@ export default async function MemoDetailPage({
 
   const fullUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "https://buildcanada.ca"}/memos/${memo.slug}`;
 
+  const allMemos = await prisma.memo.findMany({
+    select: { id: true, title: true, slug: true, category: true, author: { select: { name: true, photo: true } } },
+  });
+
+  const sameCategory = allMemos.filter(
+    (m) => m.slug !== memo.slug && memo.category && m.category === memo.category,
+  );
+  const relatedMemos = sameCategory.length > 0
+    ? sameCategory.slice(0, 2)
+    : allMemos.filter((m) => m.slug !== memo.slug).slice(0, 2);
+
   const sidebar = (
     <div className="space-y-5">
       <ShareSection
@@ -129,7 +140,7 @@ export default async function MemoDetailPage({
         url={fullUrl}
       />
       <MemoSubscribe />
-      <RelatedMemos category={memo.category} currentSlug={memo.slug} />
+      <RelatedMemos related={relatedMemos} />
       {memo.twitterEmbed && (
         <div>
           <h2 className="type-label text-text-secondary block mb-3 m-0">
@@ -149,7 +160,7 @@ export default async function MemoDetailPage({
       />
 
       {memo.splashImage && (
-        <div className="animate-fade-in relative overflow-hidden">
+        <div className="animate-fade-in relative h-[45svh] md:h-[65svh] flex items-end overflow-hidden">
           <Image
             src={memo.splashImage}
             alt=""
@@ -158,7 +169,7 @@ export default async function MemoDetailPage({
             unoptimized
             priority
           />
-          <div className="relative z-10 max-w-[1400px] mx-auto px-5 pt-[42px] pb-[60px]">
+          <div className="relative z-10 max-w-[1400px] mx-auto w-full px-5 pb-[40px]">
              <Link
               href="/memos"
               className="type-label text-white/70 hover:text-white transition-colors flex items-center gap-1.5 mb-6 py-1"

@@ -76,7 +76,7 @@ export default async function MemosPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <div className="animate-fade-in" style={{ animationDelay: "0s" }}>
-        <section className="relative px-5 border-b border-border-light overflow-hidden">
+        <section className="relative px-5 h-[45svh] md:h-[65svh] flex flex-col justify-center border-b border-border-light overflow-hidden">
           <Image
             src="/assets/images/build-canada-founder-meetup-shopify.webp"
             alt="Harley Finkelstein and Lucy Hargreaves speaking at Shopify HQ on Build Canada and the future of Canada"
@@ -84,7 +84,7 @@ export default async function MemosPage() {
             className="object-cover brightness-[0.35]"
             priority
           />
-          <div className="relative max-w-[900px] mx-auto flex flex-col justify-center h-[25svh] md:h-[45svh]">
+          <div className="relative max-w-[1080px] mx-auto w-full">
             <SectionLabel className="text-white/70">Memos</SectionLabel>
             <h1 className="type-title mb-1 text-white">Ideas for a Better Canada</h1>
             <p className="type-body text-white/70">

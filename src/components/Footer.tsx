@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
 import { useRef, useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
 import { useSubscribeStore } from "@/components/subscribe/store";
 
 const socials = [
@@ -132,18 +132,12 @@ export default function Footer() {
         {/* CTA buttons + quote cluster — first on mobile, right-aligned on lg */}
         <div className="max-w-[600px] text-center lg:text-left mb-16 lg:mb-0 mx-auto lg:mx-0 lg:order-2 lg:ml-auto">
           <div className="flex items-center justify-center lg:justify-start gap-4 mb-5">
-            <button
-              onClick={() => openModal("footer")}
-              className="type-label px-6 py-3.5 bg-linen-100 text-charcoal-1000 hover:bg-white transition-colors"
-            >
+            <Button as="button" variant="linen" onClick={() => openModal("footer")}>
               Subscribe
-            </button>
-            <Link
-              href="https://buy.stripe.com/3cI5kCdi8a2K2xY2bgdZ600"
-              className="type-label px-6 py-3.5 text-linen-100 hover:text-white transition-colors"
-            >
+            </Button>
+            <Button as="external-link" variant="linen-ghost" href="https://buy.stripe.com/3cI5kCdi8a2K2xY2bgdZ600">
               Donate
-            </Link>
+            </Button>
           </div>
 
           <p

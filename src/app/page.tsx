@@ -174,10 +174,10 @@ function BrandMessaging() {
         </strong>
       </p>
       <div className="flex items-center gap-3">
-        <LinkButton href="/about" variant="primary" showArrow>
+        <LinkButton href="/about" variant="primary">
           About Us
         </LinkButton>
-        <SubscribeButton variant="accent" showArrow source="inline">
+        <SubscribeButton variant="accent" source="inline">
           Subscribe
         </SubscribeButton>
       </div>
@@ -217,8 +217,8 @@ function SocialLinks() {
           </a>
         ))}
         <div className="w-px h-[18px] bg-border-light mx-0.5" />
-        <LinkButton href="/content" variant="primary" >
-          Full Content Feed →
+        <LinkButton href="/content" variant="primary">
+          Full Content Feed
         </LinkButton>
       </div>
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 /* ─── Twitter Embed ─── */
@@ -50,12 +51,9 @@ export function MemoSubscribe() {
           placeholder="Email"
            className="border border-charcoal-300 bg-transparent px-3 py-3.5 type-caption placeholder:text-charcoal-400 outline-none focus:border-charcoal-1000 transition-colors"
         />
-        <button
-          type="submit"
-           className="bg-charcoal-1000 text-linen-100 type-label px-4 py-4 hover:bg-auburn-800 transition-colors self-start"
-        >
+        <Button as="button" type="submit" className="self-start">
           Subscribe
-        </button>
+        </Button>
       </form>
     </div>
   );

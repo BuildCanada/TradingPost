@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
 import registry from "./registry";
 import WidgetPlaceholder from "./WidgetPlaceholder";
 import { ProjectData } from "./types";
@@ -9,11 +10,8 @@ export default function WidgetCard({ project }: { project: ProjectData }) {
   const isBig = project.featured;
 
   return (
-    <a
-      href={project.externalUrl}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={`flex flex-col h-full group border border-border-light hover:border-dark transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-dark ${
+    <div
+      className={`flex flex-col h-full border border-border-light hover:border-dark transition-colors ${
         isBig
           ? "min-h-[280px] md:min-h-[180px] md:col-span-2"
           : "min-h-[200px]"
@@ -26,19 +24,16 @@ export default function WidgetCard({ project }: { project: ProjectData }) {
           <WidgetPlaceholder project={project} />
         )}
       </div>
-      <div className="border-t border-border-light px-8 lg:px-10 py-4 flex items-center gap-2 group/cta">
-        <span className="type-label text-text-secondary group-hover/cta:text-accent transition-colors">
-          View Project
-        </span>
-        <svg
-          className="w-4 h-4 text-text-secondary group-hover/cta:text-accent group-hover/cta:translate-x-1 transition-all"
-          viewBox="0 0 16 16"
-          fill="none"
-          aria-hidden="true"
+      <div className="border-t border-border-light">
+        <Button
+          as="external-link"
+          href={project.externalUrl}
+          variant="ghost"
+          className="border-0 w-full justify-start"
         >
-          <path d="M9 5l7 7-7 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+          View Project
+        </Button>
       </div>
-    </a>
+    </div>
   );
 }

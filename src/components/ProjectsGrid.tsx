@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import { fetchTools } from "@/lib/api";
 import WidgetCard from "./widgets/WidgetCard";
 import { ProjectData } from "./widgets/types";
 
@@ -13,16 +13,9 @@ export default async function ProjectsGrid({
   filter?: "featured" | "non-featured";
   excludeSlugs?: string[];
 }) {
-  const where = featured ? { featured: true } : undefined;
-  const raw = await prisma.project.findMany({
-    where,
-    orderBy: { order: "asc" },
-  });
+  const raw = await fetchTools(featured ? { featured: true } : undefined);
 
-  let projects = raw.map((p) => ({
-    ...p,
-    size: p.size === "big" ? ("big" as const) : ("small" as const),
-  })) as ProjectData[];
+  let projects: ProjectData[] = raw;
 
   if (filter === "featured") {
     projects = projects.filter((p) => p.featured);

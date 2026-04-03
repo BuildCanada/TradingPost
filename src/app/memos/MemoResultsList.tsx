@@ -88,7 +88,7 @@ export default function MemoResultsList({ memos }: { memos: MemoItem[] }) {
         (m) =>
           m.title.toLowerCase().includes(q) ||
           m.author.name.toLowerCase().includes(q) ||
-          m.keyMessage1.toLowerCase().includes(q)
+          m.keyMessage1?.toLowerCase().includes(q)
       );
     }
 

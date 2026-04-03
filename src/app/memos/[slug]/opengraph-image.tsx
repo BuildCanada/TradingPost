@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { prisma } from "@/lib/prisma";
+import { fetchMemo } from "@/lib/api";
 import { BuildCanadaOGImage } from "@/lib/og-image-template";
 
 export const size = { width: 1200, height: 630 };
@@ -7,7 +7,12 @@ export const contentType = "image/png";
 
 export default async function Image({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const memo = await prisma.memo.findUnique({ where: { slug }, include: { author: true } });
+  let memo;
+  try {
+    memo = await fetchMemo(slug);
+  } catch {
+    memo = null;
+  }
 
   return new ImageResponse(
     <BuildCanadaOGImage

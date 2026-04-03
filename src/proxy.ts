@@ -1,6 +1,6 @@
 import { auth } from "@/lib/auth";
 
-export default auth((req) => {
+export const proxy = auth((req) => {
   const isLoggedIn = !!req.auth;
   const { pathname } = req.nextUrl;
 
@@ -10,10 +10,8 @@ export default auth((req) => {
   const isAdminApi = pathname.startsWith("/api/") && !isPublicApi && !pathname.startsWith("/api/auth");
   const isLoginPage = pathname === "/admin/login";
 
-  // Allow the login page always
   if (isLoginPage) return;
 
-  // Protect admin pages and API routes
   if ((isAdminRoute || isAdminApi) && !isLoggedIn) {
     if (isAdminApi) {
       return new Response("Unauthorized", { status: 401 });

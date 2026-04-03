@@ -1,16 +1,14 @@
-import { prisma } from "@/lib/prisma";
+import { fetchFeedItemsSimple } from "@/lib/api";
 import { type FeedItem } from "@/components/feed/types";
 import { IGCard, XCard, TikTokCard, SubstackCard, FeedCard } from "@/components/feed";
 
 async function getFeedPicks(): Promise<FeedItem[]> {
-  const all = await prisma.feedItem.findMany({
-    orderBy: { createdAt: "desc" },
-  });
+  const all = await fetchFeedItemsSimple();
   const picks: FeedItem[] = [];
   const types = ["X", "IG", "SUBSTACK", "BLOG"];
   for (const t of types) {
     const match = all.find((d) => d.type === t);
-    if (match) picks.push({ ...match, createdAt: match.createdAt.toISOString() });
+    if (match) picks.push(match);
   }
   return picks;
 }

@@ -7,27 +7,14 @@
     "build": "next build",
     "start": "next start -p 5050",
     "lint": "eslint && npm run lint:tokens",
-    "postinstall": "prisma generate",
-    "seed": "DATABASE_URL=\"file:./dev.db\" tsx prisma/seed.ts",
     "lint:tokens": "rg --glob '*.tsx' --glob '*.ts' --glob '!*.d.ts' -e '[a-z]+-\\[var\\(--' src/ && echo 'FAIL: inline CSS vars in Tailwind found' && exit 1 || echo 'OK: no inline CSS vars'"
-  },
-  "prisma": {
-    "seed": "DATABASE_URL=\"file:./dev.db\" tsx prisma/seed.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.3.0",
-    "@libsql/client": "^0.17.0",
-    "@prisma/adapter-libsql": "^7.5.0",
-    "@prisma/client": "^7.5.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "csv-parse": "^6.1.0",
-    "dotenv": "^17.3.1",
-    "googleapis": "^171.4.0",
     "lucide-react": "^1.7.0",
     "next": "16.1.6",
-    "next-auth": "^5.0.0-beta.30",
-    "prisma": "^7.5.0",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-markdown": "^10.1.0",

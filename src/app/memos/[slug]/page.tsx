@@ -1,8 +1,8 @@
-import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import { fetchMemo, fetchMemos, getSiteConfig } from "@/lib/api";
 import { TwitterEmbed, MemoSubscribe, RelatedMemos } from "./MemoClientParts";
 import { ShareSection } from "@/components/share";
 import { buildGraph } from "@/lib/schemas/graph";
@@ -11,8 +11,12 @@ import { generateBreadcrumbSchema } from "@/lib/schemas/generators/breadcrumb";
 import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
 
 export async function generateStaticParams() {
-  const memos = await prisma.memo.findMany({ select: { slug: true } });
-  return memos.map((m) => ({ slug: m.slug }));
+  try {
+    const memos = await fetchMemos();
+    return memos.map((m) => ({ slug: m.slug }));
+  } catch {
+    return [];
+  }
 }
 
 export async function generateMetadata({
@@ -21,9 +25,10 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const memo = await prisma.memo.findUnique({ where: { slug }, include: { author: true } });
-
-  if (!memo) {
+  let memo;
+  try {
+    memo = await fetchMemo(slug);
+  } catch {
     return { title: "Memo Not Found | Build Canada" };
   }
 
@@ -38,7 +43,7 @@ export async function generateMetadata({
       title,
       description,
       type: "article",
-      publishedTime: memo.publishedAt?.toISOString() ?? memo.createdAt.toISOString(),
+      publishedTime: memo.publishedAt ?? memo.createdAt,
       authors: [memo.author.name],
       ...(image && { images: [{ url: image }] }),
     },
@@ -57,18 +62,19 @@ export default async function MemoDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const memo = await prisma.memo.findUnique({ where: { slug }, include: { author: true } });
-
-  if (!memo) notFound();
+  let memo;
+  try {
+    memo = await fetchMemo(slug);
+  } catch {
+    notFound();
+  }
 
   const authorImage =
     memo.author.name === "Build Canada"
       ? "/assets/logos/Logocircle.webp"
       : memo.author.photo;
 
-  const keyMessages = [memo.keyMessage1, memo.keyMessage2, memo.keyMessage3].filter(
-    Boolean
-  ) as string[];
+  const keyMessages = memo.keyMessages;
 
   const date = new Date(
     memo.publishedAt || memo.createdAt
@@ -78,18 +84,7 @@ export default async function MemoDetailPage({
     day: "numeric",
   });
 
-  let siteConfig = await prisma.siteConfig.findUnique({ where: { id: "site" } });
-  if (!siteConfig) {
-    siteConfig = await prisma.siteConfig.create({ data: { id: "site" } });
-  }
-
-  const configData = {
-    orgName: siteConfig.orgName,
-    orgDescription: siteConfig.orgDescription,
-    siteUrl: siteConfig.siteUrl,
-    logoUrl: siteConfig.logoUrl,
-    socialLinks: siteConfig.socialLinks,
-  };
+  const configData = getSiteConfig();
 
   const jsonLd = buildGraph(
     generateOrganizationSchema(configData),
@@ -100,9 +95,9 @@ export default async function MemoDetailPage({
         keyMessage1: memo.keyMessage1,
         seoImage: memo.seoImage,
         splashImage: memo.splashImage,
-        publishedAt: memo.publishedAt,
-        createdAt: memo.createdAt,
-        updatedAt: memo.updatedAt,
+        publishedAt: memo.publishedAt ? new Date(memo.publishedAt) : null,
+        createdAt: new Date(memo.createdAt),
+        updatedAt: new Date(memo.updatedAt),
       },
       {
         name: memo.author.name,
@@ -115,15 +110,12 @@ export default async function MemoDetailPage({
       },
       configData
     ),
-    generateBreadcrumbSchema(`/memos/${memo.slug}`, memo.title, siteConfig.siteUrl)
+    generateBreadcrumbSchema(`/memos/${memo.slug}`, memo.title, configData.siteUrl)
   );
 
-  const fullUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "https://buildcanada.ca"}/memos/${memo.slug}`;
+  const fullUrl = `${configData.siteUrl}/memos/${memo.slug}`;
 
-  const allMemos = await prisma.memo.findMany({
-    select: { id: true, title: true, slug: true, category: true, author: { select: { name: true, photo: true } } },
-  });
-
+  const allMemos = await fetchMemos();
   const sameCategory = allMemos.filter(
     (m) => m.slug !== memo.slug && memo.category && m.category === memo.category,
   );

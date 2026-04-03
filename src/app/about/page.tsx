@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { prisma } from "@/lib/prisma";
+import { fetchFaqs, fetchTeamMembers, fetchTestimonials, getSiteConfig } from "@/lib/api";
 import SectionLabel from "@/components/SectionLabel";
 import OurStoryBlock from "./OurStoryBlock";
 import PlatformBlock from "./PlatformBlock";
@@ -11,31 +11,14 @@ import { generateOrganizationSchema } from "@/lib/schemas/generators/organizatio
 import { generateFAQPageSchema } from "@/lib/schemas/generators/faq-page";
 import { generateReviewSchema } from "@/lib/schemas/generators/review";
 
-export const dynamic = "force-dynamic";
-
-async function getSiteConfig() {
-  let config = await prisma.siteConfig.findUnique({ where: { id: "site" } });
-  if (!config) {
-    config = await prisma.siteConfig.create({ data: { id: "site" } });
-  }
-  return config;
-}
-
 export default async function AboutPage() {
-  const [people, testimonials, qandaItems, siteConfig] = await Promise.all([
-    prisma.person.findMany({ orderBy: { order: "asc" } }),
-    prisma.testimonial.findMany({ orderBy: { order: "asc" }, include: { person: true } }),
-    prisma.qandAItem.findMany({ where: { active: true }, orderBy: { order: "asc" } }),
-    getSiteConfig(),
+  const [people, testimonials, qandaItems] = await Promise.all([
+    fetchTeamMembers(),
+    fetchTestimonials(),
+    fetchFaqs(),
   ]);
 
-  const configData = {
-    orgName: siteConfig.orgName,
-    orgDescription: siteConfig.orgDescription,
-    siteUrl: siteConfig.siteUrl,
-    logoUrl: siteConfig.logoUrl,
-    socialLinks: siteConfig.socialLinks,
-  };
+  const configData = getSiteConfig();
 
   const orgSchema = generateOrganizationSchema(configData);
   const faqSchema = generateFAQPageSchema(
@@ -48,9 +31,7 @@ export default async function AboutPage() {
         quote: t.quote,
         title: t.title,
         profilePhoto: t.profilePhoto,
-        person: t.person
-          ? { name: t.person.name, title: t.person.title, photo: t.person.photo, bio: t.person.bio, websiteUrl: t.person.websiteUrl, xUrl: t.person.xUrl, linkedinUrl: t.person.linkedinUrl }
-          : null,
+        person: null,
       },
       configData
     )
@@ -94,7 +75,7 @@ export default async function AboutPage() {
         <PlatformBlock />
       </div>
       <div className="animate-fade-in" style={{ animationDelay: "0.7s" }}>
-        <TeamBlock members={people.filter((p) => p.role !== "AUTHOR")} />
+        <TeamBlock members={people} />
       </div>
       <div className="animate-fade-in" style={{ animationDelay: "0.9s" }}>
         <TestimonialsBlock testimonials={testimonials} />

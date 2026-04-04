@@ -35,7 +35,7 @@ export default async function BuildersPage() {
                       src={builder.imageUrl}
                       alt={`${builder.name} — ${builder.tagline}`}
                       fill
-                      className="object-cover"
+                      className="object-cover object-top"
                       unoptimized
                     />
                   )}

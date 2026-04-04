@@ -13,8 +13,8 @@ export default function WidgetCard({ project }: { project: ProjectData }) {
     <div
       className={`flex flex-col h-full border border-border-light hover:border-dark transition-colors ${
         isBig
-          ? "min-h-[280px] md:min-h-[180px] md:col-span-2"
-          : "min-h-[200px]"
+          ? "min-h-[380px] md:min-h-[340px] md:col-span-2"
+          : "min-h-[360px]"
       }`}
     >
       <div className="flex-1">

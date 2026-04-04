@@ -12,6 +12,7 @@ const BUILDERS_PROJECT = {
   featured: false,
   order: 0,
   accentColor: null,
+  imageUrl: null,
 };
 
 export function GreatBuildersSection() {

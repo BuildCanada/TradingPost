@@ -18,6 +18,7 @@ export interface YFAuthor {
   id: number;
   name: string;
   slug: string;
+  profile_photo_url?: string | null;
 }
 
 export interface YFMemo {

@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import SectionLabel from "@/components/SectionLabel";
-import { builders } from "@/lib/builders";
+import { fetchBuilders } from "@/lib/api/builders";
 
 export const metadata: Metadata = {
   title: "Great Canadian Builders",
@@ -9,7 +10,9 @@ export const metadata: Metadata = {
     "Short stories celebrating the incredible builders who shaped Canada.",
 };
 
-export default function BuildersPage() {
+export default async function BuildersPage() {
+  const builders = await fetchBuilders();
+
   return (
     <div className="mx-[10px] my-[10px] border border-border-light bg-bg">
       <section className="px-5 py-12">
@@ -27,12 +30,15 @@ export default function BuildersPage() {
                 className="group border border-border-light overflow-hidden hover:border-dark transition-colors"
               >
                 <div className="relative w-full h-[200px] overflow-hidden bg-border-light">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={builder.gif}
-                    alt={`${builder.name} — ${builder.tagline}`}
-                    className="w-full h-full object-cover"
-                  />
+                  {builder.imageUrl && (
+                    <Image
+                      src={builder.imageUrl}
+                      alt={`${builder.name} — ${builder.tagline}`}
+                      fill
+                      className="object-cover"
+                      unoptimized
+                    />
+                  )}
                 </div>
                 <div className="p-5">
                   <h2 className="font-display text-[1.25rem] font-normal leading-[1.2] text-dark mb-1 group-hover:underline">
@@ -41,9 +47,11 @@ export default function BuildersPage() {
                   <p className="type-label-sm text-text-secondary uppercase">
                     {builder.tagline}
                   </p>
-                  <p className="type-body-sm text-text-secondary mt-2 line-clamp-2">
-                    &ldquo;{builder.quote}&rdquo;
-                  </p>
+                  {builder.quote && (
+                    <p className="type-body-sm text-text-secondary mt-2 line-clamp-2">
+                      &ldquo;{builder.quote}&rdquo;
+                    </p>
+                  )}
                 </div>
               </Link>
             ))}

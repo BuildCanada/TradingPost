@@ -1,4 +1,5 @@
 export { apiFetch } from "./client";
+export { fetchBuilder, fetchBuilders } from "./builders";
 export { getSiteConfig } from "./config";
 export { fetchFaqs } from "./faqs";
 export { fetchFeedItem, fetchFeedItems, fetchFeedItemsSimple } from "./feed";

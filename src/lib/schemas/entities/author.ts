@@ -16,7 +16,7 @@ export function createAuthor(data: AuthorData): Person {
         "@type": "ImageObject",
         url: data.image.startsWith("http")
           ? data.image
-          : `https://buildcanada.ca${data.image}`,
+          : `https://buildcanada.com${data.image}`,
       },
     }),
   };

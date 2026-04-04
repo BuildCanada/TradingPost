@@ -1,34 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
+import { builders } from "@/lib/builders";
 import { WidgetProps } from "./types";
-
-const builders = [
-  {
-    name: "Diana Matheson",
-    tagline: "Building the Future of Canadian Soccer",
-    quote: "If there\u2019s something you want to do and you feel like you\u2019re the right person for the job, go do it.",
-    gif: "/assets/images/diana-matheson-canadian-soccer.gif",
-  },
-  {
-    name: "Robert Bourassa",
-    tagline: "The Project of the Century",
-    quote: "Never let it be said that we shall live like paupers on a land this rich.",
-    gif: "/assets/images/robert-bourassa-quebec-premier.gif",
-  },
-  {
-    name: "Mary Pickford",
-    tagline: "She Invented the Movie Star",
-    quote: "You may have a fresh start any moment you choose, for this thing that we call \u2018failure\u2019 is not the falling down, but the staying down.",
-    gif: "/assets/images/mary-pickford-hollywood-pioneer.gif",
-  },
-  {
-    name: "Alexander Graham Bell",
-    tagline: "A Life Wired for Meaning",
-    quote: "The inventor looks upon the world and is not contented with things as they are. He wants to improve whatever he sees.",
-    gif: "/assets/images/alexander-graham-bell-inventor.gif",
-  },
-];
 
 export default function GreatBuildersWidget({ project }: WidgetProps) {
   const [index, setIndex] = useState(0);
@@ -84,14 +59,14 @@ export default function GreatBuildersWidget({ project }: WidgetProps) {
           ))}
         </div>
 
-        <div>
-          <p className="font-display text-[1.25rem] lg:text-[1.5rem] font-normal leading-[1.2] text-dark mb-1">
+        <Link href={`/builders/${builder.slug}`} className="group block">
+          <p className="font-display text-[1.25rem] lg:text-[1.5rem] font-normal leading-[1.2] text-dark mb-1 group-hover:underline">
             {builder.name}
           </p>
           <p className="type-label-sm text-text-secondary uppercase truncate">
             {builder.tagline}
           </p>
-        </div>
+        </Link>
       </div>
 
       <div className="hidden md:block w-px bg-border-light shrink-0" />

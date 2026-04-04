@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   description:
     "Canada's Voice for Builders. Bold thinking from builders, reformers, and leaders pushing Canada to new frontiers.",
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || "https://buildcanada.ca"
+    process.env.NEXT_PUBLIC_SITE_URL || "https://buildcanada.com"
   ),
   openGraph: {
     type: "website",

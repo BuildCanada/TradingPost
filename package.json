@@ -5,6 +5,7 @@
   "packageManager": "pnpm@9.5.0",
   "scripts": {
     "dev": "next dev -p 5050",
+    "dev:remote": "YORK_FACTORY_API_URL=https://york-factory.eng.canadasbuilding.com/api/v1 next dev -p 5050",
     "build": "next build",
     "start": "next start -p 5050",
     "lint": "eslint && npm run lint:tokens",

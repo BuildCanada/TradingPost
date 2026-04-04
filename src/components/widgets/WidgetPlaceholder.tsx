@@ -13,7 +13,7 @@ export default function WidgetPlaceholder({ project }: { project: ProjectData })
         </p>
       )}
       {project.imageUrl ? (
-        <div className="relative flex-1 mt-4 min-h-[120px]">
+        <div className="relative flex-1 mt-4 min-h-[200px]">
           <Image
             src={project.imageUrl}
             alt={project.title}

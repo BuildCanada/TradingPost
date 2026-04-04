@@ -13,6 +13,7 @@ function mapTool(t: YFTool): ProjectData {
     featured: t.featured,
     order: t.position,
     accentColor: t.accent_color,
+    imageUrl: t.image_url,
   };
 }
 

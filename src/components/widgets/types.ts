@@ -10,6 +10,7 @@ export interface ProjectData {
   featured: boolean;
   order: number;
   accentColor: string | null;
+  imageUrl: string | null;
 }
 
 export interface WidgetProps {

@@ -1,6 +1,32 @@
+import Image from "next/image";
 import { ProjectData } from "./types";
 
 export default function WidgetPlaceholder({ project }: { project: ProjectData }) {
+  if (project.imageUrl) {
+    return (
+      <div className="relative h-full min-h-[180px]">
+        <Image
+          src={project.imageUrl}
+          alt={project.title}
+          fill
+          className="object-cover"
+          unoptimized
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+        <div className="absolute bottom-0 left-0 p-8 lg:p-10">
+          <span className="type-label font-bold text-white mb-1 block">
+            {project.title}
+          </span>
+          {project.description && (
+            <p className="type-body-sm text-white/70 line-clamp-2">
+              {project.description}
+            </p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   const isBig = project.featured;
 
   return (

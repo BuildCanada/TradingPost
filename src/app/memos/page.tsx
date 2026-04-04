@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { prisma } from "@/lib/prisma";
+import { fetchMemos, getSiteConfig } from "@/lib/api";
 import SectionLabel from "@/components/SectionLabel";
 import MemosListClient from "./MemosListClient";
 import { buildGraph } from "@/lib/schemas/graph";
@@ -26,47 +26,12 @@ export const metadata: Metadata = {
 };
 
 export default async function MemosPage() {
-  const memos = await prisma.memo.findMany({
-    orderBy: [{ publishedAt: "desc" }, { createdAt: "desc" }],
-    include: { author: true },
-  });
+  const serialized = await fetchMemos();
+  const configData = getSiteConfig();
 
-  const serialized = memos.map((m) => ({
-    id: m.id,
-    title: m.title,
-    slug: m.slug,
-    author: {
-      name: m.author.name,
-      photo:
-        m.author.name === "Build Canada"
-          ? "/assets/logos/Logocircle.webp"
-          : m.author.photo,
-    },
-    keyMessage1: m.keyMessage1,
-    keyMessage2: m.keyMessage2,
-    keyMessage3: m.keyMessage3,
-    splashImage: m.splashImage,
-    seoImage: m.seoImage,
-    category: m.category,
-    featured: m.featured,
-    publishedAt: m.publishedAt?.toISOString() ?? null,
-    createdAt: m.createdAt.toISOString(),
-  }));
-
-  let siteConfig = await prisma.siteConfig.findUnique({ where: { id: "site" } });
-  if (!siteConfig) {
-    siteConfig = await prisma.siteConfig.create({ data: { id: "site" } });
-  }
-  const configData = {
-    orgName: siteConfig.orgName,
-    orgDescription: siteConfig.orgDescription,
-    siteUrl: siteConfig.siteUrl,
-    logoUrl: siteConfig.logoUrl,
-    socialLinks: siteConfig.socialLinks,
-  };
   const jsonLd = buildGraph(
     generateOrganizationSchema(configData),
-    generateBreadcrumbSchema("/memos", "Memos", siteConfig.siteUrl)
+    generateBreadcrumbSchema("/memos", "Memos", configData.siteUrl)
   );
 
   return (

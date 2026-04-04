@@ -1,0 +1,107 @@
+export interface YFPagination {
+  page: number;
+  pages: number;
+  count: number;
+  per_page: number;
+}
+
+export interface YFPaginatedResponse<T> {
+  data: T[];
+  pagination: YFPagination;
+}
+
+export interface YFListResponse<T> {
+  data: T[];
+}
+
+export interface YFAuthor {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+export interface YFMemo {
+  id: number;
+  slug: string;
+  title: string;
+  category: string | null;
+  featured: boolean;
+  published_at: string | null;
+  seo_image_url: string | null;
+  author: YFAuthor;
+}
+
+export interface YFMemoDetail extends YFMemo {
+  body: string;
+  appendix: string | null;
+  supporters: string | null;
+  key_messages: string[];
+  twitter_embed: string | null;
+  author_name: string | null;
+  author_title: string | null;
+  co_author: YFAuthor | null;
+  splash_image_url: string | null;
+}
+
+export interface YFTeamMember {
+  id: number;
+  name: string;
+  slug: string;
+  title: string | null;
+  role: "board" | "team" | "volunteer" | "advisor";
+  twitter_url: string | null;
+  linkedin_url: string | null;
+  position: number;
+  profile_photo_url: string | null;
+}
+
+export interface YFTool {
+  id: number;
+  slug: string;
+  title: string;
+  description: string | null;
+  url: string;
+  featured: boolean;
+  position: number;
+  accent_color: string | null;
+  size: "small" | "big";
+  image_url: string | null;
+}
+
+export interface YFTestimonial {
+  id: number;
+  name: string;
+  quote: string;
+  position: number;
+  profile_photo_url: string | null;
+  splash_photo_url: string | null;
+}
+
+export interface YFFaq {
+  id: number;
+  question: string;
+  answer: string;
+  answer_text: string | null;
+  link_text: string | null;
+  link_href: string | null;
+  position: number;
+}
+
+export interface YFFeedItem {
+  id: number;
+  item_type: string;
+  title: string | null;
+  subtitle: string | null;
+  author: string | null;
+  url: string | null;
+  featured: boolean;
+  tags: string[];
+  image_url: string | null;
+}
+
+export interface YFFeedItemDetail extends YFFeedItem {
+  body: string | null;
+  embed_code: string | null;
+  source_url: string | null;
+  author_photo_url: string | null;
+}

@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { prisma } from "@/lib/prisma";
+import { fetchMemos, fetchTestimonials, getSiteConfig } from "@/lib/api";
 import FeedPreview from "@/components/FeedPreview";
 import FeaturedMemos from "@/components/FeaturedMemos";
 import { ExitIntentHandler } from "@/components/subscribe";
@@ -11,27 +11,6 @@ import { buildGraph } from "@/lib/schemas/graph";
 import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
 import { generateWebSiteSchema } from "@/lib/schemas/generators/website";
 import { generateReviewSchema } from "@/lib/schemas/generators/review";
-
-export const dynamic = "force-dynamic";
-
-async function getMemos() {
-  const memos = await prisma.memo.findMany({
-    orderBy: { createdAt: "desc" },
-    include: { author: true },
-  });
-  return memos.map((m) => ({
-    ...m,
-    author: {
-      name: m.author.name,
-      photo:
-        m.author.name === "Build Canada"
-          ? "/assets/logos/Logocircle.webp"
-          : m.author.photo,
-    },
-    publishedAt: m.publishedAt?.toISOString() ?? null,
-    createdAt: m.createdAt.toISOString(),
-  }));
-}
 
 function HeroSection() {
   const s = "var(--color-bg)";
@@ -174,10 +153,10 @@ function BrandMessaging() {
         </strong>
       </p>
       <div className="flex items-center gap-3">
-        <LinkButton href="/about" variant="primary" showArrow>
+        <LinkButton href="/about" variant="primary">
           About Us
         </LinkButton>
-        <SubscribeButton variant="accent" showArrow source="inline">
+        <SubscribeButton variant="accent" source="inline">
           Subscribe
         </SubscribeButton>
       </div>
@@ -217,8 +196,8 @@ function SocialLinks() {
           </a>
         ))}
         <div className="w-px h-[18px] bg-border-light mx-0.5" />
-        <LinkButton href="/content" variant="primary" >
-          Full Content Feed →
+        <LinkButton href="/content" variant="primary">
+          Full Content Feed
         </LinkButton>
       </div>
     </div>
@@ -251,24 +230,9 @@ function FeedAndEvents() {
 }
 
 export default async function Home() {
-  const memos = await getMemos();
-
-  let siteConfig = await prisma.siteConfig.findUnique({ where: { id: "site" } });
-  if (!siteConfig) {
-    siteConfig = await prisma.siteConfig.create({ data: { id: "site" } });
-  }
-  const testimonials = await prisma.testimonial.findMany({
-    orderBy: { order: "asc" },
-    include: { person: true },
-  });
-
-  const configData = {
-    orgName: siteConfig.orgName,
-    orgDescription: siteConfig.orgDescription,
-    siteUrl: siteConfig.siteUrl,
-    logoUrl: siteConfig.logoUrl,
-    socialLinks: siteConfig.socialLinks,
-  };
+  const memos = await fetchMemos();
+  const testimonials = await fetchTestimonials();
+  const configData = getSiteConfig();
 
   const reviewSchemas = testimonials.map((t) =>
     generateReviewSchema(
@@ -277,9 +241,7 @@ export default async function Home() {
         quote: t.quote,
         title: t.title,
         profilePhoto: t.profilePhoto,
-        person: t.person
-          ? { name: t.person.name, title: t.person.title, photo: t.person.photo, bio: t.person.bio, websiteUrl: t.person.websiteUrl, xUrl: t.person.xUrl, linkedinUrl: t.person.linkedinUrl }
-          : null,
+        person: null,
       },
       configData
     )

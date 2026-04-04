@@ -19,6 +19,10 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "images.lumacdn.com",
       },
+      {
+        protocol: "https",
+        hostname: "york-factory.eng.canadasbuilding.com",
+      },
     ],
   },
 };

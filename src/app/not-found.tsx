@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
   return (
@@ -119,18 +119,12 @@ export default function NotFound() {
 
         {/* CTA */}
         <div className="flex items-center gap-3">
-          <Link
-            href="/"
-            className="type-button inline-flex items-center px-6 py-3.5 bg-dark text-bg hover:bg-accent transition-colors"
-          >
+          <Button as="link" href="/" variant="charcoal">
             Back to Home
-          </Link>
-          <Link
-            href="/memos"
-            className="type-button inline-flex items-center px-6 py-3.5 border border-dark text-dark hover:bg-dark hover:text-bg transition-colors"
-          >
+          </Button>
+          <Button as="link" href="/memos" variant="ghost">
             Explore the Memos
-          </Link>
+          </Button>
         </div>
       </div>
 

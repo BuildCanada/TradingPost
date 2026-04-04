@@ -9,8 +9,8 @@ export default function FeaturedProjects() {
         <SectionLabel>Projects</SectionLabel>
         <ProjectsGrid featured maxItems={4} excludeSlugs={["great-builders"]} />
         <div className="flex justify-start mt-4">
-          <LinkButton href="/projects" variant="primary" >
-            View All Projects &rarr;
+          <LinkButton href="/projects" variant="primary">
+            View All Projects
           </LinkButton>
         </div>
       </div>

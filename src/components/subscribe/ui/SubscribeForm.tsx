@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { Button } from "@/components/ui/button";
 import { useSubscribeStore } from "../store";
 
 interface SubscribeFormProps {
@@ -55,13 +56,9 @@ export function SubscribeForm({ source, onSuccess }: SubscribeFormProps) {
         required
         className="border border-charcoal-300 bg-white px-3 py-2.5 type-body placeholder:text-charcoal-400 outline-none focus:border-charcoal-1000 transition-colors"
       />
-      <button
-        type="submit"
-        disabled={loading}
-        className="bg-charcoal-1000 text-linen-100 type-label px-5 py-3 hover:bg-auburn-800 transition-colors self-start disabled:opacity-50 cursor-pointer"
-      >
+      <Button as="button" type="submit" disabled={loading} className="self-start">
         {loading ? "Subscribing..." : "Subscribe"}
-      </button>
+      </Button>
       {error && (
         <p className="type-label-sm text-auburn-800">{error}</p>
       )}

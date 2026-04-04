@@ -1,8 +1,8 @@
-import { prisma } from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { fetchFeedItem, getSiteConfig } from "@/lib/api";
 import { buildGraph } from "@/lib/schemas/graph";
 import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
 import { generateBreadcrumbSchema } from "@/lib/schemas/generators/breadcrumb";
@@ -13,9 +13,14 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const item = await prisma.feedItem.findUnique({ where: { id } });
+  let item;
+  try {
+    item = await fetchFeedItem(id);
+  } catch {
+    return { title: "Content | Build Canada" };
+  }
 
-  if (!item || item.type !== "BLOG") {
+  if (item.type !== "BLOG") {
     return { title: "Content | Build Canada" };
   }
 
@@ -29,7 +34,7 @@ export async function generateMetadata({
       title,
       description,
       type: "article",
-      publishedTime: item.createdAt.toISOString(),
+      publishedTime: item.createdAt,
       ...(item.author && { authors: [item.author] }),
       ...(item.image && { images: [{ url: item.image }] }),
     },
@@ -48,9 +53,12 @@ export default async function ContentItemPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const item = await prisma.feedItem.findUnique({ where: { id } });
-
-  if (!item) notFound();
+  let item;
+  try {
+    item = await fetchFeedItem(id);
+  } catch {
+    notFound();
+  }
 
   if (item.type !== "BLOG") {
     if (item.url) {
@@ -59,20 +67,10 @@ export default async function ContentItemPage({
     redirect("/content");
   }
 
-  let siteConfig = await prisma.siteConfig.findUnique({ where: { id: "site" } });
-  if (!siteConfig) {
-    siteConfig = await prisma.siteConfig.create({ data: { id: "site" } });
-  }
-  const configData = {
-    orgName: siteConfig.orgName,
-    orgDescription: siteConfig.orgDescription,
-    siteUrl: siteConfig.siteUrl,
-    logoUrl: siteConfig.logoUrl,
-    socialLinks: siteConfig.socialLinks,
-  };
+  const configData = getSiteConfig();
   const jsonLd = buildGraph(
     generateOrganizationSchema(configData),
-    generateBreadcrumbSchema(`/content/${item.id}`, item.title || "Content", siteConfig.siteUrl)
+    generateBreadcrumbSchema(`/content/${item.id}`, item.title || "Content", configData.siteUrl)
   );
 
   return (

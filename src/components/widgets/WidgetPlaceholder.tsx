@@ -12,16 +12,10 @@ export default function WidgetPlaceholder({ project }: { project: ProjectData })
           className="object-cover"
           unoptimized
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
         <div className="absolute bottom-0 left-0 p-8 lg:p-10">
-          <span className="type-label font-bold text-white mb-1 block">
+          <span className="type-label font-bold text-white mb-1 block drop-shadow-md">
             {project.title}
           </span>
-          {project.description && (
-            <p className="type-body-sm text-white/70 line-clamp-2">
-              {project.description}
-            </p>
-          )}
         </div>
       </div>
     );

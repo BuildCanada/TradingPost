@@ -76,7 +76,7 @@ export default async function BuilderPage({
 
         {builder.body && (
           <div
-            className="mt-6 prose prose-body"
+            className="mt-6 prose-bc"
             dangerouslySetInnerHTML={{ __html: builder.body }}
           />
         )}

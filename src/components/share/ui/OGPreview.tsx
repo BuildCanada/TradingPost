@@ -6,11 +6,11 @@ interface OGPreviewProps {
 }
 
 export function OGPreview({ title, description, image, url }: OGPreviewProps) {
-  let domain = "buildcanada.ca";
+  let domain = "buildcanada.com";
   try {
     domain = new URL(url).hostname;
   } catch {
-    domain = "buildcanada.ca";
+    domain = "buildcanada.com";
   }
 
   return (

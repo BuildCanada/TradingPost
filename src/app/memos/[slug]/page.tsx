@@ -192,7 +192,7 @@ export default async function MemoDetailPage({
             </h1>
 
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-white/20 overflow-hidden shrink-0">
+              <div className="w-10 h-10 rounded-none bg-white/20 overflow-hidden shrink-0">
                 {authorImage && (
                   <Image
                     src={authorImage}
@@ -246,7 +246,7 @@ export default async function MemoDetailPage({
               <h1 className="type-title mb-4">{memo.title}</h1>
 
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-full bg-border-light overflow-hidden shrink-0">
+                <div className="w-10 h-10 rounded-none bg-border-light overflow-hidden shrink-0">
                   {authorImage && (
                     <Image
                       src={authorImage}

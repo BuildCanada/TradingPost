@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Image from "next/image";
-import { prisma } from "@/lib/prisma";
+import { getSiteConfig } from "@/lib/api";
 import SectionLabel from "@/components/SectionLabel";
 import ProjectsGrid from "@/components/ProjectsGrid";
 import { buildGraph } from "@/lib/schemas/graph";
@@ -23,23 +23,12 @@ export const metadata: Metadata = {
   },
 };
 
-export const dynamic = "force-dynamic";
-
 export default async function ProjectsPage() {
-  let siteConfig = await prisma.siteConfig.findUnique({ where: { id: "site" } });
-  if (!siteConfig) {
-    siteConfig = await prisma.siteConfig.create({ data: { id: "site" } });
-  }
-  const configData = {
-    orgName: siteConfig.orgName,
-    orgDescription: siteConfig.orgDescription,
-    siteUrl: siteConfig.siteUrl,
-    logoUrl: siteConfig.logoUrl,
-    socialLinks: siteConfig.socialLinks,
-  };
+  const configData = getSiteConfig();
+
   const jsonLd = buildGraph(
     generateOrganizationSchema(configData),
-    generateBreadcrumbSchema("/projects", "Projects", siteConfig.siteUrl)
+    generateBreadcrumbSchema("/projects", "Projects", configData.siteUrl)
   );
 
   return (

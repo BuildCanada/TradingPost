@@ -1,10 +1,9 @@
 import type { MetadataRoute } from "next";
-import { prisma } from "@/lib/prisma";
+import { fetchFeedItems, fetchMemos } from "@/lib/api";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://buildcanada.ca";
 
-  // Static pages
   const staticPages: MetadataRoute.Sitemap = [
     { url: baseUrl, lastModified: new Date(), changeFrequency: "daily", priority: 1 },
     { url: `${baseUrl}/memos`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
@@ -12,27 +11,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/about`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
   ];
 
-  // Dynamic memo pages
-  const memos = await prisma.memo.findMany({
-    select: { slug: true, updatedAt: true },
-  });
-
+  const memos = await fetchMemos();
   const memoPages: MetadataRoute.Sitemap = memos.map((m) => ({
     url: `${baseUrl}/memos/${m.slug}`,
-    lastModified: m.updatedAt,
+    lastModified: m.publishedAt ? new Date(m.publishedAt) : new Date(),
     changeFrequency: "weekly",
     priority: 0.7,
   }));
 
-  // Dynamic feed pages (only BLOG type — others redirect externally)
-  const feedItems = await prisma.feedItem.findMany({
-    where: { type: "BLOG" },
-    select: { id: true, updatedAt: true },
-  });
-
+  const feedItems = await fetchFeedItems({ type: "blog" });
   const feedPages: MetadataRoute.Sitemap = feedItems.map((f) => ({
     url: `${baseUrl}/content/${f.id}`,
-    lastModified: f.updatedAt,
+    lastModified: new Date(),
     changeFrequency: "weekly",
     priority: 0.6,
   }));

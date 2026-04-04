@@ -1,3 +1,5 @@
+import { Button } from "@/components/ui/button";
+
 interface SubscribeSuccessProps {
   onClose?: () => void;
 }
@@ -11,12 +13,9 @@ export function SubscribeSuccess({ onClose }: SubscribeSuccessProps) {
         be the first to know when we make progress.
       </p>
       {onClose && (
-        <button
-          onClick={onClose}
-          className="bg-charcoal-1000 text-linen-100 type-label px-5 py-3 hover:bg-auburn-800 transition-colors cursor-pointer"
-        >
+        <Button as="button" onClick={onClose}>
           Close
-        </button>
+        </Button>
       )}
     </div>
   );

@@ -93,7 +93,7 @@ export default function FeaturedMemos({ heading, memos }: { heading?: string; me
           </span>
           {heading && (
             <LinkButton href="/memos" variant="primary" className="hidden compact:flex">
-              See All Memos →
+              See All Memos
             </LinkButton>
           )}
         </div>
@@ -137,7 +137,7 @@ export default function FeaturedMemos({ heading, memos }: { heading?: string; me
         )}
         {heading && (
           <LinkButton href="/memos" className="compact:hidden flex w-full justify-center mt-6">
-            See All Memos →
+            See All Memos
           </LinkButton>
         )}
       </div>

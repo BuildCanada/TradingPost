@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+
 export default function SubscribeForm() {
   return (
     <div id="subscribe" className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px]">
@@ -35,12 +37,9 @@ export default function SubscribeForm() {
           maxLength={6}
           className="border border-border-light bg-white px-3 py-2.5 type-body placeholder:text-text-muted outline-none focus:border-dark transition-colors"
         />
-        <button
-          type="submit"
-          className="bg-dark text-bg type-label px-5 py-3 hover:bg-accent transition-colors self-start"
-        >
+        <Button as="button" type="submit" className="self-start">
           Subscribe
-        </button>
+        </Button>
       </form>
       </div>
     </div>

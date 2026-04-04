@@ -1,3 +1,4 @@
+import { Button } from "@/components/ui/button";
 import EventCard from "@/components/EventCard";
 import { LumaEvent } from "@/lib/luma/types";
 
@@ -22,29 +23,19 @@ export default async function EventsTimeline() {
             <p className="type-caption text-text-secondary">
               No upcoming events
             </p>
-            <a
-              href="https://lu.ma/cal-KUFO2yscrfWr7RV"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="type-label text-accent hover:underline mt-2 inline-block"
-            >
-              View all events →
-            </a>
+            <Button as="external-link" variant="ghost" href="https://lu.ma/cal-KUFO2yscrfWr7RV" className="mt-2">
+              View all events
+            </Button>
           </div>
         ) : (
           <>
             {events.map((event) => (
               <EventCard key={event.id} event={event} />
             ))}
-            <div className="border-t border-b border-r border-border-light p-4 mt-auto">
-              <a
-                href="https://lu.ma/cal-KUFO2yscrfWr7RV"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="type-label text-accent hover:underline"
-              >
-                View all events →
-              </a>
+            <div className="border-t border-b border-r border-border-light mt-auto">
+              <Button as="external-link" variant="ghost" href="https://lu.ma/cal-KUFO2yscrfWr7RV" className="border-0 w-full justify-start">
+                View all events
+              </Button>
             </div>
           </>
         )}

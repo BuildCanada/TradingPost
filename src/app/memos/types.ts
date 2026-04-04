@@ -6,7 +6,7 @@ export interface MemoItem {
     name: string;
     photo: string | null;
   };
-  keyMessage1: string;
+  keyMessage1: string | null;
   keyMessage2: string | null;
   keyMessage3: string | null;
   splashImage: string | null;

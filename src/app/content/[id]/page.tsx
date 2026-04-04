@@ -111,8 +111,7 @@ export default async function ContentItemPage({
         <div className="flex items-center gap-3 mt-5 pb-5 border-b border-border-light">
           {item.authorPhoto ? (
             <div
-              className="w-9 h-9 overflow-hidden shrink-0"
-              style={{ borderRadius: 2 }}
+              className="w-9 h-9 overflow-hidden shrink-0 rounded-none"
             >
               <Image
                 src={item.authorPhoto}
@@ -125,8 +124,7 @@ export default async function ContentItemPage({
             </div>
           ) : (
             <div
-              className="w-9 h-9 bg-border-light flex items-center justify-center type-label-sm text-text-secondary shrink-0"
-              style={{ borderRadius: 2 }}
+              className="w-9 h-9 bg-border-light flex items-center justify-center type-label-sm text-text-secondary shrink-0 rounded-none"
             >
               {item.author.charAt(0).toUpperCase()}
             </div>

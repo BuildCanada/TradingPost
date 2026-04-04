@@ -87,7 +87,7 @@ export function RelatedMemos({ related }: { related: RelatedMemo[] }) {
             href={`/memos/${m.slug}`}
             className="flex items-start gap-3 group"
           >
-            <div className="w-8 h-8 rounded-full bg-charcoal-300 overflow-hidden shrink-0 mt-0.5">
+            <div className="w-8 h-8 rounded-none bg-charcoal-300 overflow-hidden shrink-0 mt-0.5">
               {m.author.photo && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img

@@ -15,8 +15,7 @@ function MemoGridRow({ memo }: { memo: MemoItem }) {
     >
       <div className="flex items-start gap-4 p-5 flex-1">
         <div
-          className="w-10 h-10 bg-border-light shrink-0 overflow-hidden mt-0.5"
-          style={{ borderRadius: "2px" }}
+          className="w-10 h-10 bg-border-light shrink-0 overflow-hidden mt-0.5 rounded-none"
         >
           {memo.author.photo && (
             <Image

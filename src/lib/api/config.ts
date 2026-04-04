@@ -11,7 +11,7 @@ export function getSiteConfig(): SiteConfigData {
     orgName: "Build Canada",
     orgDescription:
       "Build Canada is a civic organization on a mission to make Canada the most prosperous country in the world.",
-    siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://buildcanada.ca",
+    siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://buildcanada.com",
     logoUrl: "/assets/logos/logo-standard.svg",
     socialLinks: JSON.stringify([
       { platform: "x", url: "https://x.com/build_canada" },

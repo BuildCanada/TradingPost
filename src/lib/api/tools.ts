@@ -2,17 +2,23 @@ import { apiFetch } from "./client";
 import type { YFTool, YFListResponse } from "./types";
 import type { ProjectData } from "@/components/widgets/types";
 
+function stripHtml(html: string | null): string | null {
+  if (!html) return null;
+  return html.replace(/<[^>]*>/g, "").trim();
+}
+
 function mapTool(t: YFTool): ProjectData {
   return {
     id: String(t.id),
     slug: t.slug,
     title: t.title,
-    description: t.description,
+    description: stripHtml(t.description),
     externalUrl: t.url,
     size: t.size,
     featured: t.featured,
     order: t.position,
     accentColor: t.accent_color,
+    imageUrl: t.image_url,
   };
 }
 

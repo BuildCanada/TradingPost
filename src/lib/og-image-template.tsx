@@ -109,7 +109,7 @@ export function BuildCanadaOGImage({ title, description, badge, label }: OGImage
           </span>
         )}
         <span style={{ fontSize: "28px", color: theme.foreground30, marginLeft: "auto" }}>
-          buildcanada.ca
+          buildcanada.com
         </span>
       </div>
     </div>

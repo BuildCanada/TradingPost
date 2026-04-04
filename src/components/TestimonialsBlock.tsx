@@ -45,10 +45,10 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
           <img
             src={testimonial.profilePhoto}
             alt={testimonial.name}
-            className="w-[40px] h-[40px] rounded-full object-cover"
+            className="w-[40px] h-[40px] rounded-none object-cover"
           />
         ) : (
-          <div className="w-[40px] h-[40px] rounded-full bg-charcoal-300" />
+          <div className="w-[40px] h-[40px] rounded-none bg-charcoal-300" />
         )}
         <div>
           <p className="type-heading text-[14px]">{testimonial.name}</p>

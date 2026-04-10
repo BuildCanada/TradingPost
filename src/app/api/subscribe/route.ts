@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const API_URL =
-  process.env.YORK_FACTORY_API_URL ||
-  "https://york-factory.eng.canadasbuilding.com/api/v1";
+import { API_URL } from "@/lib/api/client";
 
 export async function POST(req: NextRequest) {
   try {
@@ -10,17 +8,14 @@ export async function POST(req: NextRequest) {
     const { email, first_name, last_name, postal_code } = body;
 
     if (!email || typeof email !== "string") {
-      return NextResponse.json(
-        { error: "Email is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return NextResponse.json(
         { error: "Invalid email format" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -39,15 +34,12 @@ export async function POST(req: NextRequest) {
       const errorData = await res.json().catch(() => ({}));
       return NextResponse.json(
         { error: errorData.errors?.[0] || "Subscription failed" },
-        { status: res.status }
+        { status: res.status },
       );
     }
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    return NextResponse.json(
-      { error: String(err) },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: String(err) }, { status: 500 });
   }
 }

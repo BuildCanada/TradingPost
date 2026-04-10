@@ -1,12 +1,12 @@
-const BASE_URL =
+export const API_URL =
   process.env.YORK_FACTORY_API_URL ||
-  "https://york-factory.eng.canadasbuilding.com/api/v1";
+  "https://yorkfactory.buildcanada.com/api/v1";
 
 export async function apiFetch<T>(
   path: string,
-  options?: { revalidate?: number; params?: Record<string, string> }
+  options?: { revalidate?: number; params?: Record<string, string> },
 ): Promise<T> {
-  const url = new URL(`${BASE_URL}${path}`);
+  const url = new URL(`${API_URL}${path}`);
   if (options?.params) {
     for (const [key, value] of Object.entries(options.params)) {
       if (value !== undefined && value !== "") {

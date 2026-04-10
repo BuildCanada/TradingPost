@@ -90,19 +90,24 @@ export interface YFFaq {
 
 export interface YFFeedItem {
   id: number;
+  feedable_type: string;
   item_type: string;
   title: string | null;
   subtitle: string | null;
+  body: string | null;
   author: string | null;
+  account_handle: string | null;
   url: string | null;
+  slug: string | null;
   featured: boolean;
   tags: string[];
   image_url: string | null;
+  author_photo_url: string | null;
+  published_at: string;
 }
 
 export interface YFFeedItemDetail extends YFFeedItem {
   body: string | null;
   embed_code: string | null;
-  source_url: string | null;
   author_photo_url: string | null;
 }

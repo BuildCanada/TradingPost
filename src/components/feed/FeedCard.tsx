@@ -13,10 +13,14 @@ const PLATFORM_ICONS: Record<string, string> = {
 
 const PLATFORM_LABELS: Record<string, string> = {
   BLOG: "Blog",
+  MEMO: "Memo",
+  BUILDER: "Builder",
   SUBSTACK: "Substack",
   TIKTOK: "TikTok",
   IG: "IG",
 };
+
+const INTERNAL_TYPES = new Set(["BLOG", "MEMO", "BUILDER"]);
 
 export function FeedCard({ item }: { item: FeedItem }) {
   const iconSlug = PLATFORM_ICONS[item.type];
@@ -25,8 +29,8 @@ export function FeedCard({ item }: { item: FeedItem }) {
   return (
     <Link
       href={itemHref(item)}
-      target={item.type !== "BLOG" ? "_blank" : undefined}
-      rel={item.type !== "BLOG" ? "noopener noreferrer" : undefined}
+      target={INTERNAL_TYPES.has(item.type) ? undefined : "_blank"}
+      rel={INTERNAL_TYPES.has(item.type) ? undefined : "noopener noreferrer"}
       className="border-b border-r border-border-light flex flex-col group overflow-hidden"
     >
       <div className="relative h-[100px] bg-dark">

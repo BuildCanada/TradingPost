@@ -34,7 +34,7 @@ export function RecentCard({ item }: { item: ContentFeedItem }) {
     <Link
       href={href}
       target={contentItemTarget(item)}
-      rel={item.type !== "BLOG" ? "noopener noreferrer" : undefined}
+      rel={contentItemTarget(item) ? "noopener noreferrer" : undefined}
       className="block"
     >
       {inner}

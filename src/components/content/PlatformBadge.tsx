@@ -1,16 +1,15 @@
 import Image from "next/image";
 
 export function PlatformBadge({ type }: { type: string }) {
-  const label =
-    type === "SUBSTACK"
-      ? "Substack"
-      : type === "BLOG"
-        ? "Blog"
-        : type === "TIKTOK"
-          ? "TikTok"
-          : type === "IG"
-            ? "IG"
-            : type;
+  const LABELS: Record<string, string> = {
+    SUBSTACK: "Substack",
+    BLOG: "Blog",
+    TIKTOK: "TikTok",
+    IG: "IG",
+    MEMO: "Memo",
+    BUILDER: "Builder",
+  };
+  const label = LABELS[type] || type;
   const hasSocialIcon = ["X", "TIKTOK", "IG", "SUBSTACK", "YOUTUBE"].includes(
     type
   );

@@ -52,7 +52,7 @@ export function IGCard({ item }: { item: FeedItem }) {
         </span>
 
         {item.body && (
-          <p className="type-default line-clamp-4" style={{ color: COLORS.text }}>
+          <p className="type-default line-clamp-4 whitespace-pre-line" style={{ color: COLORS.text }}>
             <span className="font-display font-medium" style={{ letterSpacing: "-0.02em" }}>
               @build_canada
             </span>{" "}

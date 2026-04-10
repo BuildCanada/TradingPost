@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { type FeedItem, formatFeedDate } from "./types";
+import { type FeedItem, formatFeedDate, isValidImage } from "./types";
 
 interface SocialCardHeaderProps {
   item: FeedItem;
@@ -20,6 +20,9 @@ export function SocialCardHeader({
   mutedColor,
   avatarBorder,
 }: SocialCardHeaderProps) {
+  const handle = item.accountHandle || "@build_canada";
+  const avatarSrc = isValidImage(item.authorPhoto) ? item.authorPhoto! : "/assets/logos/Logocircle.webp";
+
   return (
     <div className="flex items-center gap-2.5 px-5 py-3 border-b" style={{ borderColor }}>
       <div
@@ -27,8 +30,8 @@ export function SocialCardHeader({
         style={{ border: `2px solid ${avatarBorder}` }}
       >
         <Image
-          src="/assets/logos/Logocircle.webp"
-          alt="Build Canada"
+          src={avatarSrc}
+          alt={handle}
           width={32}
           height={32}
           className="object-cover"
@@ -39,7 +42,7 @@ export function SocialCardHeader({
           className="font-display text-[14px] font-medium leading-tight"
           style={{ color: textColor, letterSpacing: "-0.02em" }}
         >
-          @build_canada
+          {handle}
         </span>
         <span className="type-mono-sm leading-tight" style={{ color: mutedColor }}>
           {formatFeedDate(item.createdAt)}

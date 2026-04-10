@@ -88,6 +88,7 @@ export async function fetchFeedItem(id: string): Promise<ContentFeedItem> {
     title: f.title,
     subtitle: f.subtitle,
     author: f.author,
+    accountHandle: f.account_handle ?? null,
     image: f.image_url,
     body: f.body,
     url: f.url,

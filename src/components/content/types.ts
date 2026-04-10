@@ -7,15 +7,19 @@ export interface ContentFeedItem extends FeedItem {
 
 export { feedImage, itemHref };
 
+const INTERNAL_CONTENT_TYPES = new Set(["BLOG", "MEMO", "BUILDER"]);
+
 export function contentItemTarget(item: ContentFeedItem): string | undefined {
-  return item.type === "BLOG" ? undefined : "_blank";
+  return INTERNAL_CONTENT_TYPES.has(item.type) ? undefined : "_blank";
 }
 
-export const FILTERS = ["All", "Blog", "X", "TikTok", "IG", "Substack"] as const;
+export const FILTERS = ["All", "Memo", "Blog", "Builder", "X", "TikTok", "IG", "Substack"] as const;
 
 export const TYPE_MAP: Record<string, string> = {
   All: "All",
+  Memo: "MEMO",
   Blog: "BLOG",
+  Builder: "BUILDER",
   X: "X",
   TikTok: "TIKTOK",
   IG: "IG",
@@ -29,6 +33,8 @@ export const PLATFORM_HOVER_COLORS: Record<string, string> = {
   SUBSTACK: "#FF6719",
   YOUTUBE: "#FF0000",
   BLOG: "#932f2f",
+  MEMO: "#1a1a2e",
+  BUILDER: "#2d6a4f",
 };
 
 export const INVERT_ICON_ON_HOVER = new Set(["X", "IG"]);

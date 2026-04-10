@@ -16,6 +16,8 @@ const PLATFORM_HOVER_CLASSES: Record<string, string> = {
   SUBSTACK: "group-hover/row:border-[#FF6719] group-hover/row:bg-[#FF6719]",
   YOUTUBE: "group-hover/row:border-[#FF0000] group-hover/row:bg-[#FF0000]",
   BLOG: "group-hover/row:border-[#932f2f] group-hover/row:bg-[#932f2f]",
+  MEMO: "group-hover/row:border-[#1a1a2e] group-hover/row:bg-[#1a1a2e]",
+  BUILDER: "group-hover/row:border-[#2d6a4f] group-hover/row:bg-[#2d6a4f]",
 };
 
 export function PostListRow({ item }: { item: ContentFeedItem }) {
@@ -85,7 +87,7 @@ export function PostListRow({ item }: { item: ContentFeedItem }) {
     <Link
       href={href}
       target={contentItemTarget(item)}
-      rel={item.type !== "BLOG" ? "noopener noreferrer" : undefined}
+      rel={contentItemTarget(item) ? "noopener noreferrer" : undefined}
       className="block"
     >
       {inner}

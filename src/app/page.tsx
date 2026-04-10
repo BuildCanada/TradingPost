@@ -7,6 +7,7 @@ import FeaturedProjects from "@/components/FeaturedProjects";
 import { LinkButton } from "@/components/ui/link-button";
 import { SubscribeButton } from "@/components/ui/subscribe-button";
 import EventsTimeline from "@/components/EventsTimeline";
+import CyclingWord from "@/components/CyclingWord";
 import { buildGraph } from "@/lib/schemas/graph";
 import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
 import { generateWebSiteSchema } from "@/lib/schemas/generators/website";
@@ -85,7 +86,7 @@ function HeroSection() {
 
       <h1 className="relative z-10 type-display text-center">
         <span className="relative block">
-          <span className="text-white">Canada&apos;s Voice</span>
+          <span className="text-white">Building a </span>
           <span
             className="absolute left-1/2 -translate-x-1/2 bottom-[calc(0.2em-5px)] w-[200vw] h-px"
             style={{
@@ -96,14 +97,14 @@ function HeroSection() {
             }}
           />
         </span>
-        <span className="relative block">
-          <span
-            className="text-transparent"
-            style={{ WebkitTextStroke: "1px white" }}
-          >
-            for
-          </span>{" "}
-          <span className="text-white">Builders.</span>
+        <span className="relative block whitespace-nowrap">
+          <span className="invisible" aria-hidden="true">Stronger Canada.</span>
+          <span className="absolute right-1/2 top-0 mr-[0.15em] text-right text-transparent">
+            <CyclingWord />{" "}
+          </span>
+          <span className="absolute left-1/2 top-0 ml-[0.15em] text-white">
+            {" "}Canada.
+          </span>
           <span
             className="absolute left-1/2 -translate-x-1/2 bottom-[calc(0.2em-5px)] w-[200vw] h-px"
             style={{

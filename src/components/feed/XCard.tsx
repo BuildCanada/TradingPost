@@ -41,7 +41,7 @@ export function XCard({ item }: { item: FeedItem }) {
         </span>
 
         {item.body && (
-          <p className="type-default text-[#e7e9ea] line-clamp-4">
+          <p className="type-default text-[#e7e9ea] line-clamp-4 whitespace-pre-line">
             {item.body}
           </p>
         )}

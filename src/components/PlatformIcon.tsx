@@ -17,6 +17,8 @@ const LABELS: Record<string, string> = {
   YOUTUBE: "YouTube",
   LINKEDIN: "LinkedIn",
   BLOG: "Blog",
+  MEMO: "Memo",
+  BUILDER: "Builder",
 };
 
 export function PlatformIcon({

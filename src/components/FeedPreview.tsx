@@ -1,20 +1,8 @@
-import { fetchFeedItemsSimple } from "@/lib/api";
-import { type FeedItem } from "@/components/feed/types";
+import { fetchFeedPicks } from "@/lib/api";
 import { IGCard, XCard, TikTokCard, SubstackCard, FeedCard } from "@/components/feed";
 
-async function getFeedPicks(): Promise<FeedItem[]> {
-  const all = await fetchFeedItemsSimple();
-  const picks: FeedItem[] = [];
-  const types = ["X", "IG", "SUBSTACK", "BLOG"];
-  for (const t of types) {
-    const match = all.find((d) => d.type === t);
-    if (match) picks.push(match);
-  }
-  return picks;
-}
-
 export default async function FeedPreview() {
-  const items = await getFeedPicks();
+  const items = await fetchFeedPicks("x,substack,memo|blog|builder,x:canada_spends");
 
   return (
     <div className="py-12">

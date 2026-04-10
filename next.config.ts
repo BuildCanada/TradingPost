@@ -16,6 +16,7 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
+    unoptimized: process.env.NODE_ENV === "development",
     remotePatterns: [
       {
         protocol: "https",
@@ -36,6 +37,14 @@ const nextConfig: NextConfig = {
       {
         protocol: "https",
         hostname: "york-factory.eng.canadasbuilding.com",
+      },
+      {
+        protocol: "https",
+        hostname: "yorkfactory.buildcanada.com",
+      },
+      {
+        protocol: "http",
+        hostname: "localhost",
       },
     ],
   },

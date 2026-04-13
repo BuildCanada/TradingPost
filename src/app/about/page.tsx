@@ -1,4 +1,3 @@
-import Image from "next/image";
 import { fetchFaqs, fetchTeamMembers, fetchTestimonials, getSiteConfig } from "@/lib/api";
 import SectionLabel from "@/components/SectionLabel";
 import OurStoryBlock from "./OurStoryBlock";
@@ -45,44 +44,22 @@ export default async function AboutPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <section className="relative px-5 h-[45svh] md:h-[65svh] flex items-center border-b border-border-light overflow-hidden bg-[#3a3a3a]">
-        <Image
-          src="/assets/images/canadian-pacific-railway-rocky-mountains.webp"
-          alt=""
-          aria-hidden="true"
-          fill
-          className="object-cover object-bottom pointer-events-none select-none brightness-[0.35]"
-          fetchPriority="high"
-          priority
-        />
-        <div className="relative z-10 max-w-[1080px] w-full mx-auto">
-          <SectionLabel className="pb-2 !text-bg !opacity-60">Who We Are</SectionLabel>
-          <h1 className="type-title mb-4 max-w-[700px] text-bg">
-            Building a Better Canada.
+      <section className="px-5 pt-[120px] pb-[100px] md:pt-[140px] md:pb-[120px] border-b border-border-light">
+        <div className="max-w-[1080px] mx-auto">
+          <SectionLabel as="h2">Who We Are</SectionLabel>
+          <h1 className="type-display mt-4 mb-6 max-w-[700px] text-dark" style={{ letterSpacing: "-0.126rem" }}>
+            Canada is worth building.
           </h1>
-          <p className="type-body max-w-[600px] text-bg opacity-70 hidden md:block">
-            Build Canada is a civic organization on a mission to make Canada the most prosperous country in the world. We publish bold policy research, build transparency tools, and bring together Canadian builders who are ready to act.
-          </p>
-          <p className="type-body max-w-[600px] text-bg opacity-70 md:hidden">
-            Build Canada publishes bold policy research, build transparency tools, and brings together Canadian builders who are ready to act.
+          <p className="type-body max-w-[600px] text-dark/70">
+            Build Canada publishes bold policy research and builds transparency tools to make Canada the most prosperous country in the world.
           </p>
         </div>
       </section>
-      <div className="animate-fade-in" style={{ animationDelay: "0.3s" }}>
-        <OurStoryBlock />
-      </div>
-      <div className="animate-fade-in" style={{ animationDelay: "0.5s" }}>
-        <PlatformBlock />
-      </div>
-      <div className="animate-fade-in" style={{ animationDelay: "0.7s" }}>
-        <TeamBlock members={people} />
-      </div>
-      <div className="animate-fade-in" style={{ animationDelay: "0.9s" }}>
-        <TestimonialsBlock testimonials={testimonials} />
-      </div>
-      <div className="animate-fade-in" style={{ animationDelay: "1.1s" }}>
-        <QnaBlock items={qandaItems} />
-      </div>
+      <OurStoryBlock />
+      <PlatformBlock />
+      <TeamBlock members={people} />
+      <TestimonialsBlock testimonials={testimonials} />
+      <QnaBlock items={qandaItems} />
     </div>
   );
 }

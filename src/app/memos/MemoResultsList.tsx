@@ -71,9 +71,6 @@ function MemoGridRow({ memo }: { memo: MemoItem }) {
 export default function MemoResultsList({ memos }: { memos: MemoItem[] }) {
   const search = useMemosFilter((s) => s.search);
   const activeCategory = useMemosFilter((s) => s.activeCategory);
-  const visibleCount = useMemosFilter((s) => s.visibleCount);
-  const loadMore = useMemosFilter((s) => s.loadMore);
-
   const filtered = useMemo(() => {
     let list = [...memos];
 
@@ -111,33 +108,10 @@ export default function MemoResultsList({ memos }: { memos: MemoItem[] }) {
             </p>
           )}
           <div className="grid grid-cols-1 wide:grid-cols-2 wide:gap-x-0 border-t border-l border-border-light mt-4">
-            {filtered.slice(0, visibleCount).map((memo) => (
+            {filtered.map((memo) => (
               <MemoGridRow key={memo.id} memo={memo} />
             ))}
           </div>
-          {visibleCount < filtered.length && (
-            <button
-              onClick={loadMore}
-               className="mt-6 mx-auto flex items-center gap-2 h-12 px-6 border border-border-light type-label text-text-secondary hover:text-dark hover:border-dark transition-colors"
-            >
-              Show More
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 14 14"
-                fill="none"
-                className="shrink-0"
-              >
-                <path
-                  d="M3 5.5l4 4 4-4"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-          )}
         </div>
       </section>
     </div>

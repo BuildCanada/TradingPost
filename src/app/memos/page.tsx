@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Image from "next/image";
 import { fetchMemos, getSiteConfig } from "@/lib/api";
 import SectionLabel from "@/components/SectionLabel";
@@ -59,7 +60,9 @@ export default async function MemosPage() {
         </section>
       </div>
 
-      <MemosListClient memos={serialized} />
+      <Suspense>
+        <MemosListClient memos={serialized} />
+      </Suspense>
     </div>
   );
 }

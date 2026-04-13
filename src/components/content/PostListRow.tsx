@@ -1,24 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { PlatformIcon, platformLabel } from "@/components/PlatformIcon";
+import { platformLabel } from "@/components/PlatformIcon";
 import {
   type ContentFeedItem,
   feedImage,
   itemHref,
   contentItemTarget,
 } from "./types";
-
-const PLATFORM_HOVER_CLASSES: Record<string, string> = {
-  X: "group-hover/card:border-[#000000] group-hover/card:bg-[#000000]",
-  TIKTOK: "group-hover/card:border-[#00f2ea] group-hover/card:bg-[#00f2ea]",
-  IG: "group-hover/card:border-[#E1306C] group-hover/card:bg-[#E1306C]",
-  SUBSTACK: "group-hover/card:border-[#FF6719] group-hover/card:bg-[#FF6719]",
-  YOUTUBE: "group-hover/card:border-[#FF0000] group-hover/card:bg-[#FF0000]",
-  BLOG: "group-hover/card:border-[#932f2f] group-hover/card:bg-[#932f2f]",
-  MEMO: "group-hover/card:border-[#1a1a2e] group-hover/card:bg-[#1a1a2e]",
-  BUILDER: "group-hover/card:border-[#2d6a4f] group-hover/card:bg-[#2d6a4f]",
-};
 
 const isExternal = (item: ContentFeedItem) =>
   item.type === "X" || item.type === "TIKTOK" || item.type === "IG" || item.type === "SUBSTACK" || item.type === "YOUTUBE";
@@ -28,9 +17,6 @@ export function PostListRow({ item, gridItem = false }: { item: ContentFeedItem;
   const external = isExternal(item);
   const img = feedImage(item);
   const hasRealImage = img && img !== "/assets/logos/logo-standard.svg";
-  const hoverClasses =
-    PLATFORM_HOVER_CLASSES[item.type] ||
-    "group-hover/card:border-[#888888] group-hover/card:bg-[#888888]";
 
   const imageBlock = hasRealImage ? (
     <div className="relative w-full h-40 bg-border-light overflow-hidden">
@@ -95,23 +81,11 @@ export function PostListRow({ item, gridItem = false }: { item: ContentFeedItem;
               />
             </div>
           )}
-          <div className="flex items-center gap-2 min-w-0">
-            {item.author && !external && (
-              <p className="font-display text-[0.875rem] lg:text-[1rem] font-normal leading-[1.4] truncate">
-                {item.author}
-              </p>
-            )}
-            <span
-              className={cn(
-                "border border-border-light px-1.5 py-1 shrink-0 flex items-center justify-center transition-all duration-200",
-                hoverClasses
-              )}
-            >
-              <span className="text-dark/40 transition-all duration-200 group-hover/card:text-white">
-                <PlatformIcon type={item.type} size={12} />
-              </span>
-            </span>
-          </div>
+          {item.author && !external && (
+            <p className="font-display text-[0.875rem] lg:text-[1rem] font-normal leading-[1.4] truncate">
+              {item.author}
+            </p>
+          )}
         </div>
       </div>
       <div className="border-t border-border-light px-8 lg:px-10 py-4 flex items-center gap-2 group/cta">

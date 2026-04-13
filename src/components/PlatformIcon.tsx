@@ -7,6 +7,9 @@ const ICONS: Record<string, string> = {
   SUBSTACK: "/assets/icons/substack-icon.svg",
   YOUTUBE: "/assets/icons/platform-youtube.svg",
   LINKEDIN: "/assets/icons/platform-linkedin.svg",
+  BLOG: "/assets/logos/logo-standard.svg",
+  MEMO: "/assets/logos/logo-standard.svg",
+  BUILDER: "/assets/logos/logo-standard.svg",
 };
 
 const LABELS: Record<string, string> = {

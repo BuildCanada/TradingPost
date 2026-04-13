@@ -82,7 +82,9 @@ export function MemoCard({
   const isDark = variant === 'dark' || variant === 'featured';
   const isFeatured = variant === 'featured';
 
-  const imageEl = isDark && (memo.splashImage || memo.seoImage) ? (
+  const hasImage = isDark && (memo.splashImage || memo.seoImage);
+
+  const imageEl = hasImage ? (
     <div className="absolute inset-0 bg-dark">
       <Image
         src={memo.splashImage || memo.seoImage!}
@@ -154,7 +156,7 @@ export function MemoCard({
     return (
       <Link
         href={`/memos/${memo.slug}`}
-        className="flex flex-col justify-end group relative overflow-hidden min-h-[320px] lg:min-h-[400px] border border-border-light"
+        className="flex flex-col justify-end group relative overflow-hidden min-h-[320px] lg:min-h-[400px] border border-border-light bg-dark"
       >
         {imageEl}
         {labelEl}
@@ -182,7 +184,7 @@ export function MemoCard({
       className={cn(
         "flex flex-col group relative overflow-hidden h-full",
         !isDark && (gridItem ? "border-b border-r border-l border-border-light" : "border border-border-light"),
-        isDark && !isFeatured && "justify-end min-h-[280px] lg:min-h-[320px]"
+        isDark && !isFeatured && "justify-end min-h-[280px] lg:min-h-[320px] bg-dark border border-border-light"
       )}
     >
       {imageEl}

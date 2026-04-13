@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import posthog from "posthog-js";
 import { Button } from "@/components/ui/button";
 import { useSubscribeStore } from "../store";
 
@@ -37,6 +38,8 @@ export function SubscribeForm({ source, onSuccess }: SubscribeFormProps) {
         setError(data.error || "Something went wrong");
         return;
       }
+      posthog.identify(email, { email });
+      posthog.capture("subscribed", { source });
       setSubscribed();
       onSuccess?.();
     } catch {

@@ -1,6 +1,7 @@
 import { fetchFaqs, fetchTeamMembers, fetchTestimonials, getSiteConfig } from "@/lib/api";
 import SectionLabel from "@/components/SectionLabel";
-import OurStoryBlock from "./OurStoryBlock";
+import CrisisBlock from "./CrisisBlock";
+import ImpactBlock from "./ImpactBlock";
 import PlatformBlock from "./PlatformBlock";
 import TeamBlock from "./TeamBlock";
 import TestimonialsBlock from "@/components/TestimonialsBlock";
@@ -55,7 +56,8 @@ export default async function AboutPage() {
           </p>
         </div>
       </section>
-      <OurStoryBlock />
+      <CrisisBlock />
+      <ImpactBlock />
       <PlatformBlock />
       <TeamBlock members={people} />
       <TestimonialsBlock testimonials={testimonials} />

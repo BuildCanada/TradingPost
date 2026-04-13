@@ -17,7 +17,7 @@ interface Testimonial {
 function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
   const companyLogo = testimonial.companyLogo;
   return (
-    <div className="w-full border border-charcoal-300 overflow-hidden bg-linen-100 p-6 md:p-8 flex flex-col relative">
+    <div className="w-full border border-border-light overflow-hidden bg-bg p-6 md:p-8 flex flex-col relative">
       {/* Company logo background */}
       {companyLogo && (
         <div
@@ -48,7 +48,7 @@ function TestimonialCard({ testimonial }: { testimonial: Testimonial }) {
             className="w-[40px] h-[40px] rounded-none object-cover"
           />
         ) : (
-          <div className="w-[40px] h-[40px] rounded-none bg-charcoal-300" />
+          <div className="w-[40px] h-[40px] rounded-none bg-border-light" />
         )}
         <div>
           <p className="type-heading text-[14px]">{testimonial.name}</p>
@@ -136,22 +136,23 @@ export default function TestimonialsBlock({ testimonials }: { testimonials: Test
 
   if (testimonials.length === 0) {
     return (
-      <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px] border-b border-charcoal-300">
+      <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px] border-b border-border-light">
         <div className="max-w-[1080px] mx-auto">
-          <SectionLabel>Testimonials</SectionLabel>
+          <SectionLabel as="h2">Voices</SectionLabel>
+          <h2 className="type-h3 text-dark mt-2 mb-1">From the people building Canada.</h2>
           <div className="flex justify-center mt-2">
-            <div className="border border-charcoal-300 w-[380px] max-w-[90vw]">
+            <div className="border border-border-light w-[380px] max-w-[90vw]">
               <div className="p-5">
                 <div className="space-y-2 mb-4">
-                  <div className="h-[7px] bg-charcoal-300 rounded-sm w-[95%]" />
-                  <div className="h-[7px] bg-charcoal-300 rounded-sm w-[80%]" />
-                  <div className="h-[7px] bg-charcoal-300 rounded-sm w-[60%]" />
+                  <div className="h-[7px] bg-border-light rounded-sm w-[95%]" />
+                  <div className="h-[7px] bg-border-light rounded-sm w-[80%]" />
+                  <div className="h-[7px] bg-border-light rounded-sm w-[60%]" />
                 </div>
                 <div className="flex items-center gap-3">
-                  <div className="w-[28px] h-[28px] rounded-full bg-charcoal-300" />
+                  <div className="w-[28px] h-[28px] rounded-full bg-border-light" />
                   <div>
-                    <div className="h-[6px] bg-charcoal-300 rounded-sm w-[70px] mb-1.5" />
-                    <div className="h-[6px] bg-charcoal-300 rounded-sm w-[50px]" />
+                    <div className="h-[6px] bg-border-light rounded-sm w-[70px] mb-1.5" />
+                    <div className="h-[6px] bg-border-light rounded-sm w-[50px]" />
                   </div>
                 </div>
               </div>
@@ -163,11 +164,12 @@ export default function TestimonialsBlock({ testimonials }: { testimonials: Test
   }
 
   return (
-    <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px] border-b border-charcoal-300">
+    <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px] border-b border-border-light">
       <div className="max-w-[1080px] mx-auto">
-        <SectionLabel>Testimonials</SectionLabel>
+        <SectionLabel as="h2">Voices</SectionLabel>
+        <h2 className="type-h3 text-dark mt-2 mb-1">From the people building Canada.</h2>
 
-        <div ref={containerRef} className="relative mt-2 overflow-hidden">
+        <div ref={containerRef} className="relative mt-4 overflow-hidden">
           <div
             ref={trackRef}
             className="flex items-start"
@@ -222,7 +224,7 @@ export default function TestimonialsBlock({ testimonials }: { testimonials: Test
             <button
                aria-label="Previous testimonial"
                onClick={goPrev}
-               className="w-12 h-12 border border-charcoal-300 flex items-center justify-center text-[15px] text-charcoal-600 hover:border-charcoal-1000 transition-colors"
+               className="w-12 h-12 border border-border-light flex items-center justify-center text-[15px] text-text-secondary hover:border-dark transition-colors"
              >
                &#8249;
              </button>
@@ -237,8 +239,8 @@ export default function TestimonialsBlock({ testimonials }: { testimonials: Test
                    <span
                      className={`block rounded-full transition-all ${
                        i === current
-                         ? "h-[6px] w-[14px] bg-charcoal-1000"
-                         : "h-[6px] w-[6px] bg-charcoal-300 hover:bg-charcoal-600"
+                         ? "h-[6px] w-[14px] bg-dark"
+                         : "h-[6px] w-[6px] bg-border-light hover:bg-text-secondary"
                      }`}
                    />
                  </button>
@@ -247,7 +249,7 @@ export default function TestimonialsBlock({ testimonials }: { testimonials: Test
              <button
                aria-label="Next testimonial"
                onClick={goNext}
-               className="w-12 h-12 border border-charcoal-300 flex items-center justify-center text-[15px] text-charcoal-600 hover:border-charcoal-1000 transition-colors"
+               className="w-12 h-12 border border-border-light flex items-center justify-center text-[15px] text-text-secondary hover:border-dark transition-colors"
             >
               &#8250;
             </button>

@@ -7,7 +7,6 @@ import {
   feedImage,
   itemHref,
   contentItemTarget,
-  INVERT_ICON_ON_HOVER,
 } from "./types";
 
 const PLATFORM_HOVER_CLASSES: Record<string, string> = {
@@ -108,12 +107,7 @@ export function PostListRow({ item, gridItem = false }: { item: ContentFeedItem;
                 hoverClasses
               )}
             >
-              <span
-                className={cn(
-                  "transition-all duration-200 brightness-0 opacity-40 group-hover/card:opacity-100",
-                  INVERT_ICON_ON_HOVER.has(item.type) ? "group-hover/card:invert" : ""
-                )}
-              >
+              <span className="text-dark/40 transition-all duration-200 group-hover/card:text-white">
                 <PlatformIcon type={item.type} size={12} />
               </span>
             </span>

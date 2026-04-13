@@ -108,7 +108,7 @@ export function MemoCard({
   ) : null;
 
   const latestEl = isLatest && !isDark ? (
-    <span className="absolute top-4 right-4 type-label-sm bg-dark text-bg px-2 py-1">
+    <span className="type-label-sm bg-dark text-bg px-2 py-1">
       Latest
     </span>
   ) : null;
@@ -187,7 +187,6 @@ export function MemoCard({
     >
       {imageEl}
       {labelEl}
-      {latestEl}
 
       {isDark ? (
         <div className="relative z-10 flex flex-col">
@@ -206,7 +205,7 @@ export function MemoCard({
         </div>
       ) : (
         <>
-          <div className="p-6 lg:p-8 flex flex-col gap-4 flex-1">
+          <div className="p-6 lg:p-8 flex flex-col gap-4 flex-1 relative">
             <div className="min-w-0">
               <h3 className="font-display text-[1.125rem] lg:text-[1.25rem] font-normal leading-[1.2] tracking-normal group-hover:text-accent transition-colors line-clamp-2">
                 {memo.title}
@@ -217,6 +216,9 @@ export function MemoCard({
                 </p>
               )}
             </div>
+            {latestEl && (
+              <div className="flex justify-end">{latestEl}</div>
+            )}
             <div className="flex items-center gap-3 mt-auto">
               {memo.author.photo && (
                 <div 

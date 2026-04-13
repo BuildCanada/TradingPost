@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import Image from "next/image";
 import { fetchFeedItems, getSiteConfig } from "@/lib/api";
 import SectionLabel from "@/components/SectionLabel";
@@ -40,7 +41,9 @@ export default async function ContentPage() {
           </p>
         </div>
       </section>
-      <ContentFeedClient items={items} />
+      <Suspense fallback={null}>
+        <ContentFeedClient items={items} />
+      </Suspense>
     </div>
   );
 }

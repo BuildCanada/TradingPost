@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { Suspense, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import FeaturedHero from "./FeaturedHero";
 import CategoryFilter from "./CategoryFilter";
@@ -11,15 +11,7 @@ import { useMemosFilter } from "./store";
 
 export type { MemoItem };
 
-export default function MemosListClient({ memos }: { memos: MemoItem[] }) {
-  const categories = useMemo(() => {
-    const cats = new Set<string>();
-    for (const m of memos) {
-      if (m.category) cats.add(m.category);
-    }
-    return Array.from(cats).sort();
-  }, [memos]);
-
+function CategoryFromSearchParams({ categories }: { categories: string[] }) {
   const searchParams = useSearchParams();
   const setActiveCategory = useMemosFilter((s) => s.setActiveCategory);
 
@@ -30,8 +22,23 @@ export default function MemosListClient({ memos }: { memos: MemoItem[] }) {
     }
   }, []);
 
+  return null;
+}
+
+export default function MemosListClient({ memos }: { memos: MemoItem[] }) {
+  const categories = useMemo(() => {
+    const cats = new Set<string>();
+    for (const m of memos) {
+      if (m.category) cats.add(m.category);
+    }
+    return Array.from(cats).sort();
+  }, [memos]);
+
   return (
     <>
+      <Suspense fallback={null}>
+        <CategoryFromSearchParams categories={categories} />
+      </Suspense>
       <FeaturedHero memos={memos} />
       <CategoryFilter categories={categories} />
       <MemoSearch />

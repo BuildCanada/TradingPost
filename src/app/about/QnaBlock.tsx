@@ -22,9 +22,9 @@ export default function QnaBlock({ items }: { items: QnaItem[] }) {
   if (items.length === 0) return null;
 
   return (
-    <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px] border-b border-border-light">
+    <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px]">
       <div className="max-w-[1080px] mx-auto">
-        <SectionLabel as="h2">Q&amp;A</SectionLabel>
+        <SectionLabel as="h2">Questions &amp; Answers</SectionLabel>
         <div className="mt-4 border border-border-light">
           <Accordion value={openValue} onValueChange={setOpenValue}>
             {items.map((item, i) => {

@@ -4,6 +4,16 @@ import { cn } from "@/lib/utils";
 import SectionLabel from "@/components/SectionLabel";
 import { useMemosFilter } from "./store";
 
+function updateUrl(category: string | null) {
+  const url = new URL(window.location.href);
+  if (category) {
+    url.searchParams.set("category", category);
+  } else {
+    url.searchParams.delete("category");
+  }
+  window.history.replaceState(null, "", url.toString());
+}
+
 export default function CategoryFilter({
   categories,
 }: {
@@ -27,7 +37,11 @@ export default function CategoryFilter({
               return (
                 <button
                   key={cat}
-                  onClick={() => setActiveCategory(isAll ? null : activeCategory === cat ? null : cat)}
+                  onClick={() => {
+                    const next = isAll ? null : activeCategory === cat ? null : cat;
+                    setActiveCategory(next);
+                    updateUrl(next);
+                  }}
                   aria-pressed={isActive}
                   aria-label={isAll ? "Show all categories" : `Filter by ${display}`}
                   className={cn(

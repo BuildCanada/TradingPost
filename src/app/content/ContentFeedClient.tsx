@@ -116,7 +116,7 @@ export default function ContentFeedClient({
                   setAllPostsPage((p) => Math.min(totalPages - 1, p + 1));
                 return (
                   <>
-                    <div className="flex items-center">
+                    <div className="flex items-center mb-6">
                       <SectionLabel as="h2">All Posts</SectionLabel>
                       <PaginationArrows
                         page={page}
@@ -125,18 +125,22 @@ export default function ContentFeedClient({
                         onNext={onNext}
                       />
                     </div>
-                    {pageItems.map((item) => (
-                      <PostListRow key={item.id} item={item} />
-                    ))}
-                    <div className="flex items-center mt-3">
-                      <div className="flex-1" />
-                      <PaginationArrows
-                        page={page}
-                        totalPages={totalPages}
-                        onPrev={onPrev}
-                        onNext={onNext}
-                      />
+                    <div className="grid grid-cols-1 cards:grid-cols-2 wide:grid-cols-3 gap-0 border-t border-border-light">
+                      {pageItems.map((item) => (
+                        <PostListRow key={item.id} item={item} gridItem />
+                      ))}
                     </div>
+                    {totalPages > 1 && (
+                      <div className="flex items-center mt-3">
+                        <div className="flex-1" />
+                        <PaginationArrows
+                          page={page}
+                          totalPages={totalPages}
+                          onPrev={onPrev}
+                          onNext={onNext}
+                        />
+                      </div>
+                    )}
                   </>
                 );
               })()}

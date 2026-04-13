@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { Newspaper, Bookmark, Wrench } from "lucide-react";
 
 const ICONS: Record<string, string> = {
   X: "/assets/icons/platform-x-twitter.svg",
@@ -7,6 +8,12 @@ const ICONS: Record<string, string> = {
   SUBSTACK: "/assets/icons/substack-icon.svg",
   YOUTUBE: "/assets/icons/platform-youtube.svg",
   LINKEDIN: "/assets/icons/platform-linkedin.svg",
+};
+
+const LUCIDE_ICONS: Record<string, React.ComponentType<{ size?: number; className?: string }>> = {
+  BLOG: Newspaper,
+  MEMO: Bookmark,
+  BUILDER: Wrench,
 };
 
 const LABELS: Record<string, string> = {
@@ -30,6 +37,8 @@ export function PlatformIcon({
   size?: number;
   className?: string;
 }) {
+  const LucideIcon = LUCIDE_ICONS[type];
+  if (LucideIcon) return <LucideIcon size={size} className={className} />;
   const src = ICONS[type];
   if (!src) return null;
   return (

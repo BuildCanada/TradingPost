@@ -5,30 +5,40 @@ import { PlatformBadge } from "./PlatformBadge";
 
 export function RecentCard({ item }: { item: ContentFeedItem }) {
   const href = itemHref(item);
+  const img = feedImage(item);
+  const hasRealImage = img && img !== "/assets/logos/logo-standard.svg";
+
   const inner = (
-    <div className="h-[90px] bg-border-light border border-border-light relative overflow-hidden">
-      {feedImage(item) && (
+    <div className="min-h-[200px] lg:min-h-[240px] bg-dark border border-border-light relative overflow-hidden group">
+      {img && (
         <Image
-          src={feedImage(item)!}
+          src={img}
           alt={item.title || ""}
           fill
           className={
-            feedImage(item) === "/assets/logos/logo-standard.svg"
-              ? "object-contain p-4"
-              : "object-cover"
+            hasRealImage
+              ? "object-cover opacity-40 group-hover:opacity-30 transition-opacity"
+              : "object-contain p-8 opacity-30"
           }
+          unoptimized
         />
       )}
-      <div className="absolute top-1.5 left-1.5">
+      <div className="absolute top-3 left-3 z-10">
         <PlatformBadge type={item.type} />
       </div>
-      <div className="absolute inset-0 bg-black/30 flex flex-col justify-end p-2">
-        <p className="text-white type-caption font-bold leading-tight line-clamp-2">
+      <div className="absolute inset-0 flex flex-col justify-end p-5 lg:p-6">
+        <h3 className="font-display text-[1.125rem] lg:text-[1.25rem] font-normal leading-[1.2] text-bg group-hover:text-white transition-colors line-clamp-3">
           {item.title}
-        </p>
+        </h3>
+        {item.subtitle && (
+          <p className="type-default text-bg/70 mt-1.5 line-clamp-2">
+            {item.subtitle}
+          </p>
+        )}
       </div>
     </div>
   );
+
   if (!href) return inner;
   return (
     <Link

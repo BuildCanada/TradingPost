@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import SectionLabel from "@/components/SectionLabel";
 import {
   type ContentFeedItem,
@@ -12,15 +13,32 @@ import {
   EmptyState,
   GreatBuildersSection,
   TYPE_MAP,
+  FILTERS,
   POSTS_PER_PAGE,
 } from "@/components/content";
+
+const VALID_FILTERS = new Set<string>(FILTERS);
+
+function updateUrl(filter: string) {
+  const url = new URL(window.location.href);
+  if (filter === "All") {
+    url.searchParams.delete("filter");
+  } else {
+    url.searchParams.set("filter", filter);
+  }
+  window.history.replaceState(null, "", url.toString());
+}
 
 export default function ContentFeedClient({
   items,
 }: {
   items: ContentFeedItem[];
 }) {
-  const [activeFilter, setActiveFilter] = useState("All");
+  const searchParams = useSearchParams();
+  const [activeFilter, setActiveFilter] = useState(() => {
+    const param = searchParams.get("filter");
+    return param && VALID_FILTERS.has(param) ? param : "All";
+  });
   const [allPostsPage, setAllPostsPage] = useState(0);
 
   const featuredItem = items.find((i) => i.featured);
@@ -56,6 +74,7 @@ export default function ContentFeedClient({
           onSelect={(f) => {
             setActiveFilter(f);
             setAllPostsPage(0);
+            updateUrl(f);
           }}
         />
       </div>

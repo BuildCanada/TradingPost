@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { fetchMemo, fetchMemos, getSiteConfig } from "@/lib/api";
 import { TwitterEmbed, MemoSubscribe, RelatedMemos } from "./MemoClientParts";
+import { AuthorCard } from "./AuthorCard";
 import { ShareSection } from "@/components/share";
 import { buildGraph } from "@/lib/schemas/graph";
 import { generateArticleSchema } from "@/lib/schemas/generators/article";
@@ -119,28 +120,18 @@ export default async function MemoDetailPage({
   const sameCategory = allMemos.filter(
     (m) => m.slug !== memo.slug && memo.category && m.category === memo.category,
   );
-  const relatedMemos = sameCategory.length > 0
+  const hasSameCategory = sameCategory.length > 0;
+  const relatedMemos = hasSameCategory
     ? sameCategory.slice(0, 2)
     : allMemos.filter((m) => m.slug !== memo.slug).slice(0, 2);
+  const relatedCategory = hasSameCategory ? memo.category : null;
 
   const sidebar = (
     <div className="space-y-5">
-      <ShareSection
-        title={memo.title}
-        description={memo.keyMessage1}
-        image={memo.seoImage || memo.splashImage || undefined}
-        url={fullUrl}
-      />
+      <ShareSection title={memo.title} url={fullUrl} />
       <MemoSubscribe />
-      <RelatedMemos related={relatedMemos} />
-      {memo.twitterEmbed && (
-        <div>
-          <h2 className="type-label text-text-secondary block mb-3 m-0">
-            Embedded Post
-          </h2>
-          <TwitterEmbed html={memo.twitterEmbed} />
-        </div>
-      )}
+      {memo.twitterEmbed && <TwitterEmbed html={memo.twitterEmbed} />}
+      <RelatedMemos related={relatedMemos} category={relatedCategory} />
     </div>
   );
 
@@ -151,8 +142,50 @@ export default async function MemoDetailPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
+      {/* Print-only header: Build Canada branding + memo meta */}
+      <div className="print-only mb-10 pb-5 border-b border-black">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-2">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/assets/logos/sticker-build-canada-logo.webp"
+              alt="Build Canada"
+              width={32}
+              height={32}
+              className="w-8 h-8"
+            />
+            <span className="type-label font-semibold tracking-wider">Build Canada</span>
+          </div>
+          <span className="type-label break-all text-right">
+            {fullUrl.replace(/^https?:\/\//, "")}
+          </span>
+        </div>
+        <h1 className="type-title mb-4">{memo.title}</h1>
+        <div className="flex items-center gap-4">
+          {authorImage && (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img
+              src={authorImage}
+              alt={memo.author.name}
+              width={56}
+              height={56}
+              className="w-14 h-14 object-cover shrink-0"
+            />
+          )}
+          <div className="min-w-0">
+            <p className="type-label font-medium m-0">{memo.author.name}</p>
+            {memo.author.title && (
+              <p className="type-label text-text-secondary m-0 mt-0.5">
+                {memo.author.title}
+              </p>
+            )}
+            <p className="type-label text-text-secondary m-0 mt-0.5">{date}</p>
+          </div>
+        </div>
+      </div>
+
       {memo.splashImage && (
-        <div className="animate-fade-in relative h-[45svh] md:h-[65svh] flex items-end overflow-hidden">
+        <div className="animate-fade-in relative h-[45svh] md:h-[65svh] flex items-end overflow-hidden print-hide">
           <Image
             src={memo.splashImage}
             alt=""
@@ -178,38 +211,19 @@ export default async function MemoDetailPage({
               All Memos
             </Link>
 
-            {memo.category && (
-              <div className="flex items-center gap-2 mb-3">
-                 <span className="type-label text-white/70">Category</span>
-                <span className="inline-block type-label text-dark bg-white/80 rounded-full px-3 py-0.5">
-                  {memo.category.replace(/-/g, " ")}
-                </span>
-              </div>
-            )}
-
-            <h1 className="type-title text-white mb-4 max-w-[720px]">
+            <h1 className="type-title text-white mb-6 max-w-[720px]">
               {memo.title}
             </h1>
 
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-none bg-white/20 overflow-hidden shrink-0">
-                {authorImage && (
-                  <Image
-                    src={authorImage}
-                    alt={memo.author.name}
-                    width={40}
-                    height={40}
-                    className="w-full h-full object-cover"
-                    unoptimized
-                    priority
-                  />
-                )}
-              </div>
-              <div>
-                <p className="type-label font-medium text-white">{memo.author.name}</p>
-                 <p className="type-label text-white/70">{date}</p>
-              </div>
-            </div>
+            <AuthorCard
+              name={memo.author.name}
+              photo={authorImage}
+              title={memo.author.title}
+              date={date}
+              xUrl={memo.author.xUrl}
+              linkedinUrl={memo.author.linkedinUrl}
+              variant="dark"
+            />
           </div>
         </div>
       )}
@@ -220,7 +234,7 @@ export default async function MemoDetailPage({
             <>
                <Link
                 href="/memos"
-                className="type-label text-text-secondary hover:text-dark transition-colors flex items-center gap-1.5 mb-6 py-1"
+                className="print-hide type-label text-text-secondary hover:text-dark transition-colors flex items-center gap-1.5 mb-6 py-1"
               >
                 <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
                   <path
@@ -234,35 +248,17 @@ export default async function MemoDetailPage({
                 All Memos
               </Link>
 
-              {memo.category && (
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="type-label text-text-muted">Category</span>
-                  <span className="inline-block type-label text-bg bg-dark rounded-full px-3 py-0.5">
-                    {memo.category.replace(/-/g, " ")}
-                  </span>
-                </div>
-              )}
+              <h1 className="type-title mb-6 print-hide">{memo.title}</h1>
 
-              <h1 className="type-title mb-4">{memo.title}</h1>
-
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-none bg-border-light overflow-hidden shrink-0">
-                  {authorImage && (
-                    <Image
-                      src={authorImage}
-                      alt={memo.author.name}
-                      width={40}
-                      height={40}
-                      className="w-full h-full object-cover"
-                      unoptimized
-                      priority
-                    />
-                  )}
-                </div>
-                <div>
-                  <p className="type-label font-medium">{memo.author.name}</p>
-                  <p className="type-label text-text-secondary">{date}</p>
-                </div>
+              <div className="mb-8 print-hide">
+                <AuthorCard
+                  name={memo.author.name}
+                  photo={authorImage}
+                  title={memo.author.title}
+                  date={date}
+                  xUrl={memo.author.xUrl}
+                  linkedinUrl={memo.author.linkedinUrl}
+                />
               </div>
             </>
           )}
@@ -270,10 +266,10 @@ export default async function MemoDetailPage({
           {memo.supporters && (
             <div className="mb-6 pb-6 border-b border-border-light">
               <span className="type-label text-text-secondary block mb-2">
-                Supporters
+                Supported By
               </span>
               <div
-                className="prose-bc [&_p]:text-[15px] [&_p]:leading-[1.5]"
+                className="memo-supporters"
                 dangerouslySetInnerHTML={{ __html: memo.supporters }}
               />
             </div>
@@ -305,12 +301,12 @@ export default async function MemoDetailPage({
             dangerouslySetInnerHTML={{ __html: memo.body }}
           />
 
-          <div className="2xl-memo:hidden mt-10 pt-8 border-t border-border-light">
+          <div className="print-hide 2xl-memo:hidden mt-10 pt-8 border-t border-border-light">
             {sidebar}
           </div>
         </article>
 
-        <aside className="hidden 2xl-memo:block w-[400px] shrink-0 px-[50px] sticky top-[70px] self-start max-h-[calc(100vh-90px)] overflow-y-auto">
+        <aside className="print-hide hidden 2xl-memo:block w-[400px] shrink-0 px-[50px] sticky top-[70px] self-start max-h-[calc(100vh-90px)] overflow-y-auto">
           {sidebar}
         </aside>
       </div>

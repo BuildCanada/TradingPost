@@ -1,5 +1,11 @@
 import { apiFetch } from "./client";
-import type { YFMemo, YFMemoDetail, YFPaginatedResponse } from "./types";
+import type {
+  YFListResponse,
+  YFMemo,
+  YFMemoDetail,
+  YFPaginatedResponse,
+  YFTeamMember,
+} from "./types";
 
 interface MemoSerialized {
   id: string;
@@ -79,19 +85,35 @@ export async function fetchMemo(slug: string) {
   const m = await apiFetch<YFMemoDetail>(`/memos/${slug}`, { revalidate: 300 });
   const keyMessages = extractKeyMessages((m.key_messages ?? []) as unknown[]);
   const authorName = m.author?.name ?? "Build Canada";
+  const authorSlug = m.author?.slug ?? "";
+
+  // The memo endpoint doesn't expose author title or socials — look them up via
+  // the team endpoint by slug when available.
+  let teamProfile: YFTeamMember | undefined;
+  if (authorSlug) {
+    try {
+      const team = await apiFetch<YFListResponse<YFTeamMember>>("/team", {
+        revalidate: 3600,
+      });
+      teamProfile = team.data.find((t) => t.slug === authorSlug);
+    } catch {
+      teamProfile = undefined;
+    }
+  }
+
   return {
     id: String(m.id),
     title: m.title,
     slug: m.slug,
     author: {
       name: authorName,
-      slug: m.author?.slug ?? "",
+      slug: authorSlug,
       photo: authorName === "Build Canada" ? "/assets/logos/Logocircle.webp" : (m.author?.profile_photo_url ?? null),
-      title: m.author_title,
+      title: m.author_title ?? teamProfile?.title ?? null,
       bio: null as string | null,
       websiteUrl: null as string | null,
-      xUrl: null as string | null,
-      linkedinUrl: null as string | null,
+      xUrl: teamProfile?.twitter_url ?? null,
+      linkedinUrl: teamProfile?.linkedin_url ?? null,
     },
     keyMessage1: keyMessages[0] ?? null,
     keyMessage2: keyMessages[1] ?? null,

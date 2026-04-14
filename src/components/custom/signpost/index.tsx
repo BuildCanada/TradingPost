@@ -27,7 +27,7 @@ export function Signpost({ headings }: SignpostProps) {
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
-  if (headings.length === 0) return null;
+  if (headings.length === 0) return <div className="hidden 2xl-memo:block" aria-hidden="true" />;
 
   return (
     <SignpostProvider

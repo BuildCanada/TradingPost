@@ -1,11 +1,13 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import Link from "next/link";
 import Image from "next/image";
 import { fetchMemo, fetchMemos, getSiteConfig } from "@/lib/api";
+import { extractHeadings } from "@/lib/extract-headings";
 import { TwitterEmbed, MemoSubscribe, RelatedMemos } from "./MemoClientParts";
 import { AuthorCard } from "./AuthorCard";
 import { ShareSection } from "@/components/share";
+import { MemoHero } from "./MemoHero";
+import { Signpost } from "@/components/custom/signpost";
 import { buildGraph } from "@/lib/schemas/graph";
 import { generateArticleSchema } from "@/lib/schemas/generators/article";
 import { generateBreadcrumbSchema } from "@/lib/schemas/generators/breadcrumb";
@@ -87,6 +89,8 @@ export default async function MemoDetailPage({
 
   const configData = getSiteConfig();
 
+  const fullUrl = `${configData.siteUrl}/memos/${memo.slug}`;
+
   const jsonLd = buildGraph(
     generateOrganizationSchema(configData),
     generateArticleSchema(
@@ -114,8 +118,6 @@ export default async function MemoDetailPage({
     generateBreadcrumbSchema(`/memos/${memo.slug}`, memo.title, configData.siteUrl)
   );
 
-  const fullUrl = `${configData.siteUrl}/memos/${memo.slug}`;
-
   const allMemos = await fetchMemos();
   const sameCategory = allMemos.filter(
     (m) => m.slug !== memo.slug && memo.category && m.category === memo.category,
@@ -134,6 +136,8 @@ export default async function MemoDetailPage({
       <RelatedMemos related={relatedMemos} category={relatedCategory} />
     </div>
   );
+
+  const { headings, html: bodyHtml } = extractHeadings(memo.body);
 
   return (
     <div className="mx-[10px] my-[10px] border border-border-light bg-bg">
@@ -185,7 +189,7 @@ export default async function MemoDetailPage({
       </div>
 
       {memo.splashImage && (
-        <div className="animate-fade-in relative h-[45svh] md:h-[65svh] flex items-end overflow-hidden print-hide">
+        <div className="animate-fade-in relative h-[45svh] md:h-[65svh] overflow-hidden print-hide">
           <Image
             src={memo.splashImage}
             alt=""
@@ -194,101 +198,35 @@ export default async function MemoDetailPage({
             unoptimized
             priority
           />
-          <div className="relative z-10 max-w-[1400px] mx-auto w-full px-5 pb-[40px]">
-             <Link
-              href="/memos"
-              className="type-label text-white/70 hover:text-white transition-colors flex items-center gap-1.5 mb-6 py-1"
-            >
-              <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
-                <path
-                  d="M12 7H3M6 3L2 7l4 4"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-              All Memos
-            </Link>
-
-            <h1 className="type-title text-white mb-6 max-w-[720px]">
-              {memo.title}
-            </h1>
-
-            <AuthorCard
-              name={memo.author.name}
-              photo={authorImage}
-              title={memo.author.title}
-              date={date}
-              xUrl={memo.author.xUrl}
-              linkedinUrl={memo.author.linkedinUrl}
-              variant="dark"
-            />
-          </div>
         </div>
       )}
 
-      <div className="animate-fade-in max-w-[1400px] mx-auto px-5 pt-[42px] pb-[52px] 2xl-memo:flex 2xl-memo:gap-0" style={{ animationDelay: "0.3s" }}>
-        <article className="max-w-[720px] 2xl-memo:flex-1 2xl-memo:min-w-0 2xl-memo:max-w-none 2xl-memo:pr-8">
-          {!memo.splashImage && (
-            <>
-               <Link
-                href="/memos"
-                className="print-hide type-label text-text-secondary hover:text-dark transition-colors flex items-center gap-1.5 mb-6 py-1"
-              >
-                <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
-                  <path
-                    d="M12 7H3M6 3L2 7l4 4"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-                All Memos
-              </Link>
+      <MemoHero
+        category={memo.category}
+        title={memo.title}
+        authorName={memo.author.name}
+        authorImage={authorImage}
+        date={date}
+        supporters={memo.supporters}
+      />
 
-              <h1 className="type-title mb-6 print-hide">{memo.title}</h1>
+      <div
+        className="animate-fade-in max-w-[1400px] mx-auto px-[5vw] md:px-[10vw] pt-[42px] pb-[52px] 2xl-memo:grid 2xl-memo:grid-cols-[240px_minmax(0,1fr)] 2xl-memo:gap-12"
+        style={{ animationDelay: "0.3s" }}
+      >
+        <Signpost headings={headings} />
 
-              <div className="mb-8 print-hide">
-                <AuthorCard
-                  name={memo.author.name}
-                  photo={authorImage}
-                  title={memo.author.title}
-                  date={date}
-                  xUrl={memo.author.xUrl}
-                  linkedinUrl={memo.author.linkedinUrl}
-                />
-              </div>
-            </>
-          )}
-
-          {memo.supporters && (
-            <div className="mb-6 pb-6 border-b border-border-light">
-              <span className="type-label text-text-secondary block mb-2">
-                Supported By
-              </span>
-              <div
-                className="memo-supporters"
-                dangerouslySetInnerHTML={{ __html: memo.supporters }}
-              />
-            </div>
-          )}
-
-          <div className="mb-8 p-5 border-[3px] border-double border-border-light bg-[#f0e5dc] space-y-3">
-            <span className="type-label-sm text-text-secondary block mb-2">
+        <article className="max-w-[720px]" data-memo-content>
+          <div className="mb-8 p-6 border-[3px] border-double border-border-light bg-[#f0e5dc] space-y-4">
+            <span className="type-label block mb-3">
               Key Messages
             </span>
             {keyMessages.map((msg, i) => (
               <div
                 key={i}
-                className={`flex items-start gap-3 ${
-                  i === 0
-                    ? "type-body"
-                    : "type-body text-text-secondary"
-                }`}
+                className="flex items-start gap-4 type-body"
               >
-                <span className="type-label-sm text-text-secondary mt-1.5 shrink-0">
+                <span className="type-label mt-2 shrink-0">
                   {String(i + 1).padStart(2, "0")}
                 </span>
                 <p>{msg}</p>
@@ -298,17 +236,13 @@ export default async function MemoDetailPage({
 
           <div
             className="prose-bc"
-            dangerouslySetInnerHTML={{ __html: memo.body }}
+            dangerouslySetInnerHTML={{ __html: bodyHtml }}
           />
 
           <div className="print-hide 2xl-memo:hidden mt-10 pt-8 border-t border-border-light">
             {sidebar}
           </div>
         </article>
-
-        <aside className="print-hide hidden 2xl-memo:block w-[400px] shrink-0 px-[50px] sticky top-[70px] self-start max-h-[calc(100vh-90px)] overflow-y-auto">
-          {sidebar}
-        </aside>
       </div>
     </div>
   );

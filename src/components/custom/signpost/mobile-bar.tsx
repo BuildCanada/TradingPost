@@ -1,0 +1,81 @@
+"use client";
+
+import { useState } from "react";
+import { cn } from "@/lib/utils";
+import { useSignpost } from "./store";
+import { TocTree } from "./toc-tree";
+
+export function MobileBar() {
+  const {
+    activeText,
+    progress,
+    navigateTo,
+  } = useSignpost();
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div
+      className={cn(
+        "2xl-memo:hidden sticky top-[70px] z-10 border-b transition-colors duration-300",
+        isOpen ? "border-dark bg-dark" : "border-border-light bg-bg",
+      )}
+    >
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={cn(
+          "flex h-11 w-full items-center justify-between px-5 font-sans text-[13px] font-medium transition-colors duration-200",
+          isOpen
+            ? "text-bg hover:text-linen-200"
+            : "text-dark hover:text-accent",
+        )}
+        aria-expanded={isOpen}
+        aria-label="Table of contents"
+      >
+        <span className="truncate pr-4">{activeText}</span>
+        <svg
+          width="12"
+          height="7"
+          viewBox="0 0 12 7"
+          fill="none"
+          className={cn(
+            "shrink-0 transition-transform duration-300",
+            isOpen && "rotate-180",
+          )}
+        >
+          <path
+            d="M1 1L6 6L11 1"
+            stroke="currentColor"
+            strokeWidth="1.25"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+
+      <div className="bg-bg">
+        <div className="h-px bg-charcoal-200">
+          <div
+            className="h-full bg-accent transition-[width] duration-300 ease-out"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+        <div
+          className={cn(
+            "overflow-hidden transition-[max-height] duration-300 ease-out motion-reduce:transition-none",
+            isOpen ? "max-h-[60vh] overflow-y-auto" : "max-h-0",
+          )}
+        >
+          <div className="px-5 py-4">
+            <TocTree
+              showChildren={() => isOpen}
+              onNavigate={(id) => {
+                navigateTo(id);
+                setIsOpen(false);
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

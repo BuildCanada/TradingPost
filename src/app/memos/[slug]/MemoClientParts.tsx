@@ -67,18 +67,18 @@ export function RelatedMemos({
   const heading = displayCategory ? `Other ${displayCategory} Memos` : "Other Memos";
 
   return (
-    <div className="border border-charcoal-300 p-5">
-      <h2 className="type-label text-charcoal-600 block mb-3 m-0">
+    <div className="border border-border-light p-6">
+      <h2 className="type-label text-text-secondary mb-4">
         {heading}
       </h2>
-      <div className="space-y-3">
+      <div className="space-y-4">
         {related.map((m) => (
           <Link
             key={m.id}
             href={`/memos/${m.slug}`}
             className="flex items-start gap-3 group"
           >
-            <div className="w-8 h-8 rounded-none bg-charcoal-300 overflow-hidden shrink-0 mt-0.5">
+            <div className="w-8 h-8 bg-border-light overflow-hidden shrink-0 mt-0.5">
               {m.author.photo && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -92,7 +92,7 @@ export function RelatedMemos({
               <h3 className="type-caption font-sans font-medium leading-[1.3] group-hover:text-auburn-800 transition-colors line-clamp-2">
                 {m.title}
               </h3>
-              <p className="type-label-sm text-charcoal-600 mt-0.5">
+              <p className="type-label-sm text-text-secondary mt-1">
                 {m.author.name}
               </p>
             </div>

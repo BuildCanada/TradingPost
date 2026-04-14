@@ -68,7 +68,7 @@ export function MemoHero({
       </div>
 
       {supporters && (
-        <div className="pb-6 border-b border-border-light">
+        <div className="pb-6">
           <span className="type-label text-text-secondary block mb-2">
             Supporters
           </span>
@@ -78,6 +78,8 @@ export function MemoHero({
           />
         </div>
       )}
+
+      <div className="border-b border-border-light" />
     </div>
   );
 }

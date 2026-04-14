@@ -24,7 +24,9 @@ export function Signpost({ headings }: SignpostProps) {
 
   const navigateTo = useCallback((id: string) => {
     const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (!el) return;
+    const y = el.getBoundingClientRect().top + window.scrollY - 120;
+    window.scrollTo({ top: y, behavior: "smooth" });
   }, []);
 
   if (headings.length === 0) return <div className="hidden 2xl-memo:block" aria-hidden="true" />;

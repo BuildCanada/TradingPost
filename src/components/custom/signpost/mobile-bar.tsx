@@ -69,8 +69,8 @@ export function MobileBar() {
             <TocTree
               showChildren={() => isOpen}
               onNavigate={(id) => {
-                navigateTo(id);
                 setIsOpen(false);
+                setTimeout(() => navigateTo(id), 350);
               }}
             />
           </div>

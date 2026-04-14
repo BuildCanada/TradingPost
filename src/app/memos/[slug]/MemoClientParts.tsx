@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { SubscribeButton } from "@/components/ui/subscribe-button";
 
 /* ─── Twitter Embed ─── */
 
@@ -35,27 +35,9 @@ export function TwitterEmbed({ html }: { html: string }) {
 
 export function MemoSubscribe() {
   return (
-    <div className="border border-charcoal-300 p-5">
-      <h2 className="type-label text-charcoal-600 block mb-2 m-0">
-        Subscribe
-      </h2>
-      <p className="type-body text-charcoal-600 mb-3">
-        Stay informed on bold ideas for Canada.
-      </p>
-      <form
-        className="flex flex-col gap-2.5"
-        onSubmit={(e) => e.preventDefault()}
-      >
-        <input
-          type="email"
-          placeholder="Email"
-           className="border border-charcoal-300 bg-transparent px-3 py-3.5 type-caption placeholder:text-charcoal-400 outline-none focus:border-charcoal-1000 transition-colors"
-        />
-        <Button as="button" type="submit" className="self-start">
-          Subscribe
-        </Button>
-      </form>
-    </div>
+    <SubscribeButton variant="primary" source="inline" className="w-full">
+      Subscribe
+    </SubscribeButton>
   );
 }
 
@@ -72,13 +54,22 @@ interface RelatedMemo {
   category: string | null;
 }
 
-export function RelatedMemos({ related }: { related: RelatedMemo[] }) {
+export function RelatedMemos({
+  related,
+  category,
+}: {
+  related: RelatedMemo[];
+  category: string | null;
+}) {
   if (related.length === 0) return null;
+
+  const displayCategory = category ? category.replace(/-/g, " ").toUpperCase() : null;
+  const heading = displayCategory ? `Other ${displayCategory} Memos` : "Other Memos";
 
   return (
     <div className="border border-charcoal-300 p-5">
       <h2 className="type-label text-charcoal-600 block mb-3 m-0">
-        Related Memos
+        {heading}
       </h2>
       <div className="space-y-3">
         {related.map((m) => (

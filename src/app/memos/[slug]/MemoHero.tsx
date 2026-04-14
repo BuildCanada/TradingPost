@@ -36,15 +36,6 @@ export function MemoHero({
         All Memos
       </Link>
 
-      {category && (
-        <div className="flex items-center gap-2 mb-3">
-          <span className="type-label text-text-secondary">Category</span>
-          <span className="inline-block type-label text-bg bg-dark rounded-full px-3 py-0.5">
-            {category.replace(/-/g, " ")}
-          </span>
-        </div>
-      )}
-
       <h1 className="type-title mb-4 max-w-[720px]">{title}</h1>
 
       <div className="flex items-center gap-5 mb-6">
@@ -79,7 +70,6 @@ export function MemoHero({
         </div>
       )}
 
-      <div className="border-b border-border-light" />
     </div>
   );
 }

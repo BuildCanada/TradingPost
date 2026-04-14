@@ -6,6 +6,7 @@ const ROLE_MAP: Record<string, string> = {
   board: "BOARD",
   advisor: "ADVISOR",
   volunteer: "CORE",
+  employee: "CORE",
 };
 
 interface TeamMemberSerialized {
@@ -36,9 +37,12 @@ function mapTeamMember(m: YFTeamMember): TeamMemberSerialized {
   };
 }
 
-export async function fetchTeamMembers(role?: string): Promise<TeamMemberSerialized[]> {
+export async function fetchTeamMembers(
+  opts?: { role?: string; excludeRole?: string },
+): Promise<TeamMemberSerialized[]> {
   const params: Record<string, string> = {};
-  if (role) params.role = role;
+  if (opts?.role) params.role = opts.role;
+  if (opts?.excludeRole) params.exclude_role = opts.excludeRole;
 
   const res = await apiFetch<YFListResponse<YFTeamMember>>("/team", {
     params,

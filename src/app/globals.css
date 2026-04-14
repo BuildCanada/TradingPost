@@ -314,6 +314,22 @@ body {
   @apply text-accent underline;
 }
 
+.prose-bc a:has(> sup) {
+  text-decoration: none;
+}
+
+.prose-bc a:has(> sup)::before {
+  content: "[";
+  font-size: 0.7em;
+  vertical-align: super;
+}
+
+.prose-bc a:has(> sup)::after {
+  content: "]";
+  font-size: 0.7em;
+  vertical-align: super;
+}
+
 .prose-bc code {
   @apply type-mono;
   font-size: 0.9em;

@@ -13,7 +13,7 @@ import { generateReviewSchema } from "@/lib/schemas/generators/review";
 
 export default async function AboutPage() {
   const [people, testimonials, qandaItems] = await Promise.all([
-    fetchTeamMembers("team"),
+    fetchTeamMembers({ excludeRole: "memo_author" }),
     fetchTestimonials(),
     fetchFaqs(),
   ]);

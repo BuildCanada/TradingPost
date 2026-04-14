@@ -256,6 +256,11 @@ body {
   margin-bottom: 0.6em;
 }
 
+.prose-bc h2,
+.prose-bc h3 {
+  scroll-margin-top: 80px;
+}
+
 .prose-bc h2 {
   @apply type-h2;
   margin-top: 1.8em;

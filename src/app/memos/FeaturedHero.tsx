@@ -97,8 +97,8 @@ export default function FeaturedHero({ memos }: { memos: MemoItem[] }) {
           </div>
           {latestSix.length > 0 && (
             <div className="grid grid-cols-1 cards:grid-cols-2 wide:grid-cols-3 gap-0 border-t border-border-light">
-              {latestSix.map((m, i) => (
-                <PickCard key={m.id} memo={m} isLatest={i === 0} />
+              {latestSix.map((m) => (
+                <PickCard key={m.id} memo={m} />
               ))}
             </div>
           )}

@@ -1,5 +1,6 @@
 import { fetchFaqs, fetchTeamMembers, getSiteConfig } from "@/lib/api";
 import SectionLabel from "@/components/SectionLabel";
+import { Button } from "@/components/ui/button";
 import TeamBlock from "./TeamBlock";
 import QnaBlock from "./QnaBlock";
 import QuickLinks from "./QuickLinks";
@@ -44,13 +45,9 @@ export default async function AboutPage() {
           <p className="type-body max-w-[600px] text-dark/70">
             Build Canada publishes bold policy research and builds transparency tools to make Canada the most prosperous country in the world.
           </p>
-          <div className="flex gap-6 mt-6">
-            <a href="/memos/build-canada-founding-memo" className="type-label text-auburn-800 hover:text-accent transition-colors">
-              Read the Founding Memo
-            </a>
-            <a href="#" className="type-label text-auburn-800 hover:text-accent transition-colors">
-              Read our Constitution
-            </a>
+          <div className="flex flex-wrap gap-4 mt-6">
+            <Button href="/memos/build-canada-founding-memo">Read the Founding Memo</Button>
+            <Button href="#">Read our Constitution</Button>
           </div>
         </div>
       </section>

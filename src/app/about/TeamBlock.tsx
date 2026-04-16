@@ -22,20 +22,16 @@ export default function TeamBlock({ members }: { members: Person[] }) {
             return (
               <div key={key} id={id}>
                 <h3 className="type-h4 text-dark mb-4">{label}</h3>
-                <div className="flex flex-wrap pl-px pt-px">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   {group.map((m) => (
-                    <div
-                      key={m.id}
-                      className="basis-1/2 sm:basis-1/3 lg:basis-1/4 flex-grow"
-                    >
-                      <PersonCard
+                    <PersonCard
+                        key={m.id}
                         name={m.name}
                         title={m.title}
                         photo={m.photo}
                         xUrl={m.xUrl}
                         linkedinUrl={m.linkedinUrl}
-                      />
-                    </div>
+                    />
                   ))}
                 </div>
               </div>

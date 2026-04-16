@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { useSubscribeStore } from "@/components/subscribe/store";
 import { SOCIALS } from "@/constants/socials";
+import { NAV_LINKS } from "@/constants/nav-links";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -53,44 +54,27 @@ export default function Navbar() {
 
       {/* Desktop links */}
       <div className="hidden md:flex items-stretch">
-        <Link
-          href="/"
-          className="flex items-center px-5 border-l border-border type-label text-dark hover:bg-dark hover:text-bg transition-colors"
-        >
-          Home
-        </Link>
-        <Link
-          href="/memos"
-          className="flex items-center px-5 border-l border-border type-label text-dark hover:bg-dark hover:text-bg transition-colors"
-        >
-          Memos
-        </Link>
-        <Link
-          href="/content"
-          className="flex items-center px-5 border-l border-border type-label text-dark hover:bg-dark hover:text-bg transition-colors"
-        >
-          Content
-        </Link>
-        <Link
-          href="/projects"
-          className="flex items-center px-5 border-l border-border type-label text-dark hover:bg-dark hover:text-bg transition-colors"
-        >
-          Projects
-        </Link>
-        <Link
-          href="/about"
-          className="flex items-center px-5 border-l border-border type-label text-dark hover:bg-dark hover:text-bg transition-colors"
-        >
-          About Us
-        </Link>
-        <a
-          href="https://shop.buildcanada.com"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center px-5 border-l border-border type-label text-dark hover:bg-dark hover:text-bg transition-colors"
-        >
-          Shop
-        </a>
+        {NAV_LINKS.map((link) =>
+          link.external ? (
+            <a
+              key={link.label}
+              href={link.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center px-5 border-l border-border type-label text-dark hover:bg-dark hover:text-bg transition-colors"
+            >
+              {link.label}
+            </a>
+          ) : (
+            <Link
+              key={link.label}
+              href={link.href}
+              className="flex items-center px-5 border-l border-border type-label text-dark hover:bg-dark hover:text-bg transition-colors"
+            >
+              {link.label}
+            </Link>
+          )
+        )}
       </div>
 
       {/* Desktop right: social icons + subscribe */}
@@ -142,51 +126,30 @@ export default function Navbar() {
       >
         <div className="overflow-hidden">
           <div className="flex flex-col bg-bg border-y border-border">
-            <Link
-              href="/"
-               className="px-5 py-5 border-b border-border-light type-label text-dark hover:bg-dark hover:text-bg transition-colors"
-               onClick={() => setMenuOpen(false)}
-             >
-               Home
-             </Link>
-             <Link
-               href="/memos"
-               className="px-5 py-5 border-b border-border-light type-label text-dark hover:bg-dark hover:text-bg transition-colors"
-               onClick={() => setMenuOpen(false)}
-             >
-               Memos
-             </Link>
-             <Link
-               href="/content"
-               className="px-5 py-5 border-b border-border-light type-label text-dark hover:bg-dark hover:text-bg transition-colors"
-               onClick={() => setMenuOpen(false)}
-             >
-               Content
-             </Link>
-             <Link
-               href="/projects"
-               className="px-5 py-5 border-b border-border-light type-label text-dark hover:bg-dark hover:text-bg transition-colors"
-               onClick={() => setMenuOpen(false)}
-             >
-               Projects
-             </Link>
-             <Link
-               href="/about"
-               className="px-5 py-5 border-b border-border-light type-label text-dark hover:bg-dark hover:text-bg transition-colors"
-               onClick={() => setMenuOpen(false)}
-             >
-               About Us
-             </Link>
-             <a
-               href="https://shop.buildcanada.com"
-               target="_blank"
-               rel="noopener noreferrer"
-               className="px-5 py-5 border-b border-border-light type-label text-dark hover:bg-dark hover:text-bg transition-colors"
-              onClick={() => setMenuOpen(false)}
-            >
-              Shop
-            </a>
-             <button
+            {NAV_LINKS.map((link) =>
+              link.external ? (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-5 py-5 border-b border-border-light type-label text-dark hover:bg-dark hover:text-bg transition-colors"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {link.label}
+                </a>
+              ) : (
+                <Link
+                  key={link.label}
+                  href={link.href}
+                  className="px-5 py-5 border-b border-border-light type-label text-dark hover:bg-dark hover:text-bg transition-colors"
+                  onClick={() => setMenuOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              )
+            )}
+            <button
                 className="px-5 py-5 bg-dark type-label text-bg text-left cursor-pointer"
               onClick={() => {
                 setMenuOpen(false);

@@ -3,6 +3,7 @@ import Image from "next/image";
 import { getSiteConfig } from "@/lib/api";
 import SectionLabel from "@/components/SectionLabel";
 import ProjectsGrid from "@/components/ProjectsGrid";
+import { SectionHeader } from "@/components/ui/section-header";
 import { buildGraph } from "@/lib/schemas/graph";
 import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
 import { generateBreadcrumbSchema } from "@/lib/schemas/generators/breadcrumb";
@@ -57,13 +58,10 @@ export default async function ProjectsPage() {
       </div>
 
       <div className="animate-fade-in" style={{ animationDelay: "0.4s" }}>
-      <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px]">
+      <section className="px-5 py-12">
         <div className="max-w-[1080px] mx-auto">
-          <h2 className="type-label text-text-secondary mb-3">Featured</h2>
-          <ProjectsGrid filter="featured" excludeSlugs={["great-builders"]} />
-
-          <h2 className="type-label text-text-secondary mb-3 mt-8">All Projects</h2>
-          <ProjectsGrid filter="non-featured" excludeSlugs={["great-builders"]} />
+          <SectionHeader label="Projects" />
+          <ProjectsGrid excludeSlugs={["great-builders"]} />
         </div>
       </section>
       </div>

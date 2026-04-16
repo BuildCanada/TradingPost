@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import Image from "next/image";
 import { fetchMemos, getSiteConfig } from "@/lib/api";
 import SectionLabel from "@/components/SectionLabel";
 import MemosListClient from "./MemosListClient";
@@ -41,24 +40,17 @@ export default async function MemosPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="animate-fade-in" style={{ animationDelay: "0s" }}>
-        <section className="relative px-5 h-[45svh] md:h-[65svh] flex flex-col justify-center border-b border-border-light overflow-hidden">
-          <Image
-            src="/assets/images/build-canada-founder-meetup-shopify.webp"
-            alt="Harley Finkelstein and Lucy Hargreaves speaking at Shopify HQ on Build Canada and the future of Canada"
-            fill
-            className="object-cover brightness-[0.35]"
-            priority
-          />
-          <div className="relative max-w-[1080px] mx-auto w-full">
-            <SectionLabel className="text-white/70">Memos</SectionLabel>
-            <h1 className="type-title mb-1 text-white">Ideas for a Better Canada</h1>
-            <p className="type-body text-white/70">
-              Bold thinking from Canada&apos;s leading builders and doers.
-            </p>
-          </div>
-        </section>
-      </div>
+      <section className="px-5 pt-[120px] pb-[100px] md:pt-[140px] md:pb-[120px] border-b border-border-light">
+        <div className="max-w-[1080px] mx-auto">
+          <SectionLabel as="h2">Memos</SectionLabel>
+          <h1 className="type-display mt-4 mb-6 text-dark">
+            Ideas for a Better Canada
+          </h1>
+          <p className="type-body max-w-[600px] text-dark/70">
+            Bold thinking from Canada&apos;s leading builders and doers.
+          </p>
+        </div>
+      </section>
 
       <Suspense>
         <MemosListClient memos={serialized} />

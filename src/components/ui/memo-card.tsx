@@ -14,6 +14,8 @@ export interface Memo {
   category?: string | null;
   splashImage?: string | null;
   seoImage?: string | null;
+  publishedAt?: string | null;
+  createdAt?: string;
 }
 
 export function formatCategory(category: string | null | undefined): string {
@@ -22,6 +24,16 @@ export function formatCategory(category: string | null | undefined): string {
     .split('-')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
+}
+
+function formatDate(dateStr: string | null | undefined, fallback?: string): string {
+  const d = new Date(dateStr || fallback || '');
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleDateString("en-CA", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
 }
 
 interface CardCTAProps {
@@ -65,7 +77,6 @@ function CardCTA({ variant = 'light' }: CardCTAProps) {
 interface MemoCardProps {
   memo: Memo;
   variant?: 'light' | 'dark' | 'featured';
-  isLatest?: boolean;
   showLabel?: string;
   priority?: boolean;
   gridItem?: boolean;
@@ -74,7 +85,6 @@ interface MemoCardProps {
 export function MemoCard({ 
   memo, 
   variant = 'light', 
-  isLatest = false,
   showLabel,
   priority = false,
   gridItem = false,
@@ -106,12 +116,6 @@ export function MemoCard({
       isDark ? "top-4 left-4 lg:top-5 lg:left-5" : "top-4 right-4"
     )}>
       {showLabel}
-    </span>
-  ) : null;
-
-  const latestEl = isLatest && !isDark ? (
-    <span className="type-label-sm bg-dark text-bg px-2 py-1">
-      Latest
     </span>
   ) : null;
 
@@ -148,6 +152,14 @@ export function MemoCard({
         )}>
           {formatCategory(memo.category)}
         </p>
+        {formatDate(memo.publishedAt, memo.createdAt) && (
+          <p className={cn(
+            "type-label-sm mt-0.5",
+            isDark ? "text-bg/50" : "text-text-secondary"
+          )}>
+            {formatDate(memo.publishedAt, memo.createdAt)}
+          </p>
+        )}
       </div>
     </div>
   );
@@ -162,7 +174,7 @@ export function MemoCard({
         {labelEl}
         <div className="relative z-10 flex flex-col">
           <div className="p-8 lg:p-12 flex flex-col gap-5">
-            <h3 className="font-display text-[1.75rem] lg:text-[2.25rem] font-normal leading-[1.15] text-bg group-hover:text-white transition-colors line-clamp-3">
+            <h3 className="font-display text-[1.75rem] lg:text-[2.25rem] font-medium leading-[1.15] text-bg group-hover:text-white transition-colors line-clamp-3">
               {memo.title}
             </h3>
             {memo.keyMessage1 && (
@@ -193,7 +205,7 @@ export function MemoCard({
       {isDark ? (
         <div className="relative z-10 flex flex-col">
           <div className="p-8 lg:p-10 flex flex-col gap-4">
-            <h3 className="font-display text-[1.5rem] lg:text-[1.75rem] font-normal leading-[1.2] text-bg group-hover:text-white transition-colors line-clamp-3">
+            <h3 className="font-display text-[1.5rem] lg:text-[1.75rem] font-medium leading-[1.2] text-bg group-hover:text-white transition-colors line-clamp-3">
               {memo.title}
             </h3>
             {memo.keyMessage1 && (
@@ -208,11 +220,8 @@ export function MemoCard({
       ) : (
         <>
           <div className="p-6 lg:p-8 flex flex-col gap-4 flex-1">
-            {latestEl && (
-              <div className="flex justify-end">{latestEl}</div>
-            )}
             <div className="min-w-0">
-              <h3 className="font-display text-[1.125rem] lg:text-[1.25rem] font-normal leading-[1.2] tracking-normal group-hover:text-accent transition-colors line-clamp-2">
+              <h3 className="font-display text-[1.125rem] lg:text-[1.25rem] font-medium leading-[1.2] tracking-normal group-hover:text-accent transition-colors line-clamp-2">
                 {memo.title}
               </h3>
               {memo.keyMessage1 && (
@@ -243,6 +252,11 @@ export function MemoCard({
                 <p className="type-label text-text-secondary mt-0.5">
                   {formatCategory(memo.category)}
                 </p>
+                {formatDate(memo.publishedAt, memo.createdAt) && (
+                  <p className="type-label-sm text-text-secondary mt-0.5">
+                    {formatDate(memo.publishedAt, memo.createdAt)}
+                  </p>
+                )}
               </div>
             </div>
           </div>

@@ -33,7 +33,7 @@ export function PersonCard({ name, title, photo, xUrl, linkedinUrl }: PersonCard
   const hasLinks = xUrl || linkedinUrl;
 
   return (
-    <div className="border border-border-light p-6 grid min-h-[220px] sm:min-h-[280px] lg:min-h-[340px] [grid-template-areas:'image_name_name''image_title_title''image_contacts_contacts'] [grid-template-columns:1fr_1fr_auto] [grid-template-rows:auto_auto_1fr]">
+    <div className="border border-border-light p-6 grid min-h-[160px] sm:min-h-[200px] lg:min-h-[240px] [grid-template-areas:'image_name_name''image_title_title''image_contacts_contacts'] [grid-template-columns:1fr_1fr_auto] [grid-template-rows:auto_auto_1fr]">
       <div className="[grid-area:image] relative overflow-hidden border-r border-border-light -m-6 mr-6">
         {photo ? (
           <Image
@@ -41,15 +41,15 @@ export function PersonCard({ name, title, photo, xUrl, linkedinUrl }: PersonCard
             alt={name}
             width={220}
             height={220}
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover object-top"
           />
         ) : (
           <MaplePlaceholder />
         )}
       </div>
-      <p className="type-h4 leading-tight [grid-area:name]">{name}</p>
+      <p className="type-h3 leading-tight [grid-area:name]">{name}</p>
       {title && (
-        <p className="type-body-sm text-text-secondary mt-0.5 mb-5 [grid-area:title]">{title}</p>
+        <p className="font-body text-[1.15rem] leading-[1.5] text-text-secondary mt-0.5 mb-5 [grid-area:title]">{title}</p>
       )}
       {hasLinks && (
         <div className="flex items-end gap-1 [grid-area:contacts]">

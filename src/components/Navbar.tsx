@@ -44,6 +44,7 @@ export default function Navbar() {
         <span
           className="absolute inset-0 flex items-center justify-center text-2xl transition-opacity duration-500 pointer-events-none"
           style={{ opacity: showEmoji ? 1 : 0 }}
+          aria-hidden="true"
         >
           🏗️🇨🇦
         </span>

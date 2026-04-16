@@ -33,7 +33,7 @@ export function PersonCard({ name, title, photo, xUrl, linkedinUrl }: PersonCard
   const hasLinks = xUrl || linkedinUrl;
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col border border-border-light p-6 -ml-px -mt-px">
       {photo ? (
         <div className="w-full aspect-square overflow-hidden border border-border-light">
           <Image

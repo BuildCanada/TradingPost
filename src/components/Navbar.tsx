@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import { useSubscribeStore } from "@/components/subscribe/store";
+import { SOCIALS } from "@/constants/socials";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -95,16 +96,9 @@ export default function Navbar() {
       {/* Desktop right: social icons + subscribe */}
       <div className="hidden md:flex items-center ml-auto">
         <div className="hidden lg:flex items-center gap-1.5 px-4">
-          {[
-            { icon: "X", href: "https://x.com/build_canada", file: "platform-x-twitter" },
-            { icon: "LINKEDIN", href: "https://www.linkedin.com/company/buildcanada", file: "platform-linkedin" },
-            { icon: "TIKTOK", href: "https://www.tiktok.com/@build_canada", file: "platform-tiktok" },
-            { icon: "IG", href: "https://www.instagram.com/build_canada/", file: "platform-instagram" },
-            { icon: "SUBSTACK", href: "https://buildcanada.substack.com/", file: "substack-icon" },
-            { icon: "YOUTUBE", href: "https://www.youtube.com/@BuildCanada", file: "platform-youtube" },
-          ].map(({ icon, href, file }) => (
+          {SOCIALS.map(({ href, label, iconFile }) => (
             <a
-              key={icon}
+              key={label}
               href={href}
               target="_blank"
               rel="noopener noreferrer"
@@ -112,8 +106,8 @@ export default function Navbar() {
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={`/assets/icons/${file}.svg`}
-                alt={icon}
+                src={`/assets/icons/${iconFile}.svg`}
+                alt={label}
                 width={14}
                 height={14}
                 className="brightness-0 opacity-40 group-hover:opacity-80 transition-opacity"

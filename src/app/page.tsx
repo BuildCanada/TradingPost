@@ -1,6 +1,5 @@
 import Image from "next/image";
 import { fetchMemos, fetchTestimonials, getSiteConfig } from "@/lib/api";
-import FeedPreview from "@/components/FeedPreview";
 import FeaturedMemos from "@/components/FeaturedMemos";
 import { ExitIntentHandler } from "@/components/subscribe";
 import FeaturedProjects from "@/components/FeaturedProjects";
@@ -8,10 +7,12 @@ import { LinkButton } from "@/components/ui/link-button";
 import { SubscribeButton } from "@/components/ui/subscribe-button";
 import EventsTimeline from "@/components/EventsTimeline";
 import CyclingWord from "@/components/CyclingWord";
+import SectionLabel from "@/components/SectionLabel";
 import { buildGraph } from "@/lib/schemas/graph";
 import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
 import { generateWebSiteSchema } from "@/lib/schemas/generators/website";
 import { generateReviewSchema } from "@/lib/schemas/generators/review";
+import { SOCIALS } from "@/constants/socials";
 
 function HeroSection() {
   const s = "var(--color-bg)";
@@ -140,55 +141,47 @@ function BrandSection() {
 
 function BrandMessaging() {
   return (
-    <div className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px]">
+    <div className="px-5 py-12">
       <div className="max-w-[1080px] mx-auto">
-      <h2 className="type-title mb-4">
-        Old thinking won&apos;t save us.
-      </h2>
-      <p className="type-body mb-5">
-        By almost every measure of growth and prosperity, Canada is falling
-        behind. It doesn&apos;t have to be this way.<br />
-        <strong>
-          Build Canada platforms the policy, ideas, and narratives of Builders
-          who believe Canada&apos;s best days are ahead.
-        </strong>
-      </p>
-      <div className="flex items-center gap-3">
-        <LinkButton href="/about" variant="primary">
-          About Us
-        </LinkButton>
-        <SubscribeButton variant="accent" source="inline">
-          Subscribe
-        </SubscribeButton>
-      </div>
+        <SectionLabel as="h2">Old thinking won&apos;t save us.</SectionLabel>
+        <p className="type-body mb-5">
+          By almost every measure of growth and prosperity, Canada is falling
+          behind.
+        </p>
+        <p className="type-body mb-5">
+          <strong>
+            Build Canada promotes the vision, ideas, and stories of Builders
+            who believe Canada&apos;s best days are ahead.
+          </strong>
+        </p>
+        <div className="flex items-center gap-3">
+          <LinkButton href="/about" variant="primary">
+            About Us
+          </LinkButton>
+          <SubscribeButton variant="accent" source="inline">
+            Subscribe
+          </SubscribeButton>
+        </div>
       </div>
     </div>
   );
 }
 
 function SocialLinks() {
-  const socials = [
-    { icon: "X", href: "https://x.com/build_canada" },
-    { icon: "LINKEDIN", href: "https://www.linkedin.com/company/buildcanada" },
-    { icon: "TIKTOK", href: "https://www.tiktok.com/@build_canada" },
-    { icon: "IG", href: "https://www.instagram.com/build_canada/" },
-    { icon: "SUBSTACK", href: "https://buildcanada.substack.com/" },
-    { icon: "YOUTUBE", href: "https://www.youtube.com/@BuildCanada" },
-  ];
   return (
-    <div className="pt-3 pb-[32px]">
+    <div className="pt-3 pb-8">
       <div className="max-w-[1080px] mx-auto flex items-center gap-2 flex-wrap">
-        {socials.map(({ icon, href }) => (
+        {SOCIALS.map(({ label, href, iconFile }) => (
           <a
-            key={icon}
+            key={label}
             href={href}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-[53px] h-[53px] border border-border-light flex items-center justify-center hover:border-dark transition-colors group"
+            className="h-[53px] px-4 border border-border-light flex items-center justify-center hover:border-dark transition-colors group"
           >
             <Image
-              src={`/assets/icons/${icon === "X" ? "platform-x-twitter" : icon === "LINKEDIN" ? "platform-linkedin" : icon === "TIKTOK" ? "platform-tiktok" : icon === "IG" ? "platform-instagram" : icon === "SUBSTACK" ? "substack-icon" : "platform-youtube"}.svg`}
-              alt={icon}
+              src={`/assets/icons/${iconFile}.svg`}
+              alt={label}
               width={20}
               height={20}
               className="brightness-0 opacity-40 group-hover:opacity-80 transition-opacity"
@@ -198,7 +191,7 @@ function SocialLinks() {
         ))}
         <div className="w-px h-[18px] bg-border-light mx-0.5" />
         <LinkButton href="/content" variant="primary">
-          Full Content Feed
+          Full Archive
         </LinkButton>
       </div>
     </div>
@@ -208,24 +201,10 @@ function SocialLinks() {
 
 function FeedAndEvents() {
   return (
-    <section className="px-5 border-b border-border-light">
-      <div className="max-w-[1080px] mx-auto flex flex-wrap justify-center gap-[20px]">
-        <div className="w-full md:w-auto md:flex-1 md:max-w-[768px] min-w-0">
-          <FeedPreview />
-        </div>
-
-        <div className="w-full md:hidden -mx-5 px-0" style={{ width: "calc(100% + 40px)" }}>
-          <div className="border-t border-border-light" />
-        </div>
-
-        <div className="w-full md:w-[500px]">
-          <EventsTimeline />
-        </div>
-      <div className="w-full min-w-0">
-      <SocialLinks />
+    <section className="px-5 py-12 border-b border-border-light">
+      <div className="max-w-[1080px] mx-auto">
+        <EventsTimeline />
       </div>
-      </div>
-
     </section>
   );
 }
@@ -265,7 +244,7 @@ export default async function Home() {
         <BrandSection />
       </div>
       <div className="animate-fade-in" style={{ animationDelay: "0.8s" }}>
-        <FeaturedMemos heading="Featured + Latest Memos" memos={memos} />
+        <FeaturedMemos memos={memos} />
       </div>
       <div className="animate-fade-in" style={{ animationDelay: "1.2s" }}>
         <FeedAndEvents />

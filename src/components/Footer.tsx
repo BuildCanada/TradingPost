@@ -4,34 +4,7 @@ import Image from "next/image";
 import { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useSubscribeStore } from "@/components/subscribe/store";
-
-const socials = [
-  {
-    icon: "/assets/icons/platform-x-twitter.svg",
-    href: "https://x.com/build_canada",
-    label: "X",
-  },
-  {
-    icon: "/assets/icons/platform-linkedin.svg",
-    href: "https://www.linkedin.com/company/buildcanada",
-    label: "LinkedIn",
-  },
-  {
-    icon: "/assets/icons/platform-instagram.svg",
-    href: "https://www.instagram.com/build_canada/",
-    label: "Instagram",
-  },
-  {
-    icon: "/assets/icons/substack-icon.svg",
-    href: "https://buildcanada.substack.com/",
-    label: "Substack",
-  },
-  {
-    icon: "/assets/icons/platform-youtube.svg",
-    href: "https://www.youtube.com/@BuildCanada",
-    label: "YouTube",
-  },
-];
+import { SOCIALS } from "@/constants/socials";
 
 export default function Footer() {
   const footerRef = useRef<HTMLElement>(null);
@@ -141,21 +114,21 @@ export default function Footer() {
           </div>
 
           <p
-            className="type-default text-linen-100 mb-3"
+            className="type-default text-linen-100 mb-3 italic"
           >
             Whatever our errors are otherwise, we shall not err for want of
             boldness... Canada shall be the star towards which all men who love
             progress and freedom shall come.
           </p>
           <span className="type-label text-linen-100 font-bold">
-            — Laurier
+            — Sir Wilfred Laurier
           </span>
         </div>
 
         {/* Social icons + copyright cluster — second on mobile, left on lg */}
         <div className="flex flex-col items-center lg:items-start gap-2 lg:order-1 lg:pl-[5px]">
           <div className="flex items-center gap-1.5">
-            {socials.map(({ icon, href, label }) => (
+            {SOCIALS.map(({ href, label, iconFile }) => (
               <a
                 key={label}
                 href={href}
@@ -165,7 +138,7 @@ export default function Footer() {
                 className="w-7 h-7 flex items-center justify-center hover:opacity-100 transition-opacity"
               >
                 <Image
-                  src={icon}
+                  src={`/assets/icons/${iconFile}.svg`}
                   alt={label}
                   width={18}
                   height={18}

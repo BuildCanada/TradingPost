@@ -7,6 +7,7 @@ const ROLE_MAP: Record<string, string> = {
   advisor: "ADVISOR",
   volunteer: "CORE",
   employee: "CORE",
+  memo_author: "MEMO_AUTHOR",
 };
 
 interface TeamMemberSerialized {

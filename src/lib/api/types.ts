@@ -49,7 +49,7 @@ export interface YFTeamMember {
   name: string;
   slug: string;
   title: string | null;
-  role: "board" | "team" | "volunteer" | "advisor";
+  role: "board" | "team" | "volunteer" | "advisor" | "memo_author";
   twitter_url: string | null;
   linkedin_url: string | null;
   position: number;

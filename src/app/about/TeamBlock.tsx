@@ -29,12 +29,12 @@ export default function TeamBlock({ members }: { members: Person[] }) {
                       className="basis-1/2 sm:basis-1/3 lg:basis-1/4 flex-grow"
                     >
                       <PersonCard
-                      key={m.id}
-                      name={m.name}
-                      title={m.title}
-                      photo={m.photo}
-                      xUrl={m.xUrl}
-                      linkedinUrl={m.linkedinUrl}
+                        name={m.name}
+                        title={m.title}
+                        photo={m.photo}
+                        xUrl={m.xUrl}
+                        linkedinUrl={m.linkedinUrl}
+                      />
                     </div>
                   ))}
                 </div>

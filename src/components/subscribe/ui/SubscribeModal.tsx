@@ -51,8 +51,10 @@ export function SubscribeModal() {
               onSuccess={handleClose}
             />
           )}
-          <Dialog.Close aria-label="Close dialog" className="absolute w-8 h-8 flex items-center justify-center type-label text-charcoal-400 hover:text-charcoal-1000 cursor-pointer" style={{ top: "clamp(1rem, 3vw, 1.5rem)", right: "clamp(1rem, 3vw, 1.5rem)" }}>
-            ✕
+          <Dialog.Close aria-label="Close dialog" className="absolute w-11 h-11 flex items-center justify-center text-charcoal-600 hover:text-charcoal-1000 hover:bg-charcoal-200/30 rounded-sm transition-colors cursor-pointer" style={{ top: "clamp(0.75rem, 2.5vw, 1.25rem)", right: "clamp(0.75rem, 2.5vw, 1.25rem)" }}>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M3 3l10 10M13 3L3 13" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+            </svg>
           </Dialog.Close>
         </Dialog.Popup>
       </Dialog.Portal>

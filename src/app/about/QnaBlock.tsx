@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import SectionLabel from "@/components/SectionLabel";
+import { SectionHeader } from "@/components/ui/section-header";
 import {
   Accordion,
   AccordionItem,
@@ -22,9 +22,9 @@ export default function QnaBlock({ items }: { items: QnaItem[] }) {
   if (items.length === 0) return null;
 
   return (
-    <section className="px-5 pt-[34px] pb-[44px] md:pt-[42px] md:pb-[52px]">
+    <section id="q-and-a" className="px-5 py-12">
       <div className="max-w-[1080px] mx-auto">
-        <SectionLabel as="h2">Questions &amp; Answers</SectionLabel>
+        <SectionHeader label="Questions & Answers" />
         <div className="mt-4 border border-border-light">
           <Accordion value={openValue} onValueChange={setOpenValue}>
             {items.map((item, i) => {

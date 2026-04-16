@@ -1,20 +1,22 @@
-import { fetchFaqs, fetchTeamMembers, fetchTestimonials, getSiteConfig } from "@/lib/api";
+import { fetchFaqs, fetchTeamMembers, getSiteConfig } from "@/lib/api";
 import SectionLabel from "@/components/SectionLabel";
-import CrisisBlock from "./CrisisBlock";
-import ImpactBlock from "./ImpactBlock";
-import PlatformBlock from "./PlatformBlock";
 import TeamBlock from "./TeamBlock";
-import TestimonialsBlock from "@/components/TestimonialsBlock";
 import QnaBlock from "./QnaBlock";
+import QuickLinks from "./QuickLinks";
 import { buildGraph } from "@/lib/schemas/graph";
 import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
 import { generateFAQPageSchema } from "@/lib/schemas/generators/faq-page";
-import { generateReviewSchema } from "@/lib/schemas/generators/review";
+
+const quickLinks = [
+  { label: "Core Team", href: "#core-team" },
+  { label: "Board", href: "#board" },
+  { label: "Memo Authors", href: "#memo-authors" },
+  { label: "Q&A", href: "#q-and-a" },
+];
 
 export default async function AboutPage() {
-  const [people, testimonials, qandaItems] = await Promise.all([
-    fetchTeamMembers({ excludeRole: "memo_author" }),
-    fetchTestimonials(),
+  const [people, qandaItems] = await Promise.all([
+    fetchTeamMembers(),
     fetchFaqs(),
   ]);
 
@@ -24,20 +26,8 @@ export default async function AboutPage() {
   const faqSchema = generateFAQPageSchema(
     qandaItems.map((item) => ({ question: item.question, answer: item.answer }))
   );
-  const reviewSchemas = testimonials.map((t) =>
-    generateReviewSchema(
-      {
-        name: t.name,
-        quote: t.quote,
-        title: t.title,
-        profilePhoto: t.profilePhoto,
-        person: null,
-      },
-      configData
-    )
-  );
 
-  const jsonLd = buildGraph(orgSchema, faqSchema, ...reviewSchemas);
+  const jsonLd = buildGraph(orgSchema, faqSchema);
 
   return (
     <div className="mx-[10px] my-[10px] border border-border-light bg-bg overflow-x-clip">
@@ -48,19 +38,24 @@ export default async function AboutPage() {
       <section className="px-5 pt-[120px] pb-[100px] md:pt-[140px] md:pb-[120px] border-b border-border-light">
         <div className="max-w-[1080px] mx-auto">
           <SectionLabel as="h2">Who We Are</SectionLabel>
-          <h1 className="type-display mt-4 mb-6 max-w-[700px] text-dark" style={{ letterSpacing: "-0.126rem" }}>
+          <h1 className="type-display mt-4 mb-6 text-dark" style={{ letterSpacing: "-0.126rem" }}>
             Canada is worth building.
           </h1>
           <p className="type-body max-w-[600px] text-dark/70">
             Build Canada publishes bold policy research and builds transparency tools to make Canada the most prosperous country in the world.
           </p>
+          <div className="flex gap-6 mt-6">
+            <a href="/memos/build-canada-founding-memo" className="type-label text-auburn-800 hover:text-accent transition-colors">
+              Read the Founding Memo
+            </a>
+            <a href="#" className="type-label text-auburn-800 hover:text-accent transition-colors">
+              Read our Constitution
+            </a>
+          </div>
         </div>
       </section>
-      <CrisisBlock />
-      <ImpactBlock />
-      <PlatformBlock />
+      <QuickLinks links={quickLinks} />
       <TeamBlock members={people} />
-      <TestimonialsBlock testimonials={testimonials} />
       <QnaBlock items={qandaItems} />
     </div>
   );

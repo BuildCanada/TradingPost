@@ -10,9 +10,7 @@ export default function SectionLabel({
   as: Tag = "span",
 }: SectionLabelProps) {
   return (
-    <Tag
-      className={`type-label font-bold text-text-secondary block m-0 pb-1 ${className}`}
-    >
+    <Tag className={`type-h2 block ${className}`}>
       {children}
     </Tag>
   );

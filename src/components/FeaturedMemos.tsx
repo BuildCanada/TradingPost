@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import FeaturedCard from "@/components/FeaturedCard";
 import PickCard from "@/components/PickCard";
+import { SectionHeader } from "@/components/ui/section-header";
 import { LinkButton } from "@/components/ui/link-button";
 
 interface Memo {
@@ -25,7 +26,7 @@ interface Memo {
   createdAt: string;
 }
 
-export default function FeaturedMemos({ heading, memos }: { heading?: string; memos: Memo[] }) {
+export default function FeaturedMemos({ memos }: { memos: Memo[] }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isFading, setIsFading] = useState(false);
 
@@ -72,31 +73,21 @@ export default function FeaturedMemos({ heading, memos }: { heading?: string; me
 
   if (memos.length === 0) {
     return (
-      <section className="px-5 py-10 border-b border-border-light">
+      <section className="px-5 py-12 border-b border-border-light">
         <div className="max-w-[1080px] mx-auto">
-          <div className="flex items-center justify-between">
-            <span className="type-label font-bold text-text-secondary block">
-              {heading || "Featured + Latest"}
-            </span>
-          </div>
+          <SectionHeader label="Memos" />
         </div>
       </section>
     );
   }
 
   return (
-    <section className="px-5 py-10 border-b border-border-light">
+    <section className="px-5 py-12 border-b border-border-light">
       <div className="max-w-[1080px] mx-auto">
-        <div className="flex items-center justify-between mb-6">
-          <span className="type-label font-bold text-text-secondary block">
-            {heading || "Featured + Latest"}
-          </span>
-          {heading && (
-            <LinkButton href="/memos" variant="primary" className="hidden compact:flex">
-              See All Memos
-            </LinkButton>
-          )}
-        </div>
+        <SectionHeader
+          label="Memos"
+          action={<LinkButton href="/memos" variant="primary">See All Memos</LinkButton>}
+        />
         <div className="relative">
           {featuredMemos[0] && (
             <div
@@ -130,16 +121,14 @@ export default function FeaturedMemos({ heading, memos }: { heading?: string; me
         </div>
         {latestFour.length > 0 && (
           <div className="grid grid-cols-1 cards:grid-cols-2 wide:grid-cols-4 gap-0 border-t border-border-light">
-            {latestFour.map((m, i) => (
-              <PickCard key={m.id} memo={m} isLatest={i === 0} />
+            {latestFour.map((m) => (
+              <PickCard key={m.id} memo={m} />
             ))}
           </div>
         )}
-        {heading && (
-          <LinkButton href="/memos" className="compact:hidden flex w-full justify-center mt-6">
-            See All Memos
-          </LinkButton>
-        )}
+        <LinkButton href="/memos" className="compact:hidden flex w-full justify-center mt-6">
+          See All Memos
+        </LinkButton>
       </div>
     </section>
   );

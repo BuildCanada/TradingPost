@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import EventCard from "@/components/EventCard";
+import { SectionHeader } from "@/components/ui/section-header";
 import { LumaEvent } from "@/lib/luma/types";
 
 export default async function EventsTimeline() {
@@ -15,11 +16,14 @@ export default async function EventsTimeline() {
   } catch {}
 
   return (
-    <div className="py-12 flex flex-col h-full">
-      <span className="type-label text-dark block pb-4">Events</span>
-      <div className="border-t border-l border-border-light flex-1 flex flex-col">
+    <div className="flex flex-col">
+      <SectionHeader
+        label="Events"
+        action={<Button as="external-link" variant="ghost" href="https://lu.ma/cal-KUFO2yscrfWr7RV">View all events</Button>}
+      />
+      <div className="border-t border-l border-border-light">
         {events.length === 0 ? (
-          <div className="border-b border-r border-border-light p-6 text-center">
+          <div className="p-6 text-center">
             <p className="type-caption text-text-secondary">
               No upcoming events
             </p>
@@ -28,16 +32,11 @@ export default async function EventsTimeline() {
             </Button>
           </div>
         ) : (
-          <>
+          <div className="grid grid-cols-1 cards:grid-cols-3 gap-0">
             {events.map((event) => (
               <EventCard key={event.id} event={event} />
             ))}
-            <div className="border-t border-b border-r border-border-light mt-auto">
-              <Button as="external-link" variant="ghost" href="https://lu.ma/cal-KUFO2yscrfWr7RV" className="border-0 w-full justify-start">
-                View all events
-              </Button>
-            </div>
-          </>
+          </div>
         )}
       </div>
     </div>

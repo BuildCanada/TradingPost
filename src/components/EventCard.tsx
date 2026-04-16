@@ -50,7 +50,7 @@ export default function EventCard({ event }: { event: LumaEvent }) {
     .filter(Boolean) as string[];
 
   return (
-    <div className="border-b border-r border-border-light p-6 flex gap-4">
+    <div className="border-b border-r border-border-light p-6 flex flex-col">
       <div className="flex-1 min-w-0">
         <span className="type-label font-bold text-text-secondary block m-0 pb-1">{eventDate}</span>
         <p className="type-caption mt-1">
@@ -66,7 +66,7 @@ export default function EventCard({ event }: { event: LumaEvent }) {
           href={event.url}
           target="_blank"
           rel="noopener noreferrer"
-          className="type-h4 text-text block mt-1 hover:underline"
+          className="type-h4 text-text block mt-2 hover:underline"
         >
           {event.name}
         </a>
@@ -81,15 +81,17 @@ export default function EventCard({ event }: { event: LumaEvent }) {
           </p>
         )}
       </div>
-      <div className="w-20 h-20 flex-shrink-0 overflow-hidden">
-        <Image
-          src={event.coverUrl}
-          alt=""
-          width={80}
-          height={80}
-          className="w-full h-full object-cover object-left-center"
-        />
-      </div>
+      {event.coverUrl && (
+        <div className="w-full mt-4 aspect-square overflow-hidden">
+          <Image
+            src={event.coverUrl}
+            alt=""
+            width={640}
+            height={360}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )}
     </div>
   );
 }

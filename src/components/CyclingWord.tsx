@@ -4,13 +4,10 @@ import { useEffect, useRef, useState } from "react";
 
 const words = [
   "Better",
-  "Safer",
-  "Freer",
   "Richer",
-  "Bolder",
-  "Stronger",
   "Faster",
-  "Prouder",
+  "Stronger",
+  "Bolder",
 ];
 
 type Phase = "in" | "visible" | "out";

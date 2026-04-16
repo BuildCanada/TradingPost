@@ -7,9 +7,6 @@ export default async function FeedPreview() {
   return (
     <div className="py-12">
       <div className="max-w-[1080px] mx-auto">
-        <span className="type-label text-dark block pb-4">
-          Content Feed
-        </span>
         <div className="border-t border-l border-border-light grid grid-cols-1 cards:grid-cols-2">
           {items.length > 0
             ? items.map((item) =>

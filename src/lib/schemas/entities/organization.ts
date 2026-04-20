@@ -9,7 +9,7 @@ export function createOrganization(): Organization {
     url: SITE_URL,
     description:
       "Build Canada is a civic organization on a mission to make Canada the most prosperous country in the world.",
-    logo: `${SITE_URL}/assets/logos/Logocircle.webp`,
+    logo: `${SITE_URL}/assets/logos/buildcanada-logo-square.svg`,
     sameAs: [
       "https://x.com/build_canada",
       "https://www.linkedin.com/company/buildcanada",

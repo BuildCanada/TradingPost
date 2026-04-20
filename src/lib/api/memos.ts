@@ -40,7 +40,7 @@ function mapMemo(m: YFMemo & { key_messages?: unknown[]; splash_image_url?: stri
     slug: m.slug,
     author: {
       name: authorName,
-      photo: authorName === "Build Canada" ? "/assets/logos/Logocircle.webp" : (m.author?.profile_photo_url ?? null),
+      photo: authorName === "Build Canada" ? "/assets/logos/buildcanada-logo-square.svg" : (m.author?.profile_photo_url ?? null),
     },
     keyMessage1: keyMessages[0] ?? null,
     keyMessage2: keyMessages[1] ?? null,
@@ -108,7 +108,7 @@ export async function fetchMemo(slug: string) {
     author: {
       name: authorName,
       slug: authorSlug,
-      photo: authorName === "Build Canada" ? "/assets/logos/Logocircle.webp" : (m.author?.profile_photo_url ?? null),
+      photo: authorName === "Build Canada" ? "/assets/logos/buildcanada-logo-square.svg" : (m.author?.profile_photo_url ?? null),
       title: m.author_title ?? teamProfile?.title ?? null,
       bio: null as string | null,
       websiteUrl: null as string | null,

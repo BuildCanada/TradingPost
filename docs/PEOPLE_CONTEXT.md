@@ -252,7 +252,7 @@ Reads `authors.csv` and `Memoscsv.csv`. For each memo, resolves the author by lo
 
 ### Special Case: "Build Canada" Person
 
-There is a synthetic Person record with `name: "Build Canada"` used as the default memo author. On the homepage and memos listing page, when `author.name === "Build Canada"`, the author photo is overridden to `/assets/logos/Logocircle.webp` instead of using `author.photo`. This logic lives in:
+There is a synthetic Person record with `name: "Build Canada"` used as the default memo author. On the homepage and memos listing page, when `author.name === "Build Canada"`, the author photo is overridden to `/assets/logos/buildcanada-logo-square.svg` instead of using `author.photo`. This logic lives in:
 - `src/app/page.tsx:27-29`
 - `src/app/memos/page.tsx:41-43`
 - `src/app/memos/[slug]/page.tsx:64-67`

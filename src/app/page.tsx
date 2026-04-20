@@ -6,6 +6,7 @@ import FeaturedProjects from "@/components/FeaturedProjects";
 import { LinkButton } from "@/components/ui/link-button";
 import { SubscribeButton } from "@/components/ui/subscribe-button";
 import EventsTimeline from "@/components/EventsTimeline";
+import FeedPreview from "@/components/FeedPreview";
 import CyclingWord from "@/components/CyclingWord";
 import SectionLabel from "@/components/SectionLabel";
 import { buildGraph } from "@/lib/schemas/graph";
@@ -202,8 +203,13 @@ function SocialLinks() {
 function FeedAndEvents() {
   return (
     <section className="px-5 py-12 border-b border-border-light">
-      <div className="max-w-[1080px] mx-auto">
-        <EventsTimeline />
+      <div className="max-w-[1080px] mx-auto flex flex-wrap justify-center gap-[20px]">
+        <div className="w-full md:w-auto md:flex-1 md:max-w-[768px] min-w-0">
+          <FeedPreview />
+        </div>
+        <div className="w-full md:w-[500px]">
+          <EventsTimeline />
+        </div>
       </div>
     </section>
   );

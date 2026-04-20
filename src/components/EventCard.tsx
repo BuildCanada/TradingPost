@@ -50,8 +50,19 @@ export default function EventCard({ event }: { event: LumaEvent }) {
     .filter(Boolean) as string[];
 
   return (
-    <div className="border-b border-r border-border-light p-6 flex flex-col">
-      <div className="flex-1 min-w-0">
+    <div className="border-b border-r border-border-light flex flex-row overflow-hidden h-44">
+      {event.coverUrl && (
+        <div className="shrink-0 h-full aspect-square overflow-hidden">
+          <Image
+            src={event.coverUrl}
+            alt=""
+            width={640}
+            height={360}
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )}
+      <div className="flex-1 min-w-0 p-6">
         <span className="type-label font-bold text-text-secondary block m-0 pb-1">{eventDate}</span>
         <p className="type-caption mt-1">
           {showUserTime ? (
@@ -81,17 +92,6 @@ export default function EventCard({ event }: { event: LumaEvent }) {
           </p>
         )}
       </div>
-      {event.coverUrl && (
-        <div className="w-full mt-4 aspect-square overflow-hidden">
-          <Image
-            src={event.coverUrl}
-            alt=""
-            width={640}
-            height={360}
-            className="w-full h-full object-cover"
-          />
-        </div>
-      )}
     </div>
   );
 }

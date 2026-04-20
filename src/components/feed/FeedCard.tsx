@@ -31,7 +31,7 @@ export function FeedCard({ item }: { item: FeedItem }) {
       href={itemHref(item)}
       target={INTERNAL_TYPES.has(item.type) ? undefined : "_blank"}
       rel={INTERNAL_TYPES.has(item.type) ? undefined : "noopener noreferrer"}
-      className="border-b border-r border-border-light flex flex-col group overflow-hidden"
+      className="border-b border-r border-border-light flex flex-col group overflow-hidden h-64"
     >
       <div className="relative h-[100px] bg-dark">
         {feedImage(item) && (

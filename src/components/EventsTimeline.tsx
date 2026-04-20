@@ -19,7 +19,7 @@ export default async function EventsTimeline() {
     <div className="flex flex-col">
       <SectionHeader
         label="Events"
-        action={<Button as="external-link" variant="ghost" href="https://lu.ma/cal-KUFO2yscrfWr7RV">View all events</Button>}
+        action={<Button as="external-link" variant="charcoal" href="https://luma.com/build_canada">View all events</Button>}
       />
       <div className="border-t border-l border-border-light">
         {events.length === 0 ? (
@@ -27,12 +27,12 @@ export default async function EventsTimeline() {
             <p className="type-caption text-text-secondary">
               No upcoming events
             </p>
-            <Button as="external-link" variant="ghost" href="https://lu.ma/cal-KUFO2yscrfWr7RV" className="mt-2">
+            <Button as="external-link" variant="ghost" href="https://luma.com/build_canada" className="mt-2">
               View all events
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 cards:grid-cols-3 gap-0">
+          <div className="grid grid-cols-1 gap-0">
             {events.map((event) => (
               <EventCard key={event.id} event={event} />
             ))}

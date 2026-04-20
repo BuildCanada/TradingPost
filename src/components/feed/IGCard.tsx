@@ -19,7 +19,7 @@ export function IGCard({ item }: { item: FeedItem }) {
       href={item.url || "/content"}
       target="_blank"
       rel="noopener noreferrer"
-      className="border-b border-r border-border-light flex flex-col group overflow-hidden"
+      className="border-b border-r border-border-light flex flex-col group overflow-hidden h-64"
       style={{ backgroundColor: COLORS.bg }}
     >
       <SocialCardHeader

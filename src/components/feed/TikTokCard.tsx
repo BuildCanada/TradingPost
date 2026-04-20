@@ -19,7 +19,7 @@ export function TikTokCard({ item }: { item: FeedItem }) {
       href={item.url || "/content"}
       target="_blank"
       rel="noopener noreferrer"
-      className="border-b border-r border-border-light bg-[#121212] flex flex-col group overflow-hidden"
+      className="border-b border-r border-border-light bg-[#121212] flex flex-col group overflow-hidden h-64"
     >
       <SocialCardHeader
         item={item}

@@ -1,3 +1,4 @@
+import posthog from "posthog-js";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -22,7 +23,12 @@ export const useSubscribeStore = create<SubscribeState>()(
       triggerSource: null,
 
       openModal: (source) =>
-        set({ isOpen: true, triggerSource: source }),
+        set((state) => {
+          if (!state.isOpen) {
+            posthog.capture("subscribe_modal_opened", { source });
+          }
+          return { isOpen: true, triggerSource: source };
+        }),
       closeModal: () =>
         set({ isOpen: false, triggerSource: null }),
       setSubscribed: () => set({ subscribed: true }),

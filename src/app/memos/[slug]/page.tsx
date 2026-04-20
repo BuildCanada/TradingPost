@@ -74,7 +74,7 @@ export default async function MemoDetailPage({
 
   const authorImage =
     memo.author.name === "Build Canada"
-      ? "/assets/logos/Logocircle.webp"
+      ? "/assets/logos/buildcanada-logo-square.svg"
       : memo.author.photo;
 
   const keyMessages = memo.keyMessages;

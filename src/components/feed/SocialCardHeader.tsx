@@ -21,7 +21,7 @@ export function SocialCardHeader({
   avatarBorder,
 }: SocialCardHeaderProps) {
   const handle = item.accountHandle || "@build_canada";
-  const avatarSrc = isValidImage(item.authorPhoto) ? item.authorPhoto! : "/assets/logos/Logocircle.webp";
+  const avatarSrc = isValidImage(item.authorPhoto) ? item.authorPhoto! : "/assets/logos/buildcanada-logo-square.svg";
 
   return (
     <div className="flex items-center gap-2.5 px-5 py-3 border-b" style={{ borderColor }}>

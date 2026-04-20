@@ -57,7 +57,7 @@ export default function CyclingWord() {
 
   return (
     <span
-      className="inline-block overflow-hidden align-bottom pb-[0.1em]"
+      className="inline-block overflow-hidden align-bottom pb-[0.1em] pr-[0.05em]"
       style={{ WebkitTextStroke: "1px white" }}
     >
       <span

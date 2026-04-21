@@ -35,8 +35,8 @@ export default async function AboutPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <section className="px-6 sm:px-16 pt-32 pb-10 sm:pb-16 border-b border-border-light">
-        <div className="max-w-screen-2xl mx-auto grid grid-cols-1 md:grid-cols-2 md:gap-x-12 items-start">
-          <div className="md:pr-12 md:border-r md:border-border-light">
+        <div className="max-w-screen-2xl mx-auto grid grid-cols-1 md:grid-cols-2 md:gap-x-12 items-stretch">
+          <div className="md:pr-12 md:border-r md:border-border-light flex md:items-center">
             <h1 className="type-display text-dark" style={{ letterSpacing: "-0.126rem" }}>
               Canada can be the most prosperous country on earth
             </h1>

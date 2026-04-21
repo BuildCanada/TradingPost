@@ -77,14 +77,15 @@ html {
 
 .accordion-expand {
   display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 100ms ease-out, opacity 100ms ease-out;
-  opacity: 0;
-}
-
-.accordion-expand[data-open] {
   grid-template-rows: 1fr;
   opacity: 1;
+  transition: grid-template-rows 100ms ease-out, opacity 100ms ease-out;
+}
+
+.accordion-expand[data-starting-style],
+.accordion-expand[data-ending-style] {
+  grid-template-rows: 0fr;
+  opacity: 0;
 }
 
 .accordion-expand > div {

@@ -12,7 +12,7 @@ const quickLinks = [
   { label: "Core Team", href: "#core-team" },
   { label: "Board", href: "#board" },
   { label: "Memo Authors", href: "#memo-authors" },
-  { label: "Q&A", href: "#q-and-a" },
+  { label: "FAQs", href: "#faqs" },
 ];
 
 export default async function AboutPage() {

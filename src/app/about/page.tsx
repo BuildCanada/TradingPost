@@ -38,7 +38,7 @@ export default async function AboutPage() {
         <div className="max-w-screen-2xl mx-auto grid grid-cols-1 md:grid-cols-2 md:gap-x-12 items-start">
           <div className="md:pr-12 md:border-r md:border-border-light">
             <h1 className="type-display text-dark" style={{ letterSpacing: "-0.126rem" }}>
-              Canada can be the most prosperous country on earth.
+              Canada can be the most prosperous country on earth
             </h1>
           </div>
           <div className="mt-6 md:mt-0">

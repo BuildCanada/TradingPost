@@ -2,10 +2,7 @@ import { apiFetch } from "./client";
 import type { YFTeamMember, YFListResponse } from "./types";
 
 const ROLE_MAP: Record<string, string> = {
-  team: "CORE",
   board: "BOARD",
-  advisor: "ADVISOR",
-  volunteer: "CORE",
   employee: "CORE",
   memo_author: "MEMO_AUTHOR",
 };
@@ -28,7 +25,7 @@ function mapTeamMember(m: YFTeamMember): TeamMemberSerialized {
     id: String(m.id),
     name: m.name,
     title: m.title,
-    role: ROLE_MAP[m.role] ?? "CORE",
+    role: ROLE_MAP[m.role] ?? "OTHER",
     photo: m.profile_photo_url,
     xUrl: m.twitter_url,
     linkedinUrl: m.linkedin_url,

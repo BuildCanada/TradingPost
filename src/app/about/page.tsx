@@ -36,8 +36,8 @@ export default async function AboutPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <section className="px-5 pt-[120px] pb-[100px] md:pt-[140px] md:pb-[120px] border-b border-border-light">
-        <div className="max-w-[1080px] mx-auto">
+      <section className="px-6 sm:px-16 pt-32 pb-10 sm:pb-16 border-b border-border-light">
+        <div className="max-w-screen-2xl mx-auto">
           <SectionLabel as="h2">Who We Are</SectionLabel>
           <h1 className="type-display mt-4 mb-6 text-dark" style={{ letterSpacing: "-0.126rem" }}>
             Canada is worth building.

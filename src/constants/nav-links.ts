@@ -9,6 +9,6 @@ export const NAV_LINKS: NavLink[] = [
   { label: "Memos", href: "/memos" },
   { label: "Content", href: "/content" },
   { label: "Projects", href: "/projects" },
-  { label: "About Us", href: "/about" },
+  { label: "About", href: "/about" },
   { label: "Shop", href: "https://shop.buildcanada.com", external: true },
 ];

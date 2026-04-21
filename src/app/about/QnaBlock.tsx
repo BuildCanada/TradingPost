@@ -71,7 +71,7 @@ export default function QnaBlock({ items }: { items: QnaItem[] }) {
   );
 
   return (
-    <section id="faqs" className="px-6 sm:px-16 py-16">
+    <section id="faqs" className="px-6 sm:px-16 py-12">
       <div className="max-w-screen-2xl mx-auto">
         <SectionHeader label="FAQs" />
         <div className="mt-4 grid grid-cols-1 md:grid-cols-2 md:gap-x-12 items-start">

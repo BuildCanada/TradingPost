@@ -19,11 +19,9 @@ interface QnaItem {
 export default function QnaBlock({ items }: { items: QnaItem[] }) {
   const [openValue, setOpenValue] = useState<string[]>([]);
 
-  if (items.length === 0) return null;
-
   return (
-    <section id="q-and-a" className="px-5 py-12">
-      <div className="max-w-[1080px] mx-auto">
+    <section id="q-and-a" className="px-6 sm:px-16 py-16">
+      <div className="max-w-screen-2xl mx-auto">
         <SectionHeader label="Questions & Answers" />
         <div className="mt-4 border border-border-light">
           <Accordion value={openValue} onValueChange={setOpenValue}>

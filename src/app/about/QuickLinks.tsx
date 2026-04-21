@@ -5,8 +5,8 @@ interface QuickLink {
 
 export default function QuickLinks({ links }: { links: QuickLink[] }) {
   return (
-    <div className="px-5 border-b border-border-light overflow-x-auto scrollbar-none">
-      <div className="max-w-[1080px] mx-auto flex gap-6">
+    <div className="px-6 sm:px-16 border-b border-border-light overflow-x-auto scrollbar-none">
+      <div className="max-w-screen-2xl mx-auto flex gap-6">
         {links.map((link) => (
           <a
             key={link.href}

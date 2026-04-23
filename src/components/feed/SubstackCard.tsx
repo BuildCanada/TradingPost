@@ -1,67 +1,60 @@
-import Link from "next/link";
 import Image from "next/image";
+import { ContentCard, type ContentCardTheme } from "./ContentCard";
 import { type FeedItem, isValidImage, formatFeedDate } from "./types";
-import { FeedChevron } from "./FeedChevron";
+
+const THEME: ContentCardTheme = {
+  bg: "#fffdf7",
+  text: "#1a1a1a",
+  muted: "#857e71",
+  divider: "#e8e2d9",
+  ctaBorder: "#1a1a1a",
+  ctaText: "#1a1a1a",
+  ctaHoverBg: "#FF6719",
+  ctaHoverText: "#ffffff",
+  ctaHoverBorder: "#FF6719",
+};
+
+function SubstackIcon({ size, opacity }: { size: number; opacity: number }) {
+  return (
+    <Image
+      src="/assets/icons/substack-icon.svg"
+      alt="Substack"
+      width={size}
+      height={size}
+      style={{ opacity }}
+      unoptimized
+    />
+  );
+}
 
 export function SubstackCard({ item }: { item: FeedItem }) {
   return (
-    <Link
+    <ContentCard
       href={item.url || "/content"}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="border-b border-r border-border-light bg-[#fffdf7] flex flex-col group overflow-hidden h-64"
-    >
-      {isValidImage(item.image) && (
-        <div className="relative h-[90px] bg-[#f7f5ef]">
-          <Image
-            src={item.image!}
-            alt={item.title || ""}
-            fill
-            className="object-cover opacity-85 group-hover:opacity-100 transition-opacity"
-          />
-        </div>
-      )}
-
-      <div className="px-5 py-4 flex flex-col gap-2 flex-1">
-        <div className="flex items-center gap-1.5">
-          <Image
-            src="/assets/icons/substack-icon.svg"
-            alt="Substack"
-            width={12}
-            height={12}
-            className="opacity-60"
-            unoptimized
-          />
-          <span className="text-[11px] uppercase tracking-[0.08em] font-medium text-[#857e71]">
-            Weekly Newsletter
-          </span>
-        </div>
-
-        {item.title && (
-          <h3 className="type-h4 text-[#1a1a1a] group-hover:text-[#FF6719] transition-colors">
-            {item.title}
-          </h3>
-        )}
-
-        <span className="type-mono-sm text-[#857e71]">
-          {formatFeedDate(item.createdAt)}
-        </span>
-      </div>
-
-      <div className="px-5 py-3 flex items-center justify-between border-t border-[#e8e2d9]">
-        <Image
-          src="/assets/icons/substack-icon.svg"
-          alt="Substack"
-          width={16}
-          height={16}
-          className="opacity-25"
-          unoptimized
-        />
-        <span className="inline-flex items-center gap-2 type-label px-3 py-1 border border-[#1a1a1a] text-[#1a1a1a] bg-[#fffdf7] group-hover:border-[#FF6719] group-hover:bg-[#FF6719] group-hover:text-white transition-all">
-          Read
-          <FeedChevron />
-        </span>
-      </div>
-    </Link>
+      external
+      theme={THEME}
+      top={
+        isValidImage(item.image) ? (
+          <div className="relative h-[90px]" style={{ backgroundColor: "#f7f5ef" }}>
+            <Image
+              src={item.image!}
+              alt={item.title || ""}
+              fill
+              className="object-cover opacity-85 group-hover:opacity-100 transition-opacity"
+            />
+          </div>
+        ) : null
+      }
+      label={{
+        icon: <SubstackIcon size={12} opacity={0.6} />,
+        text: "Weekly Newsletter",
+      }}
+      title={item.title}
+      meta={formatFeedDate(item.createdAt)}
+      footer={{
+        brandIcon: <SubstackIcon size={16} opacity={0.25} />,
+        ctaLabel: "Read",
+      }}
+    />
   );
 }

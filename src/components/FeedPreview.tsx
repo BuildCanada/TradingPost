@@ -13,7 +13,10 @@ import { Button } from "@/components/ui/button";
 import { SectionHeader } from "@/components/ui/section-header";
 
 export default async function FeedPreview() {
-  const items = await fetchFeedPicks("x,substack,blog|builder,x:canada_spends");
+  const picks = await fetchFeedPicks("x,substack,blog|builder,x:canada_spends");
+  const items = Array.from(
+    new Map(picks.map((item) => [item.id, item])).values(),
+  );
 
   return (
     <div className="flex flex-col">

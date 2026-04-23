@@ -1,0 +1,39 @@
+/*******************************************************************************
+ * Outcomes Tracker semantic colour tokens
+ *
+ * These tokens back the shadcn-style UI primitives (Input, Select, Skeleton)
+ * and tracker pages ported from the OutcomeTracker repo. Mirrors the values
+ * from OutcomeTracker/tailwind.config.ts.
+ ******************************************************************************/
+
+@theme {
+  --color-background: #f6ebe3;
+  --color-foreground: #1a1a1a;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #1a1a1a;
+  --color-muted: #f6ebe3;
+  --color-muted-foreground: #6b6b6b;
+  --color-accent: #f0e6dc;
+  --color-accent-foreground: #1a1a1a;
+  --color-input: #d3c7b9;
+  --color-ring: #8b2332;
+  --color-border: #d3c7b9;
+}
+
+/*******************************************************************************
+ * Scoped typography for /tracker pages.
+ *
+ * The TradingPost site default body font is Financier Text (serif). The
+ * Outcomes Tracker design uses Söhne (sans). Override the font stack inside
+ * `.tracker-root` so headings and body copy on /tracker render in Söhne while
+ * leaving the rest of the site untouched.
+ ******************************************************************************/
+
+.tracker-root,
+.tracker-root :where(h1, h2, h3, h4, h5, h6, p, span, a, button, li, label, input, select, textarea) {
+  font-family: var(--font-display);
+}
+
+.tracker-root :where(.font-mono, code, pre, kbd, samp) {
+  font-family: var(--font-label);
+}

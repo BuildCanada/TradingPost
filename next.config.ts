@@ -29,6 +29,10 @@ const nextConfig: NextConfig = {
         source: "/ph/decide",
         destination: "https://us.i.posthog.com/decide",
       },
+      {
+        source: "/tracker/api/:path*",
+        destination: `${process.env.NEXT_PUBLIC_TRACKER_API_BASE || "https://www.buildcanada.com"}/tracker/api/:path*`,
+      },
     ];
   },
   // Required to support PostHog trailing slash API requests

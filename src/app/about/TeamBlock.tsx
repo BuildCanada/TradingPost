@@ -9,7 +9,7 @@ const roleGroups = [
 
 export default function TeamBlock({ members }: { members: Person[] }) {
   return (
-    <section className="px-6 sm:px-16 py-16 border-b border-border-light">
+    <section className="px-6 sm:px-16 py-12 border-b border-border-light">
       <div className="max-w-screen-2xl mx-auto">
         <div className="space-y-16">
           {roleGroups.map(({ key, label, id }) => {
@@ -20,7 +20,7 @@ export default function TeamBlock({ members }: { members: Person[] }) {
             return (
               <div key={key} id={id}>
                 <h3 className="type-h2 text-dark mb-12">{label}</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
                   {group.map((m) => (
                     <PersonCard
                         key={m.id}

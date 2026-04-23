@@ -21,14 +21,6 @@ function formatTime(iso: string, tz: string): string {
   });
 }
 
-function getUserTimeZone(): string {
-  try {
-    return Intl.DateTimeFormat().resolvedOptions().timeZone;
-  } catch {
-    return "America/New_York";
-  }
-}
-
 function formatAddress(event: LumaEvent): string | null {
   const addr = event.address;
   if (!addr) return null;
@@ -39,11 +31,8 @@ function formatAddress(event: LumaEvent): string | null {
 }
 
 export default function EventCard({ event }: { event: LumaEvent }) {
-  const userTz = getUserTimeZone();
   const eventDate = formatEventDate(event.startAt, event.timezone);
-  const userTime = formatTime(event.startAt, userTz);
   const eventLocalTime = formatTime(event.startAt, event.timezone);
-  const showUserTime = userTz !== event.timezone;
   const address = formatAddress(event);
   const hostNames = event.hosts
     .map((h) => h.name)
@@ -63,15 +52,10 @@ export default function EventCard({ event }: { event: LumaEvent }) {
         </div>
       )}
       <div className="flex-1 min-w-0 p-6">
-        <span className="type-label font-bold text-text-secondary block m-0 pb-1">{eventDate}</span>
-        <p className="type-caption mt-1">
-          {showUserTime ? (
-            <>
-              <span className="text-text-secondary">{userTime}</span>
-              <span className="text-text-secondary mx-1">·</span>
-            </>
-          ) : null}
-          <span className="text-accent">{eventLocalTime}</span>
+        <p className="type-label font-bold text-text-secondary m-0 pb-1">
+          <span>{eventDate}</span>
+          <span className="mx-1.5">·</span>
+          <span>{eventLocalTime}</span>
         </p>
         <a
           href={event.url}

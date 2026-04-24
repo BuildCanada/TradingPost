@@ -247,6 +247,21 @@ html {
   --color-dark: var(--color-charcoal-1000);
 }
 
+/* Toronto subsection theme — swap auburn → #003086, linen → #e3ecf6 */
+.theme-toronto {
+  --color-linen-50: #f2f6fb;
+  --color-linen-100: #e3ecf6;
+  --color-linen-200: #c7d7e8;
+  --color-linen-300: #9bb7d6;
+  --color-auburn-50: #e9effa;
+  --color-auburn-100: #cbd8ef;
+  --color-auburn-200: #94aede;
+  --color-auburn-600: #0040b0;
+  --color-auburn-700: #003592;
+  --color-auburn-800: #003086;
+  --color-auburn-900: #00266d;
+}
+
 @custom-variant compact (@media (min-width: 425px));
 @custom-variant 2xl-memo (@media (min-width: 1200px));
 @custom-variant cards (@media (min-width: 612px));

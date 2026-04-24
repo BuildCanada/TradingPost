@@ -7,10 +7,10 @@ import SectionLabel from "@/components/SectionLabel";
 import { useMemosFilter } from "./store";
 import { MemoItem, formatDate, shortenName } from "./types";
 
-function MemoGridRow({ memo }: { memo: MemoItem }) {
+function MemoGridRow({ memo, basePath }: { memo: MemoItem; basePath: string }) {
   return (
     <Link
-      href={`/memos/${memo.slug}`}
+      href={`${basePath}/${memo.slug}`}
       className="flex flex-col border-b border-r border-border-light group hover:bg-linen-50 transition-colors"
     >
       <div className="flex items-start gap-4 p-5 flex-1">
@@ -68,7 +68,13 @@ function MemoGridRow({ memo }: { memo: MemoItem }) {
   );
 }
 
-export default function MemoResultsList({ memos }: { memos: MemoItem[] }) {
+export default function MemoResultsList({
+  memos,
+  basePath = "/memos",
+}: {
+  memos: MemoItem[];
+  basePath?: string;
+}) {
   const search = useMemosFilter((s) => s.search);
   const activeCategory = useMemosFilter((s) => s.activeCategory);
   const filtered = useMemo(() => {
@@ -109,7 +115,7 @@ export default function MemoResultsList({ memos }: { memos: MemoItem[] }) {
           )}
           <div className="grid grid-cols-1 wide:grid-cols-2 wide:gap-x-0 border-t border-l border-border-light mt-4">
             {filtered.map((memo) => (
-              <MemoGridRow key={memo.id} memo={memo} />
+              <MemoGridRow key={memo.id} memo={memo} basePath={basePath} />
             ))}
           </div>
         </div>

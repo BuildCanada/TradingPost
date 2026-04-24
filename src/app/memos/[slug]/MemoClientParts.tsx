@@ -57,9 +57,11 @@ interface RelatedMemo {
 export function RelatedMemos({
   related,
   category,
+  basePath = "/memos",
 }: {
   related: RelatedMemo[];
   category: string | null;
+  basePath?: string;
 }) {
   if (related.length === 0) return null;
 
@@ -75,7 +77,7 @@ export function RelatedMemos({
         {related.map((m) => (
           <Link
             key={m.id}
-            href={`/memos/${m.slug}`}
+            href={`${basePath}/${m.slug}`}
             className="flex items-start gap-3 group"
           >
             <div className="w-8 h-8 bg-border-light overflow-hidden shrink-0 mt-0.5">

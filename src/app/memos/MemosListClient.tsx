@@ -25,7 +25,13 @@ function CategoryFromSearchParams({ categories }: { categories: string[] }) {
   return null;
 }
 
-export default function MemosListClient({ memos }: { memos: MemoItem[] }) {
+export default function MemosListClient({
+  memos,
+  basePath = "/memos",
+}: {
+  memos: MemoItem[];
+  basePath?: string;
+}) {
   const categories = useMemo(() => {
     const cats = new Set<string>();
     for (const m of memos) {
@@ -39,10 +45,10 @@ export default function MemosListClient({ memos }: { memos: MemoItem[] }) {
       <Suspense fallback={null}>
         <CategoryFromSearchParams categories={categories} />
       </Suspense>
-      <FeaturedHero memos={memos} />
+      <FeaturedHero memos={memos} basePath={basePath} />
       <CategoryFilter categories={categories} />
       <MemoSearch />
-      <MemoResultsList memos={memos} />
+      <MemoResultsList memos={memos} basePath={basePath} />
     </>
   );
 }

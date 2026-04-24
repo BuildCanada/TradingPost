@@ -80,14 +80,16 @@ interface MemoCardProps {
   showLabel?: string;
   priority?: boolean;
   gridItem?: boolean;
+  basePath?: string;
 }
 
-export function MemoCard({ 
-  memo, 
-  variant = 'light', 
+export function MemoCard({
+  memo,
+  variant = 'light',
   showLabel,
   priority = false,
   gridItem = false,
+  basePath = "/memos",
 }: MemoCardProps) {
   const isDark = variant === 'dark' || variant === 'featured';
   const isFeatured = variant === 'featured';
@@ -167,7 +169,7 @@ export function MemoCard({
   if (isFeatured) {
     return (
       <Link
-        href={`/memos/${memo.slug}`}
+        href={`${basePath}/${memo.slug}`}
         className="flex flex-col justify-end group relative overflow-hidden min-h-[320px] lg:min-h-[400px] border border-border-light bg-dark"
       >
         {imageEl}
@@ -192,7 +194,7 @@ export function MemoCard({
 
   return (
     <Link
-      href={`/memos/${memo.slug}`}
+      href={`${basePath}/${memo.slug}`}
       className={cn(
         "flex flex-col group relative overflow-hidden h-full",
         !isDark && (gridItem ? "border-b border-r border-l border-border-light" : "border border-border-light"),

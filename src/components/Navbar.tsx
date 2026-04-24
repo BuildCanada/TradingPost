@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { useSubscribeStore } from "@/components/subscribe/store";
 import { SOCIALS } from "@/constants/socials";
@@ -12,6 +13,8 @@ export default function Navbar() {
   const [showEmoji, setShowEmoji] = useState(false);
   const hasScrolled = useRef(false);
   const openModal = useSubscribeStore((s) => s.openModal);
+  const pathname = usePathname();
+  const isToronto = pathname?.startsWith("/toronto") ?? false;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -30,27 +33,38 @@ export default function Navbar() {
   return (
     <nav className="border-y-2 border-border flex items-stretch sticky top-[10px] z-50 bg-bg">
       {/* Logo */}
-      <Link
-        href="/"
-        className="bg-accent flex items-center px-4 py-3 shrink-0 relative"
-      >
-        <Image
-          src="/assets/logos/logo-standard.svg"
-          alt="Build Canada"
-          width={86}
-          height={40}
-          className="h-[36px] w-auto transition-opacity duration-500"
-          style={{ opacity: showEmoji ? 0 : 1 }}
-          priority
-        />
-        <span
-          className="absolute inset-0 flex items-center justify-center text-2xl transition-opacity duration-500 pointer-events-none"
-          style={{ opacity: showEmoji ? 1 : 0 }}
-          aria-hidden="true"
+      {isToronto ? (
+        <Link
+          href="/toronto/memos"
+          className="theme-toronto bg-accent flex items-center px-4 py-3 shrink-0 relative min-w-[120px]"
         >
-          🏗️🇨🇦
-        </span>
-      </Link>
+          <span className="font-sans font-medium text-bg text-[18px] leading-none whitespace-nowrap">
+            🏗️Toronto
+          </span>
+        </Link>
+      ) : (
+        <Link
+          href="/"
+          className="bg-accent flex items-center px-4 py-3 shrink-0 relative"
+        >
+          <Image
+            src="/assets/logos/logo-standard.svg"
+            alt="Build Canada"
+            width={86}
+            height={40}
+            className="h-[36px] w-auto transition-opacity duration-500"
+            style={{ opacity: showEmoji ? 0 : 1 }}
+            priority
+          />
+          <span
+            className="absolute inset-0 flex items-center justify-center text-2xl transition-opacity duration-500 pointer-events-none"
+            style={{ opacity: showEmoji ? 1 : 0 }}
+            aria-hidden="true"
+          >
+            🏗️🇨🇦
+          </span>
+        </Link>
+      )}
 
       {/* Desktop links */}
       <div className="hidden md:flex items-stretch">

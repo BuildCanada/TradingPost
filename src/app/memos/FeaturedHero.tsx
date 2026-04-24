@@ -7,7 +7,13 @@ import FeaturedCard from "@/components/FeaturedCard";
 import PickCard from "@/components/PickCard";
 import { MemoItem } from "./types";
 
-export default function FeaturedHero({ memos }: { memos: MemoItem[] }) {
+export default function FeaturedHero({
+  memos,
+  basePath,
+}: {
+  memos: MemoItem[];
+  basePath?: string;
+}) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isFading, setIsFading] = useState(false);
 
@@ -72,6 +78,7 @@ export default function FeaturedHero({ memos }: { memos: MemoItem[] }) {
                   memo={featuredMemos[activeIndex]}
                   label="Featured"
                   wide
+                  basePath={basePath}
                 />
               </div>
             )}
@@ -98,7 +105,7 @@ export default function FeaturedHero({ memos }: { memos: MemoItem[] }) {
           {latestSix.length > 0 && (
             <div className="grid grid-cols-1 cards:grid-cols-2 wide:grid-cols-3 gap-0 border-t border-border-light">
               {latestSix.map((m) => (
-                <PickCard key={m.id} memo={m} />
+                <PickCard key={m.id} memo={m} basePath={basePath} />
               ))}
             </div>
           )}

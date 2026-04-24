@@ -57,10 +57,12 @@ function mapMemo(m: YFMemo & { key_messages?: unknown[]; splash_image_url?: stri
 export async function fetchMemos(params?: {
   featured?: boolean;
   category?: string;
+  publication?: string;
 }): Promise<MemoSerialized[]> {
   const queryParams: Record<string, string> = {};
   if (params?.featured) queryParams.featured = "true";
   if (params?.category) queryParams.category = params.category;
+  if (params?.publication) queryParams.publication = params.publication;
 
   type MemoRow = YFMemo & { key_messages?: unknown[]; splash_image_url?: string | null };
 
@@ -81,8 +83,13 @@ export async function fetchMemos(params?: {
   return all.map(mapMemo);
 }
 
-export async function fetchMemo(slug: string) {
-  const m = await apiFetch<YFMemoDetail>(`/memos/${slug}`, { revalidate: 300 });
+export async function fetchMemo(slug: string, params?: { publication?: string }) {
+  const queryParams: Record<string, string> = {};
+  if (params?.publication) queryParams.publication = params.publication;
+  const m = await apiFetch<YFMemoDetail>(`/memos/${slug}`, {
+    revalidate: 300,
+    params: queryParams,
+  });
   const keyMessages = extractKeyMessages((m.key_messages ?? []) as unknown[]);
   const authorName = m.author?.name ?? "Build Canada";
   const authorSlug = m.author?.slug ?? "";

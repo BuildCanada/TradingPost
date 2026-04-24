@@ -68,7 +68,7 @@ export function MemoHero({
             Supporters
           </span>
           <div
-            className="prose-bc [&_p]:text-[15px] [&_p]:leading-[1.5]"
+            className="prose-bc [&_p]:text-[15px] [&_p]:leading-[1.5] [&_a]:text-text-secondary [&_a]:no-underline [&_a]:font-mono [&_a]:hover:text-dark"
             dangerouslySetInnerHTML={{ __html: supporters }}
           />
         </div>

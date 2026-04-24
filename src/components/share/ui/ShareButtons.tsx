@@ -1,5 +1,6 @@
 "use client";
 
+import posthog from "posthog-js";
 import { toast } from "sonner";
 
 interface ShareButtonsProps {
@@ -15,9 +16,14 @@ export function ShareButtons({ title, url }: ShareButtonsProps) {
     window.open(shareUrl, "_blank", "width=600,height=400");
   };
 
+  const track = (platform: string) => {
+    posthog.capture("memo_shared", { platform });
+  };
+
   const handleCopyLink = async () => {
     try {
       await navigator.clipboard.writeText(url);
+      track("copy");
       toast.success("Link copied to clipboard");
     } catch {
       toast.error("Failed to copy link");
@@ -27,11 +33,12 @@ export function ShareButtons({ title, url }: ShareButtonsProps) {
   return (
     <div className="flex gap-2">
       <button
-        onClick={() =>
+        onClick={() => {
+          track("x");
           openShareWindow(
             `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedTitle}`
-          )
-        }
+          );
+        }}
         className="w-12 h-12 flex items-center justify-center bg-dark text-white hover:bg-accent transition-colors cursor-pointer"
         aria-label="Share on X"
         type="button"
@@ -41,11 +48,12 @@ export function ShareButtons({ title, url }: ShareButtonsProps) {
         </svg>
       </button>
       <button
-        onClick={() =>
+        onClick={() => {
+          track("linkedin");
           openShareWindow(
             `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`
-          )
-        }
+          );
+        }}
         className="w-12 h-12 flex items-center justify-center bg-dark text-white hover:bg-accent transition-colors cursor-pointer"
         aria-label="Share on LinkedIn"
         type="button"
@@ -55,11 +63,12 @@ export function ShareButtons({ title, url }: ShareButtonsProps) {
         </svg>
       </button>
       <button
-        onClick={() =>
+        onClick={() => {
+          track("threads");
           openShareWindow(
             `https://www.threads.net/intent?postText=${encodedTitle}%20${encodedUrl}`
-          )
-        }
+          );
+        }}
         className="w-12 h-12 flex items-center justify-center bg-dark text-white hover:bg-accent transition-colors cursor-pointer"
         aria-label="Share on Threads"
         type="button"
@@ -89,7 +98,10 @@ export function ShareButtons({ title, url }: ShareButtonsProps) {
         </svg>
       </button>
       <button
-        onClick={() => window.print()}
+        onClick={() => {
+          track("print");
+          window.print();
+        }}
         className="w-12 h-12 flex items-center justify-center bg-dark text-white hover:bg-accent transition-colors cursor-pointer"
         aria-label="Print"
         type="button"

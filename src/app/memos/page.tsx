@@ -40,10 +40,10 @@ export default async function MemosPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <section className="px-5 pt-[120px] pb-[100px] md:pt-[140px] md:pb-[120px] border-b border-border-light">
+      <section className="px-5 pt-10 pb-6 md:pt-12 md:pb-8 border-b border-border-light">
         <div className="max-w-[1080px] mx-auto">
           <SectionLabel as="h2">Memos</SectionLabel>
-          <h1 className="type-display mt-4 mb-6 text-dark">
+          <h1 className="type-h2 mt-2 mb-1 text-dark">
             Ideas for a Better Canada
           </h1>
           <p className="type-body max-w-[600px] text-dark/70">

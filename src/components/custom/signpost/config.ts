@@ -11,6 +11,8 @@ export interface TocItem {
 
 export interface SignpostProps {
   headings: Heading[];
+  shareTitle?: string;
+  shareUrl?: string;
 }
 
 export const COL = 24;

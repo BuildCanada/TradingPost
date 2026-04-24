@@ -12,6 +12,8 @@ interface SignpostState {
   readIds: Set<string>;
   progress: number;
   navigateTo: (id: string) => void;
+  shareTitle?: string;
+  shareUrl?: string;
 }
 
 const Ctx = createContext<SignpostState | null>(null);

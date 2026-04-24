@@ -8,7 +8,7 @@ import { SignpostProvider } from "./store";
 import { MobileBar } from "./mobile-bar";
 import { DesktopNav } from "./desktop-nav";
 
-export function Signpost({ headings }: SignpostProps) {
+export function Signpost({ headings, shareTitle, shareUrl }: SignpostProps) {
   const activeId = useScrollSpy(headings);
   const progress = useReadingProgress();
   const tree = useBuildTree(headings);
@@ -42,6 +42,8 @@ export function Signpost({ headings }: SignpostProps) {
         readIds,
         progress,
         navigateTo,
+        shareTitle,
+        shareUrl,
       }}
     >
       <MobileBar />

@@ -132,8 +132,6 @@ export default async function MemoDetailPage({
     <div className="space-y-5">
       <ShareSection title={memo.title} url={fullUrl} />
       <MemoSubscribe />
-      {memo.twitterEmbed && <TwitterEmbed html={memo.twitterEmbed} />}
-      <RelatedMemos related={relatedMemos} category={relatedCategory} />
     </div>
   );
 
@@ -214,7 +212,7 @@ export default async function MemoDetailPage({
         className="animate-fade-in max-w-[1400px] mx-auto px-[5vw] md:px-[10vw] pt-[42px] pb-[52px] 2xl-memo:grid 2xl-memo:grid-cols-[240px_minmax(0,1fr)] 2xl-memo:gap-12"
         style={{ animationDelay: "0.3s" }}
       >
-        <Signpost headings={headings} />
+        <Signpost headings={headings} shareTitle={memo.title} shareUrl={fullUrl} />
 
         <article className="max-w-[720px]" data-memo-content>
           <div className="mb-8 p-6 border-[3px] border-double border-border-light bg-[#f0e5dc] space-y-4">
@@ -242,6 +240,13 @@ export default async function MemoDetailPage({
           <div className="print-hide 2xl-memo:hidden mt-10 pt-8 border-t border-border-light">
             {sidebar}
           </div>
+
+          {(memo.twitterEmbed || relatedMemos.length > 0) && (
+            <div className="print-hide hidden md:block 2xl-memo:hidden mt-10 pt-8 border-t border-border-light space-y-5">
+              {memo.twitterEmbed && <TwitterEmbed html={memo.twitterEmbed} />}
+              <RelatedMemos related={relatedMemos} category={relatedCategory} />
+            </div>
+          )}
         </article>
       </div>
     </div>

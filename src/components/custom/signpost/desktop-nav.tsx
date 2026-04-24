@@ -6,9 +6,10 @@ import { useSignpost } from "./store";
 import { Track } from "./track";
 import { Indicator } from "./progress-tracker";
 import { TocTree } from "./toc-tree";
+import { ShareButtons } from "@/components/share/ui/ShareButtons";
 
 export function DesktopNav() {
-  const { tree, activeId, activeParentId, navigateTo } = useSignpost();
+  const { tree, activeId, activeParentId, navigateTo, shareTitle, shareUrl } = useSignpost();
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -38,6 +39,12 @@ export function DesktopNav() {
   return (
     <nav className="hidden 2xl-memo:block" aria-label="Table of contents">
       <div className="sticky top-[90px] border-accent border-t-[2px] overflow-x-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {shareTitle && shareUrl && (
+          <div className="pb-4 mb-4 border-b border-border-light">
+            <span className="type-label text-text-secondary block mb-3">Share</span>
+            <ShareButtons title={shareTitle} url={shareUrl} />
+          </div>
+        )}
         <div className="relative" ref={containerRef}>
           <Track />
           <Indicator visible={!!activeId} />

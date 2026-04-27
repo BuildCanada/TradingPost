@@ -44,7 +44,7 @@ export default async function ProjectsPage() {
       <div className="animate-fade-in" style={{ animationDelay: "0.4s" }}>
       <section className="px-5 py-12">
         <div className="max-w-[1080px] mx-auto">
-          <ProjectsGrid excludeSlugs={["great-builders"]} />
+          <ProjectsGrid />
         </div>
       </section>
       </div>

@@ -7,7 +7,6 @@ export { PostListRow } from "./PostListRow";
 export { PaginationArrows } from "./PaginationArrows";
 export { EmptyState } from "./EmptyState";
 export { FeedSkeleton } from "./FeedSkeleton";
-export { GreatBuildersSection } from "./GreatBuildersSection";
 export {
   FILTERS,
   TYPE_MAP,

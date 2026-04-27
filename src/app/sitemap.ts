@@ -1,6 +1,5 @@
 import type { MetadataRoute } from "next";
-import { fetchFeedItems, fetchMemos } from "@/lib/api";
-import { builders } from "@/lib/builders";
+import { fetchBuilders, fetchFeedItems, fetchMemos } from "@/lib/api";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://buildcanada.com";
@@ -14,6 +13,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/privacy-notice`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
   ];
 
+  const builders = await fetchBuilders();
   const builderPages: MetadataRoute.Sitemap = builders.map((b) => ({
     url: `${baseUrl}/builders/${b.slug}`,
     lastModified: new Date(),

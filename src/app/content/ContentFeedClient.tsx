@@ -11,7 +11,6 @@ import {
   PostListRow,
   PaginationArrows,
   EmptyState,
-  GreatBuildersSection,
   TYPE_MAP,
   FILTERS,
   POSTS_PER_PAGE,
@@ -146,10 +145,6 @@ export default function ContentFeedClient({
               })()}
           </div>
         </section>
-      </div>
-
-      <div className="animate-fade-in" style={{ animationDelay: "1.2s" }}>
-        <GreatBuildersSection />
       </div>
     </>
   );

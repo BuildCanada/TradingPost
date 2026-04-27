@@ -8,6 +8,7 @@ import { SubscribeButton } from "@/components/ui/subscribe-button";
 import EventsTimeline from "@/components/EventsTimeline";
 import FeedPreview from "@/components/FeedPreview";
 import CyclingWord from "@/components/CyclingWord";
+import { HeroVideo } from "@/components/HeroVideo";
 import SectionLabel from "@/components/SectionLabel";
 import { buildGraph } from "@/lib/schemas/graph";
 import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
@@ -21,20 +22,7 @@ function HeroSection() {
 
   return (
     <section className="w-full bg-dark flex items-center justify-center h-[45svh] md:h-[65svh] relative overflow-hidden">
-      <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="auto"
-        poster="/assets/images/hero-poster.webp"
-        className="absolute inset-0 w-full h-full object-cover brightness-[0.35]"
-      >
-        <source
-          src="/assets/videos/SplashVideo1m.mp4"
-          type="video/mp4"
-        />
-      </video>
+      <HeroVideo videoId="f3eef7c427fbb9f1f308faa4d9464a3c" />
 
       <div className="absolute inset-0 z-[5] pointer-events-none" aria-hidden="true">
         <div

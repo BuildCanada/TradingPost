@@ -209,7 +209,7 @@ export default async function MemoDetailPage({
       />
 
       <div
-        className="animate-fade-in max-w-[1400px] mx-auto px-[5vw] md:px-[10vw] pt-[42px] pb-[52px] 2xl-memo:grid 2xl-memo:grid-cols-[240px_minmax(0,1fr)] 2xl-memo:gap-12"
+        className="animate-fade-in max-w-[1400px] mx-auto px-[5vw] md:px-[10vw] pt-4 pb-[52px] 2xl-memo:grid 2xl-memo:grid-cols-[240px_minmax(0,1fr)] 2xl-memo:gap-12"
         style={{ animationDelay: "0.3s" }}
       >
         <Signpost headings={headings} shareTitle={memo.title} shareUrl={fullUrl} />

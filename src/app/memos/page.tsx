@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { fetchMemos, getSiteConfig } from "@/lib/api";
-import SectionLabel from "@/components/SectionLabel";
 import MemosListClient from "./MemosListClient";
+import { PageHeader } from "@/components/ui/page-header";
 import { buildGraph } from "@/lib/schemas/graph";
 import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
 import { generateBreadcrumbSchema } from "@/lib/schemas/generators/breadcrumb";
@@ -40,17 +40,10 @@ export default async function MemosPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <section className="px-5 pt-10 pb-6 md:pt-12 md:pb-8 border-b border-border-light">
-        <div className="max-w-[1080px] mx-auto">
-          <SectionLabel as="h2">Memos</SectionLabel>
-          <h1 className="type-h2 mt-2 mb-1 text-dark">
-            Ideas for a Better Canada
-          </h1>
-          <p className="type-body max-w-[600px] text-dark/70">
-            Bold thinking from Canada&apos;s leading builders and doers.
-          </p>
-        </div>
-      </section>
+      <PageHeader
+        title={<>Memos &mdash; Ideas for a Better Canada</>}
+        description="Bold thinking from Canada's leading builders and doers."
+      />
 
       <Suspense>
         <MemosListClient memos={serialized} />

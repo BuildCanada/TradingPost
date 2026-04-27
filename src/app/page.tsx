@@ -31,7 +31,7 @@ function HeroSection() {
         className="absolute inset-0 w-full h-full object-cover brightness-[0.35]"
       >
         <source
-          src="/assets/videos/IntroVideo_buildcanada_splash.mp4"
+          src="/assets/videos/SplashVideo1m.mp4"
           type="video/mp4"
         />
       </video>

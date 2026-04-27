@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import SectionLabel from "@/components/SectionLabel";
+import { PageHeader } from "@/components/ui/page-header";
 import { fetchBuilders } from "@/lib/api/builders";
 
 export const metadata: Metadata = {
@@ -15,13 +15,12 @@ export default async function BuildersPage() {
 
   return (
     <div className="mx-[10px] my-[10px] border border-border-light bg-bg">
+      <PageHeader
+        title="Great Canadian Builders"
+        description="Short stories celebrating the incredible builders who shaped Canada."
+      />
       <section className="px-5 py-12">
         <div className="max-w-[1080px] mx-auto">
-          <SectionLabel as="h2">Great Canadian Builders</SectionLabel>
-          <p className="type-body text-text-secondary mb-8">
-            Short stories celebrating the incredible builders who shaped Canada.
-          </p>
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
             {builders.map((builder) => (
               <Link

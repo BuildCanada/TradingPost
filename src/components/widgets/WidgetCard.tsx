@@ -5,9 +5,14 @@ import registry from "./registry";
 import WidgetPlaceholder from "./WidgetPlaceholder";
 import { ProjectData } from "./types";
 
+const INTERNAL_HREFS: Record<string, string> = {
+  "outcomes-tracker": "/tracker",
+};
+
 export default function WidgetCard({ project }: { project: ProjectData }) {
   const Widget = registry[project.slug];
   const isBig = project.featured;
+  const internalHref = INTERNAL_HREFS[project.slug];
 
   return (
     <div
@@ -25,14 +30,25 @@ export default function WidgetCard({ project }: { project: ProjectData }) {
         )}
       </div>
       <div className="border-t border-border-light">
-        <Button
-          as="external-link"
-          href={project.externalUrl}
-          variant="ghost"
-          className="border-0 w-full justify-start"
-        >
-          View Project
-        </Button>
+        {internalHref ? (
+          <Button
+            as="link"
+            href={internalHref}
+            variant="ghost"
+            className="border-0 w-full justify-start"
+          >
+            View Project
+          </Button>
+        ) : (
+          <Button
+            as="external-link"
+            href={project.externalUrl}
+            variant="ghost"
+            className="border-0 w-full justify-start"
+          >
+            View Project
+          </Button>
+        )}
       </div>
     </div>
   );

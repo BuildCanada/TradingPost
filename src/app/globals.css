@@ -5,7 +5,7 @@
 @import "../styles/tracker-theme.css";
 
 html {
-  scroll-behavior: smooth;
+  scroll-behavior: auto;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }

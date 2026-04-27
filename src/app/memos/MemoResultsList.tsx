@@ -13,23 +13,21 @@ function MemoGridRow({ memo, basePath }: { memo: MemoItem; basePath: string }) {
       href={`${basePath}/${memo.slug}`}
       className="flex flex-col border-b border-r border-border-light group hover:bg-linen-50 transition-colors"
     >
-      <div className="flex items-start gap-4 p-5 flex-1">
-        <div
-          className="w-10 h-10 bg-border-light shrink-0 overflow-hidden mt-0.5 rounded-none"
-        >
+      <div className="grid grid-cols-[7rem_1fr] wide:grid-cols-[6.125rem_1fr] flex-1">
+        <div className="relative overflow-hidden aspect-square bg-border-light">
           {memo.author.photo && (
             <Image
               src={memo.author.photo}
               alt={memo.author.name}
-              width={40}
-              height={40}
-              className="w-full h-full object-cover"
+              width={64}
+              height={64}
+              className="absolute inset-0 w-full h-full object-cover"
               unoptimized
             />
           )}
         </div>
 
-        <div className="flex-1 min-w-0">
+        <div className="min-w-0 p-5">
           <h3 className="type-h4 group-hover:text-accent transition-colors line-clamp-1">
             {memo.title}
           </h3>
@@ -101,7 +99,7 @@ export default function MemoResultsList({
     <div className="animate-fade-in" style={{ animationDelay: "1.6s" }}>
       <section className="px-5 py-10 border-b border-border-light">
         <div className="max-w-[1080px] mx-auto">
-          <SectionLabel as="h2">
+          <SectionLabel as="h2" className={activeCategory ? "capitalize" : undefined}>
             {activeCategory
               ? `${activeCategory.replace(/-/g, " ")} Memos`
               : "All Memos"}

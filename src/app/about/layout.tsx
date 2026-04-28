@@ -4,6 +4,7 @@ export const metadata: Metadata = {
   title: "About",
   description:
     "Build Canada exists to platform the bold — individuals, ideas, and reforms — that can push our country to new frontiers.",
+  alternates: { canonical: "/about" },
   openGraph: {
     title: "About",
     description:

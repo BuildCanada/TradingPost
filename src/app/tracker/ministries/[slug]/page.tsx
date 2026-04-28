@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import BurnUpChartWrapper from "@/components/tracker/BurnUpChartWrapper";
 import { fetchApi } from "@/lib/tracker-api";
@@ -6,6 +7,20 @@ import type {
   CommitmentsResponse,
   BurnUpResponse,
 } from "@/lib/commitment-types";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const name = slug.replace(/-/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+  return {
+    title: `${name} - Outcomes Tracker - Build Canada`,
+    description: `Tracked commitments and progress under ${name}.`,
+    alternates: { canonical: `/tracker/ministries/${slug}` },
+  };
+}
 
 const STATUS_LABELS: Record<string, string> = {
   not_started: "Not Started",

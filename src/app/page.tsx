@@ -178,10 +178,12 @@ function SocialLinks() {
             />
           </a>
         ))}
-        <div className="w-px h-[18px] bg-border-light mx-0.5" />
-        <LinkButton href="/content" variant="primary">
-          Full Archive
-        </LinkButton>
+        {/* /content is being phased out — hide entry point until decision is finalized.
+            <div className="w-px h-[18px] bg-border-light mx-0.5" />
+            <LinkButton href="/content" variant="primary">
+              Full Archive
+            </LinkButton>
+        */}
       </div>
     </div>
   );

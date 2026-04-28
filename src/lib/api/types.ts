@@ -111,3 +111,69 @@ export interface YFFeedItemDetail extends YFFeedItem {
   embed_code: string | null;
   author_photo_url: string | null;
 }
+
+export type YFAgreementStatus =
+  | "awaiting_sponsorship"
+  | "under_negotiation"
+  | "agreement_reached"
+  | "partially_implemented"
+  | "implemented"
+  | "deferred";
+
+export type YFAgreementJurisdictionStatus =
+  | "unknown"
+  | "aware"
+  | "considering"
+  | "engaged"
+  | "committed"
+  | "implementing"
+  | "complete"
+  | "declined"
+  | "not_applicable";
+
+export interface YFTheme {
+  id: number;
+  name: string;
+}
+
+export interface YFJurisdiction {
+  id: number;
+  name: string;
+  code: string;
+  level: "federal" | "provincial" | "territorial";
+}
+
+export interface YFAgreementHistoryEntry {
+  status: YFAgreementStatus;
+  date_entered: string;
+}
+
+export interface YFJurisdictionHistoryEntry {
+  status: YFAgreementJurisdictionStatus;
+  date_entered: string;
+}
+
+export interface YFAgreementJurisdiction extends YFJurisdiction {
+  status: YFAgreementJurisdictionStatus;
+  notes: string | null;
+  history?: YFJurisdictionHistoryEntry[];
+}
+
+export interface YFAgreement {
+  id: number;
+  slug: string;
+  title: string;
+  summary: string | null;
+  status: YFAgreementStatus;
+  theme: YFTheme | null;
+  deadline: string | null;
+  launch_date: string | null;
+  source_url: string | null;
+  jurisdictions: YFAgreementJurisdiction[];
+  history: YFAgreementHistoryEntry[];
+  updated_at: string;
+}
+
+export interface YFAgreementDetail extends YFAgreement {
+  description: string | null;
+}

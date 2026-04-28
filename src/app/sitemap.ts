@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { fetchBuilders, fetchFeedItems, fetchMemos, fetchTools } from "@/lib/api";
+import { fetchAgreements } from "@/lib/api/trade-barriers";
 import { fetchApi } from "@/lib/tracker-api";
 import type {
   CommitmentsResponse,
@@ -16,6 +17,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/tracker`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
     { url: `${baseUrl}/tracker/commitments`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.7 },
     { url: `${baseUrl}/tracker/faq`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.4 },
+    { url: `${baseUrl}/trade-barriers`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
     { url: `${baseUrl}/builders`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
     { url: `${baseUrl}/about`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
     { url: `${baseUrl}/privacy-notice`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
@@ -89,6 +91,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
+  let agreementPages: MetadataRoute.Sitemap = [];
+  try {
+    const agreements = await fetchAgreements();
+    agreementPages = agreements.map((a) => ({
+      url: `${baseUrl}/trade-barriers/${a.slug}`,
+      lastModified: a.updated_at ? new Date(a.updated_at) : new Date(),
+      changeFrequency: "weekly",
+      priority: 0.6,
+    }));
+  } catch {
+    // Trade barriers API may not be available yet — skip without failing the sitemap.
+  }
+
   return [
     ...staticPages,
     ...projectPages,
@@ -97,5 +112,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...builderPages,
     ...memoPages,
     ...feedPages,
+    ...agreementPages,
   ];
 }

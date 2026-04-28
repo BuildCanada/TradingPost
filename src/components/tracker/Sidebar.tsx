@@ -44,13 +44,13 @@ function TrackerSubnav() {
 function SidebarLogo() {
   return (
     <div className="flex items-start gap-3 mb-8">
-      <a href="https://www.buildcanada.com" className="flex-shrink-0 mt-1">
+      <Link href="/" className="flex-shrink-0 mt-1">
         <img
           src="/tracker/buildcanada-logo-square.svg"
           alt="Build Canada"
           className="h-[4.5rem] w-[4.5rem]"
         />
-      </a>
+      </Link>
       <Link href="/tracker">
         <h1 className="text-4xl font-bold leading-none">
           Outcomes

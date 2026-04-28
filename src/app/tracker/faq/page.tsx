@@ -4,6 +4,7 @@ export const metadata: Metadata = {
   title: "FAQ - Outcomes Tracker - Build Canada",
   description:
     "Frequently asked questions about the Build Canada Outcomes Tracker.",
+  alternates: { canonical: "/tracker/faq" },
 };
 
 const FAQS: { question: string; answer: React.ReactNode }[] = [

@@ -15,7 +15,7 @@ export const metadata: Metadata = {
     template: "%s | Build Canada",
   },
   description:
-    "Canada's Voice for Builders. Bold thinking from builders, reformers, and leaders pushing Canada to new frontiers.",
+    "Bold thinking from builders, reformers, and leaders pushing Canada to new frontiers.",
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL || "https://buildcanada.com"
   ),
@@ -26,7 +26,8 @@ export const metadata: Metadata = {
     type: "website",
     siteName: "Build Canada",
     title: "Build Canada",
-    description: "Canada's Voice for Builders.",
+    description:
+      "Bold thinking from builders, reformers, and leaders pushing Canada to new frontiers.",
   },
   twitter: {
     card: "summary_large_image",

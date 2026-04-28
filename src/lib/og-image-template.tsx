@@ -149,9 +149,7 @@ export function BuildCanadaOGImage({ title, description, badge, label }: OGImage
             {badge}
           </span>
         ) : (
-          <span style={{ fontSize: "24px", color: theme.foregroundFaint }}>
-            Canada&apos;s Voice for Builders
-          </span>
+          <span />
         )}
         <span style={{ fontSize: "22px", color: theme.foregroundFaint }}>
           buildcanada.com

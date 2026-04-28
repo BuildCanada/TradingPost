@@ -7,9 +7,8 @@ export const contentType = "image/png";
 export default async function Image() {
   return new ImageResponse(
     <BuildCanadaOGImage
-      title="Canada's Voice for Builders"
+      title="Build Canada"
       description="Bold thinking from builders, reformers, and leaders pushing Canada to new frontiers."
-      label="Homepage"
     />,
     { ...size }
   );

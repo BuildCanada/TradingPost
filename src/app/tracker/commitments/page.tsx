@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useCallback, useRef, useState } from "react";
+import { Suspense, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import useSWR from "swr";
 import { Search, ChevronUp, ChevronDown } from "lucide-react";
@@ -76,14 +76,14 @@ function CommitmentsPageInner() {
   const perPage = 50;
 
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const handleSearchChange = useCallback((value: string) => {
+  function handleSearchChange(value: string) {
     setSearch(value);
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       setDebouncedSearch(value);
       setPage(1);
     }, 300);
-  }, []);
+  }
 
   const qs = buildQueryString({
     q: debouncedSearch,

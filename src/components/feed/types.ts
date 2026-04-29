@@ -16,7 +16,7 @@ export interface FeedItem {
 }
 
 export const SOCIAL_TYPES = new Set(["X", "TIKTOK", "IG", "YOUTUBE"]);
-export const INTERNAL_TYPES = new Set(["MEMO", "BLOG", "BUILDER"]);
+export const INTERNAL_TYPES = new Set(["MEMO", "BLOG", "BUILDER", "POST"]);
 export const SOCIAL_FALLBACK_IMAGE = "/assets/logos/logo-standard.svg";
 
 export function isValidImage(src: string | null): boolean {
@@ -32,6 +32,7 @@ export function feedImage(item: FeedItem): string | null {
 
 export function itemHref(item: FeedItem): string {
   if (item.type === "BLOG") return `/content/${item.id}`;
+  if (item.type === "POST" && item.slug) return `/posts/${item.slug}`;
   if (item.type === "MEMO" && item.slug) return `/memos/${item.slug}`;
   if (item.type === "BUILDER" && item.slug) return `/builders/${item.slug}`;
   return item.url || "/content";

@@ -6,6 +6,6 @@ export { TikTokCard } from "./TikTokCard";
 export { SubstackCard } from "./SubstackCard";
 export { MemoCard } from "./MemoCard";
 export { BuilderCard } from "./BuilderCard";
-export { BlogCard } from "./BlogCard";
+export { StatementCard } from "./StatementCard";
 export { FeedCard } from "./FeedCard";
 export type { FeedItem } from "./types";

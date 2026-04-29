@@ -1,4 +1,4 @@
-import { fetchFeedPicks } from "@/lib/api";
+import { fetchFeedPicks, fetchPosts } from "@/lib/api";
 import {
   IGCard,
   XCard,
@@ -6,14 +6,55 @@ import {
   SubstackCard,
   MemoCard,
   BuilderCard,
-  BlogCard,
+  StatementCard,
   FeedCard,
+  type FeedItem,
 } from "@/components/feed";
 import { Button } from "@/components/ui/button";
 import { SectionHeader } from "@/components/ui/section-header";
 
 export default async function FeedPreview() {
-  const picks = await fetchFeedPicks("x,substack,blog|builder,x:canada_spends");
+  const [picks, posts] = await Promise.all([
+    fetchFeedPicks("x,substack,builder,x:canada_spends"),
+    fetchPosts(),
+  ]);
+
+  const latestPost = posts
+    .filter((p) => p.publishedAt)
+    .sort((a, b) => (b.publishedAt ?? "").localeCompare(a.publishedAt ?? ""))[0];
+
+  const builderIdx = picks.findIndex((p) => p.type === "BUILDER");
+  const builderPick = builderIdx >= 0 ? picks[builderIdx] : null;
+
+  const postIsNewer =
+    latestPost &&
+    (!builderPick ||
+      (latestPost.publishedAt ?? "") > builderPick.publishedAt);
+
+  if (latestPost && postIsNewer) {
+    const postFeedItem: FeedItem = {
+      id: `post-${latestPost.id}`,
+      type: "POST",
+      feedableType: "Post",
+      title: latestPost.title,
+      subtitle: null,
+      author: latestPost.author?.name ?? null,
+      accountHandle: null,
+      image: latestPost.seoImage,
+      body: latestPost.keyMessage1,
+      url: null,
+      slug: latestPost.slug,
+      authorPhoto: latestPost.author?.photo ?? null,
+      publishedAt: latestPost.publishedAt ?? latestPost.createdAt,
+      createdAt: latestPost.publishedAt ?? latestPost.createdAt,
+    };
+    if (builderIdx >= 0) {
+      picks.splice(builderIdx, 1, postFeedItem);
+    } else {
+      picks.push(postFeedItem);
+    }
+  }
+
   const items = Array.from(
     new Map(picks.map((item) => [item.id, item])).values(),
   );
@@ -23,7 +64,7 @@ export default async function FeedPreview() {
       <SectionHeader
         label="Latest Pieces"
         action={
-          <Button as="link" variant="charcoal" href="/content">
+          <Button as="link" variant="charcoal" href="/posts">
             View all
           </Button>
         }
@@ -44,8 +85,8 @@ export default async function FeedPreview() {
                   return <MemoCard key={item.id} item={item} />;
                 case "BUILDER":
                   return <BuilderCard key={item.id} item={item} />;
-                case "BLOG":
-                  return <BlogCard key={item.id} item={item} />;
+                case "POST":
+                  return <StatementCard key={item.id} item={item} />;
                 default:
                   return <FeedCard key={item.id} item={item} />;
               }

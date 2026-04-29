@@ -3,7 +3,7 @@
 import SectionLabel from "@/components/SectionLabel";
 import { useMemosFilter } from "./store";
 
-export default function MemoSearch() {
+export default function MemoSearch({ placeholder = "Search memos..." }: { placeholder?: string } = {}) {
   const search = useMemosFilter((s) => s.search);
   const setSearch = useMemosFilter((s) => s.setSearch);
 
@@ -38,7 +38,7 @@ export default function MemoSearch() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search memos..."
+              placeholder={placeholder}
               className="flex-1 bg-transparent font-mono text-base tracking-normal outline-none placeholder:text-text-secondary"
             />
             {search && (

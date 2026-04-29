@@ -28,9 +28,13 @@ function CategoryFromSearchParams({ categories }: { categories: string[] }) {
 export default function MemosListClient({
   memos,
   basePath = "/memos",
+  showCategoryFilter = true,
+  resultsLabel,
 }: {
   memos: MemoItem[];
   basePath?: string;
+  showCategoryFilter?: boolean;
+  resultsLabel?: string;
 }) {
   const categories = useMemo(() => {
     const cats = new Set<string>();
@@ -42,13 +46,15 @@ export default function MemosListClient({
 
   return (
     <>
-      <Suspense fallback={null}>
-        <CategoryFromSearchParams categories={categories} />
-      </Suspense>
+      {showCategoryFilter && (
+        <Suspense fallback={null}>
+          <CategoryFromSearchParams categories={categories} />
+        </Suspense>
+      )}
       <FeaturedHero memos={memos} basePath={basePath} />
-      <CategoryFilter categories={categories} />
-      <MemoSearch />
-      <MemoResultsList memos={memos} basePath={basePath} />
+      {showCategoryFilter && <CategoryFilter categories={categories} />}
+      <MemoSearch placeholder={`Search ${(resultsLabel ?? "memos").toLowerCase()}...`} />
+      <MemoResultsList memos={memos} basePath={basePath} resultsLabel={resultsLabel} />
     </>
   );
 }

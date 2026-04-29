@@ -88,6 +88,20 @@ export interface YFFaq {
   position: number;
 }
 
+export interface YFPost {
+  id: number;
+  slug: string;
+  title: string;
+  summary: string | null;
+  published_at: string | null;
+  seo_image_url: string | null;
+}
+
+export interface YFPostDetail extends YFPost {
+  body: string | null;
+  body_markdown: string | null;
+}
+
 export interface YFFeedItem {
   id: number;
   feedable_type: string;

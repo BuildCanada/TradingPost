@@ -9,7 +9,7 @@ export interface Memo {
   author: {
     name: string;
     photo: string | null;
-  };
+  } | null;
   keyMessage1?: string | null;
   category?: string | null;
   splashImage?: string | null;
@@ -121,18 +121,19 @@ export function MemoCard({
     </span>
   ) : null;
 
+  const author = memo.author;
   const authorBlock = (
     <div className="flex items-center gap-4">
-      {memo.author.photo && (
-        <div 
+      {author?.photo && (
+        <div
           className={cn(
             "bg-border-light overflow-hidden shrink-0",
             isFeatured ? "w-14 h-14 lg:w-16 lg:h-16" : "w-12 h-12 lg:w-[60px] lg:h-[60px]"
           )}
         >
           <Image
-            src={memo.author.photo}
-            alt={memo.author.name}
+            src={author.photo}
+            alt={author.name}
             width={64}
             height={64}
             className="w-full h-full object-cover"
@@ -141,13 +142,15 @@ export function MemoCard({
         </div>
       )}
       <div>
-        <p className={cn(
-          "font-display font-normal leading-[1.4]",
-          isDark ? "text-bg" : "",
-          isFeatured ? "text-[1.125rem] lg:text-[1.25rem]" : "text-[1rem] lg:text-[1.125rem]"
-        )}>
-          {memo.author.name}
-        </p>
+        {author && (
+          <p className={cn(
+            "font-display font-normal leading-[1.4]",
+            isDark ? "text-bg" : "",
+            isFeatured ? "text-[1.125rem] lg:text-[1.25rem]" : "text-[1rem] lg:text-[1.125rem]"
+          )}>
+            {author.name}
+          </p>
+        )}
         <p className={cn(
           "type-label mt-0.5",
           isDark ? "text-bg/70" : "text-text-secondary"
@@ -233,13 +236,13 @@ export function MemoCard({
               )}
             </div>
             <div className="flex items-center gap-3 mt-auto">
-              {memo.author.photo && (
-                <div 
+              {author?.photo && (
+                <div
                   className="w-10 h-10 lg:w-12 lg:h-12 bg-border-light overflow-hidden shrink-0"
                         >
                   <Image
-                    src={memo.author.photo}
-                    alt={memo.author.name}
+                    src={author.photo}
+                    alt={author.name}
                     width={48}
                     height={48}
                     className="w-full h-full object-cover"
@@ -248,9 +251,11 @@ export function MemoCard({
                 </div>
               )}
               <div>
-                <p className="font-display text-[0.875rem] lg:text-[1rem] font-normal leading-[1.4]">
-                  {memo.author.name}
-                </p>
+                {author && (
+                  <p className="font-display text-[0.875rem] lg:text-[1rem] font-normal leading-[1.4]">
+                    {author.name}
+                  </p>
+                )}
                 <p className="type-label text-text-secondary mt-0.5">
                   {formatCategory(memo.category)}
                 </p>

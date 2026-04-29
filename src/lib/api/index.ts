@@ -4,6 +4,8 @@ export { getSiteConfig } from "./config";
 export { fetchFaqs } from "./faqs";
 export { fetchFeedItem, fetchFeedItems, fetchFeedItemsSimple, fetchFeedPicks } from "./feed";
 export { fetchMemo, fetchMemos } from "./memos";
+export { fetchPost, fetchPosts } from "./posts";
+export type { PostDetail } from "./posts";
 export { fetchTeamMembers } from "./team";
 export { fetchTestimonials } from "./testimonials";
 export { fetchTools } from "./tools";

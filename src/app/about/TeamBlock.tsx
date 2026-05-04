@@ -4,7 +4,6 @@ import type { Person } from "./types";
 const roleGroups = [
   { key: "CORE", label: "Core Team", id: "core-team" },
   { key: "BOARD", label: "Board", id: "board" },
-  { key: "MEMO_AUTHOR", label: "Memo Authors", id: "memo-authors" },
 ] as const;
 
 export default function TeamBlock({ members }: { members: Person[] }) {

@@ -9,7 +9,7 @@ export interface MemoItem {
   keyMessage1: string | null;
   keyMessage2: string | null;
   keyMessage3: string | null;
-  splashImage: string | null;
+  bannerImage: string | null;
   seoImage: string | null;
   category: string | null;
   featured: boolean;

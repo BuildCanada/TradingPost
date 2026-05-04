@@ -40,7 +40,7 @@ export default async function FeedPreview() {
       subtitle: null,
       author: latestPost.author?.name ?? null,
       accountHandle: null,
-      image: latestPost.seoImage,
+      image: latestPost.bannerImage,
       body: latestPost.keyMessage1,
       url: null,
       slug: latestPost.slug,

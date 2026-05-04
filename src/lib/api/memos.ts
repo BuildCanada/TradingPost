@@ -15,7 +15,7 @@ interface MemoSerialized {
   keyMessage1: string | null;
   keyMessage2: string | null;
   keyMessage3: string | null;
-  splashImage: string | null;
+  bannerImage: string | null;
   seoImage: string | null;
   category: string | null;
   featured: boolean;
@@ -31,7 +31,7 @@ function extractKeyMessages(raw: unknown[]): string[] {
   });
 }
 
-function mapMemo(m: YFMemo & { key_messages?: unknown[]; splash_image_url?: string | null; seo_image_url?: string | null }): MemoSerialized {
+function mapMemo(m: YFMemo & { key_messages?: unknown[] }): MemoSerialized {
   const keyMessages = extractKeyMessages(m.key_messages ?? []);
   const authorName = m.author?.name ?? "Build Canada";
   return {
@@ -45,7 +45,7 @@ function mapMemo(m: YFMemo & { key_messages?: unknown[]; splash_image_url?: stri
     keyMessage1: keyMessages[0] ?? null,
     keyMessage2: keyMessages[1] ?? null,
     keyMessage3: keyMessages[2] ?? null,
-    splashImage: m.splash_image_url ?? null,
+    bannerImage: m.banner_image_url ?? null,
     seoImage: m.seo_image_url ?? null,
     category: m.category,
     featured: m.featured,
@@ -64,7 +64,7 @@ export async function fetchMemos(params?: {
   if (params?.category) queryParams.category = params.category;
   if (params?.publication) queryParams.publication = params.publication;
 
-  type MemoRow = YFMemo & { key_messages?: unknown[]; splash_image_url?: string | null };
+  type MemoRow = YFMemo & { key_messages?: unknown[] };
 
   const all: MemoRow[] = [];
   let page = 1;
@@ -129,7 +129,7 @@ export async function fetchMemo(slug: string, params?: { publication?: string })
     body: m.body,
     appendix: m.appendix,
     supporters: m.supporters,
-    splashImage: m.splash_image_url ?? null,
+    bannerImage: m.banner_image_url ?? null,
     seoImage: m.seo_image_url ?? null,
     category: m.category,
     featured: m.featured,

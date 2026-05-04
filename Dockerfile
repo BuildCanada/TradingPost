@@ -16,6 +16,16 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+
+# Build-time configuration — forwarded into `next build` so server-side
+# fetches during static generation hit the correct API host.
+ARG TRACKER_API_BASE
+ARG NEXT_PUBLIC_TRACKER_API_BASE
+ARG NEXT_PUBLIC_SITE_URL
+ENV TRACKER_API_BASE=$TRACKER_API_BASE
+ENV NEXT_PUBLIC_TRACKER_API_BASE=$NEXT_PUBLIC_TRACKER_API_BASE
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
+
 RUN pnpm run build
 
 FROM base AS runner

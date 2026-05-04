@@ -34,7 +34,7 @@ export default function CyclingWord() {
           ref.current.style.transform = "translateY(-110%)";
           ref.current.style.opacity = "0";
           // Force reflow so the browser registers the position
-          ref.current.offsetHeight;
+          void ref.current.offsetHeight;
           // Re-enable transition and slide in
           ref.current.style.transition = "";
           ref.current.style.transform = "";

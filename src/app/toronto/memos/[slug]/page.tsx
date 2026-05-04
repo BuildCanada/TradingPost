@@ -157,7 +157,6 @@ export default async function TorontoMemoDetailPage({
       />
 
       <MemoHero
-        category={memo.category}
         title={memo.title}
         authorName={memo.author.name}
         authorImage={authorImage}

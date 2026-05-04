@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { fetchMemo, fetchMemos, getSiteConfig } from "@/lib/api";
 import { extractHeadings } from "@/lib/extract-headings";
 import { TwitterEmbed, MemoSubscribe, RelatedMemos } from "./MemoClientParts";
-import { AuthorCard } from "./AuthorCard";
 import { ShareSection } from "@/components/share";
 import { MemoHero } from "./MemoHero";
 import { Signpost } from "@/components/custom/signpost";
@@ -186,7 +185,6 @@ export default async function MemoDetailPage({
       </div>
 
       <MemoHero
-        category={memo.category}
         title={memo.title}
         authorName={memo.author.name}
         authorImage={authorImage}

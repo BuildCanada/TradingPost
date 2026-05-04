@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import type { CommitmentListing, MinistryGroup } from "@/lib/commitment-types";
 
@@ -47,9 +48,12 @@ function MinistryCard({ ministry }: { ministry: MinistryGroup }) {
         {minister && (
           <div className="flex-shrink-0 w-12 h-12 bg-gray-100 overflow-hidden">
             {minister.avatar_url ? (
-              <img
+              <Image
                 src={minister.avatar_url}
                 alt={`${minister.first_name} ${minister.last_name}`}
+                width={48}
+                height={48}
+                unoptimized
                 className="w-full h-full object-cover object-[center_25%]"
               />
             ) : (

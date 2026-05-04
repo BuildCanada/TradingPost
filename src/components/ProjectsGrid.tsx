@@ -22,7 +22,6 @@ export default async function ProjectsGrid({
   let projects: ProjectData[] = raw;
 
   if (includeSlugs?.length) {
-    const included = new Set(includeSlugs);
     projects = includeSlugs
       .map((slug) => projects.find((p) => p.slug === slug))
       .filter((p): p is ProjectData => p != null);

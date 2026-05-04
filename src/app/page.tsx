@@ -14,7 +14,6 @@ import { buildGraph } from "@/lib/schemas/graph";
 import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
 import { generateWebSiteSchema } from "@/lib/schemas/generators/website";
 import { generateReviewSchema } from "@/lib/schemas/generators/review";
-import { SOCIALS } from "@/constants/socials";
 
 function HeroSection() {
   const s = "var(--color-bg)";
@@ -155,40 +154,6 @@ function BrandMessaging() {
     </div>
   );
 }
-
-function SocialLinks() {
-  return (
-    <div className="pt-3 pb-8">
-      <div className="max-w-[1080px] mx-auto flex items-center gap-2 flex-wrap">
-        {SOCIALS.map(({ label, href, iconFile }) => (
-          <a
-            key={label}
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="h-[53px] px-4 border border-border-light flex items-center justify-center hover:border-dark transition-colors group"
-          >
-            <Image
-              src={`/assets/icons/${iconFile}.svg`}
-              alt={label}
-              width={20}
-              height={20}
-              className="brightness-0 opacity-40 group-hover:opacity-80 transition-opacity"
-              unoptimized
-            />
-          </a>
-        ))}
-        {/* /content is being phased out — hide entry point until decision is finalized.
-            <div className="w-px h-[18px] bg-border-light mx-0.5" />
-            <LinkButton href="/content" variant="primary">
-              Full Archive
-            </LinkButton>
-        */}
-      </div>
-    </div>
-  );
-}
-
 
 function FeedAndEvents() {
   return (

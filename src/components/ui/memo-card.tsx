@@ -12,7 +12,7 @@ export interface Memo {
   } | null;
   keyMessage1?: string | null;
   category?: string | null;
-  splashImage?: string | null;
+  bannerImage?: string | null;
   seoImage?: string | null;
   publishedAt?: string | null;
   createdAt?: string;
@@ -94,12 +94,12 @@ export function MemoCard({
   const isDark = variant === 'dark' || variant === 'featured';
   const isFeatured = variant === 'featured';
 
-  const hasImage = isDark && (memo.splashImage || memo.seoImage);
+  const hasImage = isDark && memo.bannerImage;
 
   const imageEl = hasImage ? (
     <div className="absolute inset-0 bg-dark">
       <Image
-        src={memo.splashImage || memo.seoImage!}
+        src={memo.bannerImage!}
         alt=""
         fill
         className={cn(

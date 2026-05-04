@@ -29,6 +29,7 @@ export interface YFMemo {
   featured: boolean;
   published_at: string | null;
   seo_image_url: string | null;
+  banner_image_url: string | null;
   author: YFAuthor;
 }
 
@@ -41,7 +42,6 @@ export interface YFMemoDetail extends YFMemo {
   author_name: string | null;
   author_title: string | null;
   co_author: YFAuthor | null;
-  splash_image_url: string | null;
 }
 
 export interface YFTeamMember {
@@ -95,6 +95,7 @@ export interface YFPost {
   summary: string | null;
   published_at: string | null;
   seo_image_url: string | null;
+  banner_image_url: string | null;
 }
 
 export interface YFPostDetail extends YFPost {

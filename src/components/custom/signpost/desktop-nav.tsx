@@ -9,7 +9,7 @@ import { TocTree } from "./toc-tree";
 import { ShareButtons } from "@/components/share/ui/ShareButtons";
 
 export function DesktopNav() {
-  const { tree, activeId, activeParentId, navigateTo, shareTitle, shareUrl } = useSignpost();
+  const { activeId, activeParentId, navigateTo, shareTitle, shareUrl } = useSignpost();
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

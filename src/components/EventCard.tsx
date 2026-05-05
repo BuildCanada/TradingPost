@@ -51,7 +51,7 @@ export default function EventCard({ event }: { event: LumaEvent }) {
           />
         </div>
       )}
-      <div className="flex-1 min-w-0 p-6 pt-4 md:p-6">
+      <div className="flex-1 min-w-0 p-6 pt-5 pb-8 md:p-6 md:pb-6">
         <p className="type-label font-bold text-text-secondary m-0 pb-1">
           <span>{eventDate}</span>
           <span className="mx-1.5">·</span>

@@ -181,7 +181,7 @@ export function MemoCard({
         {imageEl}
         {labelEl}
         <div className="relative z-10 flex flex-col">
-          <div className="p-8 lg:p-12 flex flex-col gap-4">
+          <div className="p-8 lg:p-12 flex flex-col gap-3">
             <h3 className="font-display text-[1.75rem] lg:text-[2.25rem] font-medium leading-[1.15] text-bg group-hover:text-white transition-colors line-clamp-3">
               {memo.title}
             </h3>
@@ -261,7 +261,7 @@ export function MemoCard({
             {memo.keyMessage1}
           </p>
         )}
-        <div className="mt-auto pt-3 flex flex-col gap-2">
+        <div className="mt-auto pt-3 flex flex-col gap-3">
           {authorBlock}
           {formattedDate && (
             <p className="type-label-sm text-text-secondary">

@@ -261,7 +261,7 @@ export function MemoCard({
             {memo.keyMessage1}
           </p>
         )}
-        <div className="mt-auto pt-3 flex flex-col gap-3">
+        <div className="mt-auto flex flex-col gap-3">
           {authorBlock}
           {formattedDate && (
             <p className="type-label-sm text-text-secondary">

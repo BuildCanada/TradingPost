@@ -39,19 +39,19 @@ export default function EventCard({ event }: { event: LumaEvent }) {
     .filter(Boolean) as string[];
 
   return (
-    <div className="border-b border-r border-border-light flex flex-row overflow-hidden h-44">
+    <div className="border-b border-r border-border-light overflow-hidden flex flex-col md:flex-row md:h-44">
       {event.coverUrl && (
-        <div className="shrink-0 h-full aspect-square overflow-hidden">
+        <div className="shrink-0 aspect-square overflow-hidden md:h-full md:aspect-square md:w-44">
           <Image
             src={event.coverUrl}
             alt=""
             width={640}
-            height={360}
+            height={640}
             className="w-full h-full object-cover"
           />
         </div>
       )}
-      <div className="flex-1 min-w-0 p-6">
+      <div className="flex-1 min-w-0 p-6 pt-4 md:p-6">
         <p className="type-label font-bold text-text-secondary m-0 pb-1">
           <span>{eventDate}</span>
           <span className="mx-1.5">·</span>

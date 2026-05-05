@@ -23,7 +23,7 @@ function MemoGridRow({ memo, basePath }: { memo: MemoItem; basePath: string }) {
         }
       >
         {hasMedia && (
-          <div className="relative overflow-hidden aspect-square bg-border-light">
+          <div className="relative overflow-hidden bg-border-light">
             {author?.photo && (
               <Image
                 src={author.photo}
@@ -41,17 +41,22 @@ function MemoGridRow({ memo, basePath }: { memo: MemoItem; basePath: string }) {
           <h3 className="type-h4 group-hover:text-accent transition-colors line-clamp-1">
             {memo.title}
           </h3>
-          <div className="flex items-center gap-2 mt-1">
+          <div className="mt-1">
             {author && (
               <>
                 <p className="type-label text-text-secondary">
                   <span className="hidden wide:inline">{author.name}</span>
                   <span className="wide:hidden">{shortenName(author.name)}</span>
                 </p>
-                <span className="text-text-secondary">&middot;</span>
+                {author.title && (
+                  <p className="type-label-sm text-text-secondary mt-0.5">
+                    <span className="hidden wide:inline">{author.title}</span>
+                    <span className="wide:hidden line-clamp-1">{author.title}</span>
+                  </p>
+                )}
               </>
             )}
-            <p className="type-label-sm text-text-secondary">
+            <p className="type-label-sm text-text-secondary mt-0.5">
               {formatDate(memo.publishedAt, memo.createdAt)}
             </p>
           </div>

@@ -83,7 +83,7 @@ export async function fetchMemos(params?: {
     page++;
   }
 
-  let authorTitles = new Map<string, string | null>();
+  const authorTitles = new Map<string, string | null>();
   try {
     const team = await apiFetch<YFListResponse<YFTeamMember>>("/team", {
       revalidate: 3600,

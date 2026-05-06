@@ -14,6 +14,7 @@ interface Memo {
   author: {
     name: string;
     photo: string | null;
+    title: string | null;
   };
   keyMessage1: string | null;
   keyMessage2: string | null;

@@ -11,7 +11,7 @@ interface MemoSerialized {
   id: string;
   title: string;
   slug: string;
-  author: { name: string; photo: string | null };
+  author: { name: string; photo: string | null; title: string | null };
   keyMessage1: string | null;
   keyMessage2: string | null;
   keyMessage3: string | null;
@@ -31,9 +31,11 @@ function extractKeyMessages(raw: unknown[]): string[] {
   });
 }
 
-function mapMemo(m: YFMemo & { key_messages?: unknown[] }): MemoSerialized {
+function mapMemo(m: YFMemo & { key_messages?: unknown[] }, authorTitles: Map<string, string | null>): MemoSerialized {
   const keyMessages = extractKeyMessages(m.key_messages ?? []);
   const authorName = m.author?.name ?? "Build Canada";
+  const authorSlug = m.author?.slug ?? "";
+  const authorTitle = authorSlug ? (authorTitles.get(authorSlug) ?? null) : null;
   return {
     id: String(m.id),
     title: m.title,
@@ -41,6 +43,7 @@ function mapMemo(m: YFMemo & { key_messages?: unknown[] }): MemoSerialized {
     author: {
       name: authorName,
       photo: authorName === "Build Canada" ? "/assets/logos/buildcanada-logo-square.svg" : (m.author?.profile_photo_url ?? null),
+      title: authorTitle,
     },
     keyMessage1: keyMessages[0] ?? null,
     keyMessage2: keyMessages[1] ?? null,
@@ -80,7 +83,17 @@ export async function fetchMemos(params?: {
     page++;
   }
 
-  return all.map(mapMemo);
+  let authorTitles = new Map<string, string | null>();
+  try {
+    const team = await apiFetch<YFListResponse<YFTeamMember>>("/team", {
+      revalidate: 3600,
+    });
+    for (const t of team.data) {
+      authorTitles.set(t.slug, t.title ?? null);
+    }
+  } catch {}
+
+  return all.map((m) => mapMemo(m, authorTitles));
 }
 
 export async function fetchMemo(slug: string, params?: { publication?: string }) {

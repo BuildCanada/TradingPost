@@ -5,6 +5,7 @@ export interface MemoItem {
   author: {
     name: string;
     photo: string | null;
+    title: string | null;
   } | null;
   keyMessage1: string | null;
   keyMessage2: string | null;

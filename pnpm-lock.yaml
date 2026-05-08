@@ -12,14 +12,14 @@ importers:
         specifier: ^1.3.0
         version: 1.3.0(@types/react@19.2.14)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@buildcanada/charts':
-        specifier: file:../bcds/packages/charts
-        version: file:../bcds/packages/charts(@types/react@19.2.14)(d3-selection@3.0.0)(mobx-react@7.6.0(mobx@6.15.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(mobx@6.15.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)
+        specifier: ^0.3.9
+        version: 0.3.9(@types/react@19.2.14)(d3-selection@3.0.0)(mobx-react@7.6.0(mobx@6.15.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(mobx@6.15.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)
       '@buildcanada/colours':
-        specifier: file:../bcds/packages/colours
-        version: file:../bcds/packages/colours(typescript@5.9.3)
+        specifier: ^0.3.3
+        version: 0.3.3(typescript@5.9.3)
       '@buildcanada/components':
-        specifier: file:../bcds/packages/components
-        version: file:../bcds/packages/components(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+        specifier: ^0.3.5
+        version: 0.3.5(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@cloudflare/stream-react':
         specifier: ^1.9.3
         version: 1.9.3(react@19.2.3)
@@ -216,8 +216,8 @@ packages:
       '@types/react':
         optional: true
 
-  '@buildcanada/charts@file:../bcds/packages/charts':
-    resolution: {directory: ../bcds/packages/charts, type: directory}
+  '@buildcanada/charts@0.3.9':
+    resolution: {integrity: sha512-VyUMy+y7qlb+P0TJ+h2nJzwc4SdOsuXRjqBTcUpy8WweU68MsZEJKUAujZsXYK9hjMkq6Mzt5hB/POCfryqB1g==}
     peerDependencies:
       mobx: ^6.13.0
       mobx-react: ^7.6.0
@@ -229,19 +229,8 @@ packages:
     peerDependencies:
       typescript: ^5
 
-  '@buildcanada/colours@file:../bcds/packages/colours':
-    resolution: {directory: ../bcds/packages/colours, type: directory}
-    peerDependencies:
-      typescript: ^5
-
   '@buildcanada/components@0.3.5':
     resolution: {integrity: sha512-PffM8aJ6zge/lDjVXtg4GZY5uYIc5tbwOgnzMBTqA+RQKUdT9Bry9ykluuqNRJhOT5I2f8M+v+ZekF/OiDty0w==}
-    peerDependencies:
-      react: ^19.0.0
-      react-dom: ^19.0.0
-
-  '@buildcanada/components@file:../bcds/packages/components':
-    resolution: {directory: ../bcds/packages/components, type: directory}
     peerDependencies:
       react: ^19.0.0
       react-dom: ^19.0.0
@@ -3781,7 +3770,7 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.14
 
-  '@buildcanada/charts@file:../bcds/packages/charts(@types/react@19.2.14)(d3-selection@3.0.0)(mobx-react@7.6.0(mobx@6.15.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(mobx@6.15.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)':
+  '@buildcanada/charts@0.3.9(@types/react@19.2.14)(d3-selection@3.0.0)(mobx-react@7.6.0(mobx@6.15.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(mobx@6.15.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)':
     dependencies:
       '@buildcanada/colours': 0.3.3(typescript@5.9.3)
       '@buildcanada/components': 0.3.5(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -3837,20 +3826,7 @@ snapshots:
     dependencies:
       typescript: 5.9.3
 
-  '@buildcanada/colours@file:../bcds/packages/colours(typescript@5.9.3)':
-    dependencies:
-      typescript: 5.9.3
-
   '@buildcanada/components@0.3.5(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
-    dependencies:
-      '@fortawesome/fontawesome-svg-core': 6.7.2
-      '@fortawesome/free-solid-svg-icons': 6.7.2
-      '@fortawesome/react-fontawesome': 0.2.6(@fortawesome/fontawesome-svg-core@6.7.2)(react@19.2.3)
-      classnames: 2.5.1
-      react: 19.2.3
-      react-dom: 19.2.3(react@19.2.3)
-
-  '@buildcanada/components@file:../bcds/packages/components(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
     dependencies:
       '@fortawesome/fontawesome-svg-core': 6.7.2
       '@fortawesome/free-solid-svg-icons': 6.7.2

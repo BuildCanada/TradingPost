@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { PersonCard } from "@/components/ui/person-card";
 import SectionLabel from "@/components/SectionLabel";
 import QuickLinks from "@/app/about/QuickLinks";
 import QnaBlock from "@/app/about/QnaBlock";
@@ -19,7 +18,6 @@ export const metadata: Metadata = {
 
 const quickLinks = [
   { label: "Principles", href: "#principles" },
-  { label: "Leadership", href: "#leadership" },
   { label: "FAQs", href: "#faqs" },
 ];
 
@@ -61,14 +59,6 @@ const faqs = [
     answer:
       "<p>Build Canada — Toronto is the first city project of Build Canada. It is a civic initiative focused on generating bold ideas that support Toronto's growth and prosperity.</p>",
     order: 1,
-    active: true,
-  },
-  {
-    id: "who-is-involved",
-    question: "Who is involved?",
-    answer:
-      "<p>Eric Lombardi chairs the initiative. The project draws on Build Canada's broader team and network, including Daniel Debow (Chair of Board) and Lucy Hargreaves (CEO).</p>",
-    order: 2,
     active: true,
   },
   {
@@ -147,7 +137,7 @@ const faqs = [
     id: "donate",
     question: "Can I donate?",
     answer:
-      "<p>While we're not structured as a nonprofit at this time, we appreciate the sentiment. The best way to support us right now is through engagement and amplification of our content.</p>",
+      "<p>Yes — please do! Donations directly fund our work to build a better Toronto. <a href=\"https://buy.stripe.com/3cI5kCdi8a2K2xY2bgdZ600\">Donate here</a>.</p>",
     order: 12,
     active: true,
   },
@@ -228,45 +218,12 @@ function PrinciplesSection() {
   );
 }
 
-function LeadershipSection() {
-  return (
-    <section
-      id="leadership"
-      className="px-6 sm:px-16 py-12 border-b border-border-light"
-    >
-      <div className="max-w-screen-2xl mx-auto">
-        <h3 className="type-h2 text-dark mb-12">Leadership</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-          <PersonCard
-            name="Eric Lombardi"
-            title="Chair"
-            photo={null}
-            xUrl="https://x.com/EricLombardi"
-            linkedinUrl="https://www.linkedin.com/in/eric-lombardi/"
-          />
-        </div>
-        <p className="type-body text-dark/70 mt-10 max-w-[640px]">
-          Build Canada — Toronto is supported by{" "}
-          <a
-            href="/about"
-            className="underline underline-offset-2 hover:text-accent"
-          >
-            Build Canada
-          </a>
-          .
-        </p>
-      </div>
-    </section>
-  );
-}
-
 export default function TorontoAboutPage() {
   return (
     <div className="mx-[10px] my-[10px] border border-border-light bg-bg overflow-x-clip">
       <HeroSection />
       <QuickLinks links={quickLinks} />
       <PrinciplesSection />
-      <LeadershipSection />
       <QnaBlock items={faqs} />
     </div>
   );

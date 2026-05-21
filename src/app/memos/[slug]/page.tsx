@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { fetchMemo, fetchMemos, getSiteConfig } from "@/lib/api";
@@ -42,7 +42,7 @@ export async function generateMetadata({
   return {
     title,
     description,
-    alternates: { canonical: `/memos/${slug}` },
+    alternates: { canonical: `/memos/${memo.slug}` },
     openGraph: {
       title,
       description,
@@ -71,6 +71,10 @@ export default async function MemoDetailPage({
     memo = await fetchMemo(slug);
   } catch {
     notFound();
+  }
+
+  if (memo.slug !== slug) {
+    permanentRedirect(`/memos/${memo.slug}`);
   }
 
   const authorImage =

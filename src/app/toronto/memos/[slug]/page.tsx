@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
 import Image from "next/image";
 import { fetchMemo, fetchMemos, getSiteConfig } from "@/lib/api";
@@ -48,7 +48,7 @@ export async function generateMetadata({
   return {
     title,
     description,
-    alternates: { canonical: `${BASE_PATH}/${slug}` },
+    alternates: { canonical: `${BASE_PATH}/${memo.slug}` },
     openGraph: {
       title,
       description,
@@ -77,6 +77,10 @@ export default async function TorontoMemoDetailPage({
     memo = await fetchMemo(slug, { publication: PUBLICATION });
   } catch {
     notFound();
+  }
+
+  if (memo.slug !== slug) {
+    permanentRedirect(`${BASE_PATH}/${memo.slug}`);
   }
 
   const authorImage = memo.author.photo;

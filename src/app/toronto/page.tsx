@@ -66,7 +66,7 @@ function MissionSection() {
     <section className="px-5 py-12 md:py-20 border-b border-border-light">
       <div className="max-w-[1080px] mx-auto">
         <SectionLabel as="h2" className="mb-8 md:mb-12">
-          Building a better Toronto
+          Building a Better Toronto
         </SectionLabel>
         <div className="grid grid-cols-1 md:grid-cols-2 md:gap-x-12 items-start">
           <div className="relative aspect-[3/4] max-w-[420px] w-full">

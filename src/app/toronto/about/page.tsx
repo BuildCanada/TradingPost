@@ -7,12 +7,12 @@ import QnaBlock from "@/app/about/QnaBlock";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "Build Toronto is a civic movement for a city that leads again — in ambition, in size, and in what a great city can be.",
+    "Build Canada - Toronto is a civic movement for a city that leads again — in ambition, in size, and in what a great city can be.",
   alternates: { canonical: "/toronto/about" },
   openGraph: {
-    title: "🏗️ Toronto — About",
+    title: "About | Build Canada - Toronto",
     description:
-      "Build Toronto is a civic movement for a city that leads again.",
+      "Build Canada - Toronto is a civic movement for a city that leads again.",
     type: "website",
   },
 };
@@ -56,10 +56,10 @@ const principles: { title: string; body: string }[] = [
 
 const faqs = [
   {
-    id: "what-is-build-toronto",
-    question: "What is Build Toronto?",
+    id: "what-is-this",
+    question: "What is Build Canada — Toronto?",
     answer:
-      "<p>Build Toronto is the first city project of Build Canada. It is a civic initiative focused on generating bold ideas that support Toronto's growth and prosperity.</p>",
+      "<p>Build Canada — Toronto is the first city project of Build Canada. It is a civic initiative focused on generating bold ideas that support Toronto's growth and prosperity.</p>",
     order: 1,
     active: true,
   },
@@ -73,9 +73,9 @@ const faqs = [
   },
   {
     id: "how-funded",
-    question: "How is Build Toronto funded?",
+    question: "How is this funded?",
     answer:
-      "<p>Build Toronto is supported through Build Canada's network of donors and volunteers.</p>",
+      "<p>Build Canada — Toronto is supported through Build Canada's network of donors and volunteers.</p>",
     order: 3,
     active: true,
   },
@@ -83,7 +83,7 @@ const faqs = [
     id: "what-activities",
     question: "What sorts of activities are you doing?",
     answer:
-      "<p>Build Toronto's central activity is the release of frequent memos written by entrepreneurs, civic leaders, and policy thinkers. These memos focus on Toronto's biggest challenges — housing, governance, infrastructure, and economic competitiveness.</p>",
+      "<p>Our central activity is the release of frequent memos written by entrepreneurs, civic leaders, and policy thinkers. These memos focus on Toronto's biggest challenges — housing, governance, infrastructure, and economic competitiveness.</p>",
     order: 4,
     active: true,
   },
@@ -99,7 +99,7 @@ const faqs = [
     id: "partisan",
     question: "Are you a partisan group?",
     answer:
-      "<p>No. Build Toronto, like Build Canada, is non-partisan. We focus on ideas, not parties.</p>",
+      "<p>No. Like Build Canada, we are non-partisan. We focus on ideas, not parties.</p>",
     order: 6,
     active: true,
   },
@@ -107,7 +107,7 @@ const faqs = [
     id: "lobby",
     question: "Is this a lobby group?",
     answer:
-      "<p>No. Build Toronto is not a lobby group. It does not represent specific industries or special interests.</p>",
+      "<p>No. This is not a lobby group. It does not represent specific industries or special interests.</p>",
     order: 7,
     active: true,
   },
@@ -123,7 +123,7 @@ const faqs = [
     id: "stay-up-to-date",
     question: "How can I stay up to date on your work?",
     answer:
-      "<p>The best way to follow along is through the Build Toronto website and our social media accounts, as well as the Build Canada newsletter.</p>",
+      "<p>The best way to follow along is through this website and our social media accounts, as well as the Build Canada newsletter.</p>",
     order: 9,
     active: true,
   },
@@ -217,7 +217,7 @@ function PrinciplesSection() {
         </ol>
         <div className="mt-12 max-w-[820px] type-body text-dark/80">
           <p>
-            Build Toronto is a civic movement for those who want to see this
+            Build Canada — Toronto is a civic movement for those who want to see this
             city lead again. Not just in ambition. Not just in size. But in
             what a great city can be. Let&rsquo;s build the Toronto we know
             is possible &mdash; the greatest and freest city on earth.
@@ -239,14 +239,14 @@ function LeadershipSection() {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
           <PersonCard
             name="Eric Lombardi"
-            title="Chair, Build Toronto"
+            title="Chair"
             photo={null}
             xUrl="https://x.com/EricLombardi"
             linkedinUrl="https://www.linkedin.com/in/eric-lombardi/"
           />
         </div>
         <p className="type-body text-dark/70 mt-10 max-w-[640px]">
-          Build Toronto is supported by{" "}
+          Build Canada — Toronto is supported by{" "}
           <a
             href="/about"
             className="underline underline-offset-2 hover:text-accent"

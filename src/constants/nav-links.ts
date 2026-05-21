@@ -10,5 +10,12 @@ export const NAV_LINKS: NavLink[] = [
   { label: "Builders", href: "/builders" },
   { label: "Projects", href: "/projects" },
   { label: "About", href: "/about" },
+  { label: "Toronto", href: "/toronto" },
   { label: "Shop", href: "https://shop.buildcanada.com", external: true },
+];
+
+export const TORONTO_NAV_LINKS: NavLink[] = [
+  { label: "Canada", href: "/" },
+  { label: "Memos", href: "/toronto/memos" },
+  { label: "About", href: "/toronto/about" },
 ];

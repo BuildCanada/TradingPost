@@ -7,19 +7,19 @@ import { SectionHeader } from "@/components/ui/section-header";
 import PickCard from "@/components/PickCard";
 
 export const metadata: Metadata = {
-  title: "Build Toronto",
+  title: "Build Canada - Toronto",
   description:
     "Toronto is not the greatest city in the world. But it should be. Memos and ideas to help build a better Toronto.",
   alternates: { canonical: "/toronto" },
   openGraph: {
-    title: "🏗️ Toronto",
+    title: "Build Canada - Toronto",
     description:
       "Build the Toronto you know is possible — bold ideas from notable Torontonians.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "🏗️ Toronto",
+    title: "Build Canada - Toronto",
     description: "Build the Toronto you know is possible.",
   },
 };
@@ -29,7 +29,7 @@ function HeroSection() {
     <section className="relative px-5 py-[100px] md:py-[140px] border-b border-border-light bg-dark text-bg overflow-hidden">
       <div className="max-w-[1080px] mx-auto relative z-10">
         <SectionLabel as="h2" className="text-bg/70">
-          🏗️ Toronto
+          Build Canada — Toronto
         </SectionLabel>
         <h1 className="type-display mt-4 mb-6 text-bg">
           Build the Toronto You Know is Possible
@@ -137,7 +137,7 @@ function PolicyIdeasSection({
 
 function SubscribeCTA() {
   return (
-    <section className="px-5 py-16 md:py-24 bg-linen-100">
+    <section className="px-5 py-16 md:py-24 bg-bg">
       <div className="max-w-[760px] mx-auto text-center">
         <SectionLabel as="h2">Be first to know what&rsquo;s possible</SectionLabel>
         <p className="type-body mt-4 mb-8 text-dark/80">

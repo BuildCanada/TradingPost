@@ -90,7 +90,6 @@ export default function Timeline({
         </div>
         <div className="relative w-full h-[8rem] mb-8">
           {sorted.map((entry, i) => {
-            if (entry.status === "deferred") return null;
             return (
               <div
                 key={i}

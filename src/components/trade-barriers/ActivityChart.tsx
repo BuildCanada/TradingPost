@@ -141,7 +141,11 @@ export default function ActivityChart({
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { display: true, position: "top" as const },
+      legend: {
+        display: true,
+        position: "top" as const,
+        labels: { usePointStyle: true, pointStyle: "circle" as const },
+      },
     },
     scales: {
       x: { stacked: true, grid: { display: false } },
@@ -163,8 +167,8 @@ export default function ActivityChart({
           </h3>
           <div className="text-xs text-gray-500 font-mono uppercase tracking-wide">
             {timeRange === "12months"
-              ? "Status changes over the last 12 months"
-              : "Status changes since earliest recorded agreement"}
+              ? "Number of status changes over the last 12 months"
+              : "Number of status changes since earliest recorded agreement"}
           </div>
         </div>
         <div className="flex gap-2">

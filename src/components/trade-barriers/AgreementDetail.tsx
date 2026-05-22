@@ -64,27 +64,27 @@ export default function AgreementDetail({
 
         {agreement.history.length > 0 && (
           <div className="hidden md:block">
-            <h2 className="text-lg font-mono tracking-wide mb-2">Timeline</h2>
+            <h2 className="text-lg font-mono uppercase tracking-wide mb-2">Timeline</h2>
             <Timeline history={agreement.history} />
           </div>
         )}
 
         {agreement.summary && (
           <div>
-            <h2 className="text-lg font-mono tracking-wide mb-2">Summary</h2>
+            <h2 className="text-lg font-mono uppercase tracking-wide mb-2">Summary</h2>
             <p className="text-gray-700">{agreement.summary}</p>
           </div>
         )}
 
         {agreement.description && (
           <div>
-            <h2 className="text-lg font-mono tracking-wide mb-2">Description</h2>
+            <h2 className="text-lg font-mono uppercase tracking-wide mb-2">Description</h2>
             <p className="text-gray-700">{agreement.description}</p>
           </div>
         )}
 
         <div>
-          <h2 className="text-lg font-mono tracking-wide mb-4 flex items-center gap-2">
+          <h2 className="text-lg font-mono uppercase tracking-wide mb-4 flex items-center gap-2">
             <MapPin className="w-5 h-5 text-gray-600" />
             Jurisdiction Status
           </h2>
@@ -144,7 +144,7 @@ export default function AgreementDetail({
 
         {agreement.history.length > 0 && (
           <div>
-            <h2 className="text-lg font-mono tracking-wide mb-4">
+            <h2 className="text-lg font-mono uppercase tracking-wide mb-4">
               Agreement History
             </h2>
             <div className="space-y-3">

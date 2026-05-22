@@ -153,7 +153,7 @@ export default function TradeBarriersPage({
 
           <div className="mt-6">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-mono font-semibold text-gray-900">
+              <span className="text-sm font-mono font-semibold uppercase tracking-wide text-gray-900">
                 {stats.total > 0
                   ? ((stats.implemented / stats.total) * 100).toFixed(0)
                   : 0}

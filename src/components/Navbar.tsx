@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { useSubscribeStore } from "@/components/subscribe/store";
 import { SOCIALS } from "@/constants/socials";
-import { NAV_LINKS } from "@/constants/nav-links";
+import { NAV_LINKS, TORONTO_NAV_LINKS } from "@/constants/nav-links";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -15,6 +15,7 @@ export default function Navbar() {
   const openModal = useSubscribeStore((s) => s.openModal);
   const pathname = usePathname();
   const isToronto = pathname?.startsWith("/toronto") ?? false;
+  const navLinks = isToronto ? TORONTO_NAV_LINKS : NAV_LINKS;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -35,11 +36,20 @@ export default function Navbar() {
       {/* Logo */}
       {isToronto ? (
         <Link
-          href="/toronto/memos"
-          className="theme-toronto bg-accent flex items-center px-4 py-3 shrink-0 relative min-w-[120px]"
+          href="/toronto"
+          className="theme-toronto bg-accent flex items-center gap-3 px-4 py-3 shrink-0 relative"
         >
+          <Image
+            src="/assets/logos/logo-standard.svg"
+            alt="Build Canada"
+            width={86}
+            height={40}
+            className="h-[36px] w-auto"
+            priority
+          />
+          <span aria-hidden="true" className="self-stretch w-px bg-bg" />
           <span className="font-sans font-medium text-bg text-[18px] leading-none whitespace-nowrap">
-            🏗️Toronto
+            Toronto
           </span>
         </Link>
       ) : (
@@ -68,7 +78,7 @@ export default function Navbar() {
 
       {/* Desktop links */}
       <div className="hidden md:flex items-stretch">
-        {NAV_LINKS.map((link) =>
+        {navLinks.map((link) =>
           link.external ? (
             <a
               key={link.label}
@@ -140,7 +150,7 @@ export default function Navbar() {
       >
         <div className="overflow-hidden">
           <div className="flex flex-col bg-bg border-y border-border">
-            {NAV_LINKS.map((link) =>
+            {navLinks.map((link) =>
               link.external ? (
                 <a
                   key={link.label}

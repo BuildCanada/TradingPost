@@ -10,13 +10,13 @@ export const metadata: Metadata = {
     "Bold thinking for Toronto. Read policy memos and ideas worth building on.",
   alternates: { canonical: "/toronto/memos" },
   openGraph: {
-    title: "🏗️ Toronto — Memos",
+    title: "Memos | Build Canada - Toronto",
     description: "Bold thinking for Toronto.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "🏗️ Toronto — Memos",
+    title: "Memos | Build Canada - Toronto",
     description: "Bold thinking for Toronto.",
   },
 };
@@ -28,7 +28,7 @@ export default async function TorontoMemosPage() {
     <div className="mx-[10px] my-[10px] border border-border-light bg-bg">
       <section className="px-5 pt-[120px] pb-[100px] md:pt-[140px] md:pb-[120px] border-b border-border-light">
         <div className="max-w-[1080px] mx-auto">
-          <SectionLabel as="h2">🏗️ Toronto · Memos</SectionLabel>
+          <SectionLabel as="h2">Build Canada — Toronto · Memos</SectionLabel>
           <h1 className="type-display mt-4 mb-6 text-dark">
             Ideas for a Better Toronto
           </h1>

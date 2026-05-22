@@ -267,6 +267,11 @@ html {
 @custom-variant cards (@media (min-width: 612px));
 @custom-variant wide (@media (min-width: 956px));
 
+html {
+  /* Sticky nav (top-[10px] + ~64px nav) + breathing room. */
+  scroll-padding-top: 90px;
+}
+
 body {
   background: var(--color-bg);
   color: var(--color-text);

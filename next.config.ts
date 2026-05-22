@@ -13,11 +13,6 @@ const nextConfig: NextConfig = {
         destination: "/builders/:slug",
         permanent: true,
       },
-      {
-        source: "/toronto",
-        destination: "/toronto/memos",
-        permanent: false,
-      },
     ];
   },
   async rewrites() {

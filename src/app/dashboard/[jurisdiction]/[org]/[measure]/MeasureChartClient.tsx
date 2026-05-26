@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import type { KPIFact, KPIMeasure } from "@/lib/api/kpis";
+import type { KPICitation, KPIFact, KPIMeasure } from "@/lib/api/kpis";
 
 const MeasureChart = dynamic(() => import("./MeasureChart"), {
   ssr: false,
@@ -13,9 +13,11 @@ const MeasureChart = dynamic(() => import("./MeasureChart"), {
 export default function MeasureChartClient({
   measure,
   facts,
+  citations,
 }: {
   measure: KPIMeasure;
   facts: KPIFact[];
+  citations: KPICitation[];
 }) {
-  return <MeasureChart measure={measure} facts={facts} />;
+  return <MeasureChart measure={measure} facts={facts} citations={citations} />;
 }

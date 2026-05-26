@@ -10,7 +10,12 @@ import {
   GrapherState,
   legacyToChartsTableAndDimensionsWithMandatorySlug,
 } from "@buildcanada/charts";
-import type { KPIFact, KPIMeasure, KPIValueType } from "@/lib/api/kpis";
+import type {
+  KPICitation,
+  KPIFact,
+  KPIMeasure,
+  KPIValueType,
+} from "@/lib/api/kpis";
 
 type ChartTypeKey = "LineChart" | "DiscreteBar";
 
@@ -52,9 +57,68 @@ function pickDecimals(facts: KPIFact[]): number {
   return 2;
 }
 
+interface DocAggregate {
+  id: number;
+  doc_title: string;
+  doc_url: string;
+  published_at: string | null;
+  fiscal_year: number | null;
+  years: Set<number>;
+  pages: Set<number>;
+}
+
+function aggregateDocs(citations: KPICitation[]): DocAggregate[] {
+  const byDoc = new Map<number, DocAggregate>();
+  for (const c of citations) {
+    const docId = c.document.id;
+    let entry = byDoc.get(docId);
+    if (!entry) {
+      entry = {
+        id: docId,
+        doc_title: c.document.doc_title,
+        doc_url: c.document.doc_url,
+        published_at: c.document.published_at,
+        fiscal_year: c.document.fiscal_year,
+        years: new Set(),
+        pages: new Set(),
+      };
+      byDoc.set(docId, entry);
+    }
+    entry.years.add(c.measurement_year);
+    if (c.page_number != null) entry.pages.add(c.page_number);
+  }
+  return Array.from(byDoc.values()).sort((a, b) => {
+    const ad = a.published_at ?? "";
+    const bd = b.published_at ?? "";
+    if (ad !== bd) return bd.localeCompare(ad);
+    return (b.fiscal_year ?? 0) - (a.fiscal_year ?? 0);
+  });
+}
+
+function buildSourceDesc(docs: DocAggregate[]): string {
+  if (docs.length === 0) return "";
+  const titles = new Set(docs.map((d) => d.doc_title));
+  if (titles.size === 1) {
+    const docYears = docs
+      .map((d) => d.fiscal_year ?? null)
+      .filter((y): y is number => y != null)
+      .sort((a, b) => a - b);
+    if (docYears.length > 0) {
+      const span =
+        docYears[0] === docYears[docYears.length - 1]
+          ? `FY ${docYears[0]}`
+          : `FY ${docYears[0]}–${docYears[docYears.length - 1]}`;
+      return `${docs[0].doc_title} (${span})`;
+    }
+    return docs[0].doc_title;
+  }
+  return Array.from(titles).slice(0, 3).join("; ");
+}
+
 function buildGrapherState(
   measure: KPIMeasure,
   facts: KPIFact[],
+  citations: KPICitation[],
   bounds: Bounds,
   chartType: ChartTypeKey,
 ): GrapherState | null {
@@ -79,6 +143,25 @@ function buildGrapherState(
     value: f.value_numeric as number,
   }));
 
+  const docs = aggregateDocs(citations);
+  const origins = docs.map((d) => ({
+    id: d.id,
+    title: d.doc_title,
+    producer: measure.organization?.canonical_name,
+    urlMain: d.doc_url,
+    datePublished: d.published_at ?? undefined,
+    attribution:
+      d.fiscal_year != null
+        ? `${measure.organization?.canonical_name ?? ""}, FY ${d.fiscal_year}`.trim()
+        : (measure.organization?.canonical_name ?? undefined),
+    citationFull:
+      d.pages.size > 0
+        ? `${d.doc_title} (pp. ${Array.from(d.pages)
+            .sort((a, b) => a - b)
+            .join(", ")})`
+        : d.doc_title,
+  }));
+
   const metadata = {
     id: variableId,
     display: {
@@ -87,6 +170,7 @@ function buildGrapherState(
       shortUnit: measure.unit.symbol,
       numDecimalPlaces: pickDecimals(numericFacts),
     },
+    origins,
   };
 
   const dimensions = [{ variableId, property: DimensionProperty.y }];
@@ -97,6 +181,10 @@ function buildGrapherState(
     selectedEntityNames: orderedTypes.map((t) => VALUE_TYPE_LABELS[t]),
     dimensions,
   });
+
+  const sourceDesc = buildSourceDesc(docs);
+  if (sourceDesc) grapherState.sourceDesc = sourceDesc;
+  if (docs[0]?.doc_url) grapherState.originUrl = docs[0].doc_url;
 
   grapherState.inputTable = legacyToChartsTableAndDimensionsWithMandatorySlug(
     createTestDataset([{ data, metadata }]),
@@ -110,9 +198,11 @@ function buildGrapherState(
 export default function MeasureChart({
   measure,
   facts,
+  citations,
 }: {
   measure: KPIMeasure;
   facts: KPIFact[];
+  citations: KPICitation[];
 }) {
   const [chartType, setChartType] = useState<ChartTypeKey>("LineChart");
   const [size, setSize] = useState({ width: 800, height: 520 });
@@ -133,10 +223,11 @@ export default function MeasureChart({
       buildGrapherState(
         measure,
         facts,
+        citations,
         new Bounds(0, 0, size.width, size.height),
         chartType,
       ),
-    [measure, facts, size.width, size.height, chartType],
+    [measure, facts, citations, size.width, size.height, chartType],
   );
 
   return (

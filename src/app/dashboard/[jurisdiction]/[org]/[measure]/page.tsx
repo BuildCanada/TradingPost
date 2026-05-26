@@ -8,7 +8,6 @@ import {
 } from "@/lib/api/kpis";
 import type { KPICitation } from "@/lib/api/kpis";
 import MeasureChartClient from "./MeasureChartClient";
-import MeasureSources from "./MeasureSources";
 
 interface PageParams {
   jurisdiction: string;
@@ -95,9 +94,11 @@ export default async function MeasurePage({
         )}
       </div>
 
-      <MeasureChartClient measure={measureData} facts={facts} />
-
-      <MeasureSources citations={citations} />
+      <MeasureChartClient
+        measure={measureData}
+        facts={facts}
+        citations={citations}
+      />
     </div>
   );
 }

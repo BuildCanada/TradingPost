@@ -1,16 +1,11 @@
-import "@buildcanada/charts/styles.css";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import {
   getOrganization,
   listFactsForOrg,
   listMeasuresForOrg,
-  listJurisdictions,
 } from "@/lib/api/kpis";
 import type { KPIFact, KPIMeasure } from "@/lib/api/kpis";
-import OrgDashboardClient from "./OrgDashboardClient";
-import type { MeasureWithFacts } from "./types";
 
 interface PageParams {
   jurisdiction: string;
@@ -37,28 +32,41 @@ export async function generateMetadata({
   }
 }
 
-export default async function OrgDashboardPage({
+function latestActual(facts: KPIFact[]): KPIFact | null {
+  const actuals = facts.filter(
+    (f) =>
+      f.value_type === "actual" &&
+      f.period_basis === "full_year" &&
+      f.value_numeric !== null,
+  );
+  if (actuals.length === 0) return null;
+  return actuals.reduce((acc, f) =>
+    f.measurement_year > acc.measurement_year ? f : acc,
+  );
+}
+
+function formatValue(value: number, unit: KPIMeasure["unit"]): string {
+  const abs = Math.abs(value);
+  const decimals = abs >= 1000 ? 0 : abs >= 10 ? 1 : 2;
+  const formatted = value.toLocaleString("en-CA", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: decimals,
+  });
+  return `${formatted} ${unit.symbol}`;
+}
+
+export default async function OrgOverviewPage({
   params,
 }: {
   params: Promise<PageParams>;
 }) {
   const { jurisdiction, org } = await params;
 
-  let orgData;
-  try {
-    orgData = await getOrganization(jurisdiction, org);
-  } catch {
-    notFound();
-  }
-
-  const [allJurisdictions, measures, facts] = await Promise.all([
-    listJurisdictions().catch(() => []),
+  const [orgData, measures, facts] = await Promise.all([
+    getOrganization(jurisdiction, org).catch(() => null),
     listMeasuresForOrg(org).catch(() => [] as KPIMeasure[]),
     listFactsForOrg(org).catch(() => [] as KPIFact[]),
   ]);
-
-  const jurisdictionName =
-    allJurisdictions.find((j) => j.slug === jurisdiction)?.name ?? jurisdiction;
 
   const factsByMeasure = new Map<number, KPIFact[]>();
   for (const f of facts) {
@@ -66,44 +74,70 @@ export default async function OrgDashboardPage({
     factsByMeasure.get(f.measure_id)!.push(f);
   }
 
-  const items: MeasureWithFacts[] = measures
+  const items = measures
     .map((m) => ({ measure: m, facts: factsByMeasure.get(m.id) ?? [] }))
-    .filter((item) =>
-      item.facts.some((f) => f.value_numeric !== null),
-    )
-    .sort((a, b) => a.measure.canonical_name.localeCompare(b.measure.canonical_name));
+    .filter((i) => i.facts.some((f) => f.value_numeric !== null))
+    .sort((a, b) =>
+      a.measure.canonical_name.localeCompare(b.measure.canonical_name),
+    );
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-12">
-      <header className="mb-8">
-        <Link
-          href="/dashboard"
-          className="text-xs text-gray-500 transition-colors hover:text-gray-900"
-        >
-          &larr; All dashboards
-        </Link>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-          {orgData.canonical_name}
-        </h1>
-        <p className="mt-1 text-sm text-gray-500">
-          {jurisdictionName}
-          {orgData.kind ? ` · ${orgData.kind}` : ""}
-          {" · "}
-          {items.length} measure{items.length === 1 ? "" : "s"} with data
+    <div>
+      {orgData?.description && (
+        <p className="mb-6 max-w-3xl text-sm text-gray-700">
+          {orgData.description}
         </p>
-        {orgData.description && (
-          <p className="mt-3 max-w-3xl text-sm text-gray-700">
-            {orgData.description}
-          </p>
-        )}
-      </header>
+      )}
 
       {items.length === 0 ? (
         <div className="rounded-lg border border-gray-200 bg-gray-50 p-6 text-sm text-gray-600">
           No numeric measures are currently tracked for this organization.
         </div>
       ) : (
-        <OrgDashboardClient items={items} />
+        <>
+          <p className="mb-4 text-sm text-gray-600">
+            Pick a measure to see its trend over time, or browse the cards
+            below.
+          </p>
+          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {items.map(({ measure, facts: mFacts }) => {
+              const latest = latestActual(mFacts);
+              return (
+                <li key={measure.id}>
+                  <Link
+                    href={`/dashboard/${jurisdiction}/${org}/${measure.slug}`}
+                    className="block h-full rounded-md border border-gray-200 bg-white p-4 transition-colors hover:border-gray-400 hover:bg-gray-50"
+                  >
+                    <div className="text-sm font-medium text-gray-900">
+                      {measure.canonical_name}
+                    </div>
+                    {measure.service_category && (
+                      <div className="mt-1 text-[11px] uppercase tracking-wide text-gray-400">
+                        {measure.service_category}
+                      </div>
+                    )}
+                    <div className="mt-3 flex items-baseline gap-2">
+                      {latest && latest.value_numeric !== null ? (
+                        <>
+                          <span className="text-lg font-semibold text-gray-900">
+                            {formatValue(latest.value_numeric, measure.unit)}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            actual · {latest.measurement_year}
+                          </span>
+                        </>
+                      ) : (
+                        <span className="text-xs text-gray-500">
+                          target/projection only
+                        </span>
+                      )}
+                    </div>
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </>
       )}
     </div>
   );

@@ -146,6 +146,32 @@ export async function listMeasuresForOrg(
   return all;
 }
 
+export async function listFactsForMeasure(
+  measureId: number,
+): Promise<KPIFact[]> {
+  const all: KPIFact[] = [];
+  let page = 1;
+  while (true) {
+    const res = await apiFetch<KPIPaginatedResponse<KPIFact>>(
+      `/kpis/measures/${measureId}/facts`,
+      {
+        params: { per_page: "100", page: String(page) },
+        revalidate: REVALIDATE,
+      },
+    );
+    all.push(...res.data);
+    if (page >= res.meta.pages) break;
+    page++;
+  }
+  return all;
+}
+
+export async function getMeasure(measureId: number): Promise<KPIMeasure> {
+  return apiFetch<KPIMeasure>(`/kpis/measures/${measureId}`, {
+    revalidate: REVALIDATE,
+  });
+}
+
 export async function listFactsForOrg(orgSlug: string): Promise<KPIFact[]> {
   const all: KPIFact[] = [];
   let page = 1;

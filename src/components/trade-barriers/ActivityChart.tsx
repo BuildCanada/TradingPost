@@ -159,13 +159,13 @@ export default function ActivityChart({
   };
 
   return (
-    <div className="bg-white border border-[#cdc4bd] rounded-md mb-8">
+    <div className="bg-white border border-[#cdc4bd] mb-8">
       <div className="p-6 pb-3 flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-mono font-semibold uppercase tracking-wide text-gray-800">
+          <h3 className="text-lg font-mono font-semibold uppercase tracking-[0.14em] text-gray-800">
             Activity Timeline
           </h3>
-          <div className="text-xs text-gray-500 font-mono uppercase tracking-wide">
+          <div className="text-xs text-gray-500 font-mono uppercase tracking-[0.14em]">
             {timeRange === "12months"
               ? "Number of status changes over the last 12 months"
               : "Number of status changes since earliest recorded agreement"}
@@ -207,10 +207,10 @@ function RangeButton({
   return (
     <button
       onClick={onClick}
-      className={`text-xs font-mono uppercase tracking-wide px-3 py-1.5 rounded border ${
+      className={`text-xs font-mono uppercase tracking-[0.14em] px-3 py-1.5 border transition-colors ${
         active
-          ? "bg-gray-900 text-white border-gray-900"
-          : "bg-white text-gray-700 border-[#cdc4bd] hover:bg-gray-50"
+          ? "bg-charcoal-1000 text-white border-charcoal-1000"
+          : "bg-white text-charcoal-700 border-[#cdc4bd] hover:bg-linen-50 hover:border-charcoal-1000"
       }`}
     >
       {children}

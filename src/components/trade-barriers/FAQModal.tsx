@@ -73,14 +73,14 @@ export default function FAQModal({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Backdrop className="fixed inset-0 bg-black/50 z-[60]" />
-        <Dialog.Popup className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white border border-gray-300 w-[90vw] max-w-2xl z-[60] max-h-[80vh] overflow-y-auto p-6 rounded-md">
-          <Dialog.Title className="text-xl font-mono font-semibold uppercase tracking-wide text-gray-900 mb-4">
+        <Dialog.Popup className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white border border-gray-300 w-[90vw] max-w-2xl z-[60] max-h-[80vh] overflow-y-auto p-6">
+          <Dialog.Title className="text-xl font-mono font-semibold uppercase tracking-[0.14em] text-gray-900 mb-4">
             Frequently Asked Questions
           </Dialog.Title>
 
           <div className="space-y-4">
             {faqData.map((item, i) => (
-              <div key={i} className="border border-gray-200 rounded-md">
+              <div key={i} className="border border-gray-200">
                 <button
                   onClick={() => toggle(i)}
                   className="w-full px-4 py-3 text-left flex items-center justify-between hover:bg-gray-50 transition-colors"
@@ -107,7 +107,7 @@ export default function FAQModal({
 
           <Dialog.Close
             aria-label="Close dialog"
-            className="absolute top-3 right-3 w-9 h-9 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-sm transition-colors"
+            className="absolute top-3 right-3 w-9 h-9 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors"
           >
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
               <path

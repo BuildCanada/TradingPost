@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { ArrowLeft, Calendar, ExternalLink, MapPin, Tag } from "lucide-react";
+import { ArrowLeft, Calendar, MapPin, Tag } from "lucide-react";
 import type { YFAgreementDetail } from "@/lib/api/types";
+import { Button } from "@/components/ui/button";
 import Timeline from "./Timeline";
 import {
   AGREEMENT_STATUS_LABEL,
@@ -13,31 +14,35 @@ import {
 
 export default function AgreementDetail({
   agreement,
+  hideBackLink = false,
 }: {
   agreement: YFAgreementDetail;
+  hideBackLink?: boolean;
 }) {
   const overdue = isOverdue(agreement.deadline, agreement.status);
 
   return (
     <article className="max-w-4xl mx-auto px-6 py-8">
-      <Link
-        href="/trade-barriers"
-        className="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 mb-4"
-      >
-        <ArrowLeft className="w-4 h-4" /> Back to Trade Barriers
-      </Link>
+      {!hideBackLink && (
+        <Link
+          href="/trade-barriers"
+          className="inline-flex items-center gap-2 text-sm text-charcoal-600 hover:text-accent transition-colors mb-4"
+        >
+          <ArrowLeft className="w-4 h-4" /> Back to Trade Barriers
+        </Link>
+      )}
 
-      <h1 className="text-3xl font-soehne mb-4">{agreement.title}</h1>
+      <h1 className="type-h2 mb-4">{agreement.title}</h1>
 
       <div className="space-y-6">
         <div className="w-fit">
           <div
-            className={`text-xs p-1 rounded-md border inline-block ${getAgreementStatusColor(agreement.status)}`}
+            className={`text-xs p-1 border inline-block ${getAgreementStatusColor(agreement.status)}`}
           >
             {AGREEMENT_STATUS_LABEL[agreement.status]}
           </div>
           {agreement.theme && (
-            <div className="mt-2 text-sm font-semibold text-gray-800 uppercase tracking-wide flex items-center gap-1">
+            <div className="mt-2 text-sm font-semibold text-gray-800 uppercase tracking-[0.14em] flex items-center gap-1">
               <Tag className="w-3 h-3" />
               {agreement.theme.name}
             </div>
@@ -64,41 +69,41 @@ export default function AgreementDetail({
 
         {agreement.history.length > 0 && (
           <div className="hidden md:block">
-            <h2 className="text-lg font-mono uppercase tracking-wide mb-2">Timeline</h2>
+            <h2 className="text-lg font-mono uppercase tracking-[0.14em] mb-2">Timeline</h2>
             <Timeline history={agreement.history} />
           </div>
         )}
 
         {agreement.summary && (
           <div>
-            <h2 className="text-lg font-mono uppercase tracking-wide mb-2">Summary</h2>
+            <h2 className="text-lg font-mono uppercase tracking-[0.14em] mb-2">Summary</h2>
             <p className="text-gray-700">{agreement.summary}</p>
           </div>
         )}
 
         {agreement.description && (
           <div>
-            <h2 className="text-lg font-mono uppercase tracking-wide mb-2">Description</h2>
+            <h2 className="text-lg font-mono uppercase tracking-[0.14em] mb-2">Description</h2>
             <p className="text-gray-700">{agreement.description}</p>
           </div>
         )}
 
         <div>
-          <h2 className="text-lg font-mono uppercase tracking-wide mb-4 flex items-center gap-2">
+          <h2 className="text-lg font-mono uppercase tracking-[0.14em] mb-4 flex items-center gap-2">
             <MapPin className="w-5 h-5 text-gray-600" />
             Jurisdiction Status
           </h2>
-          <div className="border border-gray-200 rounded-lg overflow-hidden">
+          <div className="border border-gray-200 overflow-hidden">
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr>
-                  <th className="text-left p-3 font-semibold text-gray-700 uppercase tracking-wide text-sm">
+                  <th className="text-left p-3 font-semibold text-gray-700 uppercase tracking-[0.14em] text-sm">
                     Jurisdiction
                   </th>
-                  <th className="text-left p-3 font-semibold text-gray-700 uppercase tracking-wide text-sm">
+                  <th className="text-left p-3 font-semibold text-gray-700 uppercase tracking-[0.14em] text-sm">
                     Status
                   </th>
-                  <th className="text-left p-3 font-semibold text-gray-700 uppercase tracking-wide text-sm">
+                  <th className="text-left p-3 font-semibold text-gray-700 uppercase tracking-[0.14em] text-sm">
                     Notes
                   </th>
                 </tr>
@@ -114,7 +119,7 @@ export default function AgreementDetail({
                     <td className="p-3 text-gray-900">{j.name}</td>
                     <td className="p-3">
                       <span
-                        className={`inline-block px-2 py-0.5 rounded border text-xs ${getJurisdictionStatusColor(j.status)}`}
+                        className={`inline-block px-2 py-0.5 border text-xs ${getJurisdictionStatusColor(j.status)}`}
                       >
                         {JURISDICTION_STATUS_LABEL[j.status]}
                       </span>
@@ -144,14 +149,14 @@ export default function AgreementDetail({
 
         {agreement.history.length > 0 && (
           <div>
-            <h2 className="text-lg font-mono uppercase tracking-wide mb-4">
+            <h2 className="text-lg font-mono uppercase tracking-[0.14em] mb-4">
               Agreement History
             </h2>
             <div className="space-y-3">
               {agreement.history.map((h, i) => (
                 <div
                   key={i}
-                  className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
+                  className="flex items-center gap-3 p-3 bg-gray-50"
                 >
                   <div
                     className={`w-2 h-2 rounded-full ${getAgreementStatusColor(h.status).split(" ")[0]}`}
@@ -179,15 +184,13 @@ export default function AgreementDetail({
               </div>
             </div>
             {agreement.source_url && (
-              <a
+              <Button
+                as="external-link"
+                variant="charcoal"
                 href={agreement.source_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 hover:opacity-90 text-white text-sm font-medium uppercase tracking-wide rounded-md transition-colors"
               >
-                <ExternalLink className="w-4 h-4" />
                 View Source
-              </a>
+              </Button>
             )}
           </div>
         </div>

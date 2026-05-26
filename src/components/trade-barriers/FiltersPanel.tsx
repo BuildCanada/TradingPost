@@ -145,7 +145,7 @@ export default function FiltersPanel({
     filters.themeIds.length;
 
   return (
-    <div className="bg-white border border-[#cdc4bd] rounded-md">
+    <div className="bg-white border border-[#cdc4bd]">
       <div className="p-4 space-y-6">
         <FilterSection title="Status">
           {STATUS_OPTIONS.map((s) => (
@@ -195,7 +195,7 @@ export default function FiltersPanel({
 
         {activeCount > 0 && (
           <div className="pt-4 border-t border-[#cdc4bd]">
-            <div className="text-xs text-gray-500 font-mono uppercase tracking-wide mb-2">
+            <div className="text-xs text-gray-500 font-mono uppercase tracking-[0.14em] mb-2">
               Active filters: {activeCount}
             </div>
           </div>
@@ -205,7 +205,7 @@ export default function FiltersPanel({
         <div className="p-4 pt-0">
           <button
             onClick={clearAll}
-            className="text-xs font-mono uppercase tracking-wide border border-[#cdc4bd] text-gray-700 hover:bg-gray-50 px-3 py-1.5 rounded"
+            className="text-xs font-mono uppercase tracking-[0.14em] border border-[#cdc4bd] text-gray-700 hover:bg-gray-50 px-3 py-1.5"
           >
             Clear All
           </button>
@@ -224,7 +224,7 @@ function FilterSection({
 }) {
   return (
     <div>
-      <h3 className="text-sm font-semibold text-gray-700 my-3 uppercase tracking-wide font-mono">
+      <h3 className="text-sm font-semibold text-gray-700 my-3 uppercase tracking-[0.14em] font-mono">
         {title}
       </h3>
       <div>{children}</div>

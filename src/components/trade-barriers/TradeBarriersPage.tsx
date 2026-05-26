@@ -1,13 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import Image from "next/image";
 import { ChevronDown, ChevronUp, CircleHelp, Mail, Search } from "lucide-react";
 import type {
   YFAgreement,
   YFJurisdiction,
   YFTheme,
 } from "@/lib/api/types";
+import { Button } from "@/components/ui/button";
 import ActivityChart from "./ActivityChart";
 import AgreementsList from "./AgreementsList";
 import FAQModal from "./FAQModal";
@@ -60,43 +60,38 @@ export default function TradeBarriersPage({
   }, [initialAgreements]);
 
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen bg-stone-50">
+    <div className="flex flex-col lg:flex-row min-h-screen bg-linen-100">
       <div className="w-full lg:w-80 flex-shrink-0 p-6 border-r border-[#cdc4bd]">
-        <div className="mb-6">
-          <Image
-            src="/trade-barriers/buildcanada-logo.svg"
-            alt="Build Canada"
-            width={60}
-            height={36}
-          />
-        </div>
-
         <div className="mb-8">
-          <h1 className="text-3xl lg:text-4xl font-bold mb-3 font-mono uppercase tracking-wider text-gray-900">
+          <h1 className="text-3xl lg:text-4xl font-bold mb-3 font-mono uppercase tracking-wider text-foreground">
             Trade Barriers Tracker
           </h1>
-          <p className="text-gray-600 text-sm tracking-wide">
+          <p className="type-body-sm text-charcoal-600">
             Tracking progress of interprovincial trade agreements across Canada.
           </p>
         </div>
 
         <div className="mb-2">
-          <button
+          <Button
+            as="button"
+            variant="ghost"
             onClick={() => setFaqOpen(true)}
-            className="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-mono uppercase tracking-wide border border-[#cdc4bd] bg-white text-gray-900 hover:bg-gray-50 transition-colors rounded-md"
+            className="w-full justify-center bg-white"
           >
-            <CircleHelp className="w-4 h-4 mr-2" />
+            <CircleHelp className="w-4 h-4" />
             FAQ
-          </button>
+          </Button>
         </div>
         <div className="mb-6">
-          <a
+          <Button
+            as="external-link"
+            variant="ghost"
             href="mailto:hi@buildcanada.com?subject=Trade Barriers Feedback"
-            className="inline-flex items-center justify-center w-full px-4 py-2 text-sm font-mono uppercase tracking-wide border border-[#cdc4bd] bg-white text-gray-900 hover:bg-gray-50 transition-colors rounded-md"
+            className="w-full justify-center bg-white"
           >
-            <Mail className="w-4 h-4 mr-2" />
+            <Mail className="w-4 h-4" />
             Feedback
-          </a>
+          </Button>
         </div>
 
         <div>
@@ -105,7 +100,7 @@ export default function TradeBarriersPage({
               onClick={() => setFiltersOpen(!filtersOpen)}
               className="flex items-center justify-between w-full p-3 bg-white border border-[#cdc4bd] hover:bg-gray-50 transition-colors"
             >
-              <h3 className="text-lg font-mono font-semibold uppercase tracking-wide text-gray-900">
+              <h3 className="text-lg font-mono font-semibold uppercase tracking-[0.14em] text-gray-900">
                 Filters
               </h3>
               {filtersOpen ? (
@@ -116,7 +111,7 @@ export default function TradeBarriersPage({
             </button>
           </div>
 
-          <h3 className="hidden lg:block text-xl font-mono font-semibold mb-4 uppercase tracking-wide text-gray-900">
+          <h3 className="hidden lg:block text-xl font-mono font-semibold mb-4 uppercase tracking-[0.14em] text-gray-900">
             Filters
           </h3>
 
@@ -135,10 +130,10 @@ export default function TradeBarriersPage({
       <div className="flex-1 p-6">
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-mono font-semibold uppercase tracking-wide text-gray-900">
+            <h2 className="text-xl font-mono font-semibold uppercase tracking-[0.14em] text-gray-900">
               Overview
             </h2>
-            <span className="text-sm font-mono text-gray-500 uppercase tracking-wide">
+            <span className="text-sm font-mono text-gray-500 uppercase tracking-[0.14em]">
               {stats.total} total trade agreements
             </span>
           </div>
@@ -153,14 +148,14 @@ export default function TradeBarriersPage({
 
           <div className="mt-6">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-mono font-semibold uppercase tracking-wide text-gray-900">
+              <span className="text-sm font-mono font-semibold uppercase tracking-[0.14em] text-gray-900">
                 {stats.total > 0
                   ? ((stats.implemented / stats.total) * 100).toFixed(0)
                   : 0}
                 % Implemented
               </span>
             </div>
-            <div className="relative h-3 bg-gray-200 rounded-lg overflow-hidden">
+            <div className="relative h-3 bg-gray-200 overflow-hidden">
               <ProgressSegment offset={0} width={pct(stats.awaitingSponsorship, stats.total)} className="bg-gray-300" />
               <ProgressSegment offset={pct(stats.awaitingSponsorship, stats.total)} width={pct(stats.underNegotiation, stats.total)} className="bg-yellow-400" />
               <ProgressSegment offset={pct(stats.awaitingSponsorship + stats.underNegotiation, stats.total)} width={pct(stats.agreementReached, stats.total)} className="bg-orange-400" />
@@ -177,19 +172,19 @@ export default function TradeBarriersPage({
         <div>
           <div className="mb-6">
             <div className="hidden md:flex items-center justify-between mb-2">
-              <h2 className="text-xl font-mono font-semibold uppercase tracking-wide text-gray-900">
+              <h2 className="text-xl font-mono font-semibold uppercase tracking-[0.14em] text-gray-900">
                 Agreements ({filteredAgreements.length})
               </h2>
               <SearchInput value={searchQuery} onChange={setSearchQuery} />
             </div>
             <div className="md:hidden">
-              <h2 className="text-xl font-mono font-semibold uppercase tracking-wide text-gray-900 mb-4">
+              <h2 className="text-xl font-mono font-semibold uppercase tracking-[0.14em] text-gray-900 mb-4">
                 Agreements ({filteredAgreements.length})
               </h2>
               <SearchInput value={searchQuery} onChange={setSearchQuery} fullWidth />
             </div>
             {filteredAgreements.length !== initialAgreements.length && (
-              <p className="text-sm text-gray-500 font-mono uppercase tracking-wide">
+              <p className="text-sm text-gray-500 font-mono uppercase tracking-[0.14em]">
                 Showing {filteredAgreements.length} of {initialAgreements.length} agreements
               </p>
             )}
@@ -200,11 +195,11 @@ export default function TradeBarriersPage({
           </div>
 
           {filteredAgreements.length === 0 && (
-            <div className="bg-white border border-[#cdc4bd] text-center py-12 rounded-md">
-              <div className="text-gray-500 text-lg font-mono uppercase tracking-wide">
+            <div className="bg-white border border-[#cdc4bd] text-center py-12">
+              <div className="text-gray-500 text-lg font-mono uppercase tracking-[0.14em]">
                 No agreements match your filters
               </div>
-              <div className="text-gray-500 text-sm mt-2 font-mono uppercase tracking-wide">
+              <div className="text-gray-500 text-sm mt-2 font-mono uppercase tracking-[0.14em]">
                 Try adjusting your filter criteria
               </div>
             </div>
@@ -248,10 +243,10 @@ function StatCard({
   color: string;
 }) {
   return (
-    <div className="bg-white border border-[#cdc4bd] col-span-2 md:col-span-1 rounded-md">
+    <div className="bg-white border border-[#cdc4bd] col-span-2 md:col-span-1">
       <div className="p-4">
         <div className={`text-2xl font-bold font-mono ${color}`}>{value}</div>
-        <div className="text-sm text-gray-500 font-mono uppercase tracking-wide">
+        <div className="text-sm text-gray-500 font-mono uppercase tracking-[0.14em]">
           {label}
         </div>
       </div>
@@ -276,7 +271,7 @@ function SearchInput({
         placeholder="Search agreements..."
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className={`pl-10 pr-4 py-2 border border-[#cdc4bd] bg-white text-sm font-mono uppercase tracking-wide text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${fullWidth ? "w-full" : "w-64"}`}
+        className={`pl-10 pr-4 py-2 border border-[#cdc4bd] bg-white text-sm font-mono uppercase tracking-[0.14em] text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-auburn-800 focus:border-auburn-800 ${fullWidth ? "w-full" : "w-64"}`}
       />
     </div>
   );

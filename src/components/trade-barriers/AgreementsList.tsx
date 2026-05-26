@@ -30,20 +30,20 @@ export default function AgreementsList({
           <Link
             key={item.id}
             href={`/trade-barriers/${item.slug}`}
-            className="block bg-white border border-[#cdc4bd] hover:shadow-lg transition-shadow rounded-md flex flex-col"
+            className="block bg-white border border-[#cdc4bd] hover:shadow-lg transition-shadow flex flex-col"
           >
             <div className="p-6 pb-4">
-              <h3 className="text-xl text-[#272727] mb-2 font-semibold">
+              <h3 className="font-sans text-xl text-charcoal-1000 mb-2 font-medium leading-tight">
                 {item.title}
               </h3>
               <div className="w-fit">
                 <span
-                  className={`text-xs p-1 w-fit rounded-md border inline-block ${getAgreementStatusColor(item.status)}`}
+                  className={`text-xs p-1 w-fit border inline-block ${getAgreementStatusColor(item.status)}`}
                 >
                   {AGREEMENT_STATUS_LABEL[item.status]}
                 </span>
                 {item.theme && (
-                  <div className="mt-2 text-sm font-semibold text-gray-800 uppercase tracking-wide flex items-center gap-1">
+                  <div className="mt-2 text-sm font-semibold text-gray-800 uppercase tracking-[0.14em] flex items-center gap-1">
                     <Tag className="w-3 h-3" />
                     {item.theme.name}
                   </div>
@@ -57,7 +57,7 @@ export default function AgreementsList({
                   {participating.slice(0, 3).map((j) => (
                     <span
                       key={j.code}
-                      className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded"
+                      className="text-xs bg-gray-100 text-gray-600 px-2 py-1"
                     >
                       {j.name}
                       {j.history && j.history.length > 0 && (
@@ -66,7 +66,7 @@ export default function AgreementsList({
                     </span>
                   ))}
                   {participating.length > 3 && (
-                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">
+                    <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1">
                       +{participating.length - 3} more
                     </span>
                   )}

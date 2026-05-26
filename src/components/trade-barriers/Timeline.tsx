@@ -78,7 +78,7 @@ export default function Timeline({
   return (
     <div>
       <div className="relative w-full">
-        <div className="w-full h-4 bg-gray-100 rounded-lg overflow-hidden flex">
+        <div className="w-full h-4 bg-gray-100 overflow-hidden flex">
           {segments.map((s, i) => (
             <div
               key={i}

@@ -25,8 +25,15 @@ export const metadata: Metadata = {
 
 export default function TradeBarriersLayout({
   children,
+  modal,
 }: {
   children: React.ReactNode;
+  modal: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      {modal}
+    </>
+  );
 }

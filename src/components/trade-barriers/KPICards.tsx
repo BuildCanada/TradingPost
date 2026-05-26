@@ -62,8 +62,8 @@ export default function KPICards({ agreements }: { agreements: YFAgreement[] }) 
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-      <div className="bg-white border border-[#cdc4bd] rounded-md p-4">
-        <div className="text-sm font-mono font-semibold uppercase tracking-wide text-gray-700 mb-3">
+      <div className="bg-white border border-[#cdc4bd] p-4">
+        <div className="text-sm font-mono font-semibold uppercase tracking-[0.14em] text-gray-700 mb-3">
           Stale Agreements
         </div>
         <div className="text-3xl font-bold font-mono text-orange-500 mb-2">
@@ -71,26 +71,26 @@ export default function KPICards({ agreements }: { agreements: YFAgreement[] }) 
             ? "--%"
             : `${Math.round((kpiData.staleAgreementsCount / agreements.length) * 100)}%`}
         </div>
-        <div className="text-xs text-gray-500 font-mono uppercase tracking-wide">
+        <div className="text-xs text-gray-500 font-mono uppercase tracking-[0.14em]">
           % of Agreements Stagnant for &gt;12 Months
         </div>
-        <div className="text-xs text-gray-500 font-mono uppercase tracking-wide mt-1">
+        <div className="text-xs text-gray-500 font-mono uppercase tracking-[0.14em] mt-1">
           ({kpiData.stalePercentageChange >= 0 ? "+" : ""}
           {Math.round(kpiData.stalePercentageChange)}% v{" "}
           {new Date().getFullYear() - 1})
         </div>
       </div>
-      <div className="bg-white border border-[#cdc4bd] rounded-md p-4">
-        <div className="text-sm font-mono font-semibold uppercase tracking-wide text-gray-700 mb-3">
+      <div className="bg-white border border-[#cdc4bd] p-4">
+        <div className="text-sm font-mono font-semibold uppercase tracking-[0.14em] text-gray-700 mb-3">
           Recent Negotiations
         </div>
         <div className="text-3xl font-bold font-mono text-blue-500 mb-2">
           {kpiData.recentNegotiationsCount}
         </div>
-        <div className="text-xs text-gray-500 font-mono uppercase tracking-wide">
+        <div className="text-xs text-gray-500 font-mono uppercase tracking-[0.14em]">
           Negotiations Started on New Barriers (Last 12 Months)
         </div>
-        <div className="text-xs text-gray-500 font-mono uppercase tracking-wide mt-1">
+        <div className="text-xs text-gray-500 font-mono uppercase tracking-[0.14em] mt-1">
           ({kpiData.negotiationsChange >= 0 ? "+" : ""}
           {kpiData.negotiationsChange} v {new Date().getFullYear() - 1})
         </div>

@@ -95,24 +95,37 @@ function aggregateDocs(citations: KPICitation[]): DocAggregate[] {
   });
 }
 
-function buildSourceDesc(docs: DocAggregate[]): string {
+function buildSourceDesc(
+  measure: KPIMeasure,
+  docs: DocAggregate[],
+): string {
   if (docs.length === 0) return "";
-  const titles = new Set(docs.map((d) => d.doc_title));
-  if (titles.size === 1) {
-    const docYears = docs
-      .map((d) => d.fiscal_year ?? null)
-      .filter((y): y is number => y != null)
-      .sort((a, b) => a - b);
-    if (docYears.length > 0) {
-      const span =
-        docYears[0] === docYears[docYears.length - 1]
-          ? `FY ${docYears[0]}`
-          : `FY ${docYears[0]}–${docYears[docYears.length - 1]}`;
-      return `${docs[0].doc_title} (${span})`;
-    }
-    return docs[0].doc_title;
+
+  const fiscalYears = docs
+    .map((d) => d.fiscal_year)
+    .filter((y): y is number => y != null);
+  const fySpan =
+    fiscalYears.length === 0
+      ? ""
+      : Math.min(...fiscalYears) === Math.max(...fiscalYears)
+        ? `FY ${fiscalYears[0]}`
+        : `FY ${Math.min(...fiscalYears)}–${Math.max(...fiscalYears)}`;
+
+  const producer = measure.organization?.canonical_name ?? "";
+
+  if (docs.length === 1) {
+    const parts = [docs[0].doc_title, fySpan].filter(Boolean);
+    return parts.join(" · ");
   }
-  return Array.from(titles).slice(0, 3).join("; ");
+
+  // Multiple source documents — collapse to a producer + range summary so the
+  // footer line stays readable. Individual titles live in the Sources tab.
+  const parts = [
+    producer,
+    `${docs.length} source documents`,
+    fySpan,
+  ].filter(Boolean);
+  return parts.join(" · ");
 }
 
 function buildGrapherState(
@@ -182,7 +195,7 @@ function buildGrapherState(
     dimensions,
   });
 
-  const sourceDesc = buildSourceDesc(docs);
+  const sourceDesc = buildSourceDesc(measure, docs);
   if (sourceDesc) grapherState.sourceDesc = sourceDesc;
   if (docs[0]?.doc_url) grapherState.originUrl = docs[0].doc_url;
 

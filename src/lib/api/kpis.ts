@@ -166,6 +166,49 @@ export async function listFactsForMeasure(
   return all;
 }
 
+export interface KPICitationDocument {
+  id: number;
+  fiscal_year: number | null;
+  published_at: string | null;
+  doc_url: string;
+  doc_title: string;
+}
+
+export interface KPICitation {
+  id: number;
+  measure_id: number;
+  measurement_year: number;
+  value_type: KPIValueType;
+  period_basis: KPIPeriodBasis;
+  value_numeric: number | null;
+  value_text: string | null;
+  value_raw_text: string | null;
+  page_number: number | null;
+  notes: string | null;
+  agent_run_id: number | null;
+  document: KPICitationDocument;
+}
+
+export async function listCitationsForMeasure(
+  measureId: number,
+): Promise<KPICitation[]> {
+  const all: KPICitation[] = [];
+  let page = 1;
+  while (true) {
+    const res = await apiFetch<KPIPaginatedResponse<KPICitation>>(
+      `/kpis/measures/${measureId}/citations`,
+      {
+        params: { per_page: "100", page: String(page) },
+        revalidate: REVALIDATE,
+      },
+    );
+    all.push(...res.data);
+    if (page >= res.meta.pages) break;
+    page++;
+  }
+  return all;
+}
+
 export async function getMeasure(measureId: number): Promise<KPIMeasure> {
   return apiFetch<KPIMeasure>(`/kpis/measures/${measureId}`, {
     revalidate: REVALIDATE,

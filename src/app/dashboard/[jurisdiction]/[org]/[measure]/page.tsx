@@ -2,10 +2,13 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import {
   getMeasure,
+  listCitationsForMeasure,
   listFactsForMeasure,
   listMeasuresForOrg,
 } from "@/lib/api/kpis";
+import type { KPICitation } from "@/lib/api/kpis";
 import MeasureChartClient from "./MeasureChartClient";
+import MeasureSources from "./MeasureSources";
 
 interface PageParams {
   jurisdiction: string;
@@ -55,7 +58,12 @@ export default async function MeasurePage({
   const measureData = await resolveMeasure(org, measure).catch(() => null);
   if (!measureData) notFound();
 
-  const facts = await listFactsForMeasure(measureData.id).catch(() => []);
+  const [facts, citations] = await Promise.all([
+    listFactsForMeasure(measureData.id).catch(() => []),
+    listCitationsForMeasure(measureData.id).catch(
+      () => [] as KPICitation[],
+    ),
+  ]);
 
   const numericYears = facts
     .filter((f) => f.value_numeric !== null)
@@ -88,6 +96,8 @@ export default async function MeasurePage({
       </div>
 
       <MeasureChartClient measure={measureData} facts={facts} />
+
+      <MeasureSources citations={citations} />
     </div>
   );
 }

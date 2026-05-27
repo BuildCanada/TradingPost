@@ -53,10 +53,10 @@ Schema: [prisma/schema.prisma](prisma/schema.prisma)
 ## Setup
 
 ```bash
-npm install
-npx prisma generate
-npx prisma db push
-npm run dev
+pnpm install
+pnpm prisma generate
+pnpm prisma db push
+pnpm dev
 ```
 
 Requires a `.env` file with `DATABASE_URL` (defaults to `file:./dev.db`).

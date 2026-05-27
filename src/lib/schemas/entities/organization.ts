@@ -1,6 +1,6 @@
 import { Organization, WebSite } from "schema-dts";
 
-const SITE_URL = "https://buildcanada.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://buildcanada.com";
 
 export function createOrganization(): Organization {
   return {

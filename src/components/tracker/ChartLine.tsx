@@ -59,7 +59,6 @@ import {
 // The override signature in chart.js types is stricter than what date-fns
 // returns (Date vs number), but the runtime behavior is correct — date-fns
 // Date instances are coerced to numbers by chart.js internals.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 _adapters._date.override({
   _id: "date-fns",
   formats: () => ({

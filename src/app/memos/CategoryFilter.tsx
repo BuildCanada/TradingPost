@@ -29,7 +29,7 @@ export default function CategoryFilter({
       <div className="px-5 py-10 border-b border-border-light">
         <div className="max-w-[1080px] mx-auto">
           <SectionLabel as="h2">Category</SectionLabel>
-          <div role="group" aria-label="Filter memos by category" className="border-t border-l border-border-light mt-4 grid grid-cols-3 wide:grid-cols-5">
+          <div role="group" aria-label="Filter memos by category" className="border-t border-l border-border-light mt-4 grid grid-cols-2 md:grid-cols-3 wide:grid-cols-5">
             {allCategories.map((cat) => {
               const isAll = cat === "All";
               const isActive = isAll ? activeCategory === null : activeCategory === cat;

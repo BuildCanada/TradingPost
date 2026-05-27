@@ -1,10 +1,8 @@
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
-import Image from "next/image";
 import { fetchMemo, fetchMemos, getSiteConfig } from "@/lib/api";
 import { extractHeadings } from "@/lib/extract-headings";
 import { TwitterEmbed, MemoSubscribe, RelatedMemos } from "./MemoClientParts";
-import { AuthorCard } from "./AuthorCard";
 import { ShareSection } from "@/components/share";
 import { MemoHero } from "./MemoHero";
 import { Signpost } from "@/components/custom/signpost";
@@ -37,11 +35,12 @@ export async function generateMetadata({
 
   const title = `${memo.title} | Build Canada`;
   const description = memo.keyMessage1;
-  const image = memo.seoImage || memo.splashImage || undefined;
+  const image = memo.seoImage || undefined;
 
   return {
     title,
     description,
+    alternates: { canonical: `/memos/${memo.slug}` },
     openGraph: {
       title,
       description,
@@ -72,6 +71,10 @@ export default async function MemoDetailPage({
     notFound();
   }
 
+  if (memo.slug !== slug) {
+    permanentRedirect(`/memos/${memo.slug}`);
+  }
+
   const authorImage =
     memo.author.name === "Build Canada"
       ? "/assets/logos/buildcanada-logo-square.svg"
@@ -99,7 +102,6 @@ export default async function MemoDetailPage({
         slug: memo.slug,
         keyMessage1: memo.keyMessage1,
         seoImage: memo.seoImage,
-        splashImage: memo.splashImage,
         publishedAt: memo.publishedAt ? new Date(memo.publishedAt) : null,
         createdAt: new Date(memo.createdAt),
         updatedAt: new Date(memo.updatedAt),
@@ -186,21 +188,7 @@ export default async function MemoDetailPage({
         </div>
       </div>
 
-      {memo.splashImage && (
-        <div className="animate-fade-in relative h-[45svh] md:h-[65svh] overflow-hidden print-hide">
-          <Image
-            src={memo.splashImage}
-            alt=""
-            fill
-            className="object-cover brightness-[0.3]"
-            unoptimized
-            priority
-          />
-        </div>
-      )}
-
       <MemoHero
-        category={memo.category}
         title={memo.title}
         authorName={memo.author.name}
         authorImage={authorImage}

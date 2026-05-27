@@ -1,6 +1,7 @@
 "use client";
 import { usePathname } from "next/navigation";
 import useSWR from "swr";
+import Image from "next/image";
 import Link from "next/link";
 import type {
   DashboardResponse,
@@ -44,13 +45,15 @@ function TrackerSubnav() {
 function SidebarLogo() {
   return (
     <div className="flex items-start gap-3 mb-8">
-      <a href="https://www.buildcanada.com" className="flex-shrink-0 mt-1">
-        <img
+      <Link href="/" className="flex-shrink-0 mt-1">
+        <Image
           src="/tracker/buildcanada-logo-square.svg"
           alt="Build Canada"
+          width={72}
+          height={72}
           className="h-[4.5rem] w-[4.5rem]"
         />
-      </a>
+      </Link>
       <Link href="/tracker">
         <h1 className="text-4xl font-bold leading-none">
           Outcomes
@@ -118,9 +121,12 @@ function DefaultSidebar({ pageTitle }: { pageTitle: string }) {
           <div className="flex items-start gap-3 mt-4 not-italic">
             {pmDept?.minister?.avatar_url && (
               <div className="w-[70px] h-[70px] flex-shrink-0 bg-gray-100 overflow-hidden">
-                <img
+                <Image
                   src={pmDept.minister.avatar_url}
                   alt="Mark Carney"
+                  width={70}
+                  height={70}
+                  unoptimized
                   className="w-full h-full object-cover object-[center_25%]"
                 />
               </div>
@@ -385,12 +391,15 @@ function SupportingMinisterCard({ minister }: { minister: MinisterInfo }) {
   return (
     <div>
       <div className="flex items-start gap-3">
-        <div className="w-1/4 flex-shrink-0 aspect-square bg-gray-100 overflow-hidden">
+        <div className="w-1/4 flex-shrink-0 aspect-square bg-gray-100 overflow-hidden relative">
           {minister.avatar_url ? (
-            <img
+            <Image
               src={minister.avatar_url}
               alt={fullName}
-              className="w-full h-full object-cover object-[center_25%]"
+              fill
+              unoptimized
+              sizes="120px"
+              className="object-cover object-[center_25%]"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm font-semibold">
@@ -447,12 +456,15 @@ function MinisterCard({
       <h2 className="text-2xl font-bold mb-3">{departmentName}</h2>
 
       <div className="flex items-start gap-3">
-        <div className="w-1/4 flex-shrink-0 aspect-square bg-gray-100 overflow-hidden">
+        <div className="w-1/4 flex-shrink-0 aspect-square bg-gray-100 overflow-hidden relative">
           {minister.avatar_url ? (
-            <img
+            <Image
               src={minister.avatar_url}
               alt={fullName}
-              className="w-full h-full object-cover object-[center_25%]"
+              fill
+              unoptimized
+              sizes="160px"
+              className="object-cover object-[center_25%]"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-400 text-lg font-semibold">

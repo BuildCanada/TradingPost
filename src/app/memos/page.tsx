@@ -11,6 +11,7 @@ export const metadata: Metadata = {
   title: "Memos",
   description:
     "Bold thinking from Canada's builders, reformers, and leaders. Read policy memos and ideas worth building on.",
+  alternates: { canonical: "/memos" },
   openGraph: {
     title: "Memos",
     description:

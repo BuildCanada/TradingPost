@@ -61,6 +61,33 @@ npm run dev
 
 Requires a `.env` file with `DATABASE_URL` (defaults to `file:./dev.db`).
 
+## Environment variables
+
+Required in production:
+
+| Variable | Purpose | Notes |
+|----------|---------|-------|
+| `NEXT_PUBLIC_SITE_URL` | Canonical/OG/sitemap base URL | e.g. `https://buildcanada.com`. Used by `layout.tsx`, `sitemap.ts`, `robots.ts`, `lib/api/config.ts`, and JSON-LD. |
+| `NEXT_PUBLIC_TRACKER_API_BASE` | Backend host for `/tracker/api/*` rewrites | Set to wherever the Outcomes Tracker API is served. Falls back to `https://www.buildcanada.com`, which will loop after cutover. |
+| `YORK_FACTORY_API_URL` | York Factory CMS base URL | Defaults to `https://yorkfactory.buildcanada.com/api/v1`. Override per environment. |
+| `LUMA_API_KEY` | Luma events list (`/api/events`) | Without this the homepage events list silently returns empty. |
+
+Recommended:
+
+| Variable | Purpose |
+|----------|---------|
+| `NEXT_PUBLIC_POSTHOG_TOKEN` | PostHog analytics + client-side exception capture (`error.tsx` boundaries report here). |
+| `NEXT_PUBLIC_POSTHOG_HOST` | PostHog UI host. Defaults to `https://us.i.posthog.com`. |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics. Loader is conditional — omit to disable. |
+| `TRACKER_API_BASE` | Server-only override for tracker API base (read in `lib/tracker-api.ts` when no public var is set). |
+
+## Deployment notes
+
+- Set the env vars above before building. Several are baked into the static output (`NEXT_PUBLIC_*`), so a redeploy is required to change them.
+- After cutover, verify `/sitemap.xml` and `/robots.txt` reference the production domain.
+- Verify `/tracker` loads — if the API base is misconfigured it will silently fail to render data.
+- Cloudflare-proxied projects (e.g. `/exit-tax-calculator`, `/bills`) are not served by Next; ensure their proxy rules survive any DNS / origin change.
+
 ## Design
 
 Custom fonts: **Söhne** (headings), **Financier Text** (body), **Founders Grotesk Mono** (labels/buttons).

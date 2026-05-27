@@ -1,8 +1,8 @@
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { fetchBuilder, fetchBuilders } from "@/lib/api/builders";
+import { fetchBuilder } from "@/lib/api/builders";
 
 export async function generateMetadata({
   params,
@@ -15,6 +15,7 @@ export async function generateMetadata({
     return {
       title: `${builder.name}: ${builder.tagline}`,
       description: builder.quote ?? undefined,
+      alternates: { canonical: `/builders/${builder.slug}` },
       openGraph: {
         title: `${builder.name}: ${builder.tagline} | Build Canada`,
         description: builder.quote ?? undefined,
@@ -38,6 +39,10 @@ export default async function BuilderPage({
     builder = await fetchBuilder(slug);
   } catch {
     notFound();
+  }
+
+  if (builder.slug !== slug) {
+    permanentRedirect(`/builders/${builder.slug}`);
   }
 
   return (

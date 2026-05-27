@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: {
-    default: "🏗️ Toronto",
-    template: "%s | 🏗️ Toronto",
+    default: "Build Canada - Toronto",
+    template: "%s | Build Canada - Toronto",
   },
   description:
     "Memos and ideas for Toronto — a publication of Build Canada.",
@@ -14,5 +14,5 @@ export default function TorontoLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <div className="theme-toronto">{children}</div>;
+  return <div className="theme-toronto bg-bg">{children}</div>;
 }

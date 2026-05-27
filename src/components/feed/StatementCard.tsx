@@ -17,7 +17,7 @@ const THEME: ContentCardTheme = {
 
 const MUTED = "var(--color-text-secondary)";
 
-function BlogIcon() {
+function StatementIcon() {
   return (
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
       <path
@@ -32,7 +32,7 @@ function BlogIcon() {
   );
 }
 
-export function BlogCard({ item }: { item: FeedItem }) {
+export function StatementCard({ item }: { item: FeedItem }) {
   const img = feedImage(item);
   const isLogo = img === "/assets/logos/logo-standard.svg";
 
@@ -56,7 +56,7 @@ export function BlogCard({ item }: { item: FeedItem }) {
           )}
         </div>
       }
-      label={{ icon: <BlogIcon />, text: "Essay" }}
+      label={{ icon: <StatementIcon />, text: "Statement" }}
       title={item.title}
       body={
         item.body ? (
@@ -68,7 +68,7 @@ export function BlogCard({ item }: { item: FeedItem }) {
       bodyClassName="line-clamp-2"
       meta={item.createdAt ? formatFeedDate(item.createdAt) : null}
       footer={{
-        brandIcon: <BlogIcon />,
+        brandIcon: <StatementIcon />,
         ctaLabel: "Read more",
       }}
     />

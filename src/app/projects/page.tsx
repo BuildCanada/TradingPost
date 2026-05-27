@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   title: "Projects",
   description:
     "Transparent government data and better tools for pro-growth voices.",
+  alternates: { canonical: "/projects" },
   openGraph: {
     title: "Projects",
     description:

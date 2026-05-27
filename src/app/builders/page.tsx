@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "Great Canadian Builders",
   description:
     "Short stories celebrating the incredible builders who shaped Canada.",
+  alternates: { canonical: "/builders" },
 };
 
 export default async function BuildersPage() {

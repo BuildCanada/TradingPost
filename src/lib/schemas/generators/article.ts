@@ -12,7 +12,6 @@ interface MemoData {
   slug: string;
   keyMessage1?: string | null;
   seoImage?: string | null;
-  splashImage?: string | null;
   publishedAt?: Date | string | null;
   createdAt: Date | string;
   updatedAt: Date | string;
@@ -27,7 +26,7 @@ export function generateArticleSchema(
     "@type": "Article" as const,
     headline: memo.title,
     description: memo.keyMessage1,
-    image: memo.seoImage || memo.splashImage,
+    image: memo.seoImage,
     datePublished: toISO8601(memo.publishedAt ?? memo.createdAt),
     dateModified: toISO8601(memo.updatedAt),
     author: generatePersonSchema(author),

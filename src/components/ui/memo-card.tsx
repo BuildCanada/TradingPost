@@ -9,10 +9,11 @@ export interface Memo {
   author: {
     name: string;
     photo: string | null;
+    title: string | null;
   } | null;
   keyMessage1?: string | null;
   category?: string | null;
-  splashImage?: string | null;
+  bannerImage?: string | null;
   seoImage?: string | null;
   publishedAt?: string | null;
   createdAt?: string;
@@ -93,13 +94,14 @@ export function MemoCard({
 }: MemoCardProps) {
   const isDark = variant === 'dark' || variant === 'featured';
   const isFeatured = variant === 'featured';
-
-  const hasImage = isDark && (memo.splashImage || memo.seoImage);
+  const hasImage = isDark && memo.bannerImage;
+  const author = memo.author;
+  const formattedDate = formatDate(memo.publishedAt, memo.createdAt);
 
   const imageEl = hasImage ? (
     <div className="absolute inset-0 bg-dark">
       <Image
-        src={memo.splashImage || memo.seoImage!}
+        src={memo.bannerImage!}
         alt=""
         fill
         className={cn(
@@ -121,14 +123,17 @@ export function MemoCard({
     </span>
   ) : null;
 
-  const author = memo.author;
   const authorBlock = (
     <div className="flex items-center gap-4">
       {author?.photo && (
         <div
           className={cn(
             "bg-border-light overflow-hidden shrink-0",
-            isFeatured ? "w-14 h-14 lg:w-16 lg:h-16" : "w-12 h-12 lg:w-[60px] lg:h-[60px]"
+            isFeatured
+              ? "w-14 h-14 lg:w-16 lg:h-16"
+              : isDark
+                ? "w-12 h-12 lg:w-[60px] lg:h-[60px]"
+                : "w-10 h-10 lg:w-12 lg:h-12"
           )}
         >
           <Image
@@ -146,23 +151,21 @@ export function MemoCard({
           <p className={cn(
             "font-display font-normal leading-[1.4]",
             isDark ? "text-bg" : "",
-            isFeatured ? "text-[1.125rem] lg:text-[1.25rem]" : "text-[1rem] lg:text-[1.125rem]"
+            isFeatured
+              ? "text-[1.125rem] lg:text-[1.25rem]"
+              : isDark
+                ? "text-[1rem] lg:text-[1.125rem]"
+                : "text-[0.875rem] lg:text-[1rem]"
           )}>
             {author.name}
           </p>
         )}
-        <p className={cn(
-          "type-label mt-0.5",
-          isDark ? "text-bg/70" : "text-text-secondary"
-        )}>
-          {formatCategory(memo.category)}
-        </p>
-        {formatDate(memo.publishedAt, memo.createdAt) && (
+        {author?.title && (
           <p className={cn(
             "type-label-sm mt-0.5",
-            isDark ? "text-bg/50" : "text-text-secondary"
+            isDark ? "text-bg/60" : "text-text-secondary"
           )}>
-            {formatDate(memo.publishedAt, memo.createdAt)}
+            {author.title}
           </p>
         )}
       </div>
@@ -178,16 +181,58 @@ export function MemoCard({
         {imageEl}
         {labelEl}
         <div className="relative z-10 flex flex-col">
-          <div className="p-8 lg:p-12 flex flex-col gap-5">
+          <div className="p-8 lg:p-12 flex flex-col gap-3">
             <h3 className="font-display text-[1.75rem] lg:text-[2.25rem] font-medium leading-[1.15] text-bg group-hover:text-white transition-colors line-clamp-3">
               {memo.title}
             </h3>
+            <p className="type-label text-bg/70">
+              {formatCategory(memo.category)}
+            </p>
             {memo.keyMessage1 && (
-               <p className="type-default text-bg/80 line-clamp-2 max-w-2xl">
+              <p className="type-default text-bg/80 line-clamp-2 max-w-2xl">
                 {memo.keyMessage1}
               </p>
             )}
             {authorBlock}
+            {formattedDate && (
+              <p className="type-label-sm text-bg/50">
+                {formattedDate}
+              </p>
+            )}
+          </div>
+          <CardCTA variant="dark" />
+        </div>
+      </Link>
+    );
+  }
+
+  if (isDark) {
+    return (
+      <Link
+        href={`${basePath}/${memo.slug}`}
+        className="flex flex-col justify-end group relative overflow-hidden min-h-[280px] lg:min-h-[320px] bg-dark border border-border-light"
+      >
+        {imageEl}
+        {labelEl}
+        <div className="relative z-10 flex flex-col">
+          <div className="p-8 lg:p-10 flex flex-col gap-3">
+            <h3 className="font-display text-[1.5rem] lg:text-[1.75rem] font-medium leading-[1.2] text-bg group-hover:text-white transition-colors line-clamp-3">
+              {memo.title}
+            </h3>
+            <p className="type-label text-bg/70">
+              {formatCategory(memo.category)}
+            </p>
+            {memo.keyMessage1 && (
+              <p className="type-body text-bg/70 line-clamp-3">
+                {memo.keyMessage1}
+              </p>
+            )}
+            {authorBlock}
+            {formattedDate && (
+              <p className="type-label-sm text-bg/50">
+                {formattedDate}
+              </p>
+            )}
           </div>
           <CardCTA variant="dark" />
         </div>
@@ -200,76 +245,32 @@ export function MemoCard({
       href={`${basePath}/${memo.slug}`}
       className={cn(
         "flex flex-col group relative overflow-hidden h-full",
-        !isDark && (gridItem ? "border-b border-r border-l border-border-light" : "border border-border-light"),
-        isDark && !isFeatured && "justify-end min-h-[280px] lg:min-h-[320px] bg-dark border border-border-light"
+        gridItem ? "border-b border-r border-l border-border-light" : "border border-border-light"
       )}
     >
-      {imageEl}
       {labelEl}
-
-      {isDark ? (
-        <div className="relative z-10 flex flex-col">
-          <div className="p-8 lg:p-10 flex flex-col gap-4">
-            <h3 className="font-display text-[1.5rem] lg:text-[1.75rem] font-medium leading-[1.2] text-bg group-hover:text-white transition-colors line-clamp-3">
-              {memo.title}
-            </h3>
-            {memo.keyMessage1 && (
-              <p className="type-body text-bg/70 line-clamp-3">
-                {memo.keyMessage1}
-              </p>
-            )}
-            {authorBlock}
-          </div>
-          <CardCTA variant="dark" />
+      <div className="p-6 lg:p-8 flex flex-col gap-3 flex-1">
+        <h3 className="font-display text-[1.125rem] lg:text-[1.25rem] font-medium leading-[1.2] tracking-normal group-hover:text-accent transition-colors line-clamp-2">
+          {memo.title}
+        </h3>
+        <p className="type-label text-text-secondary">
+          {formatCategory(memo.category)}
+        </p>
+        {memo.keyMessage1 && (
+          <p className="type-default text-text-secondary line-clamp-2">
+            {memo.keyMessage1}
+          </p>
+        )}
+        <div className="mt-auto flex flex-col gap-3">
+          {authorBlock}
+          {formattedDate && (
+            <p className="type-label-sm text-text-secondary">
+              {formattedDate}
+            </p>
+          )}
         </div>
-      ) : (
-        <>
-          <div className="p-6 lg:p-8 flex flex-col gap-4 flex-1">
-            <div className="min-w-0">
-              <h3 className="font-display text-[1.125rem] lg:text-[1.25rem] font-medium leading-[1.2] tracking-normal group-hover:text-accent transition-colors line-clamp-2">
-                {memo.title}
-              </h3>
-              {memo.keyMessage1 && (
-                <p className="type-default text-text-secondary mt-2 line-clamp-2">
-                  {memo.keyMessage1}
-                </p>
-              )}
-            </div>
-            <div className="flex items-center gap-3 mt-auto">
-              {author?.photo && (
-                <div
-                  className="w-10 h-10 lg:w-12 lg:h-12 bg-border-light overflow-hidden shrink-0"
-                        >
-                  <Image
-                    src={author.photo}
-                    alt={author.name}
-                    width={48}
-                    height={48}
-                    className="w-full h-full object-cover"
-                    unoptimized
-                  />
-                </div>
-              )}
-              <div>
-                {author && (
-                  <p className="font-display text-[0.875rem] lg:text-[1rem] font-normal leading-[1.4]">
-                    {author.name}
-                  </p>
-                )}
-                <p className="type-label text-text-secondary mt-0.5">
-                  {formatCategory(memo.category)}
-                </p>
-                {formatDate(memo.publishedAt, memo.createdAt) && (
-                  <p className="type-label-sm text-text-secondary mt-0.5">
-                    {formatDate(memo.publishedAt, memo.createdAt)}
-                  </p>
-                )}
-              </div>
-            </div>
-          </div>
-          <CardCTA variant="light" />
-        </>
-      )}
+      </div>
+      <CardCTA variant="light" />
     </Link>
   );
 }

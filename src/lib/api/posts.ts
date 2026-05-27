@@ -8,6 +8,7 @@ export interface PostDetail {
   slug: string;
   summary: string | null;
   body: string | null;
+  bannerImage: string | null;
   seoImage: string | null;
   publishedAt: string | null;
   createdAt: string;
@@ -23,7 +24,7 @@ function mapPost(p: YFPost): MemoItem {
     keyMessage1: p.summary,
     keyMessage2: null,
     keyMessage3: null,
-    splashImage: null,
+    bannerImage: p.banner_image_url,
     seoImage: p.seo_image_url,
     category: "post",
     featured: false,
@@ -57,6 +58,7 @@ export async function fetchPost(slug: string): Promise<PostDetail> {
     slug: p.slug,
     summary: p.summary,
     body: p.body,
+    bannerImage: p.banner_image_url,
     seoImage: p.seo_image_url,
     publishedAt: p.published_at,
     createdAt: p.published_at ?? new Date().toISOString(),

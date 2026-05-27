@@ -20,6 +20,7 @@ function CategoryFromSearchParams({ categories }: { categories: string[] }) {
     if (category && categories.includes(category)) {
       setActiveCategory(category);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return null;

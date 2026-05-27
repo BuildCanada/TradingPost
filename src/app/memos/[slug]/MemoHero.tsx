@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 
 interface MemoHeroProps {
-  category: string | null;
   title: string;
   authorName: string;
   authorImage: string | null;
@@ -13,7 +12,6 @@ interface MemoHeroProps {
 }
 
 export function MemoHero({
-  category,
   title,
   authorName,
   authorImage,

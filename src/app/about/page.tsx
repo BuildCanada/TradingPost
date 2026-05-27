@@ -9,7 +9,6 @@ import { generateFAQPageSchema } from "@/lib/schemas/generators/faq-page";
 const quickLinks = [
   { label: "Core Team", href: "#core-team" },
   { label: "Board", href: "#board" },
-  { label: "Memo Authors", href: "#memo-authors" },
   { label: "FAQs", href: "#faqs" },
 ];
 

@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { fetchPost, fetchPosts, getSiteConfig } from "@/lib/api";
@@ -39,6 +39,7 @@ export async function generateMetadata({
   return {
     title,
     description,
+    alternates: { canonical: `/posts/${post.slug}` },
     openGraph: {
       title,
       description,
@@ -66,6 +67,10 @@ export default async function PostDetailPage({
     post = await fetchPost(slug);
   } catch {
     notFound();
+  }
+
+  if (post.slug !== slug) {
+    permanentRedirect(`/posts/${post.slug}`);
   }
 
   const date = new Date(post.publishedAt || post.createdAt).toLocaleDateString(

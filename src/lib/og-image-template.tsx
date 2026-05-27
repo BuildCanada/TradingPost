@@ -2,14 +2,14 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
 const theme = {
-  background: "#1a1a1a",
+  background: "#f6ece3",
+  backgroundAlt: "#fbf6f1",
   accent: "#932f2f",
-  accentAlpha20: "rgba(147, 47, 47, 0.20)",
-  accentAlpha40: "rgba(147, 47, 47, 0.40)",
-  foreground: "#ffffff",
-  foreground80: "rgba(255, 255, 255, 0.80)",
-  foreground50: "rgba(255, 255, 255, 0.50)",
-  foreground30: "rgba(255, 255, 255, 0.30)",
+  accentSoft: "rgba(147, 47, 47, 0.20)",
+  foreground: "#272727",
+  foregroundMuted: "#5d5d5d",
+  foregroundFaint: "#888888",
+  border: "rgba(39, 39, 39, 0.18)",
 } as const;
 
 const sans = "system-ui, -apple-system, sans-serif";
@@ -31,7 +31,7 @@ export function BuildCanadaOGImage({ title, description, badge, label }: OGImage
         flexDirection: "column",
         backgroundColor: theme.background,
         color: theme.foreground,
-        padding: "100px 120px",
+        padding: "72px 96px",
         position: "relative",
         fontFamily: sans,
       }}
@@ -47,37 +47,73 @@ export function BuildCanadaOGImage({ title, description, badge, label }: OGImage
         }}
       />
 
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "60px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "32px" }}>
-          <span style={{ fontSize: "36px", fontWeight: 800, letterSpacing: "3px", textTransform: "uppercase", color: theme.foreground }}>
-            BUILD CANADA
-          </span>
-          {label && (
-            <>
-              <div style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: theme.accent }} />
-              <span style={{ fontSize: "28px", textTransform: "uppercase", letterSpacing: "4px", color: theme.accentAlpha40 }}>
-                {label}
-              </span>
-            </>
-          )}
-        </div>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "24px",
+          marginBottom: "36px",
+        }}
+      >
+        <span
+          style={{
+            fontSize: "30px",
+            fontWeight: 800,
+            letterSpacing: "3px",
+            textTransform: "uppercase",
+            color: theme.foreground,
+          }}
+        >
+          BUILD CANADA
+        </span>
+        {label && (
+          <>
+            <div
+              style={{
+                width: "6px",
+                height: "6px",
+                borderRadius: "50%",
+                backgroundColor: theme.accent,
+              }}
+            />
+            <span
+              style={{
+                fontSize: "24px",
+                textTransform: "uppercase",
+                letterSpacing: "4px",
+                color: theme.accent,
+              }}
+            >
+              {label}
+            </span>
+          </>
+        )}
       </div>
 
-      <div style={{ width: "120px", height: "4px", backgroundColor: theme.accent, marginBottom: "60px" }} />
+      <div
+        style={{
+          width: "96px",
+          height: "3px",
+          backgroundColor: theme.accent,
+          marginBottom: "36px",
+        }}
+      />
 
-      <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          flex: 1,
+        }}
+      >
         <h1
           style={{
-            fontSize: "80px",
+            fontSize: "60px",
             lineHeight: 1.1,
             fontWeight: 700,
             color: theme.foreground,
+            letterSpacing: "-0.02em",
             margin: 0,
-            maxWidth: "1900px",
-            overflow: "hidden",
-            display: "-webkit-box",
-            WebkitLineClamp: 3,
-            WebkitBoxOrient: "vertical",
           }}
         >
           {title}
@@ -86,15 +122,11 @@ export function BuildCanadaOGImage({ title, description, badge, label }: OGImage
         {description && (
           <p
             style={{
-              fontSize: "36px",
-              color: theme.foreground80,
-              maxWidth: "1600px",
+              fontSize: "28px",
+              color: theme.foregroundMuted,
               lineHeight: 1.4,
-              marginTop: "40px",
-              overflow: "hidden",
-              display: "-webkit-box",
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: "vertical",
+              marginTop: "24px",
+              marginBottom: 0,
             }}
           >
             {description}
@@ -102,13 +134,24 @@ export function BuildCanadaOGImage({ title, description, badge, label }: OGImage
         )}
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: "auto", paddingTop: "60px" }}>
-        {badge && (
-          <span style={{ fontSize: "32px", color: theme.accent, fontWeight: 600 }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginTop: "auto",
+          paddingTop: "32px",
+          borderTop: `1px solid ${theme.border}`,
+        }}
+      >
+        {badge ? (
+          <span style={{ fontSize: "24px", color: theme.accent, fontWeight: 600 }}>
             {badge}
           </span>
+        ) : (
+          <span />
         )}
-        <span style={{ fontSize: "28px", color: theme.foreground30, marginLeft: "auto" }}>
+        <span style={{ fontSize: "22px", color: theme.foregroundFaint }}>
           buildcanada.com
         </span>
       </div>

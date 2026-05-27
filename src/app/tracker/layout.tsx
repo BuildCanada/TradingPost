@@ -8,6 +8,7 @@ const description = "Track the progress of Canada's government initiatives";
 export const metadata: Metadata = {
   title,
   description,
+  alternates: { canonical: "/tracker" },
   icons: {
     icon: "/tracker/buildcanada-logo-square.svg",
     apple: "/tracker/buildcanada-logo-square.svg",

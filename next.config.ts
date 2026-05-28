@@ -16,6 +16,31 @@ const nextConfig: NextConfig = {
     ];
   },
   async rewrites() {
+    const trackerBase = process.env.TRACKER_API_BASE;
+
+    // Default (buildcanada.com): Rails API is mounted under /tracker, paths
+    // pass through unchanged. Standalone host (e.g. nelson deploy): commitments
+    // and departments live at the root (strip /tracker/api/v1), while
+    // dashboard/burndown stay under /api (strip /tracker only). Mirrors the
+    // server-side mapping in src/lib/tracker-api.ts.
+    const trackerRewrites = trackerBase
+      ? [
+          {
+            source: "/tracker/api/v1/:path*",
+            destination: `${trackerBase}/:path*`,
+          },
+          {
+            source: "/tracker/api/:path*",
+            destination: `${trackerBase}/api/:path*`,
+          },
+        ]
+      : [
+          {
+            source: "/tracker/api/:path*",
+            destination: `https://www.buildcanada.com/tracker/api/:path*`,
+          },
+        ];
+
     return [
       {
         source: "/ph/static/:path*",
@@ -29,10 +54,7 @@ const nextConfig: NextConfig = {
         source: "/ph/decide",
         destination: "https://us.i.posthog.com/decide",
       },
-      {
-        source: "/tracker/api/:path*",
-        destination: `${process.env.NEXT_PUBLIC_TRACKER_API_BASE || "https://www.buildcanada.com"}/tracker/api/:path*`,
-      },
+      ...trackerRewrites,
     ];
   },
   // Required to support PostHog trailing slash API requests

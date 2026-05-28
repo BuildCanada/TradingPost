@@ -11,8 +11,7 @@
 //    /departments.json) while dashboard/burndown still live under /api/*. We
 //    strip the /api/v1 prefix on those two endpoints and skip the /tracker
 //    prepend.
-const EXPLICIT_BASE =
-  process.env.TRACKER_API_BASE || process.env.NEXT_PUBLIC_TRACKER_API_BASE;
+const EXPLICIT_BASE = process.env.TRACKER_API_BASE;
 
 const API_BASE = EXPLICIT_BASE || "https://www.buildcanada.com";
 

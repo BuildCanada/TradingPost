@@ -21,7 +21,7 @@ const nextConfig: NextConfig = {
     ];
   },
   async rewrites() {
-    const trackerBase = process.env.NEXT_PUBLIC_TRACKER_API_BASE;
+    const trackerBase = process.env.TRACKER_API_BASE;
 
     // Default (buildcanada.com): Rails API is mounted under /tracker, paths
     // pass through unchanged. Standalone host (e.g. nelson deploy): commitments

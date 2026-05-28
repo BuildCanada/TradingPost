@@ -68,7 +68,7 @@ Required in production:
 | Variable | Purpose | Notes |
 |----------|---------|-------|
 | `NEXT_PUBLIC_SITE_URL` | Canonical/OG/sitemap base URL | e.g. `https://buildcanada.com`. Used by `layout.tsx`, `sitemap.ts`, `robots.ts`, `lib/api/config.ts`, and JSON-LD. |
-| `NEXT_PUBLIC_TRACKER_API_BASE` | Backend host for `/tracker/api/*` rewrites | Set to wherever the Outcomes Tracker API is served. Falls back to `https://www.buildcanada.com`, which will loop after cutover. |
+| `TRACKER_API_BASE` | Backend host for `/tracker/api/*` rewrites and server-side fetches | Set to wherever the Outcomes Tracker API is served. Falls back to `https://www.buildcanada.com`, which will loop after cutover. Server-only — never exposed to the browser. |
 | `YORK_FACTORY_API_URL` | York Factory CMS base URL | Defaults to `https://yorkfactory.buildcanada.com/api/v1`. Override per environment. |
 | `LUMA_API_KEY` | Luma events list (`/api/events`) | Without this the homepage events list silently returns empty. |
 
@@ -79,7 +79,6 @@ Recommended:
 | `NEXT_PUBLIC_POSTHOG_TOKEN` | PostHog analytics + client-side exception capture (`error.tsx` boundaries report here). |
 | `NEXT_PUBLIC_POSTHOG_HOST` | PostHog UI host. Defaults to `https://us.i.posthog.com`. |
 | `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics. Loader is conditional — omit to disable. |
-| `TRACKER_API_BASE` | Server-only override for tracker API base (read in `lib/tracker-api.ts` when no public var is set). |
 
 ## Deployment notes
 

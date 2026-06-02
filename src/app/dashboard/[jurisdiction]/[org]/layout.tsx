@@ -32,7 +32,7 @@ export default async function OrgLayout({
 
   const [allJurisdictions, measures] = await Promise.all([
     listJurisdictions().catch(() => []),
-    listMeasuresForOrg(org).catch(() => [] as KPIMeasure[]),
+    listMeasuresForOrg(jurisdiction, org).catch(() => [] as KPIMeasure[]),
   ]);
 
   const jurisdictionName =

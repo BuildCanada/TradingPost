@@ -79,7 +79,9 @@ export interface KPIFact {
   period_basis: KPIPeriodBasis;
   value_numeric: number | null;
   value_text: string | null;
-  citation_id: number;
+  citation_id?: number;
+  canonical_observation_id?: number;
+  extracted_observation_id?: number;
   document_id: number;
 }
 
@@ -123,6 +125,7 @@ export async function getOrganization(
 }
 
 export async function listMeasuresForOrg(
+  jurisdictionSlug: string,
   orgSlug: string,
 ): Promise<KPIMeasure[]> {
   const all: KPIMeasure[] = [];
@@ -132,6 +135,7 @@ export async function listMeasuresForOrg(
       "/kpis/measures",
       {
         params: {
+          jurisdiction_slug: jurisdictionSlug,
           organization_slug: orgSlug,
           per_page: "100",
           page: String(page),
@@ -182,8 +186,8 @@ export interface KPICitation {
   period_basis: KPIPeriodBasis;
   value_numeric: number | null;
   value_text: string | null;
-  value_raw_text: string | null;
-  page_number: number | null;
+  value_raw: string | null;
+  source_page: number | null;
   notes: string | null;
   agent_run_id: number | null;
   document: KPICitationDocument;
@@ -215,12 +219,16 @@ export async function getMeasure(measureId: number): Promise<KPIMeasure> {
   });
 }
 
-export async function listFactsForOrg(orgSlug: string): Promise<KPIFact[]> {
+export async function listFactsForOrg(
+  jurisdictionSlug: string,
+  orgSlug: string,
+): Promise<KPIFact[]> {
   const all: KPIFact[] = [];
   let page = 1;
   while (true) {
     const res = await apiFetch<KPIPaginatedResponse<KPIFact>>("/kpis/facts", {
       params: {
+        jurisdiction_slug: jurisdictionSlug,
         organization_slug: orgSlug,
         per_page: "100",
         page: String(page),

@@ -15,8 +15,12 @@ interface PageParams {
   measure: string;
 }
 
-async function resolveMeasure(orgSlug: string, measureSlug: string) {
-  const measures = await listMeasuresForOrg(orgSlug);
+async function resolveMeasure(
+  jurisdictionSlug: string,
+  orgSlug: string,
+  measureSlug: string,
+) {
+  const measures = await listMeasuresForOrg(jurisdictionSlug, orgSlug);
   const found = measures.find((m) => m.slug === measureSlug);
   if (!found) return null;
   // Index lookup returns most of the measure, but the show endpoint includes
@@ -34,7 +38,7 @@ export async function generateMetadata({
   params: Promise<PageParams>;
 }): Promise<Metadata> {
   const { jurisdiction, org, measure } = await params;
-  const m = await resolveMeasure(org, measure).catch(() => null);
+  const m = await resolveMeasure(jurisdiction, org, measure).catch(() => null);
   if (!m) return { title: "Measure" };
   return {
     title: `${m.canonical_name} — ${m.organization?.canonical_name ?? "KPI"}`,
@@ -52,9 +56,11 @@ export default async function MeasurePage({
 }: {
   params: Promise<PageParams>;
 }) {
-  const { org, measure } = await params;
+  const { jurisdiction, org, measure } = await params;
 
-  const measureData = await resolveMeasure(org, measure).catch(() => null);
+  const measureData = await resolveMeasure(jurisdiction, org, measure).catch(
+    () => null,
+  );
   if (!measureData) notFound();
 
   const [facts, citations] = await Promise.all([

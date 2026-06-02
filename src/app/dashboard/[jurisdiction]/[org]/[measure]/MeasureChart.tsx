@@ -85,7 +85,7 @@ function aggregateDocs(citations: KPICitation[]): DocAggregate[] {
       byDoc.set(docId, entry);
     }
     entry.years.add(c.measurement_year);
-    if (c.page_number != null) entry.pages.add(c.page_number);
+    if (c.source_page != null) entry.pages.add(c.source_page);
   }
   return Array.from(byDoc.values()).sort((a, b) => {
     const ad = a.published_at ?? "";

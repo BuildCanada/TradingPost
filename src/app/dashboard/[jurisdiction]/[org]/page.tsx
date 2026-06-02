@@ -64,8 +64,8 @@ export default async function OrgOverviewPage({
 
   const [orgData, measures, facts] = await Promise.all([
     getOrganization(jurisdiction, org).catch(() => null),
-    listMeasuresForOrg(org).catch(() => [] as KPIMeasure[]),
-    listFactsForOrg(org).catch(() => [] as KPIFact[]),
+    listMeasuresForOrg(jurisdiction, org).catch(() => [] as KPIMeasure[]),
+    listFactsForOrg(jurisdiction, org).catch(() => [] as KPIFact[]),
   ]);
 
   const factsByMeasure = new Map<number, KPIFact[]>();

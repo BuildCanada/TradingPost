@@ -32,6 +32,28 @@ type Kind = "endorsement" | "critique";
 
 const POSTAL_CODE_REGEX = /^[A-Za-z]\d[A-Za-z] ?\d[A-Za-z]\d$/;
 
+// Remember the visitor's postal code between submissions so they don't retype
+// it for every endorsement/critique. Stored only in the browser — never in the DB.
+const POSTAL_CODE_STORAGE_KEY = "bc:engagement:postal-code";
+
+function readCachedPostalCode(): string {
+  if (typeof window === "undefined") return "";
+  try {
+    return window.localStorage.getItem(POSTAL_CODE_STORAGE_KEY) ?? "";
+  } catch {
+    return "";
+  }
+}
+
+function writeCachedPostalCode(value: string) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(POSTAL_CODE_STORAGE_KEY, value);
+  } catch {
+    // Ignore private-mode / quota errors — caching is best-effort.
+  }
+}
+
 const TRUSTED_API_ORIGIN =
   process.env.NEXT_PUBLIC_YORK_FACTORY_ORIGIN || API_ORIGIN;
 
@@ -273,7 +295,7 @@ function EngagementDialog({
     setPhase("connect");
     setPayload(null);
     setVerifiedTicket(null);
-    setPostalCode("");
+    setPostalCode(readCachedPostalCode());
     setBody("");
     setError(null);
     setSubmitting(false);
@@ -383,6 +405,9 @@ function EngagementDialog({
         path,
         responseBody,
       );
+
+      // Remember the postal code for next time (browser-only, opt-out by clearing storage).
+      writeCachedPostalCode(postalCode);
 
       if (kind === "endorsement") {
         onEndorsed({ name: data.name, created_at: data.created_at });

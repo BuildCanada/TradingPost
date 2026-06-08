@@ -269,26 +269,6 @@ function EngagementDialog({
   // Reset state every time we open or change kind.
   useEffect(() => {
     if (!open) return;
-    // === SCREENSHOT BYPASS — REMOVE BEFORE COMMIT ===
-    // Skip the LinkedIn OAuth dance and prefill a mock verified identity so
-    // designers / docs can capture the post-auth modal state.
-    setPhase("ready");
-    setPayload({
-      sub: "mock-sub-123",
-      name: "Jane Doe",
-      given_name: "Jane",
-      family_name: "Doe",
-      email: "jane.doe@example.com",
-      email_verified: true,
-      picture: undefined,
-    });
-    setVerifiedTicket("mock-ticket");
-    setPostalCode("M5V 3A8");
-    setBody("");
-    setError(null);
-    setSubmitting(false);
-    return;
-    // === END SCREENSHOT BYPASS ===
 
     setPhase("connect");
     setPayload(null);

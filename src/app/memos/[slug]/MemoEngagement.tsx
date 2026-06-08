@@ -269,6 +269,27 @@ function EngagementDialog({
   // Reset state every time we open or change kind.
   useEffect(() => {
     if (!open) return;
+    // === SCREENSHOT BYPASS — REMOVE BEFORE COMMIT ===
+    // Skip the LinkedIn OAuth dance and prefill a mock verified identity so
+    // designers / docs can capture the post-auth modal state.
+    setPhase("ready");
+    setPayload({
+      sub: "mock-sub-123",
+      name: "Jane Doe",
+      given_name: "Jane",
+      family_name: "Doe",
+      email: "jane.doe@example.com",
+      email_verified: true,
+      picture: undefined,
+    });
+    setVerifiedTicket("mock-ticket");
+    setPostalCode("M5V 3A8");
+    setBody("");
+    setError(null);
+    setSubmitting(false);
+    return;
+    // === END SCREENSHOT BYPASS ===
+
     setPhase("connect");
     setPayload(null);
     setVerifiedTicket(null);
@@ -427,7 +448,7 @@ function EngagementDialog({
           <Dialog.Description className="type-body text-charcoal-600" style={{ marginBottom: "clamp(0.75rem, 2vw, 1.25rem)" }}>
             {kind === "endorsement"
               ? "Verify your identity through LinkedIn so your endorsement carries weight."
-              : "Verify your identity through LinkedIn and share your critique. Critiques are reviewed before they appear publicly."}
+              : "Verify your identity through LinkedIn and share your critique.  A critique must target the memo content in a constructive or positive way.  Anything self-promotional, including an ad hominen, or is deemed anyway unwelcome or hostile, will not be approved and may be removed."}
           </Dialog.Description>
 
           {phase === "connect" && (

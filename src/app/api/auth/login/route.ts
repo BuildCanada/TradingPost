@@ -23,7 +23,6 @@ export async function GET(request: NextRequest) {
   authorizeUrl.searchParams.set("client_id", CLIENT_ID);
   authorizeUrl.searchParams.set("redirect_uri", CALLBACK_URL);
   authorizeUrl.searchParams.set("response_type", "code");
-  authorizeUrl.searchParams.set("scope", "admin");
   authorizeUrl.searchParams.set("state", state);
 
   const isSecure = process.env.NODE_ENV === "production";

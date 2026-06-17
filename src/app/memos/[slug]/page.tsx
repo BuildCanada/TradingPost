@@ -29,7 +29,12 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  setPreviewToken((await cookies()).get("yf_preview_token")?.value);
+  const cookieStore = await cookies();
+  const previewToken =
+    cookieStore.get("yf_admin")?.value === "true"
+      ? cookieStore.get("yf_preview_token")?.value
+      : undefined;
+  setPreviewToken(previewToken);
   let memo;
   try {
     memo = await fetchMemo(slug);
@@ -69,7 +74,11 @@ export default async function MemoDetailPage({
 }) {
   const { slug } = await params;
 
-  const previewToken = (await cookies()).get("yf_preview_token")?.value;
+  const cookieStore = await cookies();
+  const previewToken =
+    cookieStore.get("yf_admin")?.value === "true"
+      ? cookieStore.get("yf_preview_token")?.value
+      : undefined;
   setPreviewToken(previewToken);
 
   let memo;

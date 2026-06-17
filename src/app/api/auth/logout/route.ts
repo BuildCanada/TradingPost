@@ -24,6 +24,7 @@ export async function GET(request: NextRequest) {
 
   const response = NextResponse.redirect(`${siteUrl}/memos`);
   response.cookies.delete("yf_preview_token");
+  response.cookies.delete("yf_admin");
 
   return response;
 }

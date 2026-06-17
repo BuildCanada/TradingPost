@@ -6,12 +6,15 @@ const CLIENT_SECRET = process.env.YF_OAUTH_CLIENT_SECRET || "";
 const CALLBACK_URL =
   process.env.YF_OAUTH_CALLBACK_URL ||
   "http://localhost:5050/api/auth/callback";
+const API_URL =
+  process.env.YORK_FACTORY_API_URL ||
+  "https://yorkfactory.buildcanada.com/api/v1";
 
 interface TokenResponse {
   access_token: string;
   token_type: string;
   expires_in: number;
-  scope: string;
+  scope?: string;
   refresh_token?: string;
 }
 
@@ -65,10 +68,20 @@ export async function GET(request: NextRequest) {
 
   const tokenData = (await tokenRes.json()) as TokenResponse;
 
-  if (!tokenData.scope?.split(" ").includes("admin")) {
-    return NextResponse.redirect(
-      `${siteUrl}/?preview_error=insufficient_scope`,
-    );
+  // Look up the user to learn whether they're an admin. Admin status is a
+  // property of the user (surfaced by /me), not an OAuth scope — only admins
+  // get draft preview. Non-admins still get a valid session (general login).
+  let isAdmin = false;
+  try {
+    const meRes = await fetch(`${API_URL}/me`, {
+      headers: { Authorization: `Bearer ${tokenData.access_token}` },
+      cache: "no-store",
+    });
+    if (meRes.ok) {
+      isAdmin = (await meRes.json()).admin === true;
+    }
+  } catch {
+    // Treat a failed lookup as non-admin; the API still enforces access server-side.
   }
 
   const isSecure = process.env.NODE_ENV === "production";
@@ -77,13 +90,15 @@ export async function GET(request: NextRequest) {
   response.cookies.delete("oauth_state");
   response.cookies.delete("oauth_redirect");
 
-  response.cookies.set("yf_preview_token", tokenData.access_token, {
+  const cookieOpts = {
     httpOnly: true,
     secure: isSecure,
-    sameSite: "lax",
+    sameSite: "lax" as const,
     maxAge: tokenData.expires_in,
     path: "/",
-  });
+  };
+  response.cookies.set("yf_preview_token", tokenData.access_token, cookieOpts);
+  response.cookies.set("yf_admin", String(isAdmin), cookieOpts);
 
   return response;
 }

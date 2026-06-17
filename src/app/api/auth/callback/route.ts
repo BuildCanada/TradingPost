@@ -6,9 +6,6 @@ const CLIENT_SECRET = process.env.YF_OAUTH_CLIENT_SECRET || "";
 const CALLBACK_URL =
   process.env.YF_OAUTH_CALLBACK_URL ||
   "http://localhost:5050/api/auth/callback";
-const API_URL =
-  process.env.YORK_FACTORY_API_URL ||
-  "https://yorkfactory.buildcanada.com/api/v1";
 
 interface TokenResponse {
   access_token: string;
@@ -68,37 +65,22 @@ export async function GET(request: NextRequest) {
 
   const tokenData = (await tokenRes.json()) as TokenResponse;
 
-  // Look up the user to learn whether they're an admin. Admin status is a
-  // property of the user (surfaced by /me), not an OAuth scope — only admins
-  // get draft preview. Non-admins still get a valid session (general login).
-  let isAdmin = false;
-  try {
-    const meRes = await fetch(`${API_URL}/me`, {
-      headers: { Authorization: `Bearer ${tokenData.access_token}` },
-      cache: "no-store",
-    });
-    if (meRes.ok) {
-      isAdmin = (await meRes.json()).admin === true;
-    }
-  } catch {
-    // Treat a failed lookup as non-admin; the API still enforces access server-side.
-  }
-
   const isSecure = process.env.NODE_ENV === "production";
   const response = NextResponse.redirect(`${siteUrl}${redirectTo}`);
 
   response.cookies.delete("oauth_state");
   response.cookies.delete("oauth_redirect");
 
-  const cookieOpts = {
+  // Store only the access token. Identity and admin status are resolved live
+  // from /me when needed (see lib/auth.ts) — never baked into a cookie that
+  // could go stale.
+  response.cookies.set("yf_access_token", tokenData.access_token, {
     httpOnly: true,
     secure: isSecure,
     sameSite: "lax" as const,
     maxAge: tokenData.expires_in,
     path: "/",
-  };
-  response.cookies.set("yf_preview_token", tokenData.access_token, cookieOpts);
-  response.cookies.set("yf_admin", String(isAdmin), cookieOpts);
+  });
 
   return response;
 }

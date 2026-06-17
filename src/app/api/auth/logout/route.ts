@@ -8,13 +8,13 @@ export async function GET(request: NextRequest) {
   const siteUrl = new URL(request.url).origin;
 
   // Revoke Doorkeeper token if present
-  const previewToken = request.cookies.get("yf_preview_token")?.value;
-  if (previewToken && CLIENT_ID && CLIENT_SECRET) {
+  const accessToken = request.cookies.get("yf_access_token")?.value;
+  if (accessToken && CLIENT_ID && CLIENT_SECRET) {
     await fetch(`${YF_OAUTH_URL}/oauth/revoke`, {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: new URLSearchParams({
-        token: previewToken,
+        token: accessToken,
         client_id: CLIENT_ID,
         client_secret: CLIENT_SECRET,
       }).toString(),
@@ -23,8 +23,7 @@ export async function GET(request: NextRequest) {
   }
 
   const response = NextResponse.redirect(`${siteUrl}/memos`);
-  response.cookies.delete("yf_preview_token");
-  response.cookies.delete("yf_admin");
+  response.cookies.delete("yf_access_token");
 
   return response;
 }

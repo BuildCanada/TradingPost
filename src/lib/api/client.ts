@@ -1,4 +1,4 @@
-import { getPreviewToken } from "@/lib/preview-token";
+import { getAccessToken } from "@/lib/auth-token";
 
 export const API_URL =
   process.env.YORK_FACTORY_API_URL ||
@@ -21,14 +21,14 @@ export async function apiFetch<T>(
   }
 
   const headers: Record<string, string> = {};
-  const previewToken = getPreviewToken();
-  if (previewToken) {
-    headers["Authorization"] = `Bearer ${previewToken}`;
+  const accessToken = getAccessToken();
+  if (accessToken) {
+    headers["Authorization"] = `Bearer ${accessToken}`;
   }
 
   const res = await fetch(url.toString(), {
     headers,
-    next: previewToken
+    next: accessToken
       ? { revalidate: 0 }
       : { revalidate: options?.revalidate ?? 60 },
   });

@@ -1,4 +1,3 @@
-import { cookies } from "next/headers";
 import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
 import { fetchMemo, fetchMemos, getSiteConfig } from "@/lib/api";
@@ -12,7 +11,19 @@ import { generateArticleSchema } from "@/lib/schemas/generators/article";
 import { generateBreadcrumbSchema } from "@/lib/schemas/generators/breadcrumb";
 import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
 import { DraftPreviewBanner } from "./DraftPreviewBanner";
-import { setPreviewToken } from "@/lib/preview-token";
+import { setAccessToken } from "@/lib/auth-token";
+import { getCurrentUser, getAccessTokenCookie } from "@/lib/auth";
+
+// Draft preview is gated on the signed-in user actually being an admin (live
+// from /me), never on a baked cookie. When they are, we hand apiFetch the
+// access token so it fetches drafts; otherwise the request store stays empty
+// and only published content is returned.
+async function resolvePreviewToken(): Promise<string | undefined> {
+  const user = await getCurrentUser();
+  const token = user?.admin ? await getAccessTokenCookie() : undefined;
+  setAccessToken(token);
+  return token;
+}
 
 export async function generateStaticParams() {
   try {
@@ -29,12 +40,8 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const cookieStore = await cookies();
-  const previewToken =
-    cookieStore.get("yf_admin")?.value === "true"
-      ? cookieStore.get("yf_preview_token")?.value
-      : undefined;
-  setPreviewToken(previewToken);
+  // Prime the request-scoped token so draft metadata resolves for admins.
+  await resolvePreviewToken();
   let memo;
   try {
     memo = await fetchMemo(slug);
@@ -74,12 +81,7 @@ export default async function MemoDetailPage({
 }) {
   const { slug } = await params;
 
-  const cookieStore = await cookies();
-  const previewToken =
-    cookieStore.get("yf_admin")?.value === "true"
-      ? cookieStore.get("yf_preview_token")?.value
-      : undefined;
-  setPreviewToken(previewToken);
+  const previewToken = await resolvePreviewToken();
 
   let memo;
   try {

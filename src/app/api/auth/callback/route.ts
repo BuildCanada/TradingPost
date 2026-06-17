@@ -1,4 +1,3 @@
-import { draftMode } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 const YF_OAUTH_URL = process.env.YF_OAUTH_URL || "http://localhost:3000";
@@ -71,9 +70,6 @@ export async function GET(request: NextRequest) {
       `${siteUrl}/?preview_error=insufficient_scope`,
     );
   }
-
-  // Enable Next.js Draft Mode (sets __prerender_bypass cookie)
-  (await draftMode()).enable();
 
   const isSecure = process.env.NODE_ENV === "production";
   const response = NextResponse.redirect(`${siteUrl}${redirectTo}`);

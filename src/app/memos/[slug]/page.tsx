@@ -1,4 +1,4 @@
-import { cookies, draftMode } from "next/headers";
+import { cookies } from "next/headers";
 import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
 import { fetchMemo, fetchMemos, getSiteConfig } from "@/lib/api";
@@ -27,10 +27,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const { isEnabled: isDraft } = await draftMode();
-  const previewToken = isDraft
-    ? (await cookies()).get("yf_preview_token")?.value
-    : undefined;
+  const previewToken = (await cookies()).get("yf_preview_token")?.value;
   let memo;
   try {
     memo = await fetchMemo(slug, { previewToken });
@@ -70,11 +67,8 @@ export default async function MemoDetailPage({
 }) {
   const { slug } = await params;
 
-  const { isEnabled: isDraft } = await draftMode();
-  const cookieStore = await cookies();
-  const previewToken = isDraft
-    ? cookieStore.get("yf_preview_token")?.value
-    : undefined;
+  const previewToken = (await cookies()).get("yf_preview_token")?.value;
+  const isDraft = !!previewToken;
 
   let memo;
   try {

@@ -1,4 +1,3 @@
-import { draftMode } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 const YF_OAUTH_URL = process.env.YF_OAUTH_URL || "http://localhost:3000";
@@ -22,8 +21,6 @@ export async function GET(request: NextRequest) {
       cache: "no-store",
     }).catch(() => {});
   }
-
-  (await draftMode()).disable();
 
   const response = NextResponse.redirect(`${siteUrl}/memos`);
   response.cookies.delete("yf_preview_token");

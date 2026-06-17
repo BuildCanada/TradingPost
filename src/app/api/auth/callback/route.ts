@@ -1,21 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-
-const YF_OAUTH_URL = process.env.YF_OAUTH_URL || "http://localhost:3000";
-const CLIENT_ID = process.env.YF_OAUTH_CLIENT_ID || "";
-const CLIENT_SECRET = process.env.YF_OAUTH_CLIENT_SECRET || "";
-const CALLBACK_URL =
-  process.env.YF_OAUTH_CALLBACK_URL ||
-  "http://localhost:5050/api/auth/callback";
-
-interface TokenResponse {
-  access_token: string;
-  token_type: string;
-  expires_in: number;
-  scope?: string;
-  refresh_token?: string;
-}
+import {
+  oauthConfig,
+  safeRedirectPath,
+  setSessionCookies,
+  type TokenResponse,
+} from "@/lib/oauth";
 
 export async function GET(request: NextRequest) {
+  const { url, callbackUrl, clientId, clientSecret } = oauthConfig();
   const { searchParams } = request.nextUrl;
   const code = searchParams.get("code");
   const state = searchParams.get("state");
@@ -24,35 +16,31 @@ export async function GET(request: NextRequest) {
   const siteUrl = new URL(request.url).origin;
 
   if (error) {
-    return NextResponse.redirect(
-      `${siteUrl}/?preview_error=oauth_denied`,
-    );
+    return NextResponse.redirect(`${siteUrl}/?preview_error=oauth_denied`);
   }
 
   if (!code || !state) {
-    return NextResponse.redirect(
-      `${siteUrl}/?preview_error=invalid_callback`,
-    );
+    return NextResponse.redirect(`${siteUrl}/?preview_error=invalid_callback`);
   }
 
   const storedState = request.cookies.get("oauth_state")?.value;
-  const redirectTo = request.cookies.get("oauth_redirect")?.value || "/memos";
+  const redirectTo = safeRedirectPath(
+    request.cookies.get("oauth_redirect")?.value,
+  );
 
   if (!storedState || state !== storedState) {
-    return NextResponse.redirect(
-      `${siteUrl}/?preview_error=state_mismatch`,
-    );
+    return NextResponse.redirect(`${siteUrl}/?preview_error=state_mismatch`);
   }
 
-  const tokenRes = await fetch(`${YF_OAUTH_URL}/oauth/token`, {
+  const tokenRes = await fetch(`${url}/oauth/token`, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       grant_type: "authorization_code",
       code,
-      redirect_uri: CALLBACK_URL,
-      client_id: CLIENT_ID,
-      client_secret: CLIENT_SECRET,
+      redirect_uri: callbackUrl,
+      client_id: clientId,
+      client_secret: clientSecret,
     }).toString(),
     cache: "no-store",
   });
@@ -65,22 +53,14 @@ export async function GET(request: NextRequest) {
 
   const tokenData = (await tokenRes.json()) as TokenResponse;
 
-  const isSecure = process.env.NODE_ENV === "production";
   const response = NextResponse.redirect(`${siteUrl}${redirectTo}`);
-
   response.cookies.delete("oauth_state");
   response.cookies.delete("oauth_redirect");
 
-  // Store only the access token. Identity and admin status are resolved live
-  // from /me when needed (see lib/auth.ts) — never baked into a cookie that
-  // could go stale.
-  response.cookies.set("yf_access_token", tokenData.access_token, {
-    httpOnly: true,
-    secure: isSecure,
-    sameSite: "lax" as const,
-    maxAge: tokenData.expires_in,
-    path: "/",
-  });
+  // Store the access token (+ refresh token for silent renewal). Identity and
+  // admin status are resolved live from /me when needed (see lib/auth.ts) —
+  // never baked into a cookie that could go stale.
+  setSessionCookies(response, tokenData);
 
   return response;
 }

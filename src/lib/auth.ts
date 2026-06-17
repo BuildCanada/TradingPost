@@ -1,8 +1,7 @@
 import { cache } from "react";
 import { cookies } from "next/headers";
 import { API_URL } from "@/lib/api/client";
-
-export const ACCESS_TOKEN_COOKIE = "yf_access_token";
+import { ACCESS_TOKEN_COOKIE } from "@/lib/oauth";
 
 export interface YfUser {
   email: string;
@@ -34,17 +33,29 @@ export const getCurrentUser = cache(async (): Promise<YfUser | null> => {
       headers: { Authorization: `Bearer ${token}` },
       cache: "no-store",
     });
-    if (!res.ok) return null;
 
-    const data = await res.json();
-    return {
-      email: data.email,
-      name: data.name ?? null,
-      role: data.role ?? null,
-      avatarUrl: data.avatar_url ?? null,
-      admin: data.admin === true,
-    };
-  } catch {
+    if (res.ok) {
+      const data = await res.json();
+      return {
+        email: data.email,
+        name: data.name ?? null,
+        role: data.role ?? null,
+        avatarUrl: data.avatar_url ?? null,
+        admin: data.admin === true,
+      };
+    }
+
+    // 401/403 means the token is genuinely invalid/expired → signed out (quiet).
+    // Anything else means York Factory is unhealthy; log it so a transient
+    // outage isn't silently misread as "every admin lost access."
+    if (res.status !== 401 && res.status !== 403) {
+      console.warn(
+        `[auth] /me returned ${res.status}; treating user as signed out`,
+      );
+    }
+    return null;
+  } catch (err) {
+    console.warn("[auth] /me request failed; treating user as signed out", err);
     return null;
   }
 });

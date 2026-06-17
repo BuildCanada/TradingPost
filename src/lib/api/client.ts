@@ -4,7 +4,11 @@ export const API_URL =
 
 export async function apiFetch<T>(
   path: string,
-  options?: { revalidate?: number; params?: Record<string, string> },
+  options?: {
+    revalidate?: number;
+    params?: Record<string, string>;
+    previewToken?: string;
+  },
 ): Promise<T> {
   const url = new URL(`${API_URL}${path}`);
   if (options?.params) {
@@ -15,8 +19,16 @@ export async function apiFetch<T>(
     }
   }
 
+  const headers: Record<string, string> = {};
+  if (options?.previewToken) {
+    headers["Authorization"] = `Bearer ${options.previewToken}`;
+  }
+
   const res = await fetch(url.toString(), {
-    next: { revalidate: options?.revalidate ?? 60 },
+    headers,
+    next: options?.previewToken
+      ? { revalidate: 0 }
+      : { revalidate: options?.revalidate ?? 60 },
   });
 
   if (!res.ok) {

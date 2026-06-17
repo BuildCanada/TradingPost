@@ -96,12 +96,13 @@ export async function fetchMemos(params?: {
   return all.map((m) => mapMemo(m, authorTitles));
 }
 
-export async function fetchMemo(slug: string, params?: { publication?: string }) {
+export async function fetchMemo(slug: string, params?: { publication?: string; previewToken?: string }) {
   const queryParams: Record<string, string> = {};
   if (params?.publication) queryParams.publication = params.publication;
   const m = await apiFetch<YFMemoDetail>(`/memos/${slug}`, {
     revalidate: 300,
     params: queryParams,
+    previewToken: params?.previewToken,
   });
   const keyMessages = extractKeyMessages((m.key_messages ?? []) as unknown[]);
   const authorName = m.author?.name ?? "Build Canada";

@@ -1,3 +1,4 @@
+import { cookies, draftMode } from "next/headers";
 import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
 import { fetchMemo, fetchMemos, getSiteConfig } from "@/lib/api";
@@ -26,9 +27,13 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
+  const { isEnabled: isDraft } = await draftMode();
+  const previewToken = isDraft
+    ? (await cookies()).get("yf_preview_token")?.value
+    : undefined;
   let memo;
   try {
-    memo = await fetchMemo(slug);
+    memo = await fetchMemo(slug, { previewToken });
   } catch {
     return { title: "Memo Not Found | Build Canada" };
   }
@@ -64,9 +69,16 @@ export default async function MemoDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+
+  const { isEnabled: isDraft } = await draftMode();
+  const cookieStore = await cookies();
+  const previewToken = isDraft
+    ? cookieStore.get("yf_preview_token")?.value
+    : undefined;
+
   let memo;
   try {
-    memo = await fetchMemo(slug);
+    memo = await fetchMemo(slug, { previewToken });
   } catch {
     notFound();
   }
@@ -141,6 +153,17 @@ export default async function MemoDetailPage({
 
   return (
     <div className="mx-[10px] my-[10px] border border-border-light bg-bg">
+      {isDraft && (
+        <div className="fixed top-0 left-0 right-0 z-50 bg-amber-500 text-white text-sm px-4 py-2 flex items-center justify-between">
+          <span>Draft Preview Mode — content may be unpublished</span>
+          <a
+            href={`/api/auth/logout?redirect=/memos/${slug}`}
+            className="underline font-medium"
+          >
+            Exit Preview
+          </a>
+        </div>
+      )}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

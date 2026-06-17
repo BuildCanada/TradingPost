@@ -11,6 +11,8 @@ import { buildGraph } from "@/lib/schemas/graph";
 import { generateArticleSchema } from "@/lib/schemas/generators/article";
 import { generateBreadcrumbSchema } from "@/lib/schemas/generators/breadcrumb";
 import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
+import { DraftPreviewBanner } from "./DraftPreviewBanner";
+import { setPreviewToken } from "@/lib/preview-token";
 
 export async function generateStaticParams() {
   try {
@@ -27,10 +29,10 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  const previewToken = (await cookies()).get("yf_preview_token")?.value;
+  setPreviewToken((await cookies()).get("yf_preview_token")?.value);
   let memo;
   try {
-    memo = await fetchMemo(slug, { previewToken });
+    memo = await fetchMemo(slug);
   } catch {
     return { title: "Memo Not Found | Build Canada" };
   }
@@ -68,13 +70,26 @@ export default async function MemoDetailPage({
   const { slug } = await params;
 
   const previewToken = (await cookies()).get("yf_preview_token")?.value;
-  const isDraft = !!previewToken;
+  setPreviewToken(previewToken);
 
   let memo;
   try {
-    memo = await fetchMemo(slug, { previewToken });
+    memo = await fetchMemo(slug);
   } catch {
-    notFound();
+    if (!previewToken) notFound();
+
+    return (
+      <div className="mx-[10px] my-[10px] border border-border-light bg-bg">
+        <div className="max-w-[720px] mx-auto px-[5vw] md:px-[10vw] py-24 flex flex-col items-center gap-8 text-center">
+          <p className="type-label text-text-secondary">404</p>
+          <h1 className="type-title">Memo not found</h1>
+          <p className="type-body text-text-secondary">
+            This memo doesn&apos;t exist or hasn&apos;t been published yet.
+          </p>
+          <DraftPreviewBanner state="draft-not-found" slug={slug} />
+        </div>
+      </div>
+    );
   }
 
   if (memo.slug !== slug) {
@@ -147,16 +162,8 @@ export default async function MemoDetailPage({
 
   return (
     <div className="mx-[10px] my-[10px] border border-border-light bg-bg">
-      {isDraft && (
-        <div className="fixed top-0 left-0 right-0 z-50 bg-amber-500 text-white text-sm px-4 py-2 flex items-center justify-between">
-          <span>Draft Preview Mode — content may be unpublished</span>
-          <a
-            href={`/api/auth/logout?redirect=/memos/${slug}`}
-            className="underline font-medium"
-          >
-            Exit Preview
-          </a>
-        </div>
+      {previewToken && (
+        <DraftPreviewBanner state="viewing-draft" slug={slug} />
       )}
       <script
         type="application/ld+json"

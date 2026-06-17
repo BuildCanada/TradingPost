@@ -1,3 +1,5 @@
+import { getPreviewToken } from "@/lib/preview-token";
+
 export const API_URL =
   process.env.YORK_FACTORY_API_URL ||
   "https://yorkfactory.buildcanada.com/api/v1";
@@ -7,7 +9,6 @@ export async function apiFetch<T>(
   options?: {
     revalidate?: number;
     params?: Record<string, string>;
-    previewToken?: string;
   },
 ): Promise<T> {
   const url = new URL(`${API_URL}${path}`);
@@ -20,13 +21,14 @@ export async function apiFetch<T>(
   }
 
   const headers: Record<string, string> = {};
-  if (options?.previewToken) {
-    headers["Authorization"] = `Bearer ${options.previewToken}`;
+  const previewToken = getPreviewToken();
+  if (previewToken) {
+    headers["Authorization"] = `Bearer ${previewToken}`;
   }
 
   const res = await fetch(url.toString(), {
     headers,
-    next: options?.previewToken
+    next: previewToken
       ? { revalidate: 0 }
       : { revalidate: options?.revalidate ?? 60 },
   });

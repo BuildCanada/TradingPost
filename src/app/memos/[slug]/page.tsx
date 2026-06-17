@@ -18,7 +18,7 @@ import { getCurrentUser, getAccessTokenCookie } from "@/lib/auth";
 // from /me), never on a baked cookie. When they are, we hand apiFetch the
 // access token so it fetches drafts; otherwise the request store stays empty
 // and only published content is returned.
-async function resolvePreviewToken(): Promise<string | undefined> {
+async function resolveAccessToken(): Promise<string | undefined> {
   const user = await getCurrentUser();
   const token = user?.admin ? await getAccessTokenCookie() : undefined;
   setAccessToken(token);
@@ -41,7 +41,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   // Prime the request-scoped token so draft metadata resolves for admins.
-  await resolvePreviewToken();
+  await resolveAccessToken();
   let memo;
   try {
     memo = await fetchMemo(slug);
@@ -81,13 +81,13 @@ export default async function MemoDetailPage({
 }) {
   const { slug } = await params;
 
-  const previewToken = await resolvePreviewToken();
+  const accessToken = await resolveAccessToken();
 
   let memo;
   try {
     memo = await fetchMemo(slug);
   } catch {
-    if (!previewToken) notFound();
+    if (!accessToken) notFound();
 
     return (
       <div className="mx-[10px] my-[10px] border border-border-light bg-bg">
@@ -173,7 +173,7 @@ export default async function MemoDetailPage({
 
   return (
     <div className="mx-[10px] my-[10px] border border-border-light bg-bg">
-      {previewToken && (
+      {accessToken && (
         <DraftPreviewBanner state="viewing-draft" slug={slug} />
       )}
       <script

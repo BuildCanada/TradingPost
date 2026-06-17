@@ -3,8 +3,9 @@
 import { useEffect } from "react";
 import posthog from "posthog-js";
 
-// Sentinel recording which user id we've already identified this browser
-// session, so identify fires once per session rather than once per page load.
+// Sentinel recording which user (by email) we've already identified this
+// browser session, so identify fires once per session rather than once per
+// page load.
 const SESSION_KEY = "yf_identified";
 
 // Bridges the httpOnly session to PostHog: asks the server who the user is
@@ -23,14 +24,14 @@ export function IdentifyUser() {
         if (cancelled) return;
 
         if (user) {
-          if (sessionStorage.getItem(SESSION_KEY) !== String(user.id)) {
-            posthog.identify(String(user.id), {
+          if (sessionStorage.getItem(SESSION_KEY) !== user.email) {
+            posthog.identify(user.email, {
               email: user.email,
               name: user.name,
               role: user.role,
               is_admin: user.admin,
             });
-            sessionStorage.setItem(SESSION_KEY, String(user.id));
+            sessionStorage.setItem(SESSION_KEY, user.email);
           }
         } else if (sessionStorage.getItem(SESSION_KEY)) {
           // Was identified, now signed out → reset so the next anonymous

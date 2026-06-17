@@ -5,7 +5,6 @@ import { API_URL } from "@/lib/api/client";
 export const ACCESS_TOKEN_COOKIE = "yf_access_token";
 
 export interface YfUser {
-  id: number;
   email: string;
   name: string | null;
   role: string | null;
@@ -39,7 +38,6 @@ export const getCurrentUser = cache(async (): Promise<YfUser | null> => {
 
     const data = await res.json();
     return {
-      id: data.id,
       email: data.email,
       name: data.name ?? null,
       role: data.role ?? null,

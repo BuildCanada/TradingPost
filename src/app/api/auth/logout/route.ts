@@ -6,9 +6,17 @@ import {
   oauthConfig,
 } from "@/lib/oauth";
 
-export async function GET(request: NextRequest) {
+export async function POST(request: NextRequest) {
   const { url, clientId, clientSecret } = oauthConfig();
   const siteUrl = new URL(request.url).origin;
+
+  // CSRF guard: a same-origin form POST sends an Origin header matching our own
+  // origin. Reject anything cross-site so logout can't be forced from another
+  // site. (Logout is POST-only for the same reason — no GET vector.)
+  const origin = request.headers.get("origin");
+  if (origin && origin !== siteUrl) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   // Revoke both tokens server-side so logout isn't just a client-side cookie
   // drop — a leaked token shouldn't outlive the session.
@@ -34,7 +42,8 @@ export async function GET(request: NextRequest) {
     );
   }
 
-  const response = NextResponse.redirect(`${siteUrl}/memos`);
+  // 303 See Other so the browser issues a GET to /memos after the POST.
+  const response = NextResponse.redirect(`${siteUrl}/memos`, 303);
   clearSessionCookies(response);
 
   return response;

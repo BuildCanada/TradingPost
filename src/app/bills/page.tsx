@@ -109,11 +109,15 @@ async function getApiBills(): Promise<BillSummary[]> {
 }
 
 async function getMergedBills(): Promise<BillSummary[]> {
-  const apiBills = await getApiBills();
   const uri = process.env.MONGO_URI || "";
   const hasValidMongoUri =
     uri.startsWith("mongodb://") || uri.startsWith("mongodb+srv://");
-  const dbBills = hasValidMongoUri ? await getAllBillsFromDB() : [];
+  // The API and DB reads are independent — run them concurrently instead of
+  // waterfalling so page latency is the slower of the two, not the sum.
+  const [apiBills, dbBills] = await Promise.all([
+    getApiBills(),
+    hasValidMongoUri ? getAllBillsFromDB() : Promise.resolve([]),
+  ]);
 
   // Convert DB bills to UnifiedBill format first, then to BillSummary
   const dbBillsAsUnified = dbBills.map(fromBuildCanadaDbBill);

@@ -94,6 +94,10 @@
 
   background-color: var(--background);
   color: var(--foreground);
+  /* Match the rest of the site: the bills sub-app is UI/data-heavy, so it uses
+     the site's sans typeface (Soehne) like the navbar/chrome, rather than
+     inheriting the body's serif (Financier) used for memo prose. */
+  font-family: var(--font-display);
 }
 
 @layer base {

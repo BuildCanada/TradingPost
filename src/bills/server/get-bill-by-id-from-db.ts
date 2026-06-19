@@ -1,0 +1,20 @@
+import "server-only";
+import { connectToDatabase } from "@/bills/lib/mongoose";
+import { Bill } from "@/bills/models/Bill";
+import type { BillDocument } from "@/bills/models/Bill";
+import { env } from "@/bills/env";
+
+export async function getBillByIdFromDB(
+  billId: string,
+): Promise<BillDocument | null> {
+  const uri = env.MONGO_URI || "";
+  const hasValidMongoUri =
+    uri.startsWith("mongodb://") || uri.startsWith("mongodb+srv://");
+  if (!hasValidMongoUri) return null;
+
+  await connectToDatabase();
+  const existing = (await Bill.findOne({ billId })
+    .lean()
+    .exec()) as BillDocument | null;
+  return existing;
+}

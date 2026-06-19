@@ -1,0 +1,27 @@
+import "server-only";
+import { connectToDatabase } from "@/bills/lib/mongoose";
+import { Bill } from "@/bills/models/Bill";
+import type { BillDocument } from "@/bills/models/Bill";
+import { env } from "@/bills/env";
+
+export const getAllBillsFromDB = async (): Promise<BillDocument[]> => {
+  const uri = env.MONGO_URI || "";
+  const hasValidMongoUri =
+    uri.startsWith("mongodb://") || uri.startsWith("mongodb+srv://");
+  if (!hasValidMongoUri) {
+    console.warn("!!! No valid MongoDB URI found, returning empty bills array");
+    return [];
+  }
+
+  try {
+    await connectToDatabase();
+    const bills = await Bill.find({}).lean().exec();
+    console.log(`Fetched ${bills.length} bills from MongoDB`);
+
+    // Return lean results directly so date fields stay as Date instances
+    return bills as unknown as BillDocument[];
+  } catch (error) {
+    console.error("Error fetching bills from MongoDB:", error);
+    return [];
+  }
+};

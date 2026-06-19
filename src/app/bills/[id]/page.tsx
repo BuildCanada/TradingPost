@@ -148,7 +148,10 @@ export async function generateMetadata(
   {
     params,
     searchParams,
-  }: { params: Promise<any>; searchParams: Promise<{ q?: string }> },
+  }: {
+    params: Promise<{ id: string }>;
+    searchParams: Promise<{ q?: string }>;
+  },
   _parent: ResolvingMetadata,
 ): Promise<Metadata> {
   const { id } = await params;

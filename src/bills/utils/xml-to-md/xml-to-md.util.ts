@@ -290,14 +290,14 @@ function getTagName(node: XMLNode): string | null {
 function getChildren(node: XMLNode, tagName: string): NodeList {
   const key = Object.keys(node).find((k) => k.toLowerCase() === tagName);
   if (!key) return [];
-  const v = (node as any)[key];
+  const v = (node as Record<string, unknown>)[key];
   return Array.isArray(v) ? (v as NodeList) : [];
 }
 
 function getAttributes(node: XMLNode): Record<string, string> {
   const out: Record<string, string> = {};
   // Attributes live under the special ":@" key when preserveOrder=true
-  const attrBucket = (node as any)[":@"] as Record<string, unknown> | undefined;
+  const attrBucket = (node as Record<string, unknown>)[":@"] as Record<string, unknown> | undefined;
   if (attrBucket) {
     for (const [k, v] of Object.entries(attrBucket)) {
       if (k.startsWith("@")) out[k.slice(1)] = String(v);

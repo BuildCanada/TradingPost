@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { memo } from "react";
+import { memo, type ComponentProps } from "react";
 import { BillSummary } from "@/app/bills/types";
 import { Judgement, JudgementValue } from "./Judgement/judgement.component";
 import { DynamicIcon } from "lucide-react/dynamic";
@@ -85,7 +85,7 @@ function BillCard({ bill }: BillCardProps) {
                     >
                       <DynamicIcon
                         className="w-4 h-4 mr-1"
-                        name={icon as any}
+                        name={icon as ComponentProps<typeof DynamicIcon>["name"]}
                       />{" "}
                       {genre}
                     </span>

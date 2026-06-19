@@ -59,7 +59,7 @@ export const authOptions: NextAuthOptions = {
           return false;
         }
         existing.name = user?.name ?? existing.name;
-        (existing as any).image = (user as any)?.image ?? existing.image;
+        existing.image = user?.image ?? existing.image;
         existing.lastLoginAt = now;
         await existing.save();
         // DEV ONLY: allow regardless of the allowlist flag.
@@ -76,15 +76,15 @@ export const authOptions: NextAuthOptions = {
       if (user?.email) {
         token.email = user.email;
         token.name = user.name;
-        token.picture = (user as any)?.image as string | undefined;
+        token.picture = user?.image;
       }
       return token;
     },
     async session({ session, token }) {
       if (session?.user) {
-        session.user.email = token.email as string | undefined;
-        session.user.name = token.name as string | undefined;
-        (session.user as any).image = token.picture as string | undefined;
+        session.user.email = token.email;
+        session.user.name = token.name;
+        session.user.image = token.picture;
       }
       return session;
     },

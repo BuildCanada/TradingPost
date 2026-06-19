@@ -58,13 +58,13 @@ export async function POST(request: Request) {
     };
   } else {
     try {
-      const form: any = await (request as any).formData?.();
+      const form = await request.formData();
       body = {
-        email: (form?.get?.("email") as string | null) || undefined,
-        name: (form?.get?.("name") as string | null) || undefined,
-        image: (form?.get?.("image") as string | null) || undefined,
+        email: (form.get("email") as string | null) || undefined,
+        name: (form.get("name") as string | null) || undefined,
+        image: (form.get("image") as string | null) || undefined,
         allowed:
-          ((form?.get?.("allowed") as string | null) || "").toString() ===
+          ((form.get("allowed") as string | null) || "").toString() ===
           "true"
             ? true
             : undefined,
@@ -83,7 +83,7 @@ export async function POST(request: Request) {
   if (existing) {
     // Update only provided fields for idempotency
     if (typeof body.name !== "undefined") existing.name = body.name;
-    if (typeof body.image !== "undefined") (existing as any).image = body.image;
+    if (typeof body.image !== "undefined") existing.image = body.image;
     if (typeof body.allowed !== "undefined") existing.allowed = !!body.allowed;
     await existing.save();
     return NextResponse.json({ ok: true, user: existing, created: false });

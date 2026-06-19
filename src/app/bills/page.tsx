@@ -190,6 +190,10 @@ async function getMergedBills(): Promise<BillSummary[]> {
   return mergedBills;
 }
 
+function clearMergedBillsCache(): void {
+  mergedBillsCache = null;
+}
+
 async function getMergedBillsCached(): Promise<BillSummary[]> {
   if (!shouldUseLocalCache) {
     // Avoid stale data while iterating locally; always hit the backing store.
@@ -215,7 +219,7 @@ export default async function Home({
   const resolvedSearchParams = searchParams ? await searchParams : undefined;
 
   if (resolvedSearchParams?.cache === "clear") {
-    mergedBillsCache = null; // Allow manual cache busting with ?cache=clear
+    clearMergedBillsCache(); // Allow manual cache busting with ?cache=clear
   }
   const bills = await getMergedBillsCached();
   return (

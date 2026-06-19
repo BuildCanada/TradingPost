@@ -4,6 +4,7 @@ export interface UserDocument extends mongoose.Document {
   email: string;
   emailLower: string;
   name?: string | null;
+  image?: string | null;
   allowed: boolean;
   /** Admins may manage the allowlist (create/update other users). */
   isAdmin: boolean;
@@ -17,6 +18,7 @@ const UserSchema = new Schema<UserDocument>(
     email: { type: String, required: true },
     emailLower: { type: String, required: true, unique: true, index: true },
     name: { type: String },
+    image: { type: String },
     allowed: { type: Boolean, default: false },
     isAdmin: { type: Boolean, default: false },
     lastLoginAt: { type: Date },

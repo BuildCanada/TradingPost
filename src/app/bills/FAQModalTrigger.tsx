@@ -113,18 +113,18 @@ export default function FAQModalTrigger() {
                 >
                   The Civics Project
                 </a>
-                , which pulls data from the Government of Canada's open
+                , which pulls data from the Government of Canada&apos;s open
                 parliamentary data feeds.
               </p>
 
               <h3 className="font-semibold mt-4">
-                How do you determine a bill's judgement?
+                How do you determine a bill&apos;s judgement?
               </h3>
               <p className="text-[var(--text-secondary)] mt-1">
                 Each bill is evaluated against a set of pro-growth principles
                 using an LLM. The LLM uses these principles to make a judgement
                 on the bill. We show all of this, including the principles,
-                evaluation and rationale, on the bill's page.
+                evaluation and rationale, on the bill&apos;s page.
               </p>
 
               <h3 className="font-semibold mt-4">

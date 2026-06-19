@@ -88,32 +88,32 @@ export async function POST(
     steel_man = asString(json.steel_man);
     if ("missing_details" in json) {
       hasMissingDetails = true;
-      missing_details_input = (json as any).missing_details;
+      missing_details_input = json.missing_details;
     }
     if ("genres" in json) {
       hasGenres = true;
-      genres_input = (json as any).genres;
+      genres_input = json.genres;
     }
     if ("question_period_questions" in json) {
       hasQuestionPeriodQuestions = true;
-      question_period_questions_input = (json as any).question_period_questions;
+      question_period_questions_input = json.question_period_questions;
     }
-    tenet_ids = Array.isArray((json as any).tenet_id)
-      ? ((json as any).tenet_id as unknown[]).map(String)
+    tenet_ids = Array.isArray(json.tenet_id)
+      ? (json.tenet_id as unknown[]).map(String)
       : [];
-    tenet_titles = Array.isArray((json as any).tenet_title)
-      ? ((json as any).tenet_title as unknown[]).map(String)
+    tenet_titles = Array.isArray(json.tenet_title)
+      ? (json.tenet_title as unknown[]).map(String)
       : [];
-    tenet_alignments = Array.isArray((json as any).tenet_alignment)
-      ? ((json as any).tenet_alignment as unknown[]).map(String)
+    tenet_alignments = Array.isArray(json.tenet_alignment)
+      ? (json.tenet_alignment as unknown[]).map(String)
       : [];
-    tenet_explanations = Array.isArray((json as any).tenet_explanation)
-      ? ((json as any).tenet_explanation as unknown[]).map(String)
+    tenet_explanations = Array.isArray(json.tenet_explanation)
+      ? (json.tenet_explanation as unknown[]).map(String)
       : [];
   } else {
     // Fallback: try formData if available at runtime
     try {
-      const form: any = await (request as any).formData();
+      const form = await request.formData();
       title = (form.get("title") as string | null) || undefined;
       short_title = (form.get("short_title") as string | null) || undefined;
       summary = (form.get("summary") as string | null) || undefined;
@@ -130,9 +130,7 @@ export async function POST(
         hasGenres = true;
         genres_input = (form.get("genres") as string | null) || "";
       }
-      const questionPeriodValues = (form.getAll as any)(
-        "question_period_questions",
-      );
+      const questionPeriodValues = form.getAll("question_period_questions");
       if (
         Array.isArray(questionPeriodValues) &&
         questionPeriodValues.length > 0
@@ -140,12 +138,10 @@ export async function POST(
         hasQuestionPeriodQuestions = true;
         question_period_questions_input = questionPeriodValues;
       }
-      tenet_ids = (form.getAll as any)("tenet_id").map(String);
-      tenet_titles = (form.getAll as any)("tenet_title").map(String);
-      tenet_alignments = (form.getAll as any)("tenet_alignment").map(String);
-      tenet_explanations = (form.getAll as any)("tenet_explanation").map(
-        String,
-      );
+      tenet_ids = form.getAll("tenet_id").map(String);
+      tenet_titles = form.getAll("tenet_title").map(String);
+      tenet_alignments = form.getAll("tenet_alignment").map(String);
+      tenet_explanations = form.getAll("tenet_explanation").map(String);
     } catch {
       // no-op
     }
@@ -251,7 +247,7 @@ export async function POST(
         return;
       }
       if (typeof input === "object") {
-        const maybeQuestion = (input as any).question;
+        const maybeQuestion = (input as { question?: unknown }).question;
         if (typeof maybeQuestion === "string") {
           addGroupedLines(maybeQuestion);
         }
@@ -303,7 +299,7 @@ export async function POST(
   const tenet_evaluations = tenet_titles.map((title, idx) => ({
     id: Number(tenet_ids[idx] ?? idx + 1),
     title,
-    alignment: (tenet_alignments[idx] as any) || "neutral",
+    alignment: tenet_alignments[idx] || "neutral",
     explanation: tenet_explanations[idx] || "",
   }));
   if (tenet_evaluations.length) {

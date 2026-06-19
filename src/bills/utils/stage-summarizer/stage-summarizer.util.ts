@@ -218,17 +218,19 @@ export const getStageDescription = (
 /**
  * Get stage category for styling purposes
  */
-export const getStageCategory = (
-  inputStage: string,
-  fallbackStatus?: string,
-):
+type StageCategory =
   | "complete"
   | "failed"
   | "active"
   | "introduced"
   | "paused"
   | "pre-introduction"
-  | "unknown" => {
+  | "unknown";
+
+export const getStageCategory = (
+  inputStage: string,
+  fallbackStatus?: string,
+): StageCategory => {
   const searchText = (inputStage || fallbackStatus || "").toLowerCase().trim();
 
   if (!searchText) {
@@ -238,12 +240,12 @@ export const getStageCategory = (
   for (const stageMapping of STAGE_MAPPINGS) {
     for (const keyword of stageMapping.keywords) {
       if (searchText.includes(keyword)) {
-        return stageMapping.category as any;
+        return stageMapping.category as StageCategory;
       }
 
       const similarity = calculateSimilarity(searchText, keyword);
       if (similarity > 0.7) {
-        return stageMapping.category as any;
+        return stageMapping.category as StageCategory;
       }
     }
   }

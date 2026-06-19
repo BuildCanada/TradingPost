@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 import { Search, X, Filter } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
@@ -49,23 +49,22 @@ export function FilterSidebar({
   onCollapsedChange,
   filterOptions,
 }: FilterSidebarProps) {
-  const [isCollapsed, setIsCollapsed] = useState(forceCollapsed ?? false);
-
-  // Update collapsed state when forceCollapsed prop changes
-  useEffect(() => {
-    if (forceCollapsed !== undefined) {
-      setIsCollapsed(forceCollapsed);
-    }
-  }, [forceCollapsed]);
+  const [internalCollapsed, setInternalCollapsed] = useState(false);
+  // Derive from the controlling prop when provided; otherwise use local state.
+  // (Avoids syncing a prop into state via an effect.)
+  const isCollapsed = forceCollapsed ?? internalCollapsed;
 
   // Handle collapse toggle
   const handleCollapseToggle = () => {
     const newCollapsed = !isCollapsed;
-    setIsCollapsed(newCollapsed);
+    setInternalCollapsed(newCollapsed);
     onCollapsedChange?.(newCollapsed);
   };
 
-  const updateFilter = (key: keyof FilterState, value: any) => {
+  const updateFilter = (
+    key: keyof FilterState,
+    value: FilterState[keyof FilterState],
+  ) => {
     onFiltersChange({ ...filters, [key]: value });
   };
 

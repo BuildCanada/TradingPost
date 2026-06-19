@@ -38,6 +38,11 @@ export function BillShare({
   const [copied, setCopied] = useState(false);
   const [resolvedUrl, setResolvedUrl] = useState(shareUrl);
 
+  // Resolve a relative shareUrl to an absolute one using window.location. This
+  // must run post-hydration (not derived during render) so the server-rendered
+  // relative URL matches the client's first render and avoids a hydration
+  // mismatch — hence the intentional setState inside the effect.
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     if (!shareUrl) {
       setResolvedUrl("");
@@ -59,6 +64,7 @@ export function BillShare({
       }
     }
   }, [shareUrl]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const shareTitle = bill.short_title || bill.title;
   const xShareUrl = useMemo(() => {

@@ -3,6 +3,7 @@ import { SUMMARY_AND_VOTE_PROMPT } from "@/bills/prompt/summary-and-vote-prompt"
 import OpenAI from "openai";
 import { BILL_API_REVALIDATE_INTERVAL } from "@/bills/consts/general";
 import { env } from "@/bills/env";
+import type { BillDocument } from "@/bills/models/Bill";
 
 export type ApiStage = {
   stage: string;
@@ -414,7 +415,7 @@ export async function onBillNotInDatabase(params: {
     // Check if bill already exists and if we need to update it
     const existing = (await Bill.findOne({ billId: params.billId })
       .lean()
-      .exec()) as any;
+      .exec()) as BillDocument | null;
     if (existing) {
       const countChanged = existing.billTextsCount !== params.billTextsCount;
       const sourceChanged =

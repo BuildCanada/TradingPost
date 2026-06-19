@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { connectToDatabase } from "@/bills/lib/mongoose";
 import { User } from "@/bills/models/User";
 import { authOptions } from "@/bills/lib/auth";
+import { DEV_OPEN_ACCESS } from "@/bills/lib/auth-guards";
 
 type CreateUserPayload = {
   email: string;
@@ -19,9 +20,23 @@ function normalizeEmail(email: unknown): string | null {
 }
 
 export async function POST(request: Request) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.email) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  await connectToDatabase();
+
+  // Managing the allowlist is an admin-only action. Any allowlisted user being
+  // able to grant access to arbitrary emails is a privilege-escalation hole, so
+  // we require an explicit `isAdmin` flag here. DEV_OPEN_ACCESS bypasses for
+  // local development only (gated on BILLS_DEV_OPEN_ACCESS, never production).
+  if (!DEV_OPEN_ACCESS) {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    const requester = await User.findOne({
+      emailLower: session.user.email.toLowerCase(),
+    });
+    if (!requester?.isAdmin) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
   }
 
   const contentType = request.headers.get("content-type")?.toLowerCase() || "";
@@ -63,8 +78,6 @@ export async function POST(request: Request) {
   if (!emailLower) {
     return NextResponse.json({ error: "Invalid email" }, { status: 400 });
   }
-
-  await connectToDatabase();
 
   const existing = await User.findOne({ emailLower });
   if (existing) {

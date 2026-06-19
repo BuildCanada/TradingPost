@@ -1,16 +1,14 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/bills/lib/auth";
-import { env } from "@/bills/env";
+import { DEV_OPEN_ACCESS } from "@/bills/env";
 import { connectToDatabase } from "@/bills/lib/mongoose";
 import { User } from "@/bills/models/User";
 import { BASE_PATH } from "@/bills/utils/basePath";
 
-/**
- * DEV ONLY: when true, admin/edit access is open to everyone — including users
- * who are not signed in. Never enabled in production.
- */
-export const DEV_OPEN_ACCESS = env.NODE_ENV !== "production";
+// Re-exported for the API routes that gate on it. Defined in env.ts so it can
+// be shared without creating an import cycle with auth.ts.
+export { DEV_OPEN_ACCESS };
 
 /**
  * Server-side authentication guard that requires a valid authenticated user.

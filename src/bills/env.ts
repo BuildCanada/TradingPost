@@ -40,7 +40,22 @@ export const env = {
     "NEXT_PUBLIC_APP_URL",
     process.env.NEXT_PUBLIC_APP_URL,
   ),
+  BILLS_DEV_OPEN_ACCESS: optional(
+    "BILLS_DEV_OPEN_ACCESS",
+    process.env.BILLS_DEV_OPEN_ACCESS,
+  ),
 };
+
+/**
+ * DEV ONLY: when true, admin/edit access is open to everyone — including users
+ * who are not signed in, and any Google account is auto-allowed at sign-in.
+ *
+ * Requires BOTH a non-production NODE_ENV and an explicit `BILLS_DEV_OPEN_ACCESS=true`
+ * opt-in, so it can never be enabled by accident in a misconfigured environment
+ * (e.g. a self-hosted/staging deploy that forgot to set NODE_ENV=production).
+ */
+export const DEV_OPEN_ACCESS =
+  env.NODE_ENV !== "production" && env.BILLS_DEV_OPEN_ACCESS === "true";
 
 export function assertServerEnv() {
   // Required for auth

@@ -1,6 +1,6 @@
 import { NextAuthOptions } from "next-auth";
 import Google from "next-auth/providers/google";
-import { env, assertServerEnv } from "@/bills/env";
+import { env, assertServerEnv, DEV_OPEN_ACCESS } from "@/bills/env";
 import { connectToDatabase } from "@/bills/lib/mongoose";
 import { User } from "@/bills/models/User";
 import { BASE_PATH } from "@/bills/utils/basePath";
@@ -41,8 +41,9 @@ export const authOptions: NextAuthOptions = {
         const existing = await User.findOne({ emailLower: email });
         if (!existing) {
           // DEV ONLY: auto-create + allow any signed-in account so every user
-          // has admin access locally. Never runs in production.
-          if (env.NODE_ENV !== "production") {
+          // has admin access locally. Gated on explicit BILLS_DEV_OPEN_ACCESS
+          // opt-in; never runs in production.
+          if (DEV_OPEN_ACCESS) {
             console.warn(
               `[auth] DEV: auto-creating + allowing ${email} (admin access on for all users).`,
             );
@@ -62,7 +63,7 @@ export const authOptions: NextAuthOptions = {
         existing.lastLoginAt = now;
         await existing.save();
         // DEV ONLY: allow regardless of the allowlist flag.
-        if (env.NODE_ENV !== "production") return true;
+        if (DEV_OPEN_ACCESS) return true;
         return !!existing.allowed;
       } catch (err) {
         if (env.NODE_ENV !== "production") {

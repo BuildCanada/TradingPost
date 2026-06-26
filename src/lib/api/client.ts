@@ -1,10 +1,15 @@
+import { getAccessToken } from "@/lib/auth-token";
+
 export const API_URL =
   process.env.YORK_FACTORY_API_URL ||
   "https://yorkfactory.buildcanada.com/api/v1";
 
 export async function apiFetch<T>(
   path: string,
-  options?: { revalidate?: number; params?: Record<string, string> },
+  options?: {
+    revalidate?: number;
+    params?: Record<string, string>;
+  },
 ): Promise<T> {
   const url = new URL(`${API_URL}${path}`);
   if (options?.params) {
@@ -15,8 +20,17 @@ export async function apiFetch<T>(
     }
   }
 
+  const headers: Record<string, string> = {};
+  const accessToken = getAccessToken();
+  if (accessToken) {
+    headers["Authorization"] = `Bearer ${accessToken}`;
+  }
+
   const res = await fetch(url.toString(), {
-    next: { revalidate: options?.revalidate ?? 60 },
+    headers,
+    next: accessToken
+      ? { revalidate: 0 }
+      : { revalidate: options?.revalidate ?? 60 },
   });
 
   if (!res.ok) {

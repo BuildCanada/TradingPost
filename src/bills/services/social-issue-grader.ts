@@ -50,7 +50,7 @@ export const socialIssueGrader = async (text: string): Promise<boolean> => {
       if (yes || no) return yes;
       return false;
     }
-  } catch (_err) {
+  } catch {
     return false;
   }
 };

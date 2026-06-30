@@ -62,13 +62,6 @@ export const BillQuestions = ({
     .filter((q) => q.question.length);
   const shareTitle = bill.short_title || bill.title;
 
-  const _handleShareClick = (url: string) => {
-    if (typeof window !== "undefined" && window.sa_event) {
-      window.sa_event("share_question_clicked_x");
-    }
-    window.open(url, "_blank", "noopener,noreferrer");
-  };
-
   return (
     <div className="flex flex-col gap-4">
       <Card>

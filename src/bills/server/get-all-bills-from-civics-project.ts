@@ -5,7 +5,8 @@ export async function getBillsFromCivicsProject(): Promise<BillSummary[]> {
   const response = await fetch(
     `${env.CIVICS_PROJECT_BASE_URL}/canada/bills/45`,
     {
-      cache: "no-store",
+      // Used only by the sitemap, which doesn't need per-request freshness.
+      next: { revalidate: 3600 },
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${process.env.CIVICS_PROJECT_API_KEY}`,

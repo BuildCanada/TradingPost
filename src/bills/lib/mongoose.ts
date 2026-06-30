@@ -34,7 +34,7 @@ export async function connectToDatabase(): Promise<typeof mongoose> {
     cached.promise = mongoose.connect(MONGO_URI, {
       dbName: DATABASE_NAME,
       serverSelectionTimeoutMS: 3000,
-      socketTimeoutMS: 3000,
+      socketTimeoutMS: 30000,
       connectTimeoutMS: 3000,
       maxPoolSize: 5,
       bufferCommands: false,

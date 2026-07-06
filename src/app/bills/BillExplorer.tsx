@@ -2,16 +2,16 @@
 
 import { useEffect, useMemo, useState, useCallback, memo } from "react";
 import { BillSummary } from "./types";
-import BillCard from "@/bills/components/BillCard";
+import BillCard from "@/app/bills/components/BillCard";
 import {
   FilterSidebar,
   FilterState,
   FilterOptions,
-} from "@/bills/components/FilterSection/filter-section.component";
-import { useIsMobile } from "@/bills/components/ui/use-mobile";
-import type { JudgementValue } from "@/bills/components/Judgement/judgement.component";
-import { TenetEvaluation } from "@/bills/models/Bill";
-import { sortBillsByMostRecent } from "@/bills/utils/stages-to-dates/stages-to-dates";
+} from "@/app/bills/components/FilterSection/filter-section.component";
+import { useIsMobile } from "@/app/bills/components/ui/use-mobile";
+import type { JudgementValue } from "@/app/bills/components/Judgement/judgement.component";
+import { TenetEvaluation } from "@/app/bills/models/Bill";
+import { sortBillsByMostRecent } from "@/app/bills/utils/stages-to-dates/stages-to-dates";
 
 interface BillExplorerProps {
   bills: BillSummary[];

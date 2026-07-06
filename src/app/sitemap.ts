@@ -5,9 +5,9 @@ import type {
   CommitmentsResponse,
   DepartmentWithMinister,
 } from "@/lib/commitment-types";
-import { getBillsFromCivicsProject } from "@/bills/server/get-all-bills-from-civics-project";
-import { getAllBillsFromDB } from "@/bills/server/get-all-bills-from-db";
-import { buildAbsoluteUrl } from "@/bills/utils/basePath";
+import { getBillsFromCivicsProject } from "@/app/bills/server/get-all-bills-from-civics-project";
+import { getAllBillsFromDB } from "@/app/bills/server/get-all-bills-from-db";
+import { buildAbsoluteUrl } from "@/app/bills/utils/basePath";
 
 function toValidDate(value?: Date | string): Date | undefined {
   if (!value) return undefined;

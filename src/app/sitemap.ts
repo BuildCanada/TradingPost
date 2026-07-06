@@ -5,6 +5,15 @@ import type {
   CommitmentsResponse,
   DepartmentWithMinister,
 } from "@/lib/commitment-types";
+import { getBillsFromCivicsProject } from "@/bills/server/get-all-bills-from-civics-project";
+import { getAllBillsFromDB } from "@/bills/server/get-all-bills-from-db";
+import { buildAbsoluteUrl } from "@/bills/utils/basePath";
+
+function toValidDate(value?: Date | string): Date | undefined {
+  if (!value) return undefined;
+  const parsed = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed;
+}
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://buildcanada.com";
@@ -18,6 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/tracker/commitments`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.7 },
     { url: `${baseUrl}/tracker/faq`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.4 },
     { url: `${baseUrl}/builders`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
+    { url: buildAbsoluteUrl(baseUrl), lastModified: new Date(), changeFrequency: "daily", priority: 0.8 },
     { url: `${baseUrl}/about`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
     { url: `${baseUrl}/privacy-notice`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
   ];
@@ -71,9 +81,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
+  // Isolated in try/catch so an outage in the tracker API can't take down
+  // the whole sitemap (same defensive pattern as the bills sources below).
   const [departments, commitmentsData] = await Promise.all([
-    fetchApi<DepartmentWithMinister[]>("/api/v1/departments.json"),
-    fetchApi<CommitmentsResponse>("/api/v1/commitments.json?per_page=1000"),
+    fetchApi<DepartmentWithMinister[]>("/api/v1/departments.json").catch(
+      () => [] as DepartmentWithMinister[],
+    ),
+    fetchApi<CommitmentsResponse>("/api/v1/commitments.json?per_page=1000").catch(
+      () => ({ commitments: [], meta: { total_count: 0, page: 1, per_page: 0 } }),
+    ),
   ]);
 
   const ministryPages: MetadataRoute.Sitemap = departments.map((d) => ({
@@ -98,6 +114,38 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
+  // Bill detail pages — the union of bills resolvable by the detail route
+  // (Civics Project API ∪ MongoDB), deduped by bill id. Isolated in try/catch
+  // so an outage in the bills sources can't take down the whole sitemap.
+  let billPages: MetadataRoute.Sitemap = [];
+  try {
+    const [apiBills, dbBills] = await Promise.all([
+      getBillsFromCivicsProject().catch(() => []),
+      getAllBillsFromDB().catch(() => []),
+    ]);
+
+    const lastModifiedById = new Map<string, Date | undefined>();
+    for (const bill of apiBills) {
+      if (bill.billID) {
+        lastModifiedById.set(bill.billID, toValidDate(bill.lastUpdatedOn));
+      }
+    }
+    for (const bill of dbBills) {
+      if (bill.billId && !lastModifiedById.has(bill.billId)) {
+        lastModifiedById.set(bill.billId, toValidDate(bill.lastUpdatedOn));
+      }
+    }
+
+    billPages = [...lastModifiedById.entries()].map(([billId, lastModified]) => ({
+      url: buildAbsoluteUrl(baseUrl, billId),
+      lastModified: lastModified ?? new Date(),
+      changeFrequency: "weekly",
+      priority: 0.6,
+    }));
+  } catch {
+    billPages = [];
+  }
+
   return [
     ...staticPages,
     ...projectPages,
@@ -107,5 +155,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...memoPages,
     ...postPages,
     ...feedPages,
+    ...billPages,
   ];
 }

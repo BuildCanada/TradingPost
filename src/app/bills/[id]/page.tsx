@@ -1,0 +1,219 @@
+import Link from "next/link";
+import { getBillByIdFromDB } from "@/bills/server/get-bill-by-id-from-db";
+import { getBillFromCivicsProjectApi } from "@/bills/services/billApi";
+import {
+  fromBuildCanadaDbBill,
+  fromCivicsProjectApiBill,
+  type UnifiedBill,
+} from "@/bills/utils/billConverters";
+import type { Metadata, ResolvingMetadata } from "next";
+import { headers } from "next/headers";
+import { env } from "@/bills/env";
+import { BASE_PATH } from "@/bills/utils/basePath";
+import {
+  BillHeader,
+  BillSummary,
+  BillMetadata,
+  BillAnalysis,
+  BillContact,
+} from "@/bills/components/BillDetail";
+import { BillQuestions } from "@/bills/components/BillDetail/BillQuestions";
+import { Separator } from "@/bills/components/ui/separator";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/bills/lib/auth";
+import { DEV_OPEN_ACCESS } from "@/bills/lib/auth-guards";
+import { BillTenets } from "@/bills/components/BillDetail/BillTenets";
+import { JudgementValue } from "@/bills/components/Judgement/judgement.component";
+import { buildAbsoluteUrl, buildRelativePath } from "@/bills/utils/basePath";
+import {
+  BUILD_CANADA_TWITTER_HANDLE,
+  BUILD_CANADA_URL,
+} from "@/bills/consts/general";
+import { BillShare } from "@/bills/components/BillDetail/BillShare";
+import { shouldShowDetermination } from "@/bills/utils/should-show-determination/should-show-determination.util";
+
+// Next.js requires route segment configs to be literal values (not imported constants)
+export const revalidate = 120; // seconds - cache individual bill pages
+
+interface Params {
+  params: Promise<{ id: string }>;
+}
+
+export default async function BillDetail({ params }: Params) {
+  const { id } = await params;
+
+  const session = await getServerSession(authOptions);
+  const headerList = await headers();
+  const host =
+    headerList.get("x-forwarded-host") || headerList.get("host") || "";
+  const proto = (headerList.get("x-forwarded-proto") || "https").split(",")[0];
+  const requestOrigin = host ? `${proto}://${host}` : "";
+  const origin = env.NEXT_PUBLIC_APP_URL || requestOrigin;
+  const shareOrigin =
+    env.NODE_ENV === "production"
+      ? BUILD_CANADA_URL
+      : origin || BUILD_CANADA_URL;
+  // Try database first, then fallback to API
+  const dbBill = await getBillByIdFromDB(id);
+  let unifiedBill: UnifiedBill | null = null;
+
+  if (dbBill) {
+    unifiedBill = fromBuildCanadaDbBill(dbBill);
+  } else {
+    const apiBill = await getBillFromCivicsProjectApi(id);
+    if (apiBill) {
+      unifiedBill = await fromCivicsProjectApiBill(apiBill);
+    }
+  }
+
+  if (!unifiedBill) {
+    return (
+      <div className="mx-auto max-w-[800px] px-6 py-10">
+        <h1 className="text-xl font-semibold">Bill not found</h1>
+        <p className="mt-2 text-sm">
+          The bill you are looking for does not exist.
+        </p>
+        <Link className="mt-4 inline-block underline" href={BASE_PATH || "/"}>
+          Back to list
+        </Link>
+      </div>
+    );
+  }
+
+  const shouldDisplayDetermination = shouldShowDetermination(
+    unifiedBill.final_judgment,
+  );
+  const judgementValue: JudgementValue = unifiedBill.final_judgment;
+
+  return (
+    <div className="mx-auto max-w-[1100px] px-6 py-8">
+      <div className="mb-6">
+        <Link href={BASE_PATH || "/"} className="text-sm underline  mb-6">
+          ← Back to bills
+        </Link>
+        {(session?.user || DEV_OPEN_ACCESS) && (
+          <Link href={`${BASE_PATH}/${id}/edit`} className="ml-4 text-sm underline">
+            Edit
+          </Link>
+        )}
+      </div>
+      <BillHeader bill={unifiedBill} />
+
+      <Separator />
+      <div className="mt-4 md:hidden">
+        <BillShare
+          bill={unifiedBill}
+          shareUrl={buildAbsoluteUrl(shareOrigin, id)}
+          variant="compact"
+        />
+      </div>
+      <section className="mt-6 grid gap-6 md:grid-cols-[1fr_280px] relative">
+        <div className="flex gap-4 flex-col">
+          <BillSummary bill={unifiedBill} />
+          <BillAnalysis
+            bill={unifiedBill}
+            showAnalysis={shouldDisplayDetermination}
+            displayJudgement={{
+              value: judgementValue,
+              shouldDisplay: shouldDisplayDetermination,
+            }}
+          />
+          {shouldDisplayDetermination &&
+            unifiedBill.question_period_questions &&
+            unifiedBill.question_period_questions.length > 0 && (
+              <BillQuestions
+                bill={unifiedBill}
+                billUrl={buildAbsoluteUrl(shareOrigin, id)}
+              />
+            )}
+
+          <BillTenets bill={unifiedBill} />
+          <BillContact className="md:hidden" />
+        </div>
+        <div className="space-y-6">
+          <BillMetadata bill={unifiedBill} />
+          <BillShare
+            bill={unifiedBill}
+            shareUrl={buildAbsoluteUrl(shareOrigin, id)}
+            className="hidden md:block"
+          />
+          <BillContact className="hidden md:block" />
+        </div>
+      </section>
+    </div>
+  );
+}
+
+export async function generateMetadata(
+  {
+    params,
+    searchParams,
+  }: {
+    params: Promise<{ id: string }>;
+    searchParams: Promise<{ q?: string }>;
+  },
+  _parent: ResolvingMetadata,
+): Promise<Metadata> {
+  const { id } = await params;
+  const sp = await searchParams;
+  const q = sp?.q;
+  const title = id;
+  const description = `Bill ${id} analysis and judgement`;
+  const h = headers();
+  const host = (await h).get("x-forwarded-host") || (await h).get("host") || "";
+  const proto = ((await h).get("x-forwarded-proto") || "https").split(",")[0];
+  // Ensure we always have a base URL for absolute image URLs (required for Twitter Cards)
+  const baseUrl =
+    env.NEXT_PUBLIC_APP_URL ||
+    (host ? `${proto}://${host}` : "http://localhost:3000");
+  const pagePath = buildRelativePath(id);
+  const pageUrl = `${baseUrl}${pagePath}`;
+  const pageUrlWithQuery = q
+    ? `${pageUrl}?q=${encodeURIComponent(q)}`
+    : pageUrl;
+  const defaultOgPath = buildRelativePath(id, "opengraph-image");
+  const defaultOg = `${baseUrl}${defaultOgPath}`;
+  const questionsOgPath = q
+    ? buildRelativePath(
+        id,
+        "question",
+        encodeURIComponent(q),
+        "opengraph-image",
+      )
+    : undefined;
+  const questionsOg = questionsOgPath
+    ? `${baseUrl}${questionsOgPath}`
+    : undefined;
+  const ogImageUrl = questionsOg || defaultOg;
+
+  return {
+    title,
+    description,
+    alternates: { canonical: pageUrl },
+    openGraph: {
+      title,
+      description,
+      url: pageUrlWithQuery,
+      type: "article",
+      images: [{ url: ogImageUrl, width: 1200, height: 630, alt: title }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      creator: BUILD_CANADA_TWITTER_HANDLE,
+      site: BUILD_CANADA_TWITTER_HANDLE,
+      images: [ogImageUrl],
+    },
+    other: {
+      "twitter:card": "summary_large_image",
+      "twitter:title": title,
+      "twitter:description": description,
+      "twitter:image": ogImageUrl,
+      "twitter:image:alt": `Analysis card for Bill ${title}`,
+      "twitter:creator": BUILD_CANADA_TWITTER_HANDLE,
+      "twitter:site": BUILD_CANADA_TWITTER_HANDLE,
+      "twitter:url": pageUrlWithQuery,
+    },
+  };
+}

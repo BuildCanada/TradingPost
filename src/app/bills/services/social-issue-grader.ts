@@ -1,6 +1,6 @@
 import { OpenAI } from "openai";
 
-const SOCIAL_ISSUE_GRADER_PROMPT = `
+export const SOCIAL_ISSUE_GRADER_PROMPT = `
 You are a policy classifier. Your sole task is to decide whether a bill is primarily a social issue.
 
 Definition — Social Issue (for this classifier):

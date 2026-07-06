@@ -5,8 +5,8 @@
 @import "../styles/typography.css";
 @import "../styles/tracker-theme.css";
 
-/* Bills sub-app theme — scoped under .bills-scope (see src/bills/bills.css). */
-@import "../bills/bills.css";
+/* Bills sub-app theme — scoped under .bills-scope (see src/app/bills/bills.css). */
+@import "./bills/bills.css";
 
 html {
   scroll-behavior: auto;

@@ -1,7 +1,7 @@
 import { ImageResponse } from "next/og";
-import { getUnifiedBillById } from "@/bills/server/get-unified-bill-by-id";
-import { BillOgCard } from "@/bills/components/OpenGraph/BillOgCard";
-import { PROJECT_NAME } from "@/bills/consts/general";
+import { getUnifiedBillById } from "@/app/bills/server/get-unified-bill-by-id";
+import { BillOgCard } from "@/app/bills/components/OpenGraph/BillOgCard";
+import { PROJECT_NAME } from "@/app/bills/consts/general";
 
 export const runtime = "nodejs";
 

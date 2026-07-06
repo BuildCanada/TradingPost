@@ -1,14 +1,14 @@
 import { BillSummary } from "./types";
 import BillExplorer from "./BillExplorer";
-import { getAllBillsFromDB } from "@/bills/server/get-all-bills-from-db";
-import { fromBuildCanadaDbBill } from "@/bills/utils/billConverters";
-import { getParliament45Header } from "@/bills/components/BillDetail/BillHeader";
+import { getAllBillsFromDB } from "@/app/bills/server/get-all-bills-from-db";
+import { fromBuildCanadaDbBill } from "@/app/bills/utils/billConverters";
+import { getParliament45Header } from "@/app/bills/components/BillDetail/BillHeader";
 import Markdown from "react-markdown";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { env } from "@/bills/env";
-import { buildRelativePath } from "@/bills/utils/basePath";
-import { BUILD_CANADA_TWITTER_HANDLE, PROJECT_NAME } from "@/bills/consts/general";
+import { env } from "@/app/bills/env";
+import { buildRelativePath } from "@/app/bills/utils/basePath";
+import { BUILD_CANADA_TWITTER_HANDLE, PROJECT_NAME } from "@/app/bills/consts/general";
 import FAQModalTrigger from "./FAQModalTrigger";
 
 const CANADIAN_PARLIAMENT_NUMBER = 45;
@@ -226,8 +226,8 @@ export default async function Home({
     <div className="min-h-screen">
       <div className="mx-auto max-w-[1120px] px-6 py-8  gap-8">
         <main>
-          <header className="flex items-center justify-between pb-4 border-b border-[var(--panel-border)] mb-4">
-            <h1 className="text-[24px] font-semibold">
+          <header className="flex items-center justify-between gap-4 pb-6 border-b border-border-light mb-6">
+            <h1 className="type-h2 text-dark">
               45th Canadian Federal Parliament
             </h1>
             <FAQModalTrigger />

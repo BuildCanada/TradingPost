@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { connectToDatabase } from "@/bills/lib/mongoose";
-import { Bill } from "@/bills/models/Bill";
-import { User } from "@/bills/models/User";
-import { authOptions } from "@/bills/lib/auth";
-import { DEV_OPEN_ACCESS } from "@/bills/lib/auth-guards";
-import { BASE_PATH } from "@/bills/utils/basePath";
+import { connectToDatabase } from "@/app/bills/lib/mongoose";
+import { Bill } from "@/app/bills/models/Bill";
+import { User } from "@/app/bills/models/User";
+import { authOptions } from "@/app/bills/lib/auth";
+import { DEV_OPEN_ACCESS } from "@/app/bills/lib/auth-guards";
+import { BASE_PATH } from "@/app/bills/utils/basePath";
 
 export async function POST(
   request: Request,

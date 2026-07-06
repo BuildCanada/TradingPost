@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { connectToDatabase } from "@/bills/lib/mongoose";
-import { Bill, type BillDocument } from "@/bills/models/Bill";
-import { User } from "@/bills/models/User";
-import { authOptions } from "@/bills/lib/auth";
-import { DEV_OPEN_ACCESS } from "@/bills/lib/auth-guards";
+import { connectToDatabase } from "@/app/bills/lib/mongoose";
+import { Bill, type BillDocument } from "@/app/bills/models/Bill";
+import { User } from "@/app/bills/models/User";
+import { authOptions } from "@/app/bills/lib/auth";
+import { DEV_OPEN_ACCESS } from "@/app/bills/lib/auth-guards";
 import {
   type ApiBillDetail,
   fetchBillMarkdown,
   getBillFromCivicsProjectApi,
   summarizeBillText,
-} from "@/bills/services/billApi";
+} from "@/app/bills/services/billApi";
 
 /**
  * Admin-only endpoint to refetch a bill from the Civics Project API and re-run

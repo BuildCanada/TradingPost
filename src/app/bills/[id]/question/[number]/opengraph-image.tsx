@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
-import { getUnifiedBillById } from "@/bills/server/get-unified-bill-by-id";
-import { QuestionOgCard } from "@/bills/components/OpenGraph/QuestionOgCard";
+import { getUnifiedBillById } from "@/app/bills/server/get-unified-bill-by-id";
+import { QuestionOgCard } from "@/app/bills/components/OpenGraph/QuestionOgCard";
 
 export const runtime = "nodejs";
 

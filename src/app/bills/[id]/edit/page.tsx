@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
-import { getBillByIdFromDB } from "@/bills/server/get-bill-by-id-from-db";
-import { requireAuthenticatedUser } from "@/bills/lib/auth-guards";
-import { BASE_PATH } from "@/bills/utils/basePath";
-import { Button } from "@/bills/components/ui/button";
-import { ReprocessButton } from "@/bills/components/ReprocessButton/reprocess-button.component";
+import { getBillByIdFromDB } from "@/app/bills/server/get-bill-by-id-from-db";
+import { requireAuthenticatedUser } from "@/app/bills/lib/auth-guards";
+import { BASE_PATH } from "@/app/bills/utils/basePath";
+import { Button } from "@/components/ui/button";
+import { ReprocessButton } from "@/app/bills/components/ReprocessButton/reprocess-button.component";
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -26,7 +26,7 @@ export default async function EditBillPage({ params }: Params) {
   return (
     <div className="mx-auto max-w-[900px] px-6 py-8">
       <h1 className="text-xl font-semibold mb-6">Edit Bill</h1>
-      <div className="mb-6 border rounded p-4">
+      <div className="mb-6 border p-4">
         <ReprocessButton billId={id} />
       </div>
       <form
@@ -42,7 +42,7 @@ export default async function EditBillPage({ params }: Params) {
             id="title"
             name="title"
             defaultValue={bill.title}
-            className="w-full min-h-20 border rounded p-2"
+            className="w-full min-h-20 border p-2"
           />
         </div>
         <div className="space-y-2">
@@ -53,7 +53,7 @@ export default async function EditBillPage({ params }: Params) {
             id="short_title"
             name="short_title"
             defaultValue={bill.short_title || ""}
-            className="w-full min-h-20 border rounded p-2"
+            className="w-full min-h-20 border p-2"
           />
         </div>
         <div className="space-y-2">
@@ -64,7 +64,7 @@ export default async function EditBillPage({ params }: Params) {
             id="summary"
             name="summary"
             defaultValue={bill.summary || ""}
-            className="w-full min-h-32 border rounded p-2"
+            className="w-full min-h-32 border p-2"
           />
         </div>
         <div className="space-y-2">
@@ -75,7 +75,7 @@ export default async function EditBillPage({ params }: Params) {
             id="final_judgment"
             name="final_judgment"
             defaultValue={bill.final_judgment || ""}
-            className="w-full min-h-16 border rounded p-2"
+            className="w-full min-h-16 border p-2"
           />
         </div>
         <div className="space-y-2">
@@ -86,7 +86,7 @@ export default async function EditBillPage({ params }: Params) {
             id="rationale"
             name="rationale"
             defaultValue={bill.rationale || ""}
-            className="w-full min-h-32 border rounded p-2"
+            className="w-full min-h-32 border p-2"
           />
         </div>
         <div className="space-y-2">
@@ -97,7 +97,7 @@ export default async function EditBillPage({ params }: Params) {
             id="steel_man"
             name="steel_man"
             defaultValue={bill.steel_man || ""}
-            className="w-full min-h-32 border rounded p-2"
+            className="w-full min-h-32 border p-2"
           />
         </div>
         <div className="space-y-2">
@@ -111,7 +111,7 @@ export default async function EditBillPage({ params }: Params) {
             id="missing_details"
             name="missing_details"
             defaultValue={(bill.missing_details || []).join(", ")}
-            className="w-full min-h-20 border rounded p-2"
+            className="w-full min-h-20 border p-2"
           />
         </div>
         <div className="space-y-2">
@@ -122,7 +122,7 @@ export default async function EditBillPage({ params }: Params) {
             id="genres"
             name="genres"
             defaultValue={(bill.genres || []).join(", ")}
-            className="w-full min-h-20 border rounded p-2"
+            className="w-full min-h-20 border p-2"
           />
         </div>
         <div className="space-y-4">
@@ -151,7 +151,7 @@ export default async function EditBillPage({ params }: Params) {
                         ? "Add a new question"
                         : undefined
                     }
-                    className="w-full min-h-24 border rounded p-2"
+                    className="w-full min-h-24 border p-2"
                   />
                 </div>
               );
@@ -163,7 +163,7 @@ export default async function EditBillPage({ params }: Params) {
           {(bill.tenet_evaluations || []).map((tenet, index) => {
             const idSuffix = String(index);
             return (
-              <div key={index} className="border rounded p-3 space-y-3">
+              <div key={index} className="border p-3 space-y-3">
                 <input
                   type="hidden"
                   name="tenet_id"
@@ -180,7 +180,7 @@ export default async function EditBillPage({ params }: Params) {
                     id={`tenet_title_${idSuffix}`}
                     name="tenet_title"
                     defaultValue={tenet.title || ""}
-                    className="w-full min-h-16 border rounded p-2"
+                    className="w-full min-h-16 border p-2"
                   />
                 </div>
                 <div className="space-y-2">
@@ -194,7 +194,7 @@ export default async function EditBillPage({ params }: Params) {
                     id={`tenet_alignment_${idSuffix}`}
                     name="tenet_alignment"
                     defaultValue={tenet.alignment || "neutral"}
-                    className="w-full border rounded p-2"
+                    className="w-full border p-2"
                   >
                     <option value="aligns">aligns</option>
                     <option value="neutral">neutral</option>
@@ -212,14 +212,16 @@ export default async function EditBillPage({ params }: Params) {
                     id={`tenet_explanation_${idSuffix}`}
                     name="tenet_explanation"
                     defaultValue={tenet.explanation || ""}
-                    className="w-full min-h-24 border rounded p-2"
+                    className="w-full min-h-24 border p-2"
                   />
                 </div>
               </div>
             );
           })}
         </div>
-        <Button type="submit">Save</Button>
+        <Button as="button" type="submit" variant="charcoal">
+          Save
+        </Button>
       </form>
     </div>
   );

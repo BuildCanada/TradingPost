@@ -53,7 +53,7 @@ export default function FAQModalTrigger() {
       <button
         ref={buttonRef}
         type="button"
-        className="mt-3 inline-block cursor-pointer text-xs underline text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+        className="mt-3 inline-block cursor-pointer text-xs underline text-text-secondary hover:text-dark"
         onClick={openModal}
       >
         FAQ
@@ -73,20 +73,20 @@ export default function FAQModalTrigger() {
             aria-modal="true"
             aria-labelledby="faq-title"
             tabIndex={-1}
-            className={`relative z-10 w-full max-w-2xl rounded-lg border border-[var(--panel-border)] bg-[var(--panel)] p-5 shadow-xl outline-none transition-all duration-200 ease-out ${
+            className={`relative z-10 w-full max-w-2xl border border-border-light bg-white p-5 shadow-xl outline-none transition-all duration-200 ease-out ${
               visible
                 ? "opacity-100 translate-y-0 scale-100"
                 : "opacity-0 translate-y-2 scale-95"
             }`}
           >
             <div className="flex items-start justify-between">
-              <h2 id="faq-title" className="text-[24px] font-semibold">
+              <h2 id="faq-title" className="type-h3 text-dark">
                 Frequently Asked Questions
               </h2>
               <button
                 type="button"
                 aria-label="Close"
-                className="ml-3 rounded text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                className="ml-3 text-text-secondary hover:text-dark"
                 onClick={closeModal}
               >
                 ✕
@@ -95,7 +95,7 @@ export default function FAQModalTrigger() {
 
             <div className="mt-4 text-sm leading-6">
               <h3 className="font-semibold">Why did you build this?</h3>
-              <p className="text-[var(--text-secondary)] mt-1">
+              <p className="text-text-secondary mt-1">
                 We built this tool so that Canadians could easily understand
                 parliamentary bills and how they align with a pro-growth stance.
               </p>
@@ -103,7 +103,7 @@ export default function FAQModalTrigger() {
               <h3 className="font-semibold mt-4">
                 Where does the bill data come from?
               </h3>
-              <p className="text-[var(--text-secondary)] mt-1">
+              <p className="text-text-secondary mt-1">
                 We are powered by{" "}
                 <a
                   href="https://civicsproject.org"
@@ -120,7 +120,7 @@ export default function FAQModalTrigger() {
               <h3 className="font-semibold mt-4">
                 How do you determine a bill&apos;s judgement?
               </h3>
-              <p className="text-[var(--text-secondary)] mt-1">
+              <p className="text-text-secondary mt-1">
                 Each bill is evaluated against a set of pro-growth principles
                 using an LLM. The LLM uses these principles to make a judgement
                 on the bill. We show all of this, including the principles,
@@ -130,7 +130,7 @@ export default function FAQModalTrigger() {
               <h3 className="font-semibold mt-4">
                 Was this tool created to vote on bills?
               </h3>
-              <p className="text-[var(--text-secondary)] mt-1">
+              <p className="text-text-secondary mt-1">
                 No. This tool was created to help Canadians better understand
                 bills and their economic impact. It is meant to be educational
                 and informative.
@@ -139,7 +139,7 @@ export default function FAQModalTrigger() {
               <h3 className="font-semibold mt-4">
                 What prompt do you use to evaluate the bills?
               </h3>
-              <p className="text-[var(--text-secondary)] mt-1">
+              <p className="text-text-secondary mt-1">
                 This project, including the prompt, is open sourced on{" "}
                 <a
                   className="underline"
@@ -153,7 +153,7 @@ export default function FAQModalTrigger() {
               </p>
 
               <h3 className="font-semibold mt-4">How can I contribute?</h3>
-              <p className="text-[var(--text-secondary)] mt-1">
+              <p className="text-text-secondary mt-1">
                 This is a work in progress and we would love help from others.
                 Join us on{" "}
                 <a
@@ -168,7 +168,7 @@ export default function FAQModalTrigger() {
               </p>
 
               <h3 className="font-semibold mt-4">How can I get in touch?</h3>
-              <p className="text-[var(--text-secondary)] mt-1">
+              <p className="text-text-secondary mt-1">
                 You can reach out to us at{" "}
                 <a className="underline" href="mailto:hi@buildcanada.com">
                   hi@buildcanada.com

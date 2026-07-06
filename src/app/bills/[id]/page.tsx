@@ -1,36 +1,36 @@
 import Link from "next/link";
-import { getBillByIdFromDB } from "@/bills/server/get-bill-by-id-from-db";
-import { getBillFromCivicsProjectApi } from "@/bills/services/billApi";
+import { getBillByIdFromDB } from "@/app/bills/server/get-bill-by-id-from-db";
+import { getBillFromCivicsProjectApi } from "@/app/bills/services/billApi";
 import {
   fromBuildCanadaDbBill,
   fromCivicsProjectApiBill,
   type UnifiedBill,
-} from "@/bills/utils/billConverters";
+} from "@/app/bills/utils/billConverters";
 import type { Metadata, ResolvingMetadata } from "next";
 import { headers } from "next/headers";
-import { env } from "@/bills/env";
-import { BASE_PATH } from "@/bills/utils/basePath";
+import { env } from "@/app/bills/env";
+import { BASE_PATH } from "@/app/bills/utils/basePath";
 import {
   BillHeader,
   BillSummary,
   BillMetadata,
   BillAnalysis,
   BillContact,
-} from "@/bills/components/BillDetail";
-import { BillQuestions } from "@/bills/components/BillDetail/BillQuestions";
-import { Separator } from "@/bills/components/ui/separator";
+} from "@/app/bills/components/BillDetail";
+import { BillQuestions } from "@/app/bills/components/BillDetail/BillQuestions";
+import { Separator } from "@/app/bills/components/ui/separator";
 import { getServerSession } from "next-auth";
-import { authOptions } from "@/bills/lib/auth";
-import { DEV_OPEN_ACCESS } from "@/bills/lib/auth-guards";
-import { BillTenets } from "@/bills/components/BillDetail/BillTenets";
-import { JudgementValue } from "@/bills/components/Judgement/judgement.component";
-import { buildAbsoluteUrl, buildRelativePath } from "@/bills/utils/basePath";
+import { authOptions } from "@/app/bills/lib/auth";
+import { DEV_OPEN_ACCESS } from "@/app/bills/lib/auth-guards";
+import { BillTenets } from "@/app/bills/components/BillDetail/BillTenets";
+import { JudgementValue } from "@/app/bills/components/Judgement/judgement.component";
+import { buildAbsoluteUrl, buildRelativePath } from "@/app/bills/utils/basePath";
 import {
   BUILD_CANADA_TWITTER_HANDLE,
   BUILD_CANADA_URL,
-} from "@/bills/consts/general";
-import { BillShare } from "@/bills/components/BillDetail/BillShare";
-import { shouldShowDetermination } from "@/bills/utils/should-show-determination/should-show-determination.util";
+} from "@/app/bills/consts/general";
+import { BillShare } from "@/app/bills/components/BillDetail/BillShare";
+import { shouldShowDetermination } from "@/app/bills/utils/should-show-determination/should-show-determination.util";
 
 // Next.js requires route segment configs to be literal values (not imported constants)
 export const revalidate = 120; // seconds - cache individual bill pages
@@ -69,11 +69,14 @@ export default async function BillDetail({ params }: Params) {
   if (!unifiedBill) {
     return (
       <div className="mx-auto max-w-[800px] px-6 py-10">
-        <h1 className="text-xl font-semibold">Bill not found</h1>
-        <p className="mt-2 text-sm">
+        <h1 className="type-h3 text-dark">Bill not found</h1>
+        <p className="mt-2 text-sm text-text-secondary">
           The bill you are looking for does not exist.
         </p>
-        <Link className="mt-4 inline-block underline" href={BASE_PATH || "/"}>
+        <Link
+          className="mt-4 inline-block text-sm text-accent hover:underline"
+          href={BASE_PATH || "/"}
+        >
           Back to list
         </Link>
       </div>
@@ -88,11 +91,17 @@ export default async function BillDetail({ params }: Params) {
   return (
     <div className="mx-auto max-w-[1100px] px-6 py-8">
       <div className="mb-6">
-        <Link href={BASE_PATH || "/"} className="text-sm underline  mb-6">
+        <Link
+          href={BASE_PATH || "/"}
+          className="text-sm text-accent hover:underline mb-6"
+        >
           ← Back to bills
         </Link>
         {(session?.user || DEV_OPEN_ACCESS) && (
-          <Link href={`${BASE_PATH}/${id}/edit`} className="ml-4 text-sm underline">
+          <Link
+            href={`${BASE_PATH}/${id}/edit`}
+            className="ml-4 text-sm text-accent hover:underline"
+          >
             Edit
           </Link>
         )}

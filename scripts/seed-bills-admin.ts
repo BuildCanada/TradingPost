@@ -4,8 +4,8 @@
  *
  * Usage: pnpm seed:bills-admin <email>
  */
-import { connectToDatabase } from "@/bills/lib/mongoose";
-import { User } from "@/bills/models/User";
+import { connectToDatabase } from "@/app/bills/lib/mongoose";
+import { User } from "@/app/bills/models/User";
 
 async function main() {
   const email = process.argv[2];

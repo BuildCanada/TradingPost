@@ -8,7 +8,6 @@ const stylesByJudgement: Record<
   JudgementValue,
   {
     wrap: { subtle: string; outline: string };
-    iconWrap: string;
     icon: string;
   }
 > = {
@@ -17,7 +16,6 @@ const stylesByJudgement: Record<
       subtle: "bg-pine-50 text-pine-900 border-pine-200",
       outline: "bg-white text-pine-900 border-pine-300",
     },
-    iconWrap: "bg-pine-100 text-pine-700 border-pine-200",
     icon: "text-pine-700",
   },
   no: {
@@ -25,7 +23,6 @@ const stylesByJudgement: Record<
       subtle: "bg-auburn-50 text-auburn-900 border-auburn-200",
       outline: "bg-white text-auburn-900 border-auburn-300",
     },
-    iconWrap: "bg-auburn-100 text-auburn-700 border-auburn-200",
     icon: "text-auburn-700",
   },
   abstain: {
@@ -33,7 +30,6 @@ const stylesByJudgement: Record<
       subtle: "bg-steel-50 text-charcoal-900 border-steel-200",
       outline: "bg-white text-charcoal-900 border-steel-300",
     },
-    iconWrap: "bg-steel-100 text-charcoal-700 border-steel-200",
     icon: "text-charcoal-700",
   },
 };
@@ -82,26 +78,20 @@ export function Judgement({
     <article
       role="status"
       aria-live="polite"
-      className={["border w-fit px-2", s.wrap.subtle, sz.pad, className]
+      className={[
+        "inline-flex items-center border w-fit px-2",
+        s.wrap.subtle,
+        sz.pad,
+        sz.gap,
+        className,
+      ]
         .filter(Boolean)
         .join(" ")}
     >
-      <div className={`flex items-center ${sz.gap}`}>
-        <span
-          className={[
-            "inline-flex items-center justify-center border ",
-            sz.icon,
-            s.iconWrap,
-          ].join(" ")}
-          aria-hidden="true"
-        >
-          <Icon className={`${sz.icon} ${s.icon}`} />
-        </span>
-
-        <span className={`font-medium leading-none ${sz.text}`}>
-          {verdictCopy(judgement)}
-        </span>
-      </div>
+      <Icon className={`${sz.icon} ${s.icon}`} aria-hidden="true" />
+      <span className={`font-medium leading-none ${sz.text}`}>
+        {verdictCopy(judgement)}
+      </span>
     </article>
   );
 }

@@ -3,10 +3,9 @@ import { memo, type ComponentProps } from "react";
 import { BillSummary } from "@/app/bills/types";
 import { Judgement, JudgementValue } from "./Judgement/judgement.component";
 import { DynamicIcon } from "lucide-react/dynamic";
-import dayjs from "dayjs";
-
 import { getCategoryIcon } from "@/app/bills/utils/bill-category-to-icon/bill-category-to-icon.util";
 import { getBillMostRecentDate } from "@/app/bills/utils/stages-to-dates/stages-to-dates";
+import { formatBillDate } from "@/app/bills/utils/format-date";
 import { TenetEvaluation } from "@/app/bills/models/Bill";
 import { BASE_PATH } from "@/app/bills/utils/basePath";
 
@@ -16,7 +15,7 @@ interface BillCardProps {
 
 function BillCard({ bill }: BillCardProps) {
   const bestDate = getBillMostRecentDate(bill);
-  const dateDisplay = bestDate ? dayjs(bestDate).format("MMM D, YYYY") : "N/A";
+  const dateDisplay = formatBillDate(bestDate);
 
   const judgementValue: JudgementValue = bill.final_judgment || "abstain";
 

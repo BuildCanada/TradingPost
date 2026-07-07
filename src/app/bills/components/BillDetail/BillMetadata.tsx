@@ -1,7 +1,7 @@
 import type { UnifiedBill } from "@/app/bills/utils/billConverters";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { getBillStageDates } from "@/app/bills/utils/stages-to-dates/stages-to-dates";
-import dayjs from "dayjs";
+import { formatBillDate } from "@/app/bills/utils/format-date";
 
 interface BillMetadataProps {
   bill: UnifiedBill;
@@ -18,9 +18,7 @@ const DataPoint = ({ label, value }: { label: string; value: string }) => {
 
 export function BillMetadata({ bill }: BillMetadataProps) {
   const billDates = getBillStageDates(bill.stages);
-  const lastUpdatedDate = billDates.lastUpdated
-    ? dayjs(billDates.lastUpdated).format("MMM D, YYYY")
-    : "N/A";
+  const lastUpdatedDate = formatBillDate(billDates.lastUpdated);
 
   return (
     <Card>

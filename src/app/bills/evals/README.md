@@ -26,7 +26,8 @@ never gate the run — they are probabilistic.
 ## What it checks
 
 - **Structural** (`checks/analysis-checks.ts`, deterministic, gates the run):
-  non-empty summary/steel_man; exactly 8 tenets with ids 1–8 and valid
+  non-empty summary (steel_man is a human-editable field, not LLM-generated, so
+  it is not checked); exactly 8 tenets with ids 1–8 and valid
   `aligns|conflicts|neutral`; valid `final_judgment`; exactly 3 non-empty QP
   questions with no "Mr./Madam Speaker" prefix; no `Build Canada`/`we`/`our`
   self-reference in prose; (soft warning) tenet text not quoted in the summary.

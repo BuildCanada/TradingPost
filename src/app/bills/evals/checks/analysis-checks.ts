@@ -32,16 +32,13 @@ function warn(name: string, pass: boolean, message: string): CheckResult {
 export function checkAnalysis(a: BillAnalysis): CheckResult[] {
   const results: CheckResult[] = [];
 
-  // summary + steel_man non-empty
+  // summary non-empty. NOTE: steel_man is intentionally NOT checked here — it
+  // is a human-editable editorial field (admin edit page), not produced by
+  // SUMMARY_AND_VOTE_PROMPT, so summarizeBillText correctly leaves it "".
   results.push(
     typeof a.summary === "string" && a.summary.trim().length > 0
       ? ok("summary-present")
       : fail("summary-present", "summary is empty or not a string"),
-  );
-  results.push(
-    typeof a.steel_man === "string" && a.steel_man.trim().length > 0
-      ? ok("steel-man-present")
-      : fail("steel-man-present", "steel_man is empty or not a string"),
   );
 
   // tenet evaluations: exactly 8, ids 1-8, valid alignments

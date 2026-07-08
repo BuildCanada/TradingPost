@@ -12,6 +12,7 @@ import { buildGraph } from "@/lib/schemas/graph";
 import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
 import { generateBreadcrumbSchema } from "@/lib/schemas/generators/breadcrumb";
 import IndicatorChartClient from "./IndicatorChartClient";
+import SectionNav from "./SectionNav";
 import { SECTIONS } from "./indicators";
 
 const DESCRIPTION =
@@ -104,22 +105,9 @@ export default async function EconomicIndicatorsPage() {
         description="How Canada stacks up against its peers — growth, incomes, and housing."
       />
 
-      <nav
-        aria-label="Indicator sections"
-        className="border-b border-border-light px-5 py-3"
-      >
-        <div className="max-w-[1080px] mx-auto flex flex-wrap gap-x-6 gap-y-1">
-          {SECTIONS.map((section) => (
-            <a
-              key={section.id}
-              href={`#${section.id}`}
-              className="type-label text-dark/70 hover:text-dark underline-offset-4 hover:underline"
-            >
-              {section.title}
-            </a>
-          ))}
-        </div>
-      </nav>
+      <SectionNav
+        sections={SECTIONS.map((s) => ({ id: s.id, title: s.title }))}
+      />
 
       <section className="px-5 py-12">
         <div className="max-w-[1080px] mx-auto space-y-20">
@@ -127,7 +115,7 @@ export default async function EconomicIndicatorsPage() {
             <section
               key={section.id}
               id={section.id}
-              className="scroll-mt-24"
+              className="scroll-mt-32"
             >
               <h2 className="type-h2 text-dark">{section.title}</h2>
               <p className="mt-1 type-body text-dark/70 max-w-[720px]">

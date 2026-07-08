@@ -63,6 +63,11 @@ function displayUnit(unit: EconomySeriesUnit): {
   }
 }
 
+// auburn-600 — Canada renders in the same brand red on every chart,
+// matching the canvas feed palette.
+const CANADA_COLOR = "#c43e3e";
+const ENTITY_COLORS = { Canada: CANADA_COLOR };
+
 function buildGrapherState(
   response: EconomySeriesResponse,
   bounds: Bounds,
@@ -107,6 +112,7 @@ function buildGrapherState(
     isEmbeddedInPage: true,
     chartTypes: [GRAPHER_CHART_TYPES.LineChart],
     selectedEntityNames: series.map((s) => s.jurisdiction.name),
+    selectedEntityColors: ENTITY_COLORS,
     dimensions,
   });
 
@@ -122,7 +128,7 @@ function buildGrapherState(
   grapherState.inputTable = legacyToChartsTableAndDimensionsWithMandatorySlug(
     createTestDataset([{ data, metadata }]),
     dimensions,
-    {},
+    ENTITY_COLORS,
   );
 
   return grapherState;

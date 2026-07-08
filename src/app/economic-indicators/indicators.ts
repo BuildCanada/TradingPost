@@ -30,6 +30,12 @@ export const SECTIONS: IndicatorSection[] = [
           "Annual growth in real gross domestic product. Sustained growth is what compounds into higher incomes over a generation.",
       },
       {
+        slug: "inflation-cpi-annual",
+        heading: "Inflation",
+        blurb:
+          "Annual change in consumer prices. Inflation quietly erodes wages and savings — price stability is the foundation everything else is built on.",
+      },
+      {
         slug: "trade-balance-pct-gdp",
         heading: "Trade balance",
         blurb:

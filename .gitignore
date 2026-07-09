@@ -16,6 +16,9 @@
 # testing
 /coverage
 
+# bills eval response cache
+/src/app/bills/evals/.cache/
+
 # next.js
 /.next/
 /out/

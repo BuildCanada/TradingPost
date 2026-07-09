@@ -11,6 +11,7 @@ import {
   getBillFromCivicsProjectApi,
   summarizeBillText,
 } from "@/app/bills/services/billApi";
+import { notifyNewBillAnalysis } from "@/app/bills/services/slack-notifier";
 
 /**
  * Admin-only endpoint to refetch a bill from the Civics Project API and re-run
@@ -137,6 +138,13 @@ export async function POST(
     },
     { upsert: false },
   );
+
+  await notifyNewBillAnalysis({
+    billId: id,
+    title: apiBill.title,
+    shortTitle: apiBill.shortTitle ?? existing.short_title,
+    analysis,
+  });
 
   return NextResponse.json({ ok: true });
 }

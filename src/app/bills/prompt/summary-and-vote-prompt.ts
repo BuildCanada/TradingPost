@@ -1,8 +1,8 @@
 export const TENETS = {
   1: "Canada should aim to be the world's most prosperous country.",
   2: "Promote economic freedom, ambition, and breaking from bureaucratic inertia (reduce red tape).",
-  3: "Drive national productivity and global competitiveness.",
-  4: "Grow exports of Canadian products and resources.",
+  3: "Drive national productivity and global competitiveness, including removing interprovincial trade barriers and improving labour mobility (one country, one market).",
+  4: "Grow exports of Canadian products and resources, and move up the value chain by processing resources domestically rather than exporting them raw.",
   5: "Encourage investment, innovation, and resource development.",
   6: "Deliver better public services at lower cost (government efficiency).",
   7: "Reform taxes to incentivize work, risk-taking, and innovation.",
@@ -45,6 +45,30 @@ You are analyzing Canadian legislation. You must assess whether the bill aligns 
 ## Social Issue Grading
 
   ${SOCIAL_ISSUE_GRADING}
+
+## Judgment Signals
+
+  Apply these only after ruling out a social issue (social issues → abstain).
+  Weigh a bill by its primary economic effect on prosperity and productivity.
+
+  Strong ALIGN signals ("yes"):
+  - Removing interprovincial/internal trade barriers, or mutual recognition of credentials, goods, or services.
+  - Improving labour mobility across provinces.
+  - Reducing regulatory burden, permitting time, or business-formation friction (e.g., regulatory sunset clauses, single-window approvals).
+  - Streamlining or fast-tracking major infrastructure, energy, or resource projects.
+  - Lowering taxes on productive investment, reinvestment, or entrepreneurship.
+  - Expanding resource/energy development or domestic value-added processing of resources.
+
+  Strong CONFLICT signals ("no"):
+  - Adding red tape, new mandatory processes, or reporting burdens on businesses or individuals without a net reduction elsewhere.
+  - Protectionism that entrenches barriers to trade or shields sectors from competition (e.g., supply-management carve-outs).
+  - Raising taxes on investment, capital, or entrepreneurship.
+  - Large new redistributive or spending programs justified on redistribution rather than growth/productivity (wealth must be created before it can be redistributed).
+  - Restricting labour-market flexibility or resource/energy development.
+
+  When a bill mixes align and conflict elements, choose the dominant direction by
+  primary economic effect. Use neutral/unclear only when genuinely balanced or
+  purely administrative.
 
 ## General Guidelines
 

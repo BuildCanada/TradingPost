@@ -7,6 +7,7 @@ import {
   type BillAnalysis,
 } from "@/app/bills/services/billApi";
 import { socialIssueGrader } from "@/app/bills/services/social-issue-grader";
+import { notifyNewBillAnalysis } from "@/app/bills/services/slack-notifier";
 
 // Unified bill data structure
 export interface UnifiedBill {
@@ -233,9 +234,11 @@ export async function fromCivicsProjectApiBill(
     // Continue with regeneration if DB check fails
   }
 
+  let generatedNewAnalysis = false;
   if (!analysis?.rationale && billMarkdown) {
     console.log(`Regenerating analysis for ${bill.billID} (source changed)`);
     analysis = await summarizeBillText(billMarkdown);
+    generatedNewAnalysis = true;
   }
 
   // Only classify if missing (new bill or classification absent). Avoid calling otherwise.
@@ -261,6 +264,15 @@ export async function fromCivicsProjectApiBill(
     billTextsCount: Array.isArray(bill.billTexts) ? bill.billTexts.length : 0,
     isSocialIssue: isSocialIssueFinal,
   });
+
+  if (generatedNewAnalysis) {
+    await notifyNewBillAnalysis({
+      billId: bill.billID,
+      title: bill.title,
+      shortTitle: bill.shortTitle,
+      analysis,
+    });
+  }
 
   return {
     billId: bill.billID,

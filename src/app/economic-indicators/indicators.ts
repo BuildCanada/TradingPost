@@ -49,8 +49,14 @@ export const SECTIONS: IndicatorSection[] = [
     featuredSlug: "gdp-per-capita-ppp",
     indicators: [
       {
+        slug: "gdp-monthly-canada",
+        heading: "Real GDP, monthly (Canada)",
+        blurb:
+          "Statistics Canada's monthly real GDP, all industries, in chained 2017 dollars. Canada's output pulse with only a ~60-day lag, where the international series below run a year or more behind.",
+      },
+      {
         slug: "gdp-per-capita-ppp",
-        heading: "GDP per capita (PPP)",
+        heading: "GDP per capita vs. other countries",
         blurb:
           "Output per person, adjusted for purchasing power. The clearest single measure of how living standards in Canada compare with peer economies.",
       },

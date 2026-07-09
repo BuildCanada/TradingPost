@@ -84,6 +84,7 @@ const SOURCE_NAMES: Record<string, string> = {
   econ_statcan_crime_severity: "Statistics Canada (table 35-10-0026)",
   econ_statcan_crime_rate: "Statistics Canada (table 35-10-0177)",
   econ_statcan_cpi_essentials: "Statistics Canada (table 18-10-0004)",
+  econ_statcan_gdp_monthly: "Statistics Canada (table 36-10-0434)",
   econ_oecd_oda: "OECD DAC1",
   econ_owid_life_satisfaction: "World Happiness Report via Our World in Data",
   econ_owid_homicide_rate: "UNODC via Our World in Data",

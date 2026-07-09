@@ -29,6 +29,8 @@ function formatValue(value: number, unitSymbol: string): string {
       return `$${Math.round(value).toLocaleString("en-CA")}`;
     case "intl_$_per_hour":
       return `$${value.toFixed(2)}/h`;
+    case "$M":
+      return `$${Math.round(value).toLocaleString("en-CA")}M`;
     case "ratio":
       return value.toFixed(3);
     case "units":
@@ -70,6 +72,8 @@ function axisLabel(unitSymbol: string): string {
       return "international-$";
     case "intl_$_per_hour":
       return "international-$ / hour";
+    case "$M":
+      return "million $";
     case "ratio":
       return "ratio";
     case "units":

@@ -26,6 +26,7 @@ export function displayUnit(unit: EconomySeriesUnit): {
   unit: string;
   shortUnit: string;
   numDecimalPlaces: number;
+  conversionFactor?: number;
 } {
   switch (unit.symbol) {
     case "%":
@@ -37,6 +38,15 @@ export function displayUnit(unit: EconomySeriesUnit): {
         unit: "international-$ per hour worked",
         shortUnit: "$",
         numDecimalPlaces: 1,
+      };
+    case "$M":
+      // Values arrive in millions; convert to dollars so Grapher's
+      // magnitude abbreviations ("$2.4 trillion") come out true.
+      return {
+        unit: "CAD",
+        shortUnit: "$",
+        numDecimalPlaces: 0,
+        conversionFactor: 1_000_000,
       };
     case "index":
       return { unit: "index", shortUnit: "", numDecimalPlaces: 1 };

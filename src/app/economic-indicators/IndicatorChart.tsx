@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo } from "react";
 import {
   Bounds,
   createTestDataset,
@@ -15,8 +15,14 @@ import {
   type EconomySeriesResponse,
   type EconomySeriesUnit,
 } from "@/lib/api/economy";
+import {
+  BENCHMARK_COLOR,
+  CANADA_COLOR,
+  type IndicatorBenchmark,
+} from "./indicators";
+import { useChartSize } from "./useChartSize";
 
-function displayUnit(unit: EconomySeriesUnit): {
+export function displayUnit(unit: EconomySeriesUnit): {
   unit: string;
   shortUnit: string;
   numDecimalPlaces: number;
@@ -63,26 +69,67 @@ function displayUnit(unit: EconomySeriesUnit): {
   }
 }
 
-// auburn-600 — Canada renders in the same brand red on every chart,
-// matching the canvas feed palette.
-const CANADA_COLOR = "#c43e3e";
 const ENTITY_COLORS = { Canada: CANADA_COLOR };
+
+// Grapher represents sub-annual time as integer days since its epoch date
+// (EPOCH_DATE in @buildcanada/charts) on a column flagged yearIsDay — the
+// OWID convention for daily/monthly series.
+const GRAPHER_EPOCH_MS = Date.UTC(2020, 0, 21);
+const DAY_MS = 86_400_000;
+
+export function daysSinceGrapherEpoch(isoDate: string): number {
+  return Math.round((Date.parse(isoDate) - GRAPHER_EPOCH_MS) / DAY_MS);
+}
+
+// Benchmark values compound through the anchor point; `year` is fractional
+// for monthly points, so the line stays smooth between Januaries.
+export function benchmarkValue(
+  benchmark: IndicatorBenchmark,
+  year: number,
+): number {
+  return (
+    benchmark.anchorValue *
+    Math.pow(1 + benchmark.annualRatePct / 100, year - benchmark.anchorYear)
+  );
+}
 
 function buildGrapherState(
   response: EconomySeriesResponse,
   bounds: Bounds,
+  benchmark?: IndicatorBenchmark,
 ): GrapherState | null {
   const { measure, series } = response.data;
   const { source } = response.meta;
+  const monthly = measure.frequency === "monthly";
 
   const data = series.flatMap((s, idx) =>
     s.points.map((p) => ({
-      year: p.year,
+      year: monthly && p.date ? daysSinceGrapherEpoch(p.date) : p.year,
       entity: { id: idx + 1, code: s.jurisdiction.code, name: s.jurisdiction.name },
       value: p.value,
     })),
   );
   if (data.length === 0) return null;
+
+  if (benchmark) {
+    // One benchmark point per time in the longest series, so the reference
+    // line spans exactly the observed range.
+    const longest = series.reduce((a, b) =>
+      b.points.length > a.points.length ? b : a,
+    );
+    const entity = {
+      id: series.length + 1,
+      code: "TARGET",
+      name: benchmark.label,
+    };
+    data.push(
+      ...longest.points.map((p) => ({
+        year: monthly && p.date ? daysSinceGrapherEpoch(p.date) : p.year,
+        entity,
+        value: benchmarkValue(benchmark, p.year),
+      })),
+    );
+  }
 
   const variableId = 1;
   const dimensions = [{ variableId, property: DimensionProperty.y }];
@@ -92,6 +139,7 @@ function buildGrapherState(
     display: {
       name: measure.name,
       ...displayUnit(measure.unit),
+      ...(monthly ? { yearIsDay: true } : {}),
     },
     origins: source
       ? [
@@ -105,14 +153,22 @@ function buildGrapherState(
       : [],
   };
 
+  const entityColors = benchmark
+    ? { ...ENTITY_COLORS, [benchmark.label]: BENCHMARK_COLOR }
+    : ENTITY_COLORS;
+  const selectedEntityNames = [
+    ...series.map((s) => s.jurisdiction.name),
+    ...(benchmark ? [benchmark.label] : []),
+  ];
+
   const grapherState = new GrapherState({
     bounds,
     // Fill the available bounds exactly instead of scaling to Grapher's
     // ideal 680x480 aspect ratio.
     isEmbeddedInPage: true,
     chartTypes: [GRAPHER_CHART_TYPES.LineChart],
-    selectedEntityNames: series.map((s) => s.jurisdiction.name),
-    selectedEntityColors: ENTITY_COLORS,
+    selectedEntityNames,
+    selectedEntityColors: entityColors,
     dimensions,
   });
 
@@ -128,7 +184,7 @@ function buildGrapherState(
   grapherState.inputTable = legacyToChartsTableAndDimensionsWithMandatorySlug(
     createTestDataset([{ data, metadata }]),
     dimensions,
-    ENTITY_COLORS,
+    entityColors,
   );
 
   return grapherState;
@@ -136,30 +192,21 @@ function buildGrapherState(
 
 export default function IndicatorChart({
   response,
+  benchmark,
 }: {
   response: EconomySeriesResponse;
+  benchmark?: IndicatorBenchmark;
 }) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [size, setSize] = useState({ width: 800, height: 480 });
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-    const measure = () => {
-      const w = Math.min(1040, Math.max(320, el.clientWidth - 16));
-      const h = Math.max(320, Math.min(460, Math.round(w * 0.5)));
-      setSize({ width: w, height: h });
-    };
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
+  const { containerRef, size } = useChartSize();
 
   const grapherState = useMemo(
     () =>
-      buildGrapherState(response, new Bounds(0, 0, size.width, size.height)),
-    [response, size.width, size.height],
+      buildGrapherState(
+        response,
+        new Bounds(0, 0, size.width, size.height),
+        benchmark,
+      ),
+    [response, size.width, size.height, benchmark],
   );
 
   return (

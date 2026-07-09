@@ -52,6 +52,16 @@ function formatValue(value: number, unitSymbol: string): string {
   }
 }
 
+const MONTH_FORMAT = new Intl.DateTimeFormat("en-CA", {
+  month: "short",
+  year: "numeric",
+  timeZone: "UTC",
+});
+
+function formatMonth(isoDate: string): string {
+  return MONTH_FORMAT.format(new Date(isoDate));
+}
+
 function axisLabel(unitSymbol: string): string {
   switch (unitSymbol) {
     case "%":
@@ -131,6 +141,7 @@ export default function OverlayChart({
               ? (p.value / base) * 100
               : p.value,
           raw: p.value,
+          date: p.date,
         })),
         borderColor: s.color,
         backgroundColor: s.color,
@@ -194,7 +205,12 @@ export default function OverlayChart({
           legend: { position: "bottom", labels: { boxWidth: 12 } },
           tooltip: {
             callbacks: {
-              title: (items) => String(items[0]?.parsed.x ?? ""),
+              // Monthly points carry an ISO date; annual points show the year.
+              title: (items) => {
+                const raw = items[0]?.raw as { date?: string } | undefined;
+                if (raw?.date) return formatMonth(raw.date);
+                return String(items[0]?.parsed.x ?? "");
+              },
               label: (item) => {
                 const s = series[item.datasetIndex];
                 const raw = (item.raw as { raw: number }).raw;

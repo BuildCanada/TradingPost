@@ -28,8 +28,20 @@ export interface EconomySeriesJurisdiction {
   level: string;
 }
 
+// The API serves annual points as { year, value } and monthly points
+// (measure.frequency === "monthly") as { date, value }. getEconomicSeries
+// normalizes both to a numeric `year` time axis — fractional for monthly
+// (year + monthIndex / 12) — so charts keep a single numeric x dimension,
+// with the ISO first-of-month date preserved for date formatting.
 export interface EconomySeriesPoint {
   year: number;
+  date?: string;
+  value: number;
+}
+
+interface RawSeriesPoint {
+  year?: number;
+  date?: string;
   value: number;
 }
 
@@ -71,6 +83,7 @@ const SOURCE_NAMES: Record<string, string> = {
   econ_statcan_rental_vacancy: "CMHC via Statistics Canada (table 34-10-0127)",
   econ_statcan_crime_severity: "Statistics Canada (table 35-10-0026)",
   econ_statcan_crime_rate: "Statistics Canada (table 35-10-0177)",
+  econ_statcan_cpi_essentials: "Statistics Canada (table 18-10-0004)",
   econ_oecd_oda: "OECD DAC1",
   econ_owid_life_satisfaction: "World Happiness Report via Our World in Data",
   econ_owid_homicide_rate: "UNODC via Our World in Data",
@@ -91,11 +104,29 @@ export function humanizeSourceName(name: string): string {
 // Annual data refreshed at most weekly; matches the API's Cache-Control max-age.
 const REVALIDATE = 3600;
 
+function normalizePoint(point: RawSeriesPoint): EconomySeriesPoint {
+  if (point.date) {
+    const [year, month] = point.date.split("-").map(Number);
+    return { year: year + (month - 1) / 12, date: point.date, value: point.value };
+  }
+  return { year: point.year ?? 0, value: point.value };
+}
+
 export async function getEconomicSeries(
   measure: string,
 ): Promise<EconomySeriesResponse> {
-  return apiFetch<EconomySeriesResponse>("/kpis/series", {
+  const response = await apiFetch<EconomySeriesResponse>("/kpis/series", {
     revalidate: REVALIDATE,
     params: { measure },
   });
+  return {
+    ...response,
+    data: {
+      ...response.data,
+      series: response.data.series.map((s) => ({
+        ...s,
+        points: (s.points as RawSeriesPoint[]).map(normalizePoint),
+      })),
+    },
+  };
 }

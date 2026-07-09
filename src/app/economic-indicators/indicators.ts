@@ -2,13 +2,43 @@
 // /kpis/series endpoint — each section gets its own /economic-indicators/[section]
 // page and the canvas page uses the flat list as the feed picker.
 
-export type Indicator = { slug: string; heading: string; blurb: string };
+export type Indicator = {
+  slug: string;
+  heading: string;
+  blurb: string;
+  // Short line label used when the indicator appears in a combined chart.
+  chartLabel?: string;
+};
+// Reference line drawn on every chart in a section (including the combined
+// chart): a value compounding at annualRatePct per year through
+// (anchorYear, anchorValue).
+export type IndicatorBenchmark = {
+  label: string;
+  annualRatePct: number;
+  anchorYear: number;
+  anchorValue: number;
+};
 export type IndicatorSection = {
   id: string;
   title: string;
   description: string;
+  // The section's most striking chart, previewed on the landing-page card.
+  featuredSlug: string;
+  // Renders one overlay chart of every indicator in the section above the
+  // individual charts. Only for sections whose indicators all share the
+  // same unit and frequency.
+  combined?: { heading: string; blurb: string };
+  benchmark?: IndicatorBenchmark;
   indicators: Indicator[];
 };
+
+// auburn-600 — Canada renders in the same brand red on every chart,
+// matching the canvas feed palette. Pinned as a literal because the
+// auburn tokens get swapped in subsection themes (e.g. Toronto).
+export const CANADA_COLOR = "#c43e3e";
+
+// Neutral grey for benchmark reference lines (e.g. the 2% inflation target).
+export const BENCHMARK_COLOR = "#8c8880";
 
 export const SECTIONS: IndicatorSection[] = [
   {
@@ -16,6 +46,7 @@ export const SECTIONS: IndicatorSection[] = [
     title: "Overall Economy",
     description:
       "Is Canada's economy growing and producing enough to sustain rising living standards?",
+    featuredSlug: "gdp-per-capita-ppp",
     indicators: [
       {
         slug: "gdp-per-capita-ppp",
@@ -50,10 +81,85 @@ export const SECTIONS: IndicatorSection[] = [
     ],
   },
   {
+    id: "cost-of-living",
+    title: "Cost of Living",
+    description:
+      "What Canadians actually pay for the essentials — monthly consumer prices for food, shelter, and getting around (2002 = 100).",
+    featuredSlug: "cpi-all-items",
+    combined: {
+      heading: "The essentials, side by side",
+      blurb:
+        "Every cost-of-living component on one chart, indexed to 2002 = 100. The grey line is where prices would sit had they grown at the Bank of Canada's 2% inflation target — everything above it has outrun the target.",
+    },
+    // Bank of Canada inflation-control target (2% midpoint), compounded
+    // through the CPI's 2002 = 100 index base.
+    benchmark: {
+      label: "2% target",
+      annualRatePct: 2,
+      anchorYear: 2002,
+      anchorValue: 100,
+    },
+    indicators: [
+      {
+        slug: "cpi-all-items",
+        heading: "CPI, all items",
+        chartLabel: "All items",
+        blurb:
+          "The all-items Consumer Price Index, month by month. The headline measure of what a basket of everyday goods and services costs in Canada.",
+      },
+      {
+        slug: "cpi-food",
+        heading: "Food prices",
+        chartLabel: "Food",
+        blurb:
+          "Consumer prices for food, at the store and in restaurants. The cost increase families feel most immediately and most often.",
+      },
+      {
+        slug: "cpi-shelter",
+        heading: "Shelter costs",
+        chartLabel: "Shelter",
+        blurb:
+          "The full cost of keeping a roof overhead — rent, mortgage interest, utilities, taxes, and upkeep. The largest single item in most household budgets.",
+      },
+      {
+        slug: "cpi-rent",
+        heading: "Rent",
+        blurb:
+          "Rented accommodation alone, separated from the broader shelter index. What the third of Canadian households who rent are actually paying.",
+      },
+      {
+        slug: "cpi-clothing-footwear",
+        heading: "Clothing and footwear",
+        chartLabel: "Clothing",
+        blurb:
+          "Consumer prices for clothing and footwear — one of the few essentials where globalized supply chains have held prices nearly flat for decades.",
+      },
+      {
+        slug: "cpi-transportation",
+        heading: "Transportation",
+        blurb:
+          "The cost of getting around — vehicles, fuel, insurance, maintenance, and transit fares combined.",
+      },
+      {
+        slug: "cpi-gasoline",
+        heading: "Gasoline",
+        blurb:
+          "Pump prices, month by month. The most volatile line in the index, and a swing factor in everything that moves by truck.",
+      },
+      {
+        slug: "cpi-energy",
+        heading: "Energy",
+        blurb:
+          "Household energy overall — gasoline, natural gas, electricity, and heating fuel. What it costs to heat a home and power a life in a cold country.",
+      },
+    ],
+  },
+  {
     id: "welfare",
     title: "Individual Economics & Welfare",
     description:
       "Does prosperity reach everyday Canadians — in wages, work, and the distribution of income?",
+    featuredSlug: "household-debt-to-income",
     indicators: [
       {
         slug: "employment-rate",
@@ -122,6 +228,7 @@ export const SECTIONS: IndicatorSection[] = [
     title: "Happiness & Wellbeing",
     description:
       "Are Canadians satisfied with their lives — and confident enough in the future to build one here?",
+    featuredSlug: "life-satisfaction",
     indicators: [
       {
         slug: "life-satisfaction",
@@ -141,6 +248,7 @@ export const SECTIONS: IndicatorSection[] = [
     id: "safety",
     title: "Crime & Public Safety",
     description: "Is Canada getting safer or more dangerous?",
+    featuredSlug: "crime-severity-index",
     indicators: [
       {
         slug: "crime-severity-index",
@@ -167,6 +275,7 @@ export const SECTIONS: IndicatorSection[] = [
     title: "Governance & Transparency",
     description:
       "Is Canada's government clean, capable, and accountable by international standards?",
+    featuredSlug: "corruption-perceptions-index",
     indicators: [
       {
         slug: "corruption-perceptions-index",
@@ -187,6 +296,7 @@ export const SECTIONS: IndicatorSection[] = [
     title: "Infrastructure & Industry",
     description:
       "Is Canada investing in the physical and technological capacity to compete?",
+    featuredSlug: "rd-spending-pct-gdp",
     indicators: [
       {
         slug: "rd-spending-pct-gdp",
@@ -216,6 +326,7 @@ export const SECTIONS: IndicatorSection[] = [
     id: "international",
     title: "International Relations",
     description: "Does Canada pull its weight in the world?",
+    featuredSlug: "oda-pct-gni",
     indicators: [
       {
         slug: "oda-pct-gni",
@@ -230,6 +341,7 @@ export const SECTIONS: IndicatorSection[] = [
     title: "Environment",
     description:
       "Is Canada cutting emissions and protecting land while the economy grows? Overlay CO₂ with GDP on the canvas to see decoupling.",
+    featuredSlug: "co2-emissions-per-capita",
     indicators: [
       {
         slug: "co2-emissions-per-capita",
@@ -260,6 +372,7 @@ export const SECTIONS: IndicatorSection[] = [
     title: "Housing",
     description:
       "Can Canadians afford a home — and is the country building enough of them?",
+    featuredSlug: "real-house-price-index",
     indicators: [
       {
         slug: "house-price-to-income",

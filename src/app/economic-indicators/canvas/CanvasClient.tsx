@@ -329,7 +329,7 @@ export default function CanvasClient() {
               >
                 r = {c.r.toFixed(2)} &middot; {c.a} vs {c.b}{" "}
                 <span className="text-dark/40">
-                  ({c.n} overlapping years; correlation &ne; causation)
+                  ({c.n} overlapping points; correlation &ne; causation)
                 </span>
               </p>
             ))}

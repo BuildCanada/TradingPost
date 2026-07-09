@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getSiteConfig } from "@/lib/api";
+import { getEconomicSeries } from "@/lib/api/economy";
 import { PageHeader } from "@/components/ui/page-header";
 import { buildGraph } from "@/lib/schemas/graph";
 import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
 import { generateBreadcrumbSchema } from "@/lib/schemas/generators/breadcrumb";
 import SectionNav from "./SectionNav";
+import SectionSparkline from "./SectionSparkline";
 import { SECTIONS } from "./indicators";
 
 const DESCRIPTION =
@@ -26,8 +28,14 @@ export const metadata: Metadata = {
   },
 };
 
-export default function EconomicIndicatorsPage() {
+export default async function EconomicIndicatorsPage() {
   const configData = getSiteConfig();
+
+  const featuredSeries = await Promise.all(
+    SECTIONS.map((section) =>
+      getEconomicSeries(section.featuredSlug).catch(() => null),
+    ),
+  );
 
   const jsonLd = buildGraph(
     generateOrganizationSchema(configData),
@@ -54,27 +62,44 @@ export default function EconomicIndicatorsPage() {
       <section className="px-5 py-12">
         <div className="max-w-[1080px] mx-auto">
           <div className="grid gap-5 sm:grid-cols-2">
-            {SECTIONS.map((section) => (
-              <Link
-                key={section.id}
-                href={`/economic-indicators/${section.id}`}
-                className="group flex flex-col border border-border-light p-6 hover:border-dark transition-colors"
-              >
-                <h2 className="type-h4 text-dark group-hover:underline underline-offset-4">
-                  {section.title}
-                </h2>
-                <p className="mt-2 type-body-sm text-dark/70">
-                  {section.description}
-                </p>
-                <p className="mt-4 type-label-sm text-dark/50">
-                  {section.indicators.map((i) => i.heading).join(" · ")}
-                </p>
-                <span className="mt-auto pt-4 type-label text-dark/70 group-hover:text-dark">
-                  View {section.indicators.length}{" "}
-                  {section.indicators.length === 1 ? "chart" : "charts"} &rarr;
-                </span>
-              </Link>
-            ))}
+            {SECTIONS.map((section, i) => {
+              const preview = featuredSeries[i];
+              const featuredHeading = section.indicators.find(
+                (indicator) => indicator.slug === section.featuredSlug,
+              )?.heading;
+              return (
+                <Link
+                  key={section.id}
+                  href={`/economic-indicators/${section.id}`}
+                  className="group flex flex-col border border-border-light p-6 hover:border-dark transition-colors"
+                >
+                  <h2 className="type-h4 text-dark group-hover:underline underline-offset-4">
+                    {section.title}
+                  </h2>
+                  <p className="mt-2 type-body-sm text-dark/70">
+                    {section.description}
+                  </p>
+                  {preview && (
+                    <div className="mt-5">
+                      <p className="type-label-sm text-dark/50">
+                        {featuredHeading}
+                      </p>
+                      <div className="mt-2">
+                        <SectionSparkline response={preview} />
+                      </div>
+                    </div>
+                  )}
+                  <p className="mt-4 type-label-sm text-dark/50">
+                    {section.indicators.map((i) => i.heading).join(" · ")}
+                  </p>
+                  <span className="mt-auto pt-4 type-label text-dark/70 group-hover:text-dark">
+                    View {section.indicators.length}{" "}
+                    {section.indicators.length === 1 ? "chart" : "charts"}{" "}
+                    &rarr;
+                  </span>
+                </Link>
+              );
+            })}
 
             <Link
               href="/economic-indicators/canvas"

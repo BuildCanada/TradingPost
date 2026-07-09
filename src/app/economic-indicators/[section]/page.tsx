@@ -13,6 +13,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { buildGraph } from "@/lib/schemas/graph";
 import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
 import { generateBreadcrumbSchema } from "@/lib/schemas/generators/breadcrumb";
+import CombinedSectionChartClient from "../CombinedSectionChartClient";
 import IndicatorChartClient from "../IndicatorChartClient";
 import SectionNav from "../SectionNav";
 import { SECTIONS } from "../indicators";
@@ -118,6 +119,15 @@ export default async function IndicatorSectionPage({ params }: PageProps) {
     ),
   );
 
+  const combinedItems = section.combined
+    ? section.indicators.flatMap((indicator, i) => {
+        const response = results[i];
+        return response
+          ? [{ label: indicator.chartLabel ?? indicator.heading, response }]
+          : [];
+      })
+    : [];
+
   return (
     <div className="mx-[10px] my-[10px] border border-border-light bg-bg overflow-x-clip">
       <script
@@ -130,6 +140,21 @@ export default async function IndicatorSectionPage({ params }: PageProps) {
 
       <section className="px-5 py-12">
         <div className="max-w-[1080px] mx-auto space-y-16">
+          {section.combined && combinedItems.length > 0 && (
+            <section>
+              <h2 className="type-h4 text-dark">{section.combined.heading}</h2>
+              <p className="mt-1 mb-6 type-body-sm text-dark/60 max-w-[720px]">
+                {section.combined.blurb}
+              </p>
+              <CombinedSectionChartClient
+                heading={section.combined.heading}
+                items={combinedItems}
+                benchmark={section.benchmark}
+              />
+              <SourceLine response={combinedItems[0].response} />
+            </section>
+          )}
+
           {section.indicators.map((indicator, i) => {
             const response = results[i];
             return (
@@ -142,7 +167,10 @@ export default async function IndicatorSectionPage({ params }: PageProps) {
                 </p>
                 {response ? (
                   <>
-                    <IndicatorChartClient response={response} />
+                    <IndicatorChartClient
+                      response={response}
+                      benchmark={section.benchmark}
+                    />
                     <SourceLine response={response} />
                   </>
                 ) : (

@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import type { EconomySeriesResponse } from "@/lib/api/economy";
+import type { IndicatorBenchmark } from "./indicators";
 
 const IndicatorChart = dynamic(() => import("./IndicatorChart"), {
   ssr: false,
@@ -12,8 +13,10 @@ const IndicatorChart = dynamic(() => import("./IndicatorChart"), {
 
 export default function IndicatorChartClient({
   response,
+  benchmark,
 }: {
   response: EconomySeriesResponse;
+  benchmark?: IndicatorBenchmark;
 }) {
-  return <IndicatorChart response={response} />;
+  return <IndicatorChart response={response} benchmark={benchmark} />;
 }

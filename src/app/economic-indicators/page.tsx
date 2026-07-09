@@ -62,35 +62,26 @@ export default async function EconomicIndicatorsPage() {
       <section className="px-5 py-12">
         <div className="max-w-[1080px] mx-auto">
           <div className="mb-10 max-w-[720px] space-y-4">
-
             <p className="type-body text-dark/80">
-
               <strong className="text-dark">
-
                 Canada should be the most prosperous country in the world.
-
               </strong>{" "}
-
-              We have the land, energy, talent, and institutions. The question is
-
-              whether we are turning those advantages into better lives — and that is
-
-              measurable.
-
+              The question
+              is whether we are turning those advantages into better lives —
+              and that is measurable.
             </p>
-
             <p className="type-body text-dark/80">
-
-              The charts below track the foundations of prosperity: growth, incomes,
-
-              housing, safety, and wellbeing. Canada is the red line, measured against
-
-              its G7 and OECD peers. Each chart asks a simple question: are we moving
-
-              in the right direction?
-
+              Prosperity is more than a growing GDP. It&rsquo;s paycheques
+              that buy more each year, homes people can afford, streets that
+              are safe, air that is clean, institutions worth trusting, and
+              lives people are satisfied with, confident enough in the
+              future to build one here. That is what these charts measure.
             </p>
-
+            <p className="type-body text-dark/80">
+              Where the world offers a yardstick, Canada is the red line
+              against its G7 and OECD peers. Where the question is ours alone, how many homes we start, how fast people climb out of low income, we measure Canada against its own record. Every chart
+              asks the same question: are we moving in the right direction?
+            </p>
           </div>
 
           <div className="grid gap-5 sm:grid-cols-2">

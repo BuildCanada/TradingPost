@@ -1,6 +1,6 @@
 // Shared catalog of the economic indicator measures served by york_factory's
-// /kpis/series endpoint — the /economic-indicators page renders every entry
-// and the canvas page uses it as the feed picker.
+// /kpis/series endpoint — each section gets its own /economic-indicators/[section]
+// page and the canvas page uses the flat list as the feed picker.
 
 export type Indicator = { slug: string; heading: string; blurb: string };
 export type IndicatorSection = {

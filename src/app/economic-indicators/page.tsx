@@ -1,17 +1,10 @@
-import "@buildcanada/charts/styles.css";
-
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getSiteConfig } from "@/lib/api";
-import {
-  getEconomicSeries,
-  humanizeSourceName,
-  type EconomySeriesResponse,
-} from "@/lib/api/economy";
 import { PageHeader } from "@/components/ui/page-header";
 import { buildGraph } from "@/lib/schemas/graph";
 import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
 import { generateBreadcrumbSchema } from "@/lib/schemas/generators/breadcrumb";
-import IndicatorChartClient from "./IndicatorChartClient";
 import SectionNav from "./SectionNav";
 import { SECTIONS } from "./indicators";
 
@@ -33,50 +26,7 @@ export const metadata: Metadata = {
   },
 };
 
-function formatFetchedDate(iso: string): string {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return "";
-  return new Intl.DateTimeFormat("en-CA", { dateStyle: "long" }).format(date);
-}
-
-function SourceLine({ response }: { response: EconomySeriesResponse }) {
-  const source = response.meta.source;
-  if (!source) return null;
-  const updated = source.last_fetched_at
-    ? formatFetchedDate(source.last_fetched_at)
-    : "";
-  const sourceName = humanizeSourceName(source.name);
-  return (
-    <p className="mt-3 type-label-sm text-dark/60">
-      Source:{" "}
-      {source.url ? (
-        <a
-          href={source.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline hover:text-dark"
-        >
-          {sourceName}
-        </a>
-      ) : (
-        sourceName
-      )}
-      {updated && <> &middot; Updated {updated}</>}
-    </p>
-  );
-}
-
-function UnavailablePanel() {
-  return (
-    <div className="flex h-[360px] items-center justify-center border border-border-light bg-bg">
-      <p className="type-body text-dark/60">
-        Data is temporarily unavailable. Please check back soon.
-      </p>
-    </div>
-  );
-}
-
-export default async function EconomicIndicatorsPage() {
+export default function EconomicIndicatorsPage() {
   const configData = getSiteConfig();
 
   const jsonLd = buildGraph(
@@ -87,12 +37,6 @@ export default async function EconomicIndicatorsPage() {
       configData.siteUrl,
     ),
   );
-
-  const slugs = SECTIONS.flatMap((s) => s.indicators.map((i) => i.slug));
-  const results = await Promise.all(
-    slugs.map((slug) => getEconomicSeries(slug).catch(() => null)),
-  );
-  const responseBySlug = new Map(slugs.map((slug, i) => [slug, results[i]]));
 
   return (
     <div className="mx-[10px] my-[10px] border border-border-light bg-bg overflow-x-clip">
@@ -105,52 +49,51 @@ export default async function EconomicIndicatorsPage() {
         description="How Canada stacks up against its peers — growth, incomes, and housing."
       />
 
-      <SectionNav
-        sections={SECTIONS.map((s) => ({ id: s.id, title: s.title }))}
-      />
+      <SectionNav />
 
       <section className="px-5 py-12">
-        <div className="max-w-[1080px] mx-auto space-y-20">
-          {SECTIONS.map((section) => (
-            <section
-              key={section.id}
-              id={section.id}
-              className="scroll-mt-32"
+        <div className="max-w-[1080px] mx-auto">
+          <div className="grid gap-5 sm:grid-cols-2">
+            {SECTIONS.map((section) => (
+              <Link
+                key={section.id}
+                href={`/economic-indicators/${section.id}`}
+                className="group flex flex-col border border-border-light p-6 hover:border-dark transition-colors"
+              >
+                <h2 className="type-h4 text-dark group-hover:underline underline-offset-4">
+                  {section.title}
+                </h2>
+                <p className="mt-2 type-body-sm text-dark/70">
+                  {section.description}
+                </p>
+                <p className="mt-4 type-label-sm text-dark/50">
+                  {section.indicators.map((i) => i.heading).join(" · ")}
+                </p>
+                <span className="mt-auto pt-4 type-label text-dark/70 group-hover:text-dark">
+                  View {section.indicators.length}{" "}
+                  {section.indicators.length === 1 ? "chart" : "charts"} &rarr;
+                </span>
+              </Link>
+            ))}
+
+            <Link
+              href="/economic-indicators/canvas"
+              className="group flex flex-col border border-border-light p-6 hover:border-dark transition-colors"
             >
-              <h2 className="type-h2 text-dark">{section.title}</h2>
-              <p className="mt-1 type-body text-dark/70 max-w-[720px]">
-                {section.description}
+              <h2 className="type-h4 text-dark group-hover:underline underline-offset-4">
+                Indicator Canvas
+              </h2>
+              <p className="mt-2 type-body-sm text-dark/70">
+                Overlay up to three indicator series and eyeball how they move
+                together.
               </p>
+              <span className="mt-auto pt-4 type-label text-dark/70 group-hover:text-dark">
+                Open the canvas &rarr;
+              </span>
+            </Link>
+          </div>
 
-              <div className="mt-10 space-y-16">
-                {section.indicators.map((indicator) => {
-                  const response = responseBySlug.get(indicator.slug) ?? null;
-                  return (
-                    <section key={indicator.slug}>
-                      <h3 className="type-h4 text-dark">
-                        {indicator.heading}
-                      </h3>
-                      <p className="mt-1 mb-6 type-body-sm text-dark/60 max-w-[720px]">
-                        {indicator.blurb ||
-                          response?.data.measure.description ||
-                          ""}
-                      </p>
-                      {response ? (
-                        <>
-                          <IndicatorChartClient response={response} />
-                          <SourceLine response={response} />
-                        </>
-                      ) : (
-                        <UnavailablePanel />
-                      )}
-                    </section>
-                  );
-                })}
-              </div>
-            </section>
-          ))}
-
-          <div className="border-t border-border-light pt-12 text-center">
+          <div className="mt-16 border-t border-border-light pt-12 text-center">
             <h2 className="type-h3 text-dark">
               Want to see another indicator?
             </h2>

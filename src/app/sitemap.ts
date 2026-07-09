@@ -8,6 +8,7 @@ import type {
 import { getBillsFromCivicsProject } from "@/app/bills/server/get-all-bills-from-civics-project";
 import { getAllBillsFromDB } from "@/app/bills/server/get-all-bills-from-db";
 import { buildAbsoluteUrl } from "@/app/bills/utils/basePath";
+import { SECTIONS as ECONOMIC_SECTIONS } from "@/app/economic-indicators/indicators";
 
 function toValidDate(value?: Date | string): Date | undefined {
   if (!value) return undefined;
@@ -24,6 +25,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/posts`, lastModified: new Date(), changeFrequency: "daily", priority: 0.8 },
     { url: `${baseUrl}/projects`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
     { url: `${baseUrl}/economic-indicators`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.7 },
+    ...ECONOMIC_SECTIONS.map((section) => ({
+      url: `${baseUrl}/economic-indicators/${section.id}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly" as const,
+      priority: 0.6,
+    })),
     { url: `${baseUrl}/economic-indicators/canvas`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.5 },
     { url: `${baseUrl}/tracker`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
     { url: `${baseUrl}/tracker/commitments`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.7 },

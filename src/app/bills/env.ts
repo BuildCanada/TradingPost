@@ -44,6 +44,10 @@ export const env = {
     "BILLS_DEV_OPEN_ACCESS",
     process.env.BILLS_DEV_OPEN_ACCESS,
   ),
+  BILLS_SLACK_WEBHOOK_URL: optional(
+    "BILLS_SLACK_WEBHOOK_URL",
+    process.env.BILLS_SLACK_WEBHOOK_URL,
+  ),
 };
 
 /**

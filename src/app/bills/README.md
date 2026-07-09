@@ -120,6 +120,7 @@ Configured in `env.ts`. Put these in `.env.local` for local dev.
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | Google OAuth provider |
 | `NEXT_PUBLIC_APP_URL` | Absolute URL for OG/metadata |
 | `BILLS_DEV_OPEN_ACCESS` | Dev-only admin bypass (see Auth) |
+| `BILLS_SLACK_WEBHOOK_URL` | Slack incoming webhook for #builder-mp — posts each newly generated analysis (summary, overall vote, tenet breakdown). No posts if unset. |
 
 ## Local development
 

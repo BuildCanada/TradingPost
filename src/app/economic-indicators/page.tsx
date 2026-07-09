@@ -11,7 +11,7 @@ import SectionSparkline from "./SectionSparkline";
 import { SECTIONS } from "./indicators";
 
 const DESCRIPTION =
-  "How Canada stacks up against the G7 and OECD — growth, productivity, incomes, inequality, and housing.";
+  "Are we moving in the right direction? Canada's growth, incomes, housing, safety, and wellbeing, measured against the G7 and OECD.";
 
 export const metadata: Metadata = {
   title: "Economic Indicators",
@@ -54,13 +54,45 @@ export default async function EconomicIndicatorsPage() {
       />
       <PageHeader
         title="Economic Indicators"
-        description="How Canada stacks up against its peers — growth, incomes, and housing."
+        description="Are we moving in the right direction? Canadian prosperity, measured."
       />
 
       <SectionNav />
 
       <section className="px-5 py-12">
         <div className="max-w-[1080px] mx-auto">
+          <div className="mb-10 max-w-[720px] space-y-4">
+
+            <p className="type-body text-dark/80">
+
+              <strong className="text-dark">
+
+                Canada should be the most prosperous country in the world.
+
+              </strong>{" "}
+
+              We have the land, energy, talent, and institutions. The question is
+
+              whether we are turning those advantages into better lives — and that is
+
+              measurable.
+
+            </p>
+
+            <p className="type-body text-dark/80">
+
+              The charts below track the foundations of prosperity: growth, incomes,
+
+              housing, safety, and wellbeing. Canada is the red line, measured against
+
+              its G7 and OECD peers. Each chart asks a simple question: are we moving
+
+              in the right direction?
+
+            </p>
+
+          </div>
+
           <div className="grid gap-5 sm:grid-cols-2">
             {SECTIONS.map((section, i) => {
               const preview = featuredSeries[i];
@@ -120,11 +152,12 @@ export default async function EconomicIndicatorsPage() {
 
           <div className="mt-16 border-t border-border-light pt-12 text-center">
             <h2 className="type-h3 text-dark">
-              Want to see another indicator?
+              Missing a measure that matters?
             </h2>
             <p className="mt-2 type-body text-dark/70 max-w-[560px] mx-auto">
-              We&rsquo;re expanding this dashboard. If there&rsquo;s a metric
-              you&rsquo;d like us to track, let us know.
+              We&rsquo;re expanding this dashboard. If there&rsquo;s an
+              indicator that would sharpen the picture — for better or worse
+              — tell us and we&rsquo;ll track it.
             </p>
             <a
               href="mailto:hi@buildcanada.com?subject=Economic%20indicators%20request"

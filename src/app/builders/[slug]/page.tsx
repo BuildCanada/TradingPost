@@ -15,7 +15,10 @@ export async function generateMetadata({
     return {
       title: `${builder.name}: ${builder.tagline}`,
       description: builder.quote ?? undefined,
-      alternates: { canonical: `/builders/${builder.slug}` },
+      alternates: {
+        canonical: `/builders/${builder.slug}`,
+        types: { "text/markdown": `/builders/${builder.slug}.md` },
+      },
       openGraph: {
         title: `${builder.name}: ${builder.tagline} | Build Canada`,
         description: builder.quote ?? undefined,

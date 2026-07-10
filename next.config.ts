@@ -1,6 +1,23 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  async headers() {
+    return [
+      {
+        source: "/:path*",
+        headers: [
+          // Signals AI crawlers that training, search indexing, and agentic
+          // use are all permitted (https://contentsignals.org). Set here
+          // rather than public/_headers because the Docker deploy doesn't
+          // read that file.
+          {
+            key: "Content-Signal",
+            value: "ai-train=yes, search=yes, ai-input=yes",
+          },
+        ],
+      },
+    ];
+  },
   async redirects() {
     return [
       {

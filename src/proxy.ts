@@ -12,12 +12,24 @@ import {
 const FLAG = "dashboard";
 
 // Next 16 allows a single proxy (formerly "middleware") entrypoint, so this file
-// owns two unrelated concerns, dispatched by path:
-//   - /dashboard/*            → gate the section behind the `dashboard` PostHog flag
-//   - /memos/*, /api/auth/me  → silently renew an expired OAuth session
+// owns three unrelated concerns, dispatched by path:
+//   - /dashboard/*                         → gate the section behind the `dashboard` PostHog flag
+//   - /memos/*, /posts/*, /builders/*      → serve markdown to LLM agents (.md suffix or Accept header)
+//   - /memos/*, /api/auth/me               → silently renew an expired OAuth session
 export const config = {
-  matcher: ["/memos/:path*", "/api/auth/me", "/dashboard", "/dashboard/:path*"],
+  matcher: [
+    "/memos/:path*",
+    "/posts/:path*",
+    "/builders/:path*",
+    "/api/auth/me",
+    "/dashboard",
+    "/dashboard/:path*",
+  ],
 };
+
+// Detail pages of these content types have a markdown representation for LLM
+// agents, served by src/app/md/[...path]/route.ts. Single-segment slugs only.
+const MARKDOWN_CONTENT = /^\/(memos|posts|builders)\/([^/]+?)(\.md)?$/;
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -26,7 +38,36 @@ export async function proxy(req: NextRequest) {
     return gateDashboard(req);
   }
 
-  return renewSession(req);
+  const markdown = resolveMarkdownRewrite(req);
+  if (markdown) return markdown;
+
+  if (pathname.startsWith("/memos/") || pathname === "/api/auth/me") {
+    return renewSession(req);
+  }
+  return NextResponse.next();
+}
+
+// Rewrites both public markdown shapes to the internal /md route:
+//   /memos/foo.md                                  → /md/memos/foo
+//   /memos/foo + `Accept: text/markdown` header    → /md/memos/foo
+//
+// Caching note: the markdown responses emit `Vary: Accept`, but Next owns the
+// Vary header on HTML page routes and drops any Accept we append (verified on
+// `next start`), so the HTML variant can't advertise the negotiation. In
+// practice this is safe: spec-compliant caches key the markdown responses on
+// Accept, and caches that ignore Vary (e.g. Cloudflare's free tier) don't
+// cache text/html by default. The explicit .md URL is the canonical
+// mechanism; Accept negotiation is best-effort.
+function resolveMarkdownRewrite(req: NextRequest): NextResponse | null {
+  const match = req.nextUrl.pathname.match(MARKDOWN_CONTENT);
+  if (!match) return null;
+
+  const [, type, slug, mdSuffix] = match;
+  const wantsMarkdown =
+    Boolean(mdSuffix) || (req.headers.get("accept") ?? "").includes("text/markdown");
+  if (!wantsMarkdown) return null;
+
+  return NextResponse.rewrite(new URL(`/md/${type}/${slug}`, req.url));
 }
 
 // Gate the entire /dashboard section behind the `dashboard` PostHog flag.

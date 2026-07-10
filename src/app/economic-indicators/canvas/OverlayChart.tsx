@@ -10,6 +10,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { axisLabel, formatValue } from "../units";
 import type { OverlaySeries, OverlayMode } from "./overlay-types";
 
 ChartJS.register(
@@ -21,39 +22,6 @@ ChartJS.register(
   Legend,
 );
 
-function formatValue(value: number, unitSymbol: string): string {
-  switch (unitSymbol) {
-    case "%":
-      return `${value.toFixed(1)}%`;
-    case "intl_$":
-      return `$${Math.round(value).toLocaleString("en-CA")}`;
-    case "intl_$_per_hour":
-      return `$${value.toFixed(2)}/h`;
-    case "$M":
-      return `$${Math.round(value).toLocaleString("en-CA")}M`;
-    case "ratio":
-      return value.toFixed(3);
-    case "units":
-      return Math.round(value).toLocaleString("en-CA");
-    case "hours":
-      return `${Math.round(value).toLocaleString("en-CA")} h`;
-    case "index":
-      return value.toFixed(1);
-    case "score":
-    case "births_per_woman":
-      return value.toFixed(2);
-    case "per_100_people":
-    case "rate_per_100k":
-    case "t_co2_per_capita":
-    case "ug_m3":
-      return value.toFixed(1);
-    case "tonne_km_millions":
-      return Math.round(value).toLocaleString("en-CA");
-    default:
-      return value.toLocaleString("en-CA");
-  }
-}
-
 const MONTH_FORMAT = new Intl.DateTimeFormat("en-CA", {
   month: "short",
   year: "numeric",
@@ -62,43 +30,6 @@ const MONTH_FORMAT = new Intl.DateTimeFormat("en-CA", {
 
 function formatMonth(isoDate: string): string {
   return MONTH_FORMAT.format(new Date(isoDate));
-}
-
-function axisLabel(unitSymbol: string): string {
-  switch (unitSymbol) {
-    case "%":
-      return "%";
-    case "intl_$":
-      return "international-$";
-    case "intl_$_per_hour":
-      return "international-$ / hour";
-    case "$M":
-      return "million $";
-    case "ratio":
-      return "ratio";
-    case "units":
-      return "dwelling units";
-    case "hours":
-      return "hours / year";
-    case "index":
-      return "index";
-    case "score":
-      return "score";
-    case "births_per_woman":
-      return "births per woman";
-    case "per_100_people":
-      return "per 100 people";
-    case "rate_per_100k":
-      return "per 100,000";
-    case "t_co2_per_capita":
-      return "t CO₂ / person";
-    case "ug_m3":
-      return "µg/m³";
-    case "tonne_km_millions":
-      return "million ton-km";
-    default:
-      return unitSymbol;
-  }
 }
 
 // The first year present in every series, so indexed mode rebases all series

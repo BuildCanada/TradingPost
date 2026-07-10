@@ -19,11 +19,8 @@ import {
   CANADA_COLOR,
   type IndicatorBenchmark,
 } from "./indicators";
-import {
-  benchmarkValue,
-  daysSinceGrapherEpoch,
-  displayUnit,
-} from "./IndicatorChart";
+import { benchmarkValue, daysSinceGrapherEpoch } from "./IndicatorChart";
+import { displayUnit } from "./units";
 import { useChartSize } from "./useChartSize";
 
 // Overlays one section's indicators as lines on a single chart — one entity

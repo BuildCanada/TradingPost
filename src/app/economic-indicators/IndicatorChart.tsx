@@ -13,71 +13,14 @@ import {
 import {
   humanizeSourceName,
   type EconomySeriesResponse,
-  type EconomySeriesUnit,
 } from "@/lib/api/economy";
 import {
   BENCHMARK_COLOR,
   CANADA_COLOR,
   type IndicatorBenchmark,
 } from "./indicators";
+import { displayUnit } from "./units";
 import { useChartSize } from "./useChartSize";
-
-export function displayUnit(unit: EconomySeriesUnit): {
-  unit: string;
-  shortUnit: string;
-  numDecimalPlaces: number;
-  conversionFactor?: number;
-} {
-  switch (unit.symbol) {
-    case "%":
-      return { unit: "%", shortUnit: "%", numDecimalPlaces: 1 };
-    case "intl_$":
-      return { unit: "international-$", shortUnit: "$", numDecimalPlaces: 0 };
-    case "intl_$_per_hour":
-      return {
-        unit: "international-$ per hour worked",
-        shortUnit: "$",
-        numDecimalPlaces: 1,
-      };
-    case "$M":
-      // Values arrive in millions; convert to dollars so Grapher's
-      // magnitude abbreviations ("$2.4 trillion") come out true.
-      return {
-        unit: "CAD",
-        shortUnit: "$",
-        numDecimalPlaces: 0,
-        conversionFactor: 1_000_000,
-      };
-    case "index":
-      return { unit: "index", shortUnit: "", numDecimalPlaces: 1 };
-    case "ratio":
-      return { unit: "ratio", shortUnit: "", numDecimalPlaces: 3 };
-    case "units":
-      return { unit: "dwelling units", shortUnit: "", numDecimalPlaces: 0 };
-    case "hours":
-      return { unit: "hours per year", shortUnit: "", numDecimalPlaces: 0 };
-    case "score":
-      return { unit: "score", shortUnit: "", numDecimalPlaces: 2 };
-    case "births_per_woman":
-      return { unit: "births per woman", shortUnit: "", numDecimalPlaces: 2 };
-    case "per_100_people":
-      return { unit: "per 100 people", shortUnit: "", numDecimalPlaces: 1 };
-    case "rate_per_100k":
-      return { unit: "per 100,000 people", shortUnit: "", numDecimalPlaces: 2 };
-    case "t_co2_per_capita":
-      return { unit: "tonnes of CO₂ per person", shortUnit: "t", numDecimalPlaces: 1 };
-    case "ug_m3":
-      return { unit: "µg/m³", shortUnit: "µg/m³", numDecimalPlaces: 1 };
-    case "tonne_km_millions":
-      return { unit: "million ton-km", shortUnit: "", numDecimalPlaces: 0 };
-    default:
-      return {
-        unit: unit.base_unit,
-        shortUnit: unit.symbol,
-        numDecimalPlaces: 1,
-      };
-  }
-}
 
 const ENTITY_COLORS = { Canada: CANADA_COLOR };
 

@@ -33,11 +33,11 @@ export async function generateMetadata({
   const { section: sectionId } = await params;
   const section = SECTIONS.find((s) => s.id === sectionId);
   if (!section) return {};
-  const title = `${section.title} — Economic Indicators`;
+  const title = `${section.title} — Prosperity Dashboard`;
   return {
     title,
     description: section.description,
-    alternates: { canonical: `/economic-indicators/${section.id}` },
+    alternates: { canonical: `/prosperity-dashboard/${section.id}` },
     openGraph: {
       title,
       description: section.description,
@@ -131,7 +131,7 @@ export default async function IndicatorSectionPage({ params }: PageProps) {
   const jsonLd = buildGraph(
     generateOrganizationSchema(configData),
     generateBreadcrumbSchema(
-      `/economic-indicators/${section.id}`,
+      `/prosperity-dashboard/${section.id}`,
       section.title,
       configData.siteUrl,
     ),
@@ -240,7 +240,7 @@ export default async function IndicatorSectionPage({ params }: PageProps) {
             >
               {prev ? (
                 <Link
-                  href={`/economic-indicators/${prev.id}`}
+                  href={`/prosperity-dashboard/${prev.id}`}
                   className="type-label text-dark/70 hover:text-dark underline-offset-4 hover:underline"
                 >
                   &larr; {prev.title}
@@ -250,7 +250,7 @@ export default async function IndicatorSectionPage({ params }: PageProps) {
               )}
               {next ? (
                 <Link
-                  href={`/economic-indicators/${next.id}`}
+                  href={`/prosperity-dashboard/${next.id}`}
                   className="type-label text-dark/70 hover:text-dark underline-offset-4 hover:underline text-right"
                 >
                   {next.title} &rarr;

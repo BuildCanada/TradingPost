@@ -111,7 +111,7 @@ export default function CanvasClient() {
     const params = new URLSearchParams();
     params.set("f", serializeFeeds(resolvedFeeds));
     if (mode !== "indexed") params.set("mode", mode);
-    const next = `/economic-indicators/canvas?${params.toString()}`;
+    const next = `/prosperity-dashboard/canvas?${params.toString()}`;
     if (`${window.location.pathname}${window.location.search}` !== next) {
       window.history.replaceState(null, "", next);
     }

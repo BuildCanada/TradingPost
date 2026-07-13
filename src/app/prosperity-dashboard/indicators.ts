@@ -1,5 +1,5 @@
 // Shared catalog of the economic indicator measures served by york_factory's
-// /kpis/series endpoint — each section gets its own /economic-indicators/[section]
+// /kpis/series endpoint — each section gets its own /prosperity-dashboard/[section]
 // page and the canvas page uses the flat list as the feed picker.
 
 export type Indicator = {

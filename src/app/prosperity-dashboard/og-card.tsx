@@ -2,7 +2,7 @@ import type { EconomySeriesResponse } from "@/lib/api/economy";
 import { CANADA_COLOR } from "./indicators";
 import { formatValue } from "./units";
 
-// Shared plumbing for the /economic-indicators opengraph images: one branded
+// Shared plumbing for the /prosperity-dashboard opengraph images: one branded
 // card layout plus builders that bake a series into a data-URI SVG. Satori
 // lays out the text; the chart travels as an <img> so resvg rasterizes real
 // vector paths instead of satori's partial SVG support.

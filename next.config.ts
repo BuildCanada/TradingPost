@@ -30,6 +30,16 @@ const nextConfig: NextConfig = {
         destination: "/builders/:slug",
         permanent: true,
       },
+      {
+        source: "/economic-indicators",
+        destination: "/prosperity-dashboard",
+        permanent: true,
+      },
+      {
+        source: "/economic-indicators/:path*",
+        destination: "/prosperity-dashboard/:path*",
+        permanent: true,
+      },
     ];
   },
   async rewrites() {

@@ -10,7 +10,7 @@ const DESCRIPTION =
 export const metadata: Metadata = {
   title: "Indicator Canvas",
   description: DESCRIPTION,
-  alternates: { canonical: "/economic-indicators/canvas" },
+  alternates: { canonical: "/prosperity-dashboard/canvas" },
   openGraph: {
     title: "Indicator Canvas",
     description: DESCRIPTION,
@@ -33,10 +33,10 @@ export default function CanvasPage() {
       <nav className="border-b border-border-light px-5 py-3">
         <div className="max-w-[1080px] mx-auto">
           <Link
-            href="/economic-indicators"
+            href="/prosperity-dashboard"
             className="type-label text-dark/70 hover:text-dark underline-offset-4 hover:underline"
           >
-            &larr; All economic indicators
+            &larr; Prosperity Dashboard
           </Link>
         </div>
       </nav>

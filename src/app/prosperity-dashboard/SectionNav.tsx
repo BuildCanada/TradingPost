@@ -10,7 +10,7 @@ export default function SectionNav({ currentId }: { currentId?: string }) {
     >
       <div className="max-w-[1080px] mx-auto flex flex-wrap gap-x-6 gap-y-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <Link
-          href="/economic-indicators"
+          href="/prosperity-dashboard"
           aria-current={currentId === undefined ? "page" : undefined}
           className={
             currentId === undefined
@@ -25,7 +25,7 @@ export default function SectionNav({ currentId }: { currentId?: string }) {
           return (
             <Link
               key={section.id}
-              href={`/economic-indicators/${section.id}`}
+              href={`/prosperity-dashboard/${section.id}`}
               aria-current={isActive ? "page" : undefined}
               className={
                 isActive

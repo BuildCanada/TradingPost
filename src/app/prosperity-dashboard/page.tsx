@@ -54,7 +54,6 @@ export default async function ProsperityDashboardPage() {
       />
       <PageHeader
         title="Prosperity Dashboard"
-        description="Are we moving in the right direction? Canadian prosperity, measured."
       />
 
       <SectionNav />

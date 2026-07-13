@@ -8,8 +8,15 @@ import { Indicator } from "./progress-tracker";
 import { TocTree } from "./toc-tree";
 import { ShareButtons } from "@/components/share/ui/ShareButtons";
 
-export function DesktopNav() {
-  const { activeId, activeParentId, navigateTo, shareTitle, shareUrl } = useSignpost();
+export function DesktopNav({
+  topClass = "top-[90px]",
+  showTopBorder = true,
+}: {
+  topClass?: string;
+  showTopBorder?: boolean;
+}) {
+  const { activeId, activeParentId, navigateTo, shareTitle, shareUrl } =
+    useSignpost();
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -22,7 +29,8 @@ export function DesktopNav() {
       }
       const dot = container.querySelector(`[data-dot="${activeId}"]`);
       if (!dot) return;
-      const h = (dot as HTMLElement).offsetTop + (dot as HTMLElement).offsetHeight / 2;
+      const h =
+        (dot as HTMLElement).offsetTop + (dot as HTMLElement).offsetHeight / 2;
       container.style.setProperty("--progress-height", `${h}px`);
     };
     measure();
@@ -38,20 +46,21 @@ export function DesktopNav() {
 
   return (
     <nav className="hidden 2xl-memo:block" aria-label="Table of contents">
-      <div className="sticky top-[90px] border-accent border-t-[2px] overflow-x-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div
+        className={`sticky ${topClass} ${showTopBorder ? "border-accent border-t-[2px] " : ""}overflow-x-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`}
+      >
         {shareTitle && shareUrl && (
           <div className="pb-4 mb-4 border-b border-border-light">
-            <span className="type-label text-text-secondary block mb-3">Share</span>
+            <span className="type-label text-text-secondary block mb-3">
+              Share
+            </span>
             <ShareButtons title={shareTitle} url={shareUrl} />
           </div>
         )}
         <div className="relative" ref={containerRef}>
           <Track />
           <Indicator visible={!!activeId} />
-          <TocTree
-            showChildren={showChildren}
-            onNavigate={navigateTo}
-          />
+          <TocTree showChildren={showChildren} onNavigate={navigateTo} />
         </div>
       </div>
     </nav>

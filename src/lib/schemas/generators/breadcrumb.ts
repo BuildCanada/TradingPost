@@ -3,6 +3,7 @@ const ROUTE_LABELS: Record<string, string> = {
   about: "About",
   projects: "Projects",
   content: "Content",
+  "economic-indicators": "Economic Indicators",
 };
 
 export function generateBreadcrumbSchema(

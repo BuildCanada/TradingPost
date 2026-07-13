@@ -14,7 +14,7 @@ export interface SignpostProps {
   shareTitle?: string;
   shareUrl?: string;
   // Pages with an extra sticky bar below the global navbar (e.g. the
-  // economic-indicators section nav) push the rail and scroll target down,
+  // prosperity-dashboard section nav) push the rail and scroll target down,
   // and may already have their own narrow-screen navigation.
   desktopTopClass?: string;
   scrollOffset?: number;

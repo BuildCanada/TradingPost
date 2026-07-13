@@ -14,21 +14,21 @@ const DESCRIPTION =
   "Are we moving in the right direction? Canada's growth, incomes, housing, safety, and wellbeing, measured against the G7 and OECD.";
 
 export const metadata: Metadata = {
-  title: "Economic Indicators",
+  title: "Prosperity Dashboard",
   description: DESCRIPTION,
-  alternates: { canonical: "/economic-indicators" },
+  alternates: { canonical: "/prosperity-dashboard" },
   openGraph: {
-    title: "Economic Indicators",
+    title: "Prosperity Dashboard",
     description: DESCRIPTION,
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Economic Indicators",
+    title: "Prosperity Dashboard",
   },
 };
 
-export default async function EconomicIndicatorsPage() {
+export default async function ProsperityDashboardPage() {
   const configData = getSiteConfig();
 
   const featuredSeries = await Promise.all(
@@ -40,8 +40,8 @@ export default async function EconomicIndicatorsPage() {
   const jsonLd = buildGraph(
     generateOrganizationSchema(configData),
     generateBreadcrumbSchema(
-      "/economic-indicators",
-      "Economic Indicators",
+      "/prosperity-dashboard",
+      "Prosperity Dashboard",
       configData.siteUrl,
     ),
   );
@@ -53,36 +53,14 @@ export default async function EconomicIndicatorsPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <PageHeader
-        title="Economic Indicators"
-        description="Are we moving in the right direction? Canadian prosperity, measured."
+        title="Prosperity Dashboard"
       />
 
       <SectionNav />
 
       <section className="px-5 py-12">
         <div className="max-w-[1080px] mx-auto">
-          <div className="mb-10 max-w-[720px] space-y-4">
-            <p className="type-body text-dark/80">
-              <strong className="text-dark">
-                Canada should be the most prosperous country in the world.
-              </strong>{" "}
-              The question
-              is whether we are turning those advantages into better lives —
-              and that is measurable.
-            </p>
-            <p className="type-body text-dark/80">
-              Prosperity is more than a growing GDP. It&rsquo;s paycheques
-              that buy more each year, homes people can afford, streets that
-              are safe, air that is clean, institutions worth trusting, and
-              lives people are satisfied with, confident enough in the
-              future to build one here. That is what these charts measure.
-            </p>
-            <p className="type-body text-dark/80">
-              Where the world offers a yardstick, Canada is the red line
-              against its G7 and OECD peers. Where the question is ours alone, how many homes we start, how fast people climb out of low income, we measure Canada against its own record. Every chart
-              asks the same question: are we moving in the right direction?
-            </p>
-          </div>
+
 
           <div className="grid gap-5 sm:grid-cols-2">
             {SECTIONS.map((section, i) => {
@@ -93,15 +71,12 @@ export default async function EconomicIndicatorsPage() {
               return (
                 <Link
                   key={section.id}
-                  href={`/economic-indicators/${section.id}`}
+                  href={`/prosperity-dashboard/${section.id}`}
                   className="group flex flex-col border border-border-light p-6 hover:border-dark transition-colors"
                 >
                   <h2 className="type-h4 text-dark group-hover:underline underline-offset-4">
                     {section.title}
                   </h2>
-                  <p className="mt-2 type-body-sm text-dark/70">
-                    {section.description}
-                  </p>
                   {preview && (
                     <div className="mt-5">
                       <p className="type-label-sm text-dark/50">
@@ -124,21 +99,6 @@ export default async function EconomicIndicatorsPage() {
               );
             })}
 
-            <Link
-              href="/economic-indicators/canvas"
-              className="group flex flex-col border border-border-light p-6 hover:border-dark transition-colors"
-            >
-              <h2 className="type-h4 text-dark group-hover:underline underline-offset-4">
-                Indicator Canvas
-              </h2>
-              <p className="mt-2 type-body-sm text-dark/70">
-                Overlay up to three indicator series and eyeball how they move
-                together.
-              </p>
-              <span className="mt-auto pt-4 type-label text-dark/70 group-hover:text-dark">
-                Open the canvas &rarr;
-              </span>
-            </Link>
           </div>
 
           <div className="mt-16 border-t border-border-light pt-12 text-center">
@@ -151,7 +111,7 @@ export default async function EconomicIndicatorsPage() {
               — tell us and we&rsquo;ll track it.
             </p>
             <a
-              href="mailto:hi@buildcanada.com?subject=Economic%20indicators%20request"
+              href="mailto:hi@buildcanada.com?subject=Prosperity%20dashboard%20indicator%20request"
               className="mt-6 inline-block border border-dark px-5 py-2.5 type-label text-dark hover:bg-dark hover:text-bg transition-colors"
             >
               Email us

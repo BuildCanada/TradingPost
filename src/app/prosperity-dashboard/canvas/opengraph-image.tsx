@@ -52,7 +52,7 @@ export default async function OpengraphImage() {
 
   return new ImageResponse(
     <IndicatorOgCard
-      label="Economic Indicators"
+      label="Prosperity Dashboard"
       title={TITLE}
       description={DESCRIPTION}
       chartHeading="Canada, three series overlaid"

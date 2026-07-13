@@ -11,7 +11,7 @@ import {
 export const runtime = "nodejs";
 
 export const alt =
-  "Build Canada — Economic Indicators: Canadian prosperity, measured against the G7 and OECD";
+  "Build Canada — Prosperity Dashboard: Canadian prosperity, measured against the G7 and OECD";
 
 export const size = OG_SIZE;
 
@@ -22,7 +22,7 @@ export const revalidate = 3600;
 // The landing card leads with the dashboard's clearest single chart.
 const FEATURED_SLUG = "gdp-per-capita-ppp";
 
-const TITLE = "Economic Indicators";
+const TITLE = "Prosperity Dashboard";
 const DESCRIPTION =
   "Are we moving in the right direction? Canadian prosperity, measured against the G7 and OECD.";
 

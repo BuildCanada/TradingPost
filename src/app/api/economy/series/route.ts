@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getEconomicSeries } from "@/lib/api/economy";
-import { MEASURE_SLUGS } from "@/app/economic-indicators/indicators";
+import { MEASURE_SLUGS } from "@/app/prosperity-dashboard/indicators";
 
 // Same-origin proxy for york_factory's public series endpoint so client
 // components (the canvas page) can fetch without cross-origin config. The

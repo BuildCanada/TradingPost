@@ -10,7 +10,7 @@ import {
 
 export const runtime = "nodejs";
 
-export const alt = "Build Canada — Economic Indicators";
+export const alt = "Build Canada — Prosperity Dashboard";
 
 export const size = OG_SIZE;
 
@@ -26,7 +26,7 @@ export default async function OpengraphImage({
   const { section: sectionId } = await params;
   const section = SECTIONS.find((s) => s.id === sectionId);
 
-  const title = section?.title ?? "Economic Indicators";
+  const title = section?.title ?? "Prosperity Dashboard";
   const description =
     section?.description ??
     "Are we moving in the right direction? Canadian prosperity, measured against the G7 and OECD.";
@@ -43,12 +43,12 @@ export default async function OpengraphImage({
   const footnote = source ? `Source: ${humanizeSourceName(source.name)}` : "";
 
   const fonts = await loadOgFonts(
-    `${title}${description}${chartHeading}${chart?.latestLabel ?? ""}${footnote}Economic Indicators`,
+    `${title}${description}${chartHeading}${chart?.latestLabel ?? ""}${footnote}Prosperity Dashboard`,
   );
 
   return new ImageResponse(
     <IndicatorOgCard
-      label="Economic Indicators"
+      label="Prosperity Dashboard"
       title={title}
       description={description}
       chartHeading={chartHeading}

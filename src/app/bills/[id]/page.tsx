@@ -42,7 +42,15 @@ interface Params {
 export default async function BillDetail({ params }: Params) {
   const { id } = await params;
 
-  const session = await getServerSession(authOptions);
+  // The session only gates the admin "Edit" link — a misconfigured auth setup
+  // (e.g. missing NEXTAUTH_SECRET, which throws in production) must not take
+  // down the public bill page.
+  let session = null;
+  try {
+    session = await getServerSession(authOptions);
+  } catch (error) {
+    console.error("Failed to resolve session for bill page:", error);
+  }
   const headerList = await headers();
   const host =
     headerList.get("x-forwarded-host") || headerList.get("host") || "";

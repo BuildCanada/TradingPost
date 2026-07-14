@@ -26,7 +26,15 @@ export async function requireAuthenticatedUser() {
     return { session: null, dbUser: null };
   }
 
-  const session = await getServerSession(authOptions);
+  // Fail closed: if the session can't be resolved (e.g. missing
+  // NEXTAUTH_SECRET throws in production), treat the user as signed out
+  // instead of surfacing a 500.
+  let session = null;
+  try {
+    session = await getServerSession(authOptions);
+  } catch (error) {
+    console.error("Failed to resolve session in auth guard:", error);
+  }
 
   if (!session?.user?.email) {
     redirect(`${BASE_PATH}/unauthorized`);

@@ -12,6 +12,7 @@ import {
 } from "@buildcanada/charts";
 import {
   humanizeSourceName,
+  humanizeSourceUrl,
   type EconomySeriesResponse,
 } from "@/lib/api/economy";
 import {
@@ -99,7 +100,7 @@ function buildGrapherState(
           {
             id: 1,
             title: humanizeSourceName(source.name),
-            urlMain: source.url ?? undefined,
+            urlMain: humanizeSourceUrl(source.name, source.url) ?? undefined,
             datePublished: source.last_fetched_at ?? undefined,
           },
         ]

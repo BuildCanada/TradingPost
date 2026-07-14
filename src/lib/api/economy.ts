@@ -102,6 +102,39 @@ export function humanizeSourceName(name: string): string {
   return name;
 }
 
+// For StatsCan sources the API's source URL is its ingestion endpoint
+// (StatsCan's POST-only Web Data Service, so browsers get a 405); link to
+// the public table page instead. Table numbers match SOURCE_NAMES above.
+const STATCAN_TABLES: Record<string, string> = {
+  econ_statcan_gini_after_tax: "11-10-0134",
+  econ_statcan_low_income_dynamics: "11-10-0024",
+  econ_statcan_housing_starts: "34-10-0126",
+  econ_statcan_rental_vacancy: "34-10-0127",
+  econ_statcan_crime_severity: "35-10-0026",
+  econ_statcan_crime_rate: "35-10-0177",
+  econ_statcan_cpi_essentials: "18-10-0004",
+  econ_statcan_gdp_monthly: "36-10-0434",
+};
+
+export function humanizeSourceUrl(
+  name: string,
+  url: string | null,
+): string | null {
+  const table = STATCAN_TABLES[name];
+  if (table)
+    return `https://www150.statcan.gc.ca/t1/tbl1/en/tv.action?pid=${table.replaceAll("-", "")}01`;
+  // World Bank source URLs are raw API queries (JSON dumps); link to the
+  // public indicator page instead. Worldwide Governance Indicators carry a
+  // GOV_WGI_ prefix in the API's source=3 dataset that the public catalog
+  // doesn't use (GOV_WGI_GE.EST -> GE.EST).
+  const worldBank = url?.match(
+    /^https:\/\/api\.worldbank\.org\/v2\/country\/[^/]+\/indicator\/([A-Za-z0-9._]+)/,
+  );
+  if (worldBank)
+    return `https://data.worldbank.org/indicator/${worldBank[1].replace(/^GOV_WGI_/, "")}`;
+  return url;
+}
+
 // Annual data refreshed at most weekly; matches the API's Cache-Control max-age.
 const REVALIDATE = 3600;
 

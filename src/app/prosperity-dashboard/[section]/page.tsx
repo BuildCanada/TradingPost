@@ -7,6 +7,7 @@ import { getSiteConfig } from "@/lib/api";
 import {
   getEconomicSeries,
   humanizeSourceName,
+  humanizeSourceUrl,
   type EconomySeriesResponse,
 } from "@/lib/api/economy";
 import { PageHeader } from "@/components/ui/page-header";
@@ -63,12 +64,13 @@ function SourceLine({ response }: { response: EconomySeriesResponse }) {
     ? formatFetchedDate(source.last_fetched_at)
     : "";
   const sourceName = humanizeSourceName(source.name);
+  const sourceUrl = humanizeSourceUrl(source.name, source.url);
   return (
     <p className="mt-3 type-label-sm text-dark/60">
       Source:{" "}
-      {source.url ? (
+      {sourceUrl ? (
         <a
-          href={source.url}
+          href={sourceUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="underline hover:text-dark"

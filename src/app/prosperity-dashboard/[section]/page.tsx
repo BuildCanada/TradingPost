@@ -4,12 +4,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSiteConfig } from "@/lib/api";
-import {
-  getEconomicSeries,
-  humanizeSourceName,
-  humanizeSourceUrl,
-  type EconomySeriesResponse,
-} from "@/lib/api/economy";
+import { getEconomicSeries } from "@/lib/api/economy";
 import { PageHeader } from "@/components/ui/page-header";
 import { buildGraph } from "@/lib/schemas/graph";
 import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
@@ -18,6 +13,7 @@ import { Signpost } from "@/components/custom/signpost";
 import CombinedSectionChartClient from "../CombinedSectionChartClient";
 import IndicatorChartClient from "../IndicatorChartClient";
 import SectionNav from "../SectionNav";
+import SourceLine from "../SourceLine";
 import { SECTIONS } from "../indicators";
 
 export const dynamicParams = false;
@@ -49,40 +45,6 @@ export async function generateMetadata({
       title,
     },
   };
-}
-
-function formatFetchedDate(iso: string): string {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return "";
-  return new Intl.DateTimeFormat("en-CA", { dateStyle: "long" }).format(date);
-}
-
-function SourceLine({ response }: { response: EconomySeriesResponse }) {
-  const source = response.meta.source;
-  if (!source) return null;
-  const updated = source.last_fetched_at
-    ? formatFetchedDate(source.last_fetched_at)
-    : "";
-  const sourceName = humanizeSourceName(source.name);
-  const sourceUrl = humanizeSourceUrl(source.name, source.url);
-  return (
-    <p className="mt-3 type-label-sm text-dark/60">
-      Source:{" "}
-      {sourceUrl ? (
-        <a
-          href={sourceUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline hover:text-dark"
-        >
-          {sourceName}
-        </a>
-      ) : (
-        sourceName
-      )}
-      {updated && <> &middot; Updated {updated}</>}
-    </p>
-  );
 }
 
 // Deep-link targets must clear the sticky navbar + SectionNav stack, whose

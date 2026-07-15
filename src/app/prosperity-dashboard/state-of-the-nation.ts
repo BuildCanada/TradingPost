@@ -24,6 +24,8 @@ export type SotnView = {
   body: string;
   source: string;
   spec: ChartSpec;
+  // Renders full-width above its section's card grid.
+  wide?: boolean;
 };
 
 type Getter = (slug: string) => EconomySeriesResponse | null;
@@ -120,6 +122,7 @@ type SotnIndicator = {
   verdict: Verdict;
   headline: string;
   body: string;
+  wide?: boolean;
   build: (get: Getter) => (Pick<SotnView, "stat" | "statSub" | "source"> & { spec: ChartSpec }) | null;
 };
 
@@ -132,6 +135,7 @@ const INDICATORS: SotnIndicator[] = [
     n: "01",
     title: "Living standards",
     verdict: "lag",
+    wide: true,
     headline: "Living standards have gone sideways since 2022.",
     body: "Real output per person, in chained 2017 dollars — the clearest single measure of whether living standards are rising. StatCan's quarterly series runs within about two months of the present, and it shows a country producing no more per person than it did four years ago.",
     build: (get) => {
@@ -143,7 +147,7 @@ const INDICATORS: SotnIndicator[] = [
         statSub: `Real GDP per capita, chained 2017 $ · ${quarterLabel(latest)}`,
         source: "Statistics Canada (table 36-10-0706)",
         spec: line({
-          unit: "Real GDP per capita, chained 2017 dollars",
+          unit: "Economic output per person",
           fmt: "money",
           xLabels: xLabels(ps),
           legend: [{ label: "Canada", color: "au" }],
@@ -172,7 +176,7 @@ const INDICATORS: SotnIndicator[] = [
         statSub: `Employment rate, 25–54 · ${monthLabel(latest)}`,
         source: "Statistics Canada (table 14-10-0287)",
         spec: line({
-          unit: "Employment rate by age group, % (seasonally adjusted)",
+          unit: "Who's working, by age group",
           fmt: "pct",
           xLabels: xLabels(aligned.base),
           legend: [
@@ -214,7 +218,7 @@ const INDICATORS: SotnIndicator[] = [
         statSub: `Net business formation (entrants − exits) · ${monthLabel(lastCommon)}`,
         source: "Statistics Canada (table 33-10-0270)",
         spec: line({
-          unit: "Business entrants and exits per month",
+          unit: "Businesses starting vs closing for good",
           fmt: "count",
           xLabels: xLabels(entrants),
           legend: [
@@ -244,7 +248,7 @@ const INDICATORS: SotnIndicator[] = [
         statSub: `Employment rate, 15+ · ${Math.floor(latest.year)}`,
         source: "World Bank, World Development Indicators",
         spec: line({
-          unit: "Employment to population ratio, 15+, %",
+          unit: "The share of Canadians who work",
           fmt: "pct",
           xLabels: xLabels(ps),
           legend: [{ label: "Canada", color: "au" }],
@@ -271,7 +275,7 @@ const INDICATORS: SotnIndicator[] = [
         statSub: `Average hourly wage · ${Math.floor(latest.year)}`,
         source: "Statistics Canada (table 14-10-0064)",
         spec: line({
-          unit: "Hourly wage, current dollars",
+          unit: "What Canadians earn per hour",
           fmt: "money",
           xLabels: xLabels(aligned.base),
           legend: [
@@ -307,7 +311,7 @@ const INDICATORS: SotnIndicator[] = [
         statSub: `Net direct investment flow · ${quarterLabel(latest)}`,
         source: "Statistics Canada (table 36-10-0025)",
         spec: line({
-          unit: "Direct investment flows, $ millions per quarter",
+          unit: "Investment coming into Canada vs leaving it",
           fmt: "count",
           xLabels: xLabels(aligned.base),
           legend: [
@@ -337,7 +341,7 @@ const INDICATORS: SotnIndicator[] = [
         statSub: `Gross capital formation, % of GDP · ${Math.floor(latest.year)}`,
         source: "World Bank, World Development Indicators",
         spec: line({
-          unit: "Gross capital formation, % of GDP",
+          unit: "How much of the economy goes to building",
           fmt: "pct",
           xLabels: xLabels(ps),
           legend: [{ label: "Canada", color: "au" }],
@@ -364,7 +368,7 @@ const INDICATORS: SotnIndicator[] = [
         statSub: `General government gross debt to GDP · ${quarterLabel(latest)}`,
         source: "Statistics Canada (table 38-10-0237)",
         spec: line({
-          unit: "All levels of government, % of GDP",
+          unit: "What every level of government owes",
           fmt: "pct",
           xLabels: xLabels(aligned.base),
           legend: [
@@ -403,7 +407,7 @@ const INDICATORS: SotnIndicator[] = [
         statSub: `Public share of employment · ${monthLabel(latest)}`,
         source: "Statistics Canada (table 14-10-0288)",
         spec: line({
-          unit: "Share of total employment, %",
+          unit: "Where Canadians work: public vs private",
           fmt: "pct",
           xLabels: xLabels(aligned.base),
           legend: [
@@ -436,7 +440,7 @@ const INDICATORS: SotnIndicator[] = [
         statSub: `CPI, all items (2002 = 100) · ${monthLabel(latest)}`,
         source: "Statistics Canada (table 18-10-0004)",
         spec: line({
-          unit: "CPI all-items, 2002 = 100",
+          unit: "Consumer prices vs the 2% target",
           fmt: "index",
           xLabels: xLabels(cpi),
           legend: [
@@ -466,7 +470,7 @@ const INDICATORS: SotnIndicator[] = [
         statSub: `House price to income vs. long-term norm · ${Math.floor(latest.year)}`,
         source: "OECD Analytical House Prices Database",
         spec: line({
-          unit: "Price to income, long-term average = 100",
+          unit: "Home prices vs incomes (100 = the long-term norm)",
           fmt: "index",
           xLabels: xLabels(ps),
           legend: [{ label: "Canada", color: "au" }],
@@ -490,7 +494,7 @@ const INDICATORS: SotnIndicator[] = [
         statSub: `Dwelling units started · ${Math.floor(latest.year)}`,
         source: "CMHC via Statistics Canada (table 34-10-0126)",
         spec: line({
-          unit: "Dwelling units started per year",
+          unit: "Homes started each year",
           fmt: "count",
           xLabels: xLabels(ps),
           legend: [{ label: "Housing starts", color: "au" }],
@@ -518,7 +522,7 @@ const INDICATORS: SotnIndicator[] = [
         statSub: `Net emigration · ${Math.floor(latest.year)} (July–June year)`,
         source: "Statistics Canada (table 17-10-0008)",
         spec: line({
-          unit: "Emigrants minus returning emigrants, persons per year",
+          unit: "People leaving Canada for good",
           fmt: "count",
           xLabels: xLabels(aligned.base),
           legend: [{ label: "Net emigration", color: "au" }],
@@ -542,7 +546,7 @@ const INDICATORS: SotnIndicator[] = [
         statSub: `Immigrants admitted · ${Math.floor(latest.year)} (July–June year)`,
         source: "Statistics Canada (table 17-10-0008)",
         spec: line({
-          unit: "Immigrants admitted per year",
+          unit: "New permanent residents each year",
           fmt: "count",
           xLabels: xLabels(ps),
           legend: [{ label: "Immigrants", color: "au" }],
@@ -569,7 +573,7 @@ const INDICATORS: SotnIndicator[] = [
         statSub: `Work-permit holders · ${quarterLabel(latest)}`,
         source: "Statistics Canada (table 17-10-0121)",
         spec: line({
-          unit: "Persons holding temporary status (stock)",
+          unit: "People in Canada on temporary permits",
           fmt: "count",
           xLabels: xLabels(aligned.base),
           legend: [
@@ -605,7 +609,7 @@ const INDICATORS: SotnIndicator[] = [
         statSub: `Permanent residents admitted, monthly · ${monthLabel(latest)}`,
         source: "Immigration, Refugees and Citizenship Canada",
         spec: line({
-          unit: "PR admissions per month, by class",
+          unit: "Permanent residents by immigration class",
           fmt: "count",
           xLabels: xLabels(aligned.base),
           legend: [
@@ -633,8 +637,11 @@ export const SOTN_INDICATOR_COUNT = INDICATORS.length;
 // Section grouping for the page: charts keep their continuous 01–16
 // numbering; each section renders its own header and card grid.
 const SECTION_DEFS = [
-  { id: "headline", title: "Headline", ns: ["01"] },
-  { id: "economy", title: "Economy", ns: ["02", "03", "04", "05", "06", "07"] },
+  {
+    id: "economy",
+    title: "Economy",
+    ns: ["01", "02", "03", "04", "05", "06", "07"],
+  },
   {
     id: "government-sustainability",
     title: "Government Sustainability",
@@ -670,6 +677,7 @@ export function buildIndicators(get: Getter): SotnView[] {
         verdict: indicator.verdict,
         headline: indicator.headline,
         body: indicator.body,
+        wide: indicator.wide,
         ...built,
       },
     ];

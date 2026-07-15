@@ -53,21 +53,6 @@ function lastUpdatedLabel(
   }).format(new Date(latest));
 }
 
-const VERDICT_BADGE = {
-  lead: {
-    label: "Where we lead",
-    className: "bg-transparent border-dark text-dark",
-  },
-  lag: {
-    label: "Where we lag",
-    className: "bg-auburn-800 border-auburn-800 text-bg",
-  },
-  mixed: {
-    label: "Mixed",
-    className: "bg-transparent border-[#CDC4BD] text-[#6f6a63]",
-  },
-} as const;
-
 // A chart card: meta row, chart title + chart, and the source attribution
 // the data licences require. Cards tile 2×2 on desktop within their section,
 // ruled by the design's warm hairlines; `wide` cards span both columns
@@ -79,7 +64,6 @@ function IndicatorCard({
   indicator: SotnView;
   wide?: boolean;
 }) {
-  const badge = VERDICT_BADGE[indicator.verdict];
   return (
     <section
       className={`flex flex-col border-[#CDC4BD] border-b px-[clamp(24px,5vw,88px)] py-[clamp(32px,4vw,56px)] ${
@@ -97,11 +81,6 @@ function IndicatorCard({
           style={{ color: GRAY }}
         >
           {indicator.title}
-        </span>
-        <span
-          className={`type-label-sm uppercase tracking-[0.1em] px-2.5 py-[5px] leading-none whitespace-nowrap border ${badge.className}`}
-        >
-          {badge.label}
         </span>
       </div>
       <StateChart spec={indicator.spec} wide={wide} />
@@ -211,27 +190,34 @@ export default async function StateOfTheNationPage() {
       </header>
 
       <div id="indicators">
-        {sections.map((section) => (
-          <section key={section.id} id={section.id}>
-            <div
-              className="px-[clamp(24px,5vw,88px)] pt-[clamp(40px,5vw,72px)] pb-[clamp(16px,2vw,28px)]"
-              style={{ borderBottom: `1px solid ${BD}` }}
-            >
-              <h2 className="m-0 font-display font-medium text-[clamp(1.9rem,3.4vw,2.8rem)] leading-[1.02] tracking-[-0.02em]">
-                {section.title}
-              </h2>
-            </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2">
-              {section.indicators.map((indicator) => (
-                <IndicatorCard
-                  key={indicator.n}
-                  indicator={indicator}
-                  wide={section.indicators.length === 1}
-                />
+        {sections.map((section) => {
+          // Wide cards render full-width above the 2×2 grid, outside it so
+          // the grid's odd/even column rules stay aligned.
+          const wideIndicators = section.indicators.filter((i) => i.wide);
+          const gridIndicators = section.indicators.filter((i) => !i.wide);
+          return (
+            <section key={section.id} id={section.id}>
+              <div
+                className="px-[clamp(24px,5vw,88px)] pt-[clamp(40px,5vw,72px)] pb-[clamp(16px,2vw,28px)]"
+                style={{ borderBottom: `1px solid ${BD}` }}
+              >
+                <h2 className="m-0 font-display font-medium text-[clamp(1.9rem,3.4vw,2.8rem)] leading-[1.02] tracking-[-0.02em]">
+                  {section.title}
+                </h2>
+              </div>
+              {wideIndicators.map((indicator) => (
+                <IndicatorCard key={indicator.n} indicator={indicator} wide />
               ))}
-            </div>
-          </section>
-        ))}
+              {gridIndicators.length > 0 && (
+                <div className="grid grid-cols-1 lg:grid-cols-2">
+                  {gridIndicators.map((indicator) => (
+                    <IndicatorCard key={indicator.n} indicator={indicator} />
+                  ))}
+                </div>
+              )}
+            </section>
+          );
+        })}
       </div>
 
       <section

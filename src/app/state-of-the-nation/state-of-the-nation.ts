@@ -133,7 +133,7 @@ const line = (
 const INDICATORS: SotnIndicator[] = [
   {
     n: "01",
-    title: "Living standards",
+    title: "GDP per capita",
     verdict: "lag",
     wide: true,
     headline: "Living standards have gone sideways since 2022.",

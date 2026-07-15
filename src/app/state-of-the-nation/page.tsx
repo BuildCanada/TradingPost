@@ -65,11 +65,10 @@ function IndicatorCard({
 }) {
   return (
     <section
-      className={`flex flex-col border-[#CDC4BD] border-b px-[clamp(24px,5vw,88px)] py-[clamp(32px,4vw,56px)] ${
-        wide
-          ? "lg:col-span-2"
-          : "lg:[&:nth-child(odd):not(:last-child)]:border-r"
-      }`}
+      className={`flex flex-col border-[#CDC4BD] border-b px-[clamp(24px,5vw,88px)] py-[clamp(32px,4vw,56px)] ${wide
+        ? "lg:col-span-2"
+        : "lg:[&:nth-child(odd):not(:last-child)]:border-r"
+        }`}
     >
       <div className="mb-5 flex flex-wrap items-baseline gap-4">
         <span className="type-label text-auburn-800 tracking-[0.12em]">
@@ -130,62 +129,14 @@ export default async function StateOfTheNationPage() {
 
       <header
         className="max-w-[1180px] px-[clamp(24px,5vw,88px)] pt-[clamp(48px,8vw,104px)] pb-[clamp(36px,5vw,64px)]"
-        style={{ borderBottom: `1px solid ${BD}` }}
       >
         <div className="mb-7 type-label uppercase tracking-[0.16em] text-auburn-800">
           State of the Nation · 2026
         </div>
         <h1 className="m-0 mb-8 font-display font-medium text-[clamp(2.8rem,6.2vw,5.4rem)] leading-[0.99] tracking-[-0.03em] text-balance">
-          Canada is not a poor country.
-          <br />
-          It is a country underperforming its potential.
+          State of the Nation
         </h1>
-        <p className="m-0 mb-10 max-w-[760px] font-body text-[clamp(1.2rem,2vw,1.5rem)] leading-normal tracking-[-0.01em] text-pretty">
-          Sixteen indicators, read honestly. Where we lead, where we lag, and
-          where the picture is genuinely mixed — Canada measured against its
-          own record. The numbers below are the starting point for every plan
-          we publish.
-        </p>
-        <div className="flex flex-wrap items-end gap-[clamp(20px,3vw,48px)]">
-          <div className="flex gap-8">
-            <div>
-              <div className="font-display text-[2.6rem] leading-none text-dark">
-                {leadCount}
-              </div>
-              <div
-                className="mt-2 type-label-sm uppercase tracking-[0.1em]"
-                style={{ color: GRAY }}
-              >
-                Areas we lead
-              </div>
-            </div>
-            <div>
-              <div className="font-display text-[2.6rem] leading-none text-auburn-800">
-                {lagCount}
-              </div>
-              <div
-                className="mt-2 type-label-sm uppercase tracking-[0.1em]"
-                style={{ color: GRAY }}
-              >
-                Areas we lag
-              </div>
-            </div>
-          </div>
-          <div
-            className="type-label-sm uppercase tracking-[0.09em] leading-[1.7] pl-6"
-            style={{ color: GRAY, borderLeft: `1px solid ${BD}` }}
-          >
-            {SOTN_INDICATOR_COUNT} indicators tracked
-            <br />
-            All figures from live sources
-            {updated && (
-              <>
-                <br />
-                Last updated · {updated}
-              </>
-            )}
-          </div>
-        </div>
+
       </header>
 
       <div id="indicators">

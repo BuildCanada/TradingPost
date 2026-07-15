@@ -30,14 +30,26 @@ const nextConfig: NextConfig = {
         destination: "/builders/:slug",
         permanent: true,
       },
+      // Both prior names of the State of the Nation dashboard redirect
+      // straight to the current route (no chained hops).
       {
         source: "/economic-indicators",
-        destination: "/prosperity-dashboard",
+        destination: "/state-of-the-nation",
         permanent: true,
       },
       {
         source: "/economic-indicators/:path*",
-        destination: "/prosperity-dashboard/:path*",
+        destination: "/state-of-the-nation/:path*",
+        permanent: true,
+      },
+      {
+        source: "/prosperity-dashboard",
+        destination: "/state-of-the-nation",
+        permanent: true,
+      },
+      {
+        source: "/prosperity-dashboard/:path*",
+        destination: "/state-of-the-nation/:path*",
         permanent: true,
       },
     ];

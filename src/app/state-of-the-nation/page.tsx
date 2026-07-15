@@ -21,7 +21,7 @@ const DESCRIPTION =
 export const metadata: Metadata = {
   title: "State of the Nation",
   description: DESCRIPTION,
-  alternates: { canonical: "/prosperity-dashboard" },
+  alternates: { canonical: "/state-of-the-nation" },
   openGraph: {
     title: "State of the Nation",
     description: DESCRIPTION,
@@ -115,7 +115,7 @@ export default async function StateOfTheNationPage() {
   const jsonLd = buildGraph(
     generateOrganizationSchema(configData),
     generateBreadcrumbSchema(
-      "/prosperity-dashboard",
+      "/state-of-the-nation",
       "State of the Nation",
       configData.siteUrl,
     ),
@@ -227,7 +227,7 @@ export default async function StateOfTheNationPage() {
           we&rsquo;ll track it.
         </p>
         <a
-          href="mailto:hi@buildcanada.com?subject=Prosperity%20dashboard%20indicator%20request"
+          href="mailto:hi@buildcanada.com?subject=State%20of%20the%20Nation%20indicator%20request"
           className="mt-6 inline-block border border-dark px-5 py-2.5 type-label text-dark hover:bg-dark hover:text-bg transition-colors"
         >
           Email us

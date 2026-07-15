@@ -10,7 +10,7 @@ import {
 export const runtime = "nodejs";
 
 export const alt =
-  "Build Canada — Prosperity Dashboard: Canadian prosperity, measured";
+  "Build Canada — State of the Nation: Canadian prosperity, measured";
 
 export const size = OG_SIZE;
 
@@ -23,7 +23,7 @@ export const revalidate = 3600;
 const FEATURED_SLUG = "gdp-per-capita-canada";
 const CHART_HEADING = "GDP per capita";
 
-const TITLE = "Prosperity Dashboard";
+const TITLE = "State of the Nation";
 const DESCRIPTION =
   "Are we moving in the right direction? Canadian prosperity, measured.";
 

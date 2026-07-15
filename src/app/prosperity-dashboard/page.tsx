@@ -8,7 +8,6 @@ import { buildGraph } from "@/lib/schemas/graph";
 import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
 import { generateBreadcrumbSchema } from "@/lib/schemas/generators/breadcrumb";
 import StateChart from "./StateChart";
-import JoinForm from "./JoinForm";
 import {
   buildSections,
   SOTN_INDICATOR_COUNT,
@@ -220,27 +219,19 @@ export default async function StateOfTheNationPage() {
         })}
       </div>
 
-      <section
-        id="join"
-        className="bg-dark text-bg px-[clamp(24px,5vw,88px)] py-[clamp(56px,8vw,104px)]"
-      >
-        <div className="max-w-[820px]">
-          <div className="mb-6 type-label uppercase tracking-[0.16em] text-[#c9877f]">
-            Turn the numbers into plans
-          </div>
-          <h2 className="m-0 mb-6 font-display font-medium text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.02] tracking-[-0.02em] text-balance">
-            The state of the nation is a choice. Help us change it.
-          </h2>
-          <p className="m-0 mb-10 max-w-[620px] font-body text-[clamp(1.1rem,2vw,1.4rem)] leading-normal text-[#d8cfc6] text-pretty">
-            We publish memos on behalf of Canada&rsquo;s top builders —
-            concrete plans to close the gaps above. Be first to know
-            what&rsquo;s possible.
-          </p>
-          <JoinForm />
-          <div className="mt-4 type-label-sm uppercase tracking-[0.08em] text-[#8f8880]">
-            No spam. Unsubscribe anytime.
-          </div>
-        </div>
+      <section className="px-[clamp(24px,5vw,88px)] py-[clamp(48px,6vw,80px)] text-center">
+        <h2 className="type-h3 text-dark">Missing a measure that matters?</h2>
+        <p className="mt-2 type-body text-dark/70 max-w-[560px] mx-auto">
+          We&rsquo;re expanding this dashboard. If there&rsquo;s an indicator
+          that would sharpen the picture — for better or worse — tell us and
+          we&rsquo;ll track it.
+        </p>
+        <a
+          href="mailto:hi@buildcanada.com?subject=Prosperity%20dashboard%20indicator%20request"
+          className="mt-6 inline-block border border-dark px-5 py-2.5 type-label text-dark hover:bg-dark hover:text-bg transition-colors"
+        >
+          Email us
+        </a>
       </section>
     </div>
   );

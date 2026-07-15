@@ -95,7 +95,16 @@ export async function POST(
     );
   }
 
-  const analysis = await summarizeBillText(markdown);
+  // Explicit admin action — exempt from the organic-traffic rate cap.
+  const analysis = await summarizeBillText(markdown, { bypassCap: true });
+  if (analysis.isFallback) {
+    // Never overwrite a good stored analysis with a degraded placeholder
+    // (missing OpenAI key, parse failure, API error).
+    return NextResponse.json(
+      { error: "AI analysis unavailable; existing analysis left untouched" },
+      { status: 502 },
+    );
+  }
 
   const latestStageDate =
     apiBill.stages && apiBill.stages.length > 0

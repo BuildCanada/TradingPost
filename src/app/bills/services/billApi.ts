@@ -78,6 +78,10 @@ export interface BillAnalysis {
   missing_details: string[];
   steel_man: string;
   question_period_questions?: Array<{ question: string }>;
+  // Set when this is a degraded placeholder (no OpenAI key, parse failure,
+  // API error, rate cap) rather than a real analysis. Callers must not
+  // persist or Slack-notify a fallback. Never written to Mongo.
+  isFallback?: true;
 }
 
 export async function getBillFromCivicsProjectApi(
@@ -121,7 +125,27 @@ export async function getBillFromCivicsProjectApi(
   return data;
 }
 
-export async function summarizeBillText(input: string): Promise<BillAnalysis> {
+// Soft cap on organic (non-admin) OpenAI calls per process. The primary guard
+// lives in fromCivicsProjectApiBill; this backstop bounds the cost of any
+// future regression that reopens a rerun loop (July 14 incident).
+const SUMMARIZE_CAP_PER_HOUR = 25;
+let summarizeWindowStart = 0;
+let summarizeCallsInWindow = 0;
+
+function summarizeCapExceeded(): boolean {
+  const now = Date.now();
+  if (now - summarizeWindowStart > 60 * 60 * 1000) {
+    summarizeWindowStart = now;
+    summarizeCallsInWindow = 0;
+  }
+  summarizeCallsInWindow += 1;
+  return summarizeCallsInWindow > SUMMARIZE_CAP_PER_HOUR;
+}
+
+export async function summarizeBillText(
+  input: string,
+  options?: { bypassCap?: boolean },
+): Promise<BillAnalysis> {
   if (!process.env.OPENAI_API_KEY) {
     console.log("No OPENAI API key, using fallback analysis");
     // Fallback analysis
@@ -140,11 +164,31 @@ export async function summarizeBillText(input: string): Promise<BillAnalysis> {
       steel_man:
         "The steel man for this bill is the bill that aligns with the tenets of Build Canada.",
       question_period_questions: [],
+      isFallback: true,
+    };
+  }
+
+  if (!options?.bypassCap && summarizeCapExceeded()) {
+    console.error(
+      `[LLM_SUMMARIZE_CAP] exceeded ${SUMMARIZE_CAP_PER_HOUR} calls/hour — refusing OpenAI call`,
+    );
+    const text = input?.trim() || "";
+    return {
+      summary: text.length <= 500 ? text : `${text.slice(0, 500)}…`,
+      short_title: undefined,
+      tenet_evaluations: makeFallbackTenets("Analysis rate cap exceeded"),
+      final_judgment: "abstain",
+      rationale: undefined,
+      needs_more_info: true,
+      missing_details: ["Analysis rate cap exceeded"],
+      steel_man: "Analysis rate cap exceeded",
+      question_period_questions: [],
+      isFallback: true,
     };
   }
 
   try {
-    console.log("Analyzing bill text with AI");
+    console.warn("[LLM_SUMMARIZE] starting", { inputChars: input.length });
     const OpenAIClient = new OpenAI();
 
     const prompt = `${SUMMARY_AND_VOTE_PROMPT}\n\nBill Text:\n${input}`;
@@ -204,6 +248,7 @@ export async function summarizeBillText(input: string): Promise<BillAnalysis> {
         missing_details: ["Valid AI response format"],
         steel_man: "Analysis parsing failed",
         question_period_questions: [],
+        isFallback: true,
       };
     }
   } catch (error) {
@@ -223,6 +268,7 @@ export async function summarizeBillText(input: string): Promise<BillAnalysis> {
       missing_details: ["Technical issue resolution"],
       steel_man: "Technical error during analysis",
       question_period_questions: [],
+      isFallback: true,
     };
   }
 }

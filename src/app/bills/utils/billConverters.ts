@@ -8,6 +8,7 @@ import {
 } from "@/app/bills/services/billApi";
 import { socialIssueGrader } from "@/app/bills/services/social-issue-grader";
 import { notifyNewBillAnalysis } from "@/app/bills/services/slack-notifier";
+import { lookupBillInDB } from "@/app/bills/server/get-bill-by-id-from-db";
 
 // Unified bill data structure
 export interface UnifiedBill {
@@ -106,11 +107,6 @@ export function fromBuildCanadaDbBill(bill: BillDocument): UnifiedBill {
 export async function fromCivicsProjectApiBill(
   bill: ApiBillDetail,
 ): Promise<UnifiedBill> {
-  const { env } = await import("@/app/bills/env");
-  const uri = env.MONGO_URI || "";
-  const hasValidMongoUri =
-    uri.startsWith("mongodb://") || uri.startsWith("mongodb+srv://");
-  let existingBill: BillDocument | null = null;
   const latestStageDate =
     bill.stages && bill.stages.length > 0
       ? bill.stages[bill.stages.length - 1].date
@@ -184,61 +180,69 @@ export async function fromCivicsProjectApiBill(
         explanation: "Not analyzed",
       },
     ],
-    final_judgment: "no",
+    final_judgment: "abstain",
     rationale: undefined,
     needs_more_info: false,
     missing_details: [],
     steel_man: "Not analyzed",
   };
 
-  // Check existing bill in database to see if source changed
-  try {
-    const { connectToDatabase } = await import("@/app/bills/lib/mongoose");
-    const { Bill } = await import("@/app/bills/models/Bill");
+  // LLM summarization is fail-safe: it may only run when the DB is confirmed
+  // reachable AND the bill is genuinely new or its source text actually
+  // changed. An unavailable DB (missing MONGO_URI, connection error) must
+  // never be treated as "bill not found" — that turns every page view into an
+  // OpenAI call (July 14 incident).
+  const dbLookup = await lookupBillInDB(bill.billID);
+  const existingBill = dbLookup.status === "found" ? dbLookup.bill : null;
+  const dbAvailable = dbLookup.status !== "unavailable";
 
-    if (hasValidMongoUri) {
-      await connectToDatabase();
-      existingBill = (await Bill.findOne({ billId: bill.billID })
-        .lean()
-        .exec()) as BillDocument | null;
-
-      if (existingBill && !analysis.rationale) {
-        // Source hasn't changed, use existing analysis
-        analysis = {
-          summary: existingBill.summary,
-          tenet_evaluations:
-            existingBill.tenet_evaluations || analysis.tenet_evaluations,
-          final_judgment: (() => {
-            const raw = String(existingBill.final_judgment || "")
-              .trim()
-              .toLowerCase();
-            if (raw === "yes" || raw === "no") return raw as "yes" | "no";
-            // Treat legacy "neutral" and any unknown value as "abstain"
-            if (raw === "abstain" || raw === "neutral") return "abstain";
-            return analysis.final_judgment;
-          })(),
-          rationale: existingBill.rationale || analysis.rationale,
-          needs_more_info:
-            existingBill.needs_more_info || analysis.needs_more_info,
-          missing_details:
-            existingBill.missing_details || analysis.missing_details,
-          steel_man: existingBill.steel_man || analysis.steel_man,
-        };
-        console.log(
-          `Using existing analysis for ${bill.billID} (source unchanged)`,
-        );
-      }
-    }
-  } catch (error) {
-    console.error("Error checking existing bill:", error);
-    // Continue with regeneration if DB check fails
+  if (existingBill) {
+    analysis = {
+      summary: existingBill.summary,
+      tenet_evaluations:
+        existingBill.tenet_evaluations || analysis.tenet_evaluations,
+      final_judgment: (() => {
+        const raw = String(existingBill.final_judgment || "")
+          .trim()
+          .toLowerCase();
+        if (raw === "yes" || raw === "no") return raw as "yes" | "no";
+        // Treat legacy "neutral" and any unknown value as "abstain"
+        if (raw === "abstain" || raw === "neutral") return "abstain";
+        return analysis.final_judgment;
+      })(),
+      rationale: existingBill.rationale || analysis.rationale,
+      needs_more_info: existingBill.needs_more_info || analysis.needs_more_info,
+      missing_details: existingBill.missing_details || analysis.missing_details,
+      steel_man: existingBill.steel_man || analysis.steel_man,
+    };
   }
 
+  const billTextsCount = Array.isArray(bill.billTexts)
+    ? bill.billTexts.length
+    : 0;
+  const sourceChanged = existingBill
+    ? (existingBill.source || null) !== (bill.source || null)
+    : false;
+  const countChanged = existingBill
+    ? existingBill.billTextsCount !== billTextsCount
+    : false;
+  const shouldRegenerate =
+    dbAvailable &&
+    (dbLookup.status === "not-found" || sourceChanged || countChanged);
+
   let generatedNewAnalysis = false;
-  if (!analysis?.rationale && billMarkdown) {
-    console.log(`Regenerating analysis for ${bill.billID} (source changed)`);
+  if (shouldRegenerate && billMarkdown) {
+    console.log(
+      `Regenerating analysis for ${bill.billID} (${
+        existingBill ? "source changed" : "new bill"
+      })`,
+    );
     analysis = await summarizeBillText(billMarkdown);
     generatedNewAnalysis = true;
+  } else if (existingBill) {
+    console.log(
+      `Using existing analysis for ${bill.billID} (source unchanged)`,
+    );
   }
 
   // Only classify if missing (new bill or classification absent). Avoid calling otherwise.
@@ -247,7 +251,7 @@ export async function fromCivicsProjectApiBill(
       ? ((existingBill as BillDocument).isSocialIssue as boolean)
       : false;
   if (
-    hasValidMongoUri &&
+    dbAvailable &&
     (existingBill === null || typeof existingBill.isSocialIssue !== "boolean")
   ) {
     isSocialIssueFinal = await socialIssueGrader(
@@ -255,17 +259,23 @@ export async function fromCivicsProjectApiBill(
     );
   }
 
-  await onBillNotInDatabase({
-    billId: bill.billID,
-    source: bill.source,
-    markdown: billMarkdown,
-    bill,
-    analysis,
-    billTextsCount: Array.isArray(bill.billTexts) ? bill.billTexts.length : 0,
-    isSocialIssue: isSocialIssueFinal,
-  });
+  // A fallback analysis (no OpenAI key, parse failure, API error) must never
+  // overwrite stored data or ping Slack.
+  const analysisUsable = !generatedNewAnalysis || !analysis.isFallback;
 
-  if (generatedNewAnalysis) {
+  if (dbAvailable && analysisUsable) {
+    await onBillNotInDatabase({
+      billId: bill.billID,
+      source: bill.source,
+      markdown: billMarkdown,
+      bill,
+      analysis,
+      billTextsCount,
+      isSocialIssue: isSocialIssueFinal,
+    });
+  }
+
+  if (generatedNewAnalysis && analysisUsable) {
     await notifyNewBillAnalysis({
       billId: bill.billID,
       title: bill.title,

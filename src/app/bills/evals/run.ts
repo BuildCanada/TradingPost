@@ -79,12 +79,12 @@ async function main() {
     if (runAnalysis) {
       // In fallback mode the result is deterministic and free — skip the cache.
       const { value: analysis, cached } = args.fallback
-        ? { value: await summarizeBillText(text), cached: false }
+        ? { value: await summarizeBillText(text, { bypassCap: true }), cached: false }
         : await runCached(
             "analysis",
             text,
             SUMMARY_AND_VOTE_PROMPT,
-            () => summarizeBillText(text),
+            () => summarizeBillText(text, { bypassCap: true }),
             { refresh: args.refresh, stats },
           );
       report.cached = cached;

@@ -1,119 +1,144 @@
-import "@buildcanada/charts/styles.css";
-
 import type { Metadata } from "next";
 import { getSiteConfig } from "@/lib/api";
 import {
   getEconomicSeries,
   type EconomySeriesResponse,
 } from "@/lib/api/economy";
-import { PageHeader } from "@/components/ui/page-header";
 import { buildGraph } from "@/lib/schemas/graph";
 import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
 import { generateBreadcrumbSchema } from "@/lib/schemas/generators/breadcrumb";
-import IndicatorChartClient from "./IndicatorChartClient";
-import DashboardNav from "./DashboardNav";
-import SourceLine from "./SourceLine";
+import StateChart from "./StateChart";
+import JoinForm from "./JoinForm";
 import {
-  DASHBOARD_INDICATORS,
-  DASHBOARD_SECTIONS,
-  type DashboardIndicator,
-} from "./dashboard";
+  buildSections,
+  SOTN_INDICATOR_COUNT,
+  SOTN_MEASURE_SLUGS,
+  type SotnView,
+} from "./state-of-the-nation";
 
 const DESCRIPTION =
-  "Are we moving in the right direction? Canada's growth, jobs, cost of living, and immigration on one page, measured against the G7 and OECD.";
+  "Sixteen indicators, read honestly. Where Canada leads, where we lag, and where the picture is genuinely mixed — measured against our own record.";
 
 export const metadata: Metadata = {
-  title: "Prosperity Dashboard",
+  title: "State of the Nation",
   description: DESCRIPTION,
   alternates: { canonical: "/prosperity-dashboard" },
   openGraph: {
-    title: "Prosperity Dashboard",
+    title: "State of the Nation",
     description: DESCRIPTION,
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Prosperity Dashboard",
+    title: "State of the Nation",
   },
 };
 
-// Anchor targets must clear the sticky navbar + DashboardNav stack, whose
-// height grows as the nav links wrap on narrower screens.
-const SECTION_SCROLL_MT = "scroll-mt-[220px] sm:scroll-mt-[160px]";
+// Warm grey used by the design for secondary mono text; no site token.
+const GRAY = "#6f6a63";
+const BD = "#CDC4BD";
 
-// Chart headings link to their own anchor so a reader can grab a URL
-// straight to one chart.
-function AnchoredHeading({ id, text }: { id: string; text: string }) {
-  return (
-    <h3 className="type-h4 text-dark">
-      <a href={`#${id}`} className="group">
-        {text}
-        <span
-          aria-hidden="true"
-          className="ml-2 text-dark/30 opacity-0 group-hover:opacity-100 transition-opacity"
-        >
-          #
-        </span>
-      </a>
-    </h3>
-  );
+function lastUpdatedLabel(
+  responses: (EconomySeriesResponse | null)[],
+): string | null {
+  const dates = responses
+    .map((r) => r?.meta.source?.last_fetched_at)
+    .filter((d): d is string => !!d)
+    .sort();
+  const latest = dates[dates.length - 1];
+  if (!latest) return null;
+  return new Intl.DateTimeFormat("en-CA", {
+    month: "long",
+    year: "numeric",
+  }).format(new Date(latest));
 }
 
-function UnavailablePanel() {
-  return (
-    <div className="flex h-[320px] items-center justify-center border border-border-light bg-bg">
-      <p className="type-body text-dark/60">
-        Data is temporarily unavailable. Please check back soon.
-      </p>
-    </div>
-  );
-}
+const VERDICT_BADGE = {
+  lead: {
+    label: "Where we lead",
+    className: "bg-transparent border-dark text-dark",
+  },
+  lag: {
+    label: "Where we lag",
+    className: "bg-auburn-800 border-auburn-800 text-bg",
+  },
+  mixed: {
+    label: "Mixed",
+    className: "bg-transparent border-[#CDC4BD] text-[#6f6a63]",
+  },
+} as const;
 
-function ChartCard({
+// A chart card: meta row, chart title + chart, and the source attribution
+// the data licences require. Cards tile 2×2 on desktop within their section,
+// ruled by the design's warm hairlines; `wide` cards span both columns
+// (the headline chart).
+function IndicatorCard({
   indicator,
-  response,
+  wide,
 }: {
-  indicator: DashboardIndicator;
-  response: EconomySeriesResponse | null;
+  indicator: SotnView;
+  wide?: boolean;
 }) {
+  const badge = VERDICT_BADGE[indicator.verdict];
   return (
-    <div id={indicator.slug} className={SECTION_SCROLL_MT}>
-      <AnchoredHeading id={indicator.slug} text={indicator.heading} />
-      <p className="mt-1 mb-6 type-body-sm text-dark/60 max-w-[720px]">
-        {indicator.blurb}
-      </p>
-      {response ? (
-        <>
-          <IndicatorChartClient
-            response={response}
-            benchmark={indicator.benchmark}
-          />
-          <SourceLine response={response} />
-        </>
-      ) : (
-        <UnavailablePanel />
-      )}
-    </div>
+    <section
+      className={`flex flex-col border-[#CDC4BD] border-b px-[clamp(24px,5vw,88px)] py-[clamp(32px,4vw,56px)] ${
+        wide
+          ? "lg:col-span-2"
+          : "lg:[&:nth-child(odd):not(:last-child)]:border-r"
+      }`}
+    >
+      <div className="mb-5 flex flex-wrap items-baseline gap-4">
+        <span className="type-label text-auburn-800 tracking-[0.12em]">
+          {indicator.n}
+        </span>
+        <span
+          className="type-label uppercase tracking-[0.12em]"
+          style={{ color: GRAY }}
+        >
+          {indicator.title}
+        </span>
+        <span
+          className={`type-label-sm uppercase tracking-[0.1em] px-2.5 py-[5px] leading-none whitespace-nowrap border ${badge.className}`}
+        >
+          {badge.label}
+        </span>
+      </div>
+      <StateChart spec={indicator.spec} wide={wide} />
+      <div
+        className="mt-5 pt-3.5 type-label-sm uppercase tracking-[0.08em]"
+        style={{ color: GRAY, borderTop: `1px solid ${BD}` }}
+      >
+        Source · {indicator.source}
+      </div>
+    </section>
   );
 }
 
-export default async function ProsperityDashboardPage() {
+export default async function StateOfTheNationPage() {
   const configData = getSiteConfig();
 
+  // Canada only — this page reads Canada against its own record.
   const results = await Promise.all(
-    DASHBOARD_INDICATORS.map((indicator) =>
-      getEconomicSeries(indicator.slug).catch(() => null),
+    SOTN_MEASURE_SLUGS.map((slug) =>
+      getEconomicSeries(slug, { jurisdictions: "ca" }).catch(() => null),
     ),
   );
   const responseBySlug = new Map(
-    DASHBOARD_INDICATORS.map((indicator, i) => [indicator.slug, results[i]]),
+    SOTN_MEASURE_SLUGS.map((slug, i) => [slug, results[i]]),
   );
+
+  const sections = buildSections((slug) => responseBySlug.get(slug) ?? null);
+  const indicators = sections.flatMap((section) => section.indicators);
+  const leadCount = indicators.filter((m) => m.verdict === "lead").length;
+  const lagCount = indicators.filter((m) => m.verdict === "lag").length;
+  const updated = lastUpdatedLabel(results);
 
   const jsonLd = buildGraph(
     generateOrganizationSchema(configData),
     generateBreadcrumbSchema(
       "/prosperity-dashboard",
-      "Prosperity Dashboard",
+      "State of the Nation",
       configData.siteUrl,
     ),
   );
@@ -124,76 +149,110 @@ export default async function ProsperityDashboardPage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <PageHeader title="Prosperity Dashboard" description={DESCRIPTION} />
 
-      <DashboardNav />
+      <header
+        className="max-w-[1180px] px-[clamp(24px,5vw,88px)] pt-[clamp(48px,8vw,104px)] pb-[clamp(36px,5vw,64px)]"
+        style={{ borderBottom: `1px solid ${BD}` }}
+      >
+        <div className="mb-7 type-label uppercase tracking-[0.16em] text-auburn-800">
+          State of the Nation · 2026
+        </div>
+        <h1 className="m-0 mb-8 font-display font-medium text-[clamp(2.8rem,6.2vw,5.4rem)] leading-[0.99] tracking-[-0.03em] text-balance">
+          Canada is not a poor country.
+          <br />
+          It is a country underperforming its potential.
+        </h1>
+        <p className="m-0 mb-10 max-w-[760px] font-body text-[clamp(1.2rem,2vw,1.5rem)] leading-normal tracking-[-0.01em] text-pretty">
+          Sixteen indicators, read honestly. Where we lead, where we lag, and
+          where the picture is genuinely mixed — Canada measured against its
+          own record. The numbers below are the starting point for every plan
+          we publish.
+        </p>
+        <div className="flex flex-wrap items-end gap-[clamp(20px,3vw,48px)]">
+          <div className="flex gap-8">
+            <div>
+              <div className="font-display text-[2.6rem] leading-none text-dark">
+                {leadCount}
+              </div>
+              <div
+                className="mt-2 type-label-sm uppercase tracking-[0.1em]"
+                style={{ color: GRAY }}
+              >
+                Areas we lead
+              </div>
+            </div>
+            <div>
+              <div className="font-display text-[2.6rem] leading-none text-auburn-800">
+                {lagCount}
+              </div>
+              <div
+                className="mt-2 type-label-sm uppercase tracking-[0.1em]"
+                style={{ color: GRAY }}
+              >
+                Areas we lag
+              </div>
+            </div>
+          </div>
+          <div
+            className="type-label-sm uppercase tracking-[0.09em] leading-[1.7] pl-6"
+            style={{ color: GRAY, borderLeft: `1px solid ${BD}` }}
+          >
+            {SOTN_INDICATOR_COUNT} indicators tracked
+            <br />
+            All figures from live sources
+            {updated && (
+              <>
+                <br />
+                Last updated · {updated}
+              </>
+            )}
+          </div>
+        </div>
+      </header>
 
-      <section className="px-5 py-12">
-        <div className="max-w-[1080px] mx-auto space-y-20">
-          {DASHBOARD_SECTIONS.map((section) => (
-            <section
-              key={section.id}
-              id={section.id}
-              className={SECTION_SCROLL_MT}
+      <div id="indicators">
+        {sections.map((section) => (
+          <section key={section.id} id={section.id}>
+            <div
+              className="px-[clamp(24px,5vw,88px)] pt-[clamp(40px,5vw,72px)] pb-[clamp(16px,2vw,28px)]"
+              style={{ borderBottom: `1px solid ${BD}` }}
             >
-              <h2 className="type-h3 text-dark">{section.title}</h2>
-              {section.description && (
-                <p className="mt-2 type-body text-dark/70 max-w-[720px]">
-                  {section.description}
-                </p>
-              )}
+              <h2 className="m-0 font-display font-medium text-[clamp(1.9rem,3.4vw,2.8rem)] leading-[1.02] tracking-[-0.02em]">
+                {section.title}
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2">
+              {section.indicators.map((indicator) => (
+                <IndicatorCard
+                  key={indicator.n}
+                  indicator={indicator}
+                  wide={section.indicators.length === 1}
+                />
+              ))}
+            </div>
+          </section>
+        ))}
+      </div>
 
-              {section.indicators.length > 0 && (
-                <div
-                  className={
-                    section.hero
-                      ? "mt-8 space-y-12"
-                      : "mt-8 grid gap-x-10 gap-y-12 lg:grid-cols-2"
-                  }
-                >
-                  {section.indicators.map((indicator) => (
-                    <ChartCard
-                      key={indicator.slug}
-                      indicator={indicator}
-                      response={responseBySlug.get(indicator.slug) ?? null}
-                    />
-                  ))}
-                </div>
-              )}
-
-              {section.planned && section.planned.length > 0 && (
-                <div className="mt-8 border border-dashed border-border-light px-5 py-4">
-                  <p className="type-label text-dark/70">In the works</p>
-                  <ul className="mt-2 space-y-1">
-                    {section.planned.map((planned) => (
-                      <li
-                        key={planned.heading}
-                        className="type-body-sm text-dark/60"
-                      >
-                        {planned.heading}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </section>
-          ))}
-
-          <div className="border-t border-border-light pt-12 text-center">
-            <h2 className="type-h3 text-dark">
-              Missing a measure that matters?
-            </h2>
-            <p className="mt-2 type-body text-dark/70 max-w-[560px] mx-auto">
-              We&rsquo;re expanding this dashboard. If there&rsquo;s an
-              indicator that would sharpen the picture — for better or worse
-              — tell us and we&rsquo;ll track it.
-            </p>
-            <a
-              href="mailto:hi@buildcanada.com?subject=Prosperity%20dashboard%20indicator%20request"
-              className="mt-6 inline-block border border-dark px-5 py-2.5 type-label text-dark hover:bg-dark hover:text-bg transition-colors"
-            >
-              Email us
-            </a>
+      <section
+        id="join"
+        className="bg-dark text-bg px-[clamp(24px,5vw,88px)] py-[clamp(56px,8vw,104px)]"
+      >
+        <div className="max-w-[820px]">
+          <div className="mb-6 type-label uppercase tracking-[0.16em] text-[#c9877f]">
+            Turn the numbers into plans
+          </div>
+          <h2 className="m-0 mb-6 font-display font-medium text-[clamp(2rem,4.5vw,3.4rem)] leading-[1.02] tracking-[-0.02em] text-balance">
+            The state of the nation is a choice. Help us change it.
+          </h2>
+          <p className="m-0 mb-10 max-w-[620px] font-body text-[clamp(1.1rem,2vw,1.4rem)] leading-normal text-[#d8cfc6] text-pretty">
+            We publish memos on behalf of Canada&rsquo;s top builders —
+            concrete plans to close the gaps above. Be first to know
+            what&rsquo;s possible.
+          </p>
+          <JoinForm />
+          <div className="mt-4 type-label-sm uppercase tracking-[0.08em] text-[#8f8880]">
+            No spam. Unsubscribe anytime.
           </div>
         </div>
       </section>

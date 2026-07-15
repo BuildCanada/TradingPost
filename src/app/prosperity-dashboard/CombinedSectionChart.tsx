@@ -41,7 +41,9 @@ function buildGrapherState(
 ): GrapherState | null {
   const first = items[0]?.response;
   if (!first) return null;
-  const monthly = first.data.measure.frequency === "monthly";
+  // Monthly and quarterly points both carry ISO dates and use Grapher's
+  // day-based time axis; annual points stay on integer years.
+  const dated = first.data.measure.frequency !== "annual";
   const { source } = first.meta;
 
   const itemSeries = items.map(
@@ -54,7 +56,7 @@ function buildGrapherState(
     const series = itemSeries[idx];
     if (!series) return [];
     return series.points.map((p) => ({
-      year: monthly && p.date ? daysSinceGrapherEpoch(p.date) : p.year,
+      year: dated && p.date ? daysSinceGrapherEpoch(p.date) : p.year,
       entity: { id: idx + 1, code: item.label, name: item.label },
       value: p.value,
     }));
@@ -74,7 +76,7 @@ function buildGrapherState(
     };
     data.push(
       ...longest.points.map((p) => ({
-        year: monthly && p.date ? daysSinceGrapherEpoch(p.date) : p.year,
+        year: dated && p.date ? daysSinceGrapherEpoch(p.date) : p.year,
         entity,
         value: benchmarkValue(benchmark, p.year),
       })),
@@ -89,7 +91,7 @@ function buildGrapherState(
     display: {
       name: heading,
       ...displayUnit(first.data.measure.unit),
-      ...(monthly ? { yearIsDay: true } : {}),
+      ...(dated ? { yearIsDay: true } : {}),
     },
     origins: source
       ? [

@@ -107,24 +107,34 @@ export default async function IndicatorSectionPage({ params }: PageProps) {
     ),
   );
 
-  const combinedItems = section.combined
-    ? section.indicators.flatMap((indicator, i) => {
-        const response = results[i];
-        return response
-          ? [{ label: indicator.chartLabel ?? indicator.heading, response }]
-          : [];
-      })
-    : [];
+  // Each combined chart overlays a subset of the section's indicators
+  // (defaulting to all of them), in the order its slugs list them.
+  const combinedCharts = (section.combined ?? []).flatMap((chart) => {
+    const slugs = chart.slugs ?? section.indicators.map((i) => i.slug);
+    const items = slugs.flatMap((slug) => {
+      const index = section.indicators.findIndex((i) => i.slug === slug);
+      const indicator = section.indicators[index];
+      const response = index >= 0 ? results[index] : null;
+      return indicator && response
+        ? [{ label: indicator.chartLabel ?? indicator.heading, response }]
+        : [];
+    });
+    return items.length > 0 ? [{ ...chart, items }] : [];
+  });
 
   const signpostHeadings = [
-    ...(section.combined && combinedItems.length > 0
-      ? [{ id: "combined", text: section.combined.heading, level: 2 as const }]
-      : []),
-    ...section.indicators.map((indicator) => ({
-      id: indicator.slug,
-      text: indicator.heading,
+    ...combinedCharts.map((chart) => ({
+      id: chart.id,
+      text: chart.heading,
       level: 2 as const,
     })),
+    ...section.indicators
+      .filter((indicator) => !indicator.combinedOnly)
+      .map((indicator) => ({
+        id: indicator.slug,
+        text: indicator.heading,
+        level: 2 as const,
+      })),
   ];
 
   return (
@@ -151,22 +161,23 @@ export default async function IndicatorSectionPage({ params }: PageProps) {
             showTopBorder={false}
           />
           <div className="max-w-[1080px] mx-auto 2xl-memo:mx-0 w-full min-w-0 space-y-16">
-            {section.combined && combinedItems.length > 0 && (
-              <section id="combined" className={SECTION_SCROLL_MT}>
-                <AnchoredHeading id="combined" text={section.combined.heading} />
+            {combinedCharts.map((chart) => (
+              <section key={chart.id} id={chart.id} className={SECTION_SCROLL_MT}>
+                <AnchoredHeading id={chart.id} text={chart.heading} />
                 <p className="mt-1 mb-6 type-body-sm text-dark/60 max-w-[720px]">
-                  {section.combined.blurb}
+                  {chart.blurb}
                 </p>
                 <CombinedSectionChartClient
-                  heading={section.combined.heading}
-                  items={combinedItems}
+                  heading={chart.heading}
+                  items={chart.items}
                   benchmark={section.benchmark}
                 />
-                <SourceLine response={combinedItems[0].response} />
+                <SourceLine response={chart.items[0].response} />
               </section>
-            )}
+            ))}
 
             {section.indicators.map((indicator, i) => {
+              if (indicator.combinedOnly) return null;
               const response = results[i];
               return (
                 <section

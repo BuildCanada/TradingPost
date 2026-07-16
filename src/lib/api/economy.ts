@@ -98,9 +98,11 @@ const SOURCE_NAMES: Record<string, string> = {
   econ_statcan_hourly_wages: "Statistics Canada (table 14-10-0064)",
   econ_statcan_business_dynamics: "Statistics Canada (table 33-10-0270)",
   econ_statcan_fdi_flows: "Statistics Canada (table 36-10-0025)",
+  econ_statcan_investment_position: "Statistics Canada (table 36-10-0008)",
   econ_statcan_capital_formation: "Statistics Canada (table 36-10-0104)",
   econ_statcan_govt_debt_to_gdp: "Statistics Canada (table 38-10-0237)",
   econ_statcan_population_components: "Statistics Canada (table 17-10-0008)",
+  econ_statcan_population_total: "Statistics Canada (table 17-10-0009)",
   econ_statcan_npr_by_type: "Statistics Canada (table 17-10-0121)",
   econ_ircc_pr_admissions: "Immigration, Refugees and Citizenship Canada",
 };
@@ -132,9 +134,11 @@ const STATCAN_TABLES: Record<string, string> = {
   econ_statcan_hourly_wages: "14-10-0064",
   econ_statcan_business_dynamics: "33-10-0270",
   econ_statcan_fdi_flows: "36-10-0025",
+  econ_statcan_investment_position: "36-10-0008",
   econ_statcan_capital_formation: "36-10-0104",
   econ_statcan_govt_debt_to_gdp: "38-10-0237",
   econ_statcan_population_components: "17-10-0008",
+  econ_statcan_population_total: "17-10-0009",
   econ_statcan_npr_by_type: "17-10-0121",
 };
 

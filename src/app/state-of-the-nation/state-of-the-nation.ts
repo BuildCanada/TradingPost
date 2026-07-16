@@ -47,13 +47,17 @@ export const SOTN_MEASURE_SLUGS = [
   "employment-rate-55-to-64",
   "employment-rate-15-plus",
   "business-entrants",
-  "employment-rate",
+  // "employment-rate" (annual 15+) removed with the "Employment" chart below —
+  // redundant with "Employment by age", which carries the 15+ line monthly.
+  // "employment-rate",
   "average-hourly-wage",
   "median-hourly-wage",
-  "fdi-inflows",
-  "fdi-outflows",
+  "fdi-position-in-canada",
+  "cdi-position-abroad",
   "capital-formation-pct-gdp",
-  "govt-gross-debt-to-gdp",
+  // Gross debt is deliberately not fetched or charted — it ignores the
+  // financial assets governments hold and overstates the burden. The debt
+  // chart shows net financial debt only (govt-net-debt-to-gdp).
   "govt-net-debt-to-gdp",
   "employment-all-classes",
   "employment-private-sector",
@@ -65,14 +69,22 @@ export const SOTN_MEASURE_SLUGS = [
   "population-canada",
   "emigrants-annual",
   "returning-emigrants-annual",
-  "immigrants-annual",
-  "npr-work-permit-holders",
-  "npr-total",
+  "pr-admissions-annual-historical",
+  // Temporarily disabled: the NPR-by-type series only start 2021 Q3, which was
+  // dragging the shared chart window forward to 2021. Commented out with the
+  // "Temporary foreign workers" indicator below so the window can reach back
+  // to 2015 (the next-shortest series: business formation and PR admissions).
+  // "npr-work-permit-holders",
+  // "npr-total",
   "pr-admissions-total",
   "pr-admissions-economic",
   "pr-admissions-family",
   "pr-admissions-refugee",
   "pr-admissions-other",
+  "pr-admissions-economic-historical",
+  "pr-admissions-family-historical",
+  "pr-admissions-refugee-historical",
+  "pr-admissions-other-historical",
 ];
 
 const MONTHS = [
@@ -80,11 +92,35 @@ const MONTHS = [
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ];
 
-function points(get: Getter, slug: string): EconomySeriesPoint[] | null {
+// The x window charts render in — a fixed 2000 start through the latest point
+// any series reports. Set at the top of buildIndicators.
+let sharedDomain: [number, number] = [2000, 2001];
+
+// Real GDP per capita is the one exception: it starts earlier to show its
+// deeper history (data begins 1981).
+const GDP_START = 1980;
+
+// Trims a series to a window start (default: the shared 2000 start; GDP passes
+// GDP_START). Series with longer histories are cut back to it; series that
+// begin later are left untouched and simply render partway into the window.
+function clip(
+  ps: EconomySeriesPoint[] | null,
+  start = sharedDomain[0],
+): EconomySeriesPoint[] | null {
+  if (!ps) return null;
+  const kept = ps.filter((p) => p.year >= start - 1e-6);
+  return kept.length > 1 ? kept : null;
+}
+
+function points(
+  get: Getter,
+  slug: string,
+  start = sharedDomain[0],
+): EconomySeriesPoint[] | null {
   const series = get(slug)?.data.series.find(
     (s) => s.jurisdiction.slug === "ca",
   );
-  return series && series.points.length > 1 ? series.points : null;
+  return clip(series && series.points.length > 1 ? series.points : null, start);
 }
 
 const last = (ps: EconomySeriesPoint[]) => ps[ps.length - 1];
@@ -157,20 +193,6 @@ function domainLabels(domain: [number, number]): [string, string, string] {
 
 const xs = (ps: EconomySeriesPoint[]) => ps.map((p) => p.year);
 
-// The [min, max] year span across every series a chart plots.
-function domainOf(...xsList: number[][]): [number, number] {
-  const all = xsList.flat();
-  return [Math.min(...all), Math.max(...all)];
-}
-
-// The decade marks (1970, 1980, …) that fall inside a domain — used to label
-// the x axis of long-running charts.
-function decades([a, b]: [number, number]): number[] {
-  const ticks: number[] = [];
-  for (let y = Math.ceil(a / 10) * 10; y <= b; y += 10) ticks.push(y);
-  return ticks;
-}
-
 // Restrict several series to the time keys they all report, so every line in
 // a combined chart has the same length.
 function align(
@@ -199,14 +221,53 @@ type SotnIndicator = {
     | null;
 };
 
-// The x domain and its labels are derived from the series themselves, so each
-// chart spans exactly the years it plots — no shared axis, no clipping.
+// Charts render in the shared x window (see buildIndicators) so the timelines
+// line up. A chart may pass an earlier `start` to reach further back — only
+// Real GDP per capita does, to show its deeper history.
 const line = (
   spec: Omit<LineSpec, "kind" | "xDomain" | "xLabels">,
+  start = sharedDomain[0],
 ): LineSpec => {
-  const xDomain = domainOf(...spec.series.map((s) => s.xs));
-  return { kind: "line", xDomain, xLabels: domainLabels(xDomain), ...spec };
+  const domain: [number, number] = [start, sharedDomain[1]];
+  return {
+    kind: "line",
+    xDomain: domain,
+    xLabels: domainLabels(domain),
+    ...spec,
+  };
 };
+
+// Splices an IRCC permanent-resident series into one annual line: archived
+// annual values for years before the cutover, then the ongoing monthly series
+// summed to complete calendar years from the cutover on. Complete years only —
+// a partial current year would read as a false collapse. Both slugs are
+// clipped to the shared window start by points().
+function spliceIrccAdmissions(
+  get: Getter,
+  historicalSlug: string,
+  monthlySlug: string,
+  cutover = 2015,
+): { year: number; value: number }[] {
+  const historical = points(get, historicalSlug);
+  const monthly = points(get, monthlySlug);
+  const byYear = new Map<number, { sum: number; n: number }>();
+  for (const p of monthly ?? []) {
+    const y = Math.floor(p.year);
+    const e = byYear.get(y) ?? { sum: 0, n: 0 };
+    e.sum += p.value;
+    e.n += 1;
+    byYear.set(y, e);
+  }
+  const out: { year: number; value: number }[] = [];
+  for (const p of historical ?? []) {
+    if (Math.floor(p.year) < cutover) out.push({ year: p.year, value: p.value });
+  }
+  for (const [y, e] of [...byYear].sort((a, b) => a[0] - b[0])) {
+    if (y >= cutover && e.n === 12) out.push({ year: y, value: e.sum });
+  }
+  out.sort((a, b) => a.year - b.year);
+  return out;
+}
 
 const INDICATORS: SotnIndicator[] = [
   {
@@ -217,7 +278,9 @@ const INDICATORS: SotnIndicator[] = [
     headline: "Living standards have gone sideways since 2022.",
     body: "Real output per person, in chained 2017 dollars — the clearest single measure of whether living standards are rising. StatCan's quarterly series runs within about two months of the present, and it shows a country producing no more per person than it did four years ago.",
     build: (get) => {
-      const ps = points(get, "gdp-per-capita-canada");
+      // GDP per capita is the one chart that reaches back past the shared 2000
+      // start (data begins 1981).
+      const ps = points(get, "gdp-per-capita-canada", GDP_START);
       if (!ps) return null;
       const latest = last(ps);
       // Index to the first point (= 100) so the chart reads as cumulative
@@ -233,12 +296,12 @@ const INDICATORS: SotnIndicator[] = [
         spec: line({
           unit: `Real GDP per capita (index, ${baseYear} = 100)`,
           fmt: "index",
-          // The headline chart spans decades; label each one rather than just
-          // the endpoints.
-          xTicks: decades(domainOf(xs(ps))),
+          // Indexed series: frame around 100 with a floating baseline there,
+          // rather than anchoring the axis at zero.
+          baseline: 100,
           legend: [{ label: "Canada", color: "au" }],
           series: [{ color: "au", xs: xs(ps), points: indexed }],
-        }),
+        }, GDP_START),
       };
     },
   },
@@ -303,6 +366,8 @@ const INDICATORS: SotnIndicator[] = [
       };
     },
   },
+  /* Removed — redundant with "Employment by age" (02), which already carries
+     the 15-and-over line monthly. Kept commented for easy restore.
   {
     n: "04",
     title: "Employment",
@@ -326,6 +391,7 @@ const INDICATORS: SotnIndicator[] = [
       };
     },
   },
+  */
   {
     n: "05",
     title: "Wage growth",
@@ -368,57 +434,37 @@ const INDICATORS: SotnIndicator[] = [
   },
   {
     n: "06",
-    title: "Investment flows",
+    title: "Investment position",
     verdict: "lag",
-    headline: "Canadian capital would rather invest abroad than at home.",
-    body: "Quarterly foreign-direct-investment flows into Canada and Canadian direct investment abroad, adjusted for inflation and smoothed as four-quarter averages (the raw quarters are far too jagged to read). Outflows are not a loss — they are Canadian firms investing elsewhere — but the persistent gap shows where capital would rather be.",
+    headline: "Canada now holds far more investment abroad than the world holds here.",
+    body: "The accumulated book value of direct investment — how much foreign capital is parked in Canada versus how much Canadian capital is parked abroad (StatCan table 36-10-0008, annual since 1987). In the late 1980s more foreign investment sat in Canada than Canadian investment sat abroad; the two crossed around 2000 and the gap has widened steadily since. Book value, not inflation-adjusted.",
     build: (get) => {
-      const inflows = points(get, "fdi-inflows");
-      const outflows = points(get, "fdi-outflows");
-      if (!inflows || !outflows) return null;
-      const aligned = align([inflows, outflows]);
+      const inCanada = points(get, "fdi-position-in-canada");
+      const abroad = points(get, "cdi-position-abroad");
+      if (!inCanada || !abroad) return null;
+      const aligned = align([inCanada, abroad]);
       if (!aligned) return null;
-      const deflator = cpiDeflator(get);
-      const real = (values: number[]) =>
-        deflator
-          ? values.map((v, i) => deflator.toReal(v, aligned.base[i].year))
-          : values;
-      const [realIn, realOut] = aligned.values.map(real);
-      // Quarterly FDI is extremely noisy; a trailing four-quarter average
-      // keeps the in-vs-out comparison legible.
-      const WINDOW = 4;
-      if (aligned.base.length <= WINDOW) return null;
-      const smooth = (values: number[]) =>
-        values
-          .slice(WINDOW - 1)
-          .map(
-            (_, i) =>
-              values.slice(i, i + WINDOW).reduce((a, b) => a + b, 0) / WINDOW,
-          );
-      const base = aligned.base.slice(WINDOW - 1);
-      // Trailing-year net flow: what actually arrived minus what left over
-      // the last four quarters.
-      const net = realIn
-        .slice(-WINDOW)
-        .reduce((a, b) => a + b, 0) -
-        realOut.slice(-WINDOW).reduce((a, b) => a + b, 0);
-      const latest = last(base);
+      // Plot in $ billions; the raw series are in $ millions.
+      const inB = aligned.values[0].map((v) => v / 1000);
+      const outB = aligned.values[1].map((v) => v / 1000);
+      // Net international direct-investment position: what sits in Canada minus
+      // what Canadians hold abroad. Negative = Canada is a net outward owner.
+      const net = inB[inB.length - 1] - outB[outB.length - 1];
+      const latest = last(aligned.base);
       return {
-        stat: `${net < 0 ? "−" : "+"}$${int(Math.abs(net) / 1000)}B`,
-        statSub: `Net direct investment, trailing year${deflator ? `, ${deflator.baseYear} dollars` : ""} · ${quarterLabel(latest)}`,
-        ...sourceLink(get, "fdi-inflows"),
+        stat: `${net < 0 ? "−" : "+"}$${int(Math.abs(net))}B`,
+        statSub: `Net direct investment position · ${Math.floor(latest.year)}`,
+        ...sourceLink(get, "fdi-position-in-canada"),
         spec: line({
-          unit: deflator
-            ? `Foreign direct investment, inflows vs outflows (${deflator.baseYear} dollars)`
-            : "Foreign direct investment, inflows vs outflows",
+          unit: "Direct investment position: in Canada vs abroad ($B)",
           fmt: "count",
           legend: [
-            { label: "Into Canada (4-qtr avg)", color: "au" },
-            { label: "Abroad (4-qtr avg)", color: "ink", dash: true },
+            { label: "Foreign-owned in Canada", color: "au" },
+            { label: "Canadian-owned abroad", color: "ink", dash: true },
           ],
           series: [
-            { color: "au", xs: xs(base), points: smooth(realIn) },
-            { color: "ink", dash: true, xs: xs(base), points: smooth(realOut) },
+            { color: "au", xs: xs(aligned.base), points: inB },
+            { color: "ink", dash: true, xs: xs(aligned.base), points: outB },
           ],
         }),
       };
@@ -449,32 +495,23 @@ const INDICATORS: SotnIndicator[] = [
   },
   {
     n: "08",
-    title: "Debt to GDP",
-    verdict: "lag",
-    headline: "Government debt has climbed back toward its 1990s crisis peak.",
-    body: "Count every level of government — federal, provincial, local, CPP and QPP — on a national-balance-sheet basis. Net debt subtracts financial assets, including the pension plans' holdings, which is why it sits far below the federal-budget figures in the news. The two lines measure different things; don't split the difference.",
+    title: "Net financial debt",
+    verdict: "lead",
+    headline: "Net financial debt sits near its lowest since 1990, far below the mid-1990s peak.",
+    body: "Every level of government — federal, provincial, local, CPP and QPP — on a national-balance-sheet basis. This is net financial debt: total liabilities minus financial assets (the pension plans' holdings included). It excludes tangible capital assets like roads and buildings, and it is the honest measure of the public sector's financial position. Gross debt ignores the assets held against those liabilities and overstates the burden; a net-worth measure would wrongly net out non-financial assets. This is neither — just liabilities net of financial assets.",
     build: (get) => {
-      const gross = points(get, "govt-gross-debt-to-gdp");
       const net = points(get, "govt-net-debt-to-gdp");
-      if (!gross || !net) return null;
-      const aligned = align([gross, net]);
-      if (!aligned) return null;
-      const latest = last(gross);
+      if (!net) return null;
+      const latest = last(net);
       return {
         stat: `${Math.round(latest.value)}%`,
-        statSub: `General government gross debt to GDP · ${quarterLabel(latest)}`,
-        ...sourceLink(get, "govt-gross-debt-to-gdp"),
+        statSub: `General government net financial debt to GDP · ${quarterLabel(latest)}`,
+        ...sourceLink(get, "govt-net-debt-to-gdp"),
         spec: line({
-          unit: "General government debt, share of GDP",
+          unit: "Government net financial debt, share of GDP",
           fmt: "pct",
-          legend: [
-            { label: "Gross debt", color: "au" },
-            { label: "Net liabilities", color: "ink", dash: true },
-          ],
-          series: [
-            { color: "au", xs: xs(aligned.base), points: aligned.values[0] },
-            { color: "ink", dash: true, xs: xs(aligned.base), points: aligned.values[1] },
-          ],
+          legend: [{ label: "Net financial debt", color: "au" }],
+          series: [{ color: "au", xs: xs(net), points: net.map((p) => p.value) }],
         }),
       };
     },
@@ -651,24 +688,38 @@ const INDICATORS: SotnIndicator[] = [
     title: "Permanent residents",
     verdict: "lead",
     headline: "Still one of the world's great immigration destinations — intake is easing off record highs.",
-    body: "Immigrants admitted per year, on StatCan's July–June demographic years. Handled well, this is an engine of growth; handled poorly, it strains the housing and services shown elsewhere on this page.",
+    body: "Permanent residents admitted per calendar year. Two IRCC sources are spliced into one continuous line: the archived by-category series (1980–2015) for the historical years, and IRCC's ongoing monthly admissions (summed to calendar years) from 2015 on. Handled well, this is an engine of growth; handled poorly, it strains the housing and services shown elsewhere on this page.",
     build: (get) => {
-      const ps = points(get, "immigrants-annual");
-      if (!ps) return null;
-      const latest = last(ps);
+      const series = spliceIrccAdmissions(
+        get,
+        "pr-admissions-annual-historical",
+        "pr-admissions-total",
+      );
+      if (series.length < 2) return null;
+      const latest = series[series.length - 1];
       return {
         stat: int(latest.value),
-        statSub: `Immigrants admitted · ${Math.floor(latest.year)} (July–June year)`,
-        ...sourceLink(get, "immigrants-annual"),
+        statSub: `Permanent residents admitted · ${Math.floor(latest.year)}`,
+        ...sourceLink(get, "pr-admissions-total"),
         spec: line({
           unit: "Permanent residents admitted per year",
           fmt: "count",
-          legend: [{ label: "Immigrants", color: "au" }],
-          series: [{ color: "au", xs: xs(ps), points: ps.map((p) => p.value) }],
+          legend: [{ label: "PR admissions", color: "au" }],
+          series: [
+            {
+              color: "au",
+              xs: series.map((p) => p.year),
+              points: series.map((p) => p.value),
+            },
+          ],
         }),
       };
     },
   },
+  /* Temporarily disabled — the NPR-by-type series only start 2021 Q3, which
+     forced the shared chart window forward to 2021. Re-enable together with
+     the "npr-work-permit-holders" / "npr-total" slugs above; note that doing
+     so pulls every chart's window back to 2021.
   {
     n: "15",
     title: "Temporary foreign workers",
@@ -701,25 +752,28 @@ const INDICATORS: SotnIndicator[] = [
       };
     },
   },
+  */
   {
     n: "16",
     title: "By class",
     verdict: "mixed",
     headline: "A shrinking intake, still anchored by the economic class.",
-    body: "Permanent residents admitted each month, by immigration class, from IRCC's monthly updates. IRCC rounds counts to the nearest 5 and suppresses small cells, so values are approximate and won't exactly match StatCan's July–June figures above. Students are not a PR class — they appear under work and study permits.",
+    body: "Permanent residents admitted per year by immigration class. Two IRCC sources are spliced per class: the archived by-category series through 2014, then the ongoing monthly admissions (summed to calendar years) from 2015 on. IRCC rounds counts and suppresses small cells, so values are approximate; the archived 'Other' bucket is narrower than today's, so that line's pre-2015 level isn't directly comparable. Students are not a PR class — they appear under work and study permits.",
     build: (get) => {
-      const total = points(get, "pr-admissions-total");
-      const economic = points(get, "pr-admissions-economic");
-      const family = points(get, "pr-admissions-family");
-      const refugee = points(get, "pr-admissions-refugee");
-      const other = points(get, "pr-admissions-other");
-      if (!total || !economic || !family || !refugee || !other) return null;
-      const aligned = align([total, economic, family, refugee, other]);
-      if (!aligned) return null;
-      const latest = last(aligned.base);
+      const economic = spliceIrccAdmissions(get, "pr-admissions-economic-historical", "pr-admissions-economic");
+      const family = spliceIrccAdmissions(get, "pr-admissions-family-historical", "pr-admissions-family");
+      const refugee = spliceIrccAdmissions(get, "pr-admissions-refugee-historical", "pr-admissions-refugee");
+      const other = spliceIrccAdmissions(get, "pr-admissions-other-historical", "pr-admissions-other");
+      const total = spliceIrccAdmissions(get, "pr-admissions-annual-historical", "pr-admissions-total");
+      if (economic.length < 2 || total.length < 2) return null;
+      const latest = total[total.length - 1];
+      const pts = (s: { year: number; value: number }[]) => ({
+        xs: s.map((p) => p.year),
+        points: s.map((p) => p.value),
+      });
       return {
-        stat: int(last(total).value),
-        statSub: `Permanent residents admitted, monthly · ${monthLabel(latest)}`,
+        stat: int(latest.value),
+        statSub: `Permanent residents admitted, by class · ${Math.floor(latest.year)}`,
         ...sourceLink(get, "pr-admissions-total"),
         spec: line({
           unit: "Permanent-resident admissions by class",
@@ -732,11 +786,11 @@ const INDICATORS: SotnIndicator[] = [
             { label: "Other", color: "sand" },
           ],
           series: [
-            { color: "au", xs: xs(aligned.base), points: aligned.values[1] },
-            { color: "ink", dash: true, xs: xs(aligned.base), points: aligned.values[0] },
-            { color: "clay", xs: xs(aligned.base), points: aligned.values[2] },
-            { color: "stone", xs: xs(aligned.base), points: aligned.values[3] },
-            { color: "sand", xs: xs(aligned.base), points: aligned.values[4] },
+            { color: "au", ...pts(economic) },
+            { color: "ink", dash: true, ...pts(total) },
+            { color: "clay", ...pts(family) },
+            { color: "stone", ...pts(refugee) },
+            { color: "sand", ...pts(other) },
           ],
         }),
       };
@@ -779,6 +833,20 @@ export function buildSections(get: Getter): SotnSection[] {
 }
 
 export function buildIndicators(get: Getter): SotnView[] {
+  // Standardize charts on one x window: a fixed start of 2000 through the
+  // latest point any series reports. Series that don't reach back to 2000
+  // begin partway in. Real GDP per capita is the exception — it passes
+  // GDP_START to show its deeper history.
+  let maxEnd = -Infinity;
+  for (const slug of SOTN_MEASURE_SLUGS) {
+    const series = get(slug)?.data.series.find(
+      (s) => s.jurisdiction.slug === "ca",
+    );
+    if (!series || series.points.length < 2) continue;
+    maxEnd = Math.max(maxEnd, series.points[series.points.length - 1].year);
+  }
+  sharedDomain = [2000, Number.isFinite(maxEnd) ? maxEnd : 2001];
+
   return INDICATORS.flatMap((indicator) => {
     const built = indicator.build(get);
     if (!built) return [];

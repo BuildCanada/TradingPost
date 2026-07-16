@@ -32,6 +32,10 @@ export type LineSpec = {
   // Optional explicit x-axis tick years (e.g. decade marks). When present they
   // replace the start/mid/end labels and sit at their true date on the axis.
   xTicks?: number[];
+  // When set, the y axis frames the data around this reference value instead
+  // of anchoring at zero, and a floating horizontal rule is drawn at it. Used
+  // by indexed series (e.g. 100 = base year) where zero carries no meaning.
+  baseline?: number;
   legend?: LegendItem[];
   // xs holds each point's fractional year, parallel to points.
   series: {
@@ -85,37 +89,56 @@ function niceStep(raw: number): number {
   return nice * mag;
 }
 
-// Frames the y axis around the data's own range rather than forcing a zero
-// baseline. Most of these series never approach zero — employment rates in the
-// 80s, index values near 150, GDP per capita in the tens of thousands — so
-// anchoring there flattens every line into a straight streak near the top.
-// Returns a padded range snapped to round tick values (~4–6 gridlines). Zero
-// is kept on the chart whenever the data goes negative, and a positive series
-// that sits close to zero still floors at zero rather than floating above it.
-function niceAxis(
-  dataMin: number,
-  dataMax: number,
-): { mn: number; mx: number; ticks: number[] } {
-  let lo = dataMin;
-  let hi = dataMax;
-  if (lo === hi) {
-    lo -= 1;
-    hi += 1;
-  }
-  const span = hi - lo;
-  lo -= span * 0.08;
-  hi += span * 0.08;
-  if (dataMin >= 0 && lo < 0) lo = 0;
-  const step = niceStep((hi - lo) / 4);
-  const mn = Math.floor(lo / step) * step;
-  const mx = Math.ceil(hi / step) * step;
+// Builds the tick array for a snapped [mn, mx] range. The 0.001·step slack
+// absorbs floating-point drift so the top tick isn't dropped or doubled.
+function buildTicks(mn: number, mx: number, step: number): number[] {
   const ticks: number[] = [];
-  // The 0.001·step slack absorbs floating-point drift so the top tick isn't
-  // dropped or doubled.
   for (let v = mn; v <= mx + step * 0.001; v += step) {
     ticks.push(Math.abs(v) < step * 1e-9 ? 0 : v);
   }
-  return { mn, mx, ticks };
+  return ticks;
+}
+
+// Chooses the y-axis range and round tick values.
+// - Default: anchored at zero, so every line reads as a magnitude from zero
+//   and the charts are comparable (extends below zero only for negative data).
+// - With a `baseline` (e.g. an index's 100): frames the data around that
+//   reference instead — zero carries no meaning for an indexed series — while
+//   guaranteeing the baseline itself stays on the chart.
+function niceAxis(
+  dataMin: number,
+  dataMax: number,
+  baseline?: number,
+): { mn: number; mx: number; ticks: number[] } {
+  if (baseline !== undefined) {
+    let lo = Math.min(dataMin, baseline);
+    let hi = Math.max(dataMax, baseline);
+    if (hi === lo) {
+      lo -= 1;
+      hi += 1;
+    }
+    const span = hi - lo;
+    lo -= span * 0.08;
+    hi += span * 0.08;
+    const step = niceStep((hi - lo) / 4);
+    const mn = Math.floor(lo / step) * step;
+    const mx = Math.ceil(hi / step) * step;
+    return { mn, mx, ticks: buildTicks(mn, mx, step) };
+  }
+  // Start from zero on both ends, then open whichever side the data occupies.
+  let lo = Math.min(0, dataMin);
+  let hi = Math.max(0, dataMax);
+  if (hi === lo) hi += 1;
+  const span = hi - lo;
+  // Pad only away from zero; the zero side stays pinned to the axis.
+  if (hi > 0) hi += span * 0.08;
+  if (lo < 0) lo -= span * 0.08;
+  const step = niceStep((hi - lo) / 4);
+  // Zero stays exactly on a gridline: the positive side ceils to a round tick,
+  // the negative side (if any) floors to one.
+  const mn = lo < 0 ? Math.floor(lo / step) * step : 0;
+  const mx = hi > 0 ? Math.ceil(hi / step) * step : 0;
+  return { mn, mx, ticks: buildTicks(mn, mx, step) };
 }
 
 function LineChart({ spec, wide }: { spec: LineSpec; wide?: boolean }) {
@@ -131,16 +154,24 @@ function LineChart({ spec, wide }: { spec: LineSpec; wide?: boolean }) {
   const iw = W - L - R,
     ih = H - T - B;
   const all = spec.series.flatMap((s) => s.points);
-  // Frame the y axis around the data's own range (see niceAxis) so each trend
-  // fills the panel instead of flattening against a zero baseline.
-  const { mn, mx, ticks } = niceAxis(Math.min(...all), Math.max(...all));
-  const crossesZero = mn < 0 && mx > 0;
+  const { mn, mx, ticks } = niceAxis(
+    Math.min(...all),
+    Math.max(...all),
+    spec.baseline,
+  );
   const [d0, d1] = spec.xDomain;
   const X = (x: number) => L + iw * ((x - d0) / (d1 - d0));
   const Y = (v: number) => T + ih * (1 - (v - mn) / (mx - mn));
-  // Area fills close at the bottom of the framed panel — or at the zero line
-  // when the data straddles it.
-  const baseY = Y(crossesZero ? 0 : mn);
+  // The emphasized horizontal rule: the declared baseline (e.g. an index's
+  // 100) when present, otherwise the zero axis. Area fills close here.
+  const refVal = spec.baseline ?? 0;
+  const refOnAxis = refVal >= mn - 1e-9 && refVal <= mx + 1e-9;
+  // Drawn as a floating line only when it sits inside the range and isn't
+  // already one of the round ticks (which carry the ink weight themselves).
+  const refOnTick = ticks.some((t) => Math.abs(t - refVal) < 1e-9);
+  const showFloatingRef =
+    refOnAxis && !refOnTick && refVal > mn + 1e-9 && refVal < mx - 1e-9;
+  const baseY = Y(refOnAxis ? refVal : mn);
   // Ticks sit at the domain edges and middle — identical across charts.
   const tickX = [L, L + iw / 2, L + iw];
 
@@ -151,10 +182,11 @@ function LineChart({ spec, wide }: { spec: LineSpec; wide?: boolean }) {
       style={{ display: "block", overflow: "visible" }}
       preserveAspectRatio="xMidYMid meet"
     >
-      {ticks.map((tv, i) => {
+      {ticks.map((tv) => {
         const gy = Y(tv);
-        // The lowest tick doubles as the bottom axis and gets the ink weight.
-        const isBase = i === 0;
+        // The reference line (baseline, or zero by default) carries the ink
+        // weight; every other tick is a light gridline.
+        const isRef = Math.abs(tv - refVal) < 1e-9;
         return (
           <g key={tv}>
             <line
@@ -162,8 +194,8 @@ function LineChart({ spec, wide }: { spec: LineSpec; wide?: boolean }) {
               y1={gy}
               x2={L + iw}
               y2={gy}
-              stroke={isBase ? INK : GRID}
-              strokeWidth={isBase ? 1.5 : 1}
+              stroke={isRef ? INK : GRID}
+              strokeWidth={isRef ? 1.5 : 1}
             />
             <text
               x={L + iw + 8}
@@ -177,12 +209,12 @@ function LineChart({ spec, wide }: { spec: LineSpec; wide?: boolean }) {
           </g>
         );
       })}
-      {crossesZero && (
+      {showFloatingRef && (
         <line
           x1={L}
-          y1={Y(0)}
+          y1={Y(refVal)}
           x2={L + iw}
-          y2={Y(0)}
+          y2={Y(refVal)}
           stroke={INK}
           strokeWidth={1}
         />

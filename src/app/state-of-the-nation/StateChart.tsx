@@ -256,8 +256,11 @@ function LineChart({ spec, wide }: { spec: LineSpec; wide?: boolean }) {
         const col = SERIES_COLORS[s.color];
         const end = s.points.length - 1;
         const pts = s.points.map((v, i) => `${X(s.xs[i])},${Y(v)}`).join(" ");
+        // Fill only single-series trend charts. On multi-line comparisons the
+        // fill sits under whichever series happens to be first (often not the
+        // dominant line), which reads as arbitrary shading.
         const area =
-          si === 0
+          si === 0 && spec.series.length === 1
             ? `M${X(s.xs[0])},${Y(s.points[0])} ` +
               s.points.map((v, i) => `L${X(s.xs[i])},${Y(v)}`).join(" ") +
               ` L${X(s.xs[end])},${baseY} L${X(s.xs[0])},${baseY} Z`

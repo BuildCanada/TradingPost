@@ -51,17 +51,6 @@ function IndicatorCard({
         : "pt-[clamp(32px,4vw,56px)] lg:[&:nth-child(odd):not(:last-child)]:border-r"
         }`}
     >
-      <div className="mb-5 flex flex-wrap items-baseline gap-4">
-        <span className="type-label text-auburn-800 tracking-[0.12em]">
-          {indicator.n}
-        </span>
-        <span
-          className="type-label uppercase tracking-[0.12em]"
-          style={{ color: GRAY }}
-        >
-          {indicator.title}
-        </span>
-      </div>
       <StateChart spec={indicator.spec} wide={wide} />
       <div
         className="mt-5 pt-3.5 type-label-sm uppercase tracking-[0.08em]"

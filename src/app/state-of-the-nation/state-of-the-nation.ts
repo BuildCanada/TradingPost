@@ -46,7 +46,11 @@ export const SOTN_MEASURE_SLUGS = [
   "employment-rate-15-to-24",
   "employment-rate-55-to-64",
   "employment-rate-15-plus",
-  "business-entrants",
+  // Business entries chart: the discontinued quarterly series (2000-2019)
+  // chain-linked with the ongoing monthly openings series. "business-entrants"
+  // (the narrower 2015+ first-ever formation) is no longer charted.
+  "business-entries-historical",
+  "business-openings",
   // "employment-rate" (annual 15+) removed with the "Employment" chart below —
   // redundant with "Employment by age", which carries the 15+ line monthly.
   // "employment-rate",
@@ -92,17 +96,14 @@ const MONTHS = [
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ];
 
-// The x window charts render in — a fixed 2000 start through the latest point
+// The x window charts render in — a fixed 1980 start through the latest point
 // any series reports. Set at the top of buildIndicators.
-let sharedDomain: [number, number] = [2000, 2001];
+let sharedDomain: [number, number] = [1980, 1981];
 
-// Real GDP per capita is the one exception: it starts earlier to show its
-// deeper history (data begins 1981).
-const GDP_START = 1980;
-
-// Trims a series to a window start (default: the shared 2000 start; GDP passes
-// GDP_START). Series with longer histories are cut back to it; series that
-// begin later are left untouched and simply render partway into the window.
+// Trims a series to a window start (default: the shared 1980 start). Series
+// with longer histories are cut back to it; series that begin later are left
+// untouched and simply render partway into the window. The optional `start`
+// lets a chart reach back further if ever needed.
 function clip(
   ps: EconomySeriesPoint[] | null,
   start = sharedDomain[0],
@@ -222,8 +223,8 @@ type SotnIndicator = {
 };
 
 // Charts render in the shared x window (see buildIndicators) so the timelines
-// line up. A chart may pass an earlier `start` to reach further back — only
-// Real GDP per capita does, to show its deeper history.
+// line up. A chart may pass an earlier `start` to reach further back, though
+// none currently does — every chart uses the shared 1980 start.
 const line = (
   spec: Omit<LineSpec, "kind" | "xDomain" | "xLabels">,
   start = sharedDomain[0],
@@ -278,9 +279,7 @@ const INDICATORS: SotnIndicator[] = [
     headline: "Living standards have gone sideways since 2022.",
     body: "Real output per person, in chained 2017 dollars — the clearest single measure of whether living standards are rising. StatCan's quarterly series runs within about two months of the present, and it shows a country producing no more per person than it did four years ago.",
     build: (get) => {
-      // GDP per capita is the one chart that reaches back past the shared 2000
-      // start (data begins 1981).
-      const ps = points(get, "gdp-per-capita-canada", GDP_START);
+      const ps = points(get, "gdp-per-capita-canada");
       if (!ps) return null;
       const latest = last(ps);
       // Index to the first point (= 100) so the chart reads as cumulative
@@ -301,7 +300,7 @@ const INDICATORS: SotnIndicator[] = [
           baseline: 100,
           legend: [{ label: "Canada", color: "au" }],
           series: [{ color: "au", xs: xs(ps), points: indexed }],
-        }, GDP_START),
+        }),
       };
     },
   },
@@ -345,23 +344,64 @@ const INDICATORS: SotnIndicator[] = [
   },
   {
     n: "03",
-    title: "Business formation",
-    verdict: "lag",
-    headline: "New business creation has stalled.",
-    body: "Businesses appearing for the first time, monthly and seasonally adjusted — true new-business formation, not seasonal reopenings. Experimental estimates (Statistics Canada).",
+    title: "Business entries",
+    verdict: "mixed",
+    headline: "Business entry has held up since 2000, but much of it is churn.",
+    body: "New business entries per year — businesses gaining a paid employee, including seasonal reopenings, not only first-ever formation. Two StatCan sources are chain-linked: the discontinued quarterly entry series (2000–2019, private sector) rescaled to meet the ongoing monthly openings series (2015→present, business sector) at their overlap, so the trend is continuous across the 2015 join. Source tables 33-10-0165 and 33-10-0270.",
     build: (get) => {
-      const entrants = points(get, "business-entrants");
-      if (!entrants) return null;
-      const latest = last(entrants);
+      const histRaw = points(get, "business-entries-historical");
+      const openRaw = points(get, "business-openings");
+      if (!histRaw || !openRaw) return null;
+      // Sum sub-annual points into complete calendar years only.
+      const annualize = (
+        ps: EconomySeriesPoint[],
+        perYear: number,
+      ): Map<number, number> => {
+        const acc = new Map<number, { sum: number; n: number }>();
+        for (const p of ps) {
+          const y = Math.floor(p.year);
+          const e = acc.get(y) ?? { sum: 0, n: 0 };
+          e.sum += p.value;
+          e.n += 1;
+          acc.set(y, e);
+        }
+        const out = new Map<number, number>();
+        for (const [y, e] of acc) if (e.n === perYear) out.set(y, e.sum);
+        return out;
+      };
+      const hist = annualize(histRaw, 4); // quarterly
+      const open = annualize(openRaw, 12); // monthly
+      // Chain-link: the two tables differ in scope (~11% level), so rescale the
+      // ongoing openings series to the historical level over their overlap,
+      // preserving the trend across the join.
+      const overlap = [...hist.keys()].filter((y) => open.has(y));
+      if (overlap.length === 0) return null;
+      const factor =
+        overlap.reduce((a, y) => a + hist.get(y)! / open.get(y)!, 0) /
+        overlap.length;
+      // Historical before the cutover, rescaled openings from it on.
+      const CUTOVER = 2015;
+      const series: { year: number; value: number }[] = [];
+      for (const [y, v] of hist) if (y < CUTOVER) series.push({ year: y, value: v });
+      for (const [y, v] of open) if (y >= CUTOVER) series.push({ year: y, value: v * factor });
+      series.sort((a, b) => a.year - b.year);
+      if (series.length < 2) return null;
+      const latest = series[series.length - 1];
       return {
         stat: int(latest.value),
-        statSub: `New businesses, monthly · ${monthLabel(latest)}`,
-        ...sourceLink(get, "business-entrants"),
+        statSub: `Business entries per year · ${Math.floor(latest.year)}`,
+        ...sourceLink(get, "business-openings"),
         spec: line({
-          unit: "New business formation, monthly",
+          unit: "Business entries per year",
           fmt: "count",
-          legend: [{ label: "New businesses", color: "au" }],
-          series: [{ color: "au", xs: xs(entrants), points: entrants.map((p) => p.value) }],
+          legend: [{ label: "Business entries", color: "au" }],
+          series: [
+            {
+              color: "au",
+              xs: series.map((p) => p.year),
+              points: series.map((p) => p.value),
+            },
+          ],
         }),
       };
     },
@@ -560,27 +600,44 @@ const INDICATORS: SotnIndicator[] = [
     n: "10",
     title: "Consumer prices",
     verdict: "lag",
-    headline: "Prices broke from the 2% track in 2021 and never came back.",
-    body: "The all-items Consumer Price Index, month by month (2002 = 100). The dashed line is where prices would sit had they grown at the Bank of Canada's 2% inflation target — the gap above it is permanent lost ground.",
+    headline: "Inflation broke above target in 2021–22 and is only now easing back toward 2%.",
+    body: "The 12-month change in the all-items Consumer Price Index — the headline inflation rate, month by month. The dashed line is the Bank of Canada's 2% target. After four decades of gradual disinflation from the double-digit early 1980s, inflation spiked above 8% in 2022 before easing back toward target.",
     build: (get) => {
-      const cpi = points(get, "cpi-all-items");
-      if (!cpi) return null;
-      const target = cpi.map((p) => 100 * Math.pow(1.02, p.year - 2002));
-      const latest = last(cpi);
+      // Raw (unclipped) monthly CPI so the year-over-year rate is defined right
+      // at the 1980 window start — computing 1980's rate needs 1979's index.
+      const raw = get("cpi-all-items")?.data.series.find(
+        (s) => s.jurisdiction.slug === "ca",
+      )?.points;
+      if (!raw || raw.length < 13) return null;
+      const byMonth = new Map(
+        raw.filter((p) => p.date).map((p) => [p.date!, p.value]),
+      );
+      // 12-month percentage change for each month with a value a year earlier,
+      // kept from the shared window start on.
+      const rate = raw.flatMap((p) => {
+        if (!p.date) return [];
+        const prior = byMonth.get(
+          `${Number(p.date.slice(0, 4)) - 1}${p.date.slice(4)}`,
+        );
+        if (prior === undefined || p.year < sharedDomain[0]) return [];
+        return [{ year: p.year, value: (p.value / prior - 1) * 100 }];
+      });
+      if (rate.length < 2) return null;
+      const rateXs = rate.map((p) => p.year);
       return {
-        stat: String(latest.value.toFixed(1)),
-        statSub: `CPI, all items (2002 = 100) · ${monthLabel(latest)}`,
+        stat: `${rate[rate.length - 1].value.toFixed(1)}%`,
+        statSub: `CPI inflation, 12-month change · ${monthLabel(raw[raw.length - 1])}`,
         ...sourceLink(get, "cpi-all-items"),
         spec: line({
-          unit: "Consumer Price Index vs the 2% target path",
-          fmt: "index",
+          unit: "Consumer price inflation vs the 2% target",
+          fmt: "pct1",
           legend: [
-            { label: "CPI", color: "au" },
-            { label: "2% target path", color: "ink", dash: true },
+            { label: "Inflation (12-month)", color: "au" },
+            { label: "2% target", color: "ink", dash: true },
           ],
           series: [
-            { color: "au", xs: xs(cpi), points: cpi.map((p) => p.value) },
-            { color: "ink", dash: true, xs: xs(cpi), points: target },
+            { color: "au", xs: rateXs, points: rate.map((p) => p.value) },
+            { color: "ink", dash: true, xs: rateXs, points: rate.map(() => 2) },
           ],
         }),
       };
@@ -590,19 +647,22 @@ const INDICATORS: SotnIndicator[] = [
     n: "11",
     title: "Housing affordability",
     verdict: "lag",
-    headline: "House prices sit half again above their long-term relationship with incomes.",
-    body: "The OECD's headline affordability measure compares home prices with the incomes that must carry them. Canada's ratio now runs roughly fifty per cent above its long-term average — among the most stretched in the developed world, pricing a whole generation out of ownership.",
+    headline: "House prices have swung from below their long-term norm to roughly 50% above it.",
+    body: "The OECD's headline affordability measure, indexed so 100 is the long-term average of Canada's house-price-to-income ratio. Below the line, homes are cheaper than the historical norm relative to incomes; above it, more stretched. Canada sat below through the 1990s and 2000s, crossed the norm around 2009, and now runs about fifty per cent above — among the most stretched in the developed world.",
     build: (get) => {
       const ps = points(get, "house-price-to-income");
       if (!ps) return null;
       const latest = last(ps);
       return {
-        stat: `${(latest.value / 100).toFixed(1)}×`,
-        statSub: `House price to income vs. long-term norm · ${Math.floor(latest.year)}`,
+        stat: `+${Math.round(latest.value - 100)}%`,
+        statSub: `Above the long-term price-to-income average · ${Math.floor(latest.year)}`,
         ...sourceLink(get, "house-price-to-income"),
         spec: line({
-          unit: "House-price-to-income ratio (100 = long-term norm)",
+          unit: "House-price-to-income ratio (100 = long-term average)",
           fmt: "index",
+          // Index where 100 = the long-term norm: frame around it with a
+          // floating baseline instead of anchoring at zero.
+          baseline: 100,
           legend: [{ label: "Canada", color: "au" }],
           series: [{ color: "au", xs: xs(ps), points: ps.map((p) => p.value) }],
         }),
@@ -833,10 +893,9 @@ export function buildSections(get: Getter): SotnSection[] {
 }
 
 export function buildIndicators(get: Getter): SotnView[] {
-  // Standardize charts on one x window: a fixed start of 2000 through the
-  // latest point any series reports. Series that don't reach back to 2000
-  // begin partway in. Real GDP per capita is the exception — it passes
-  // GDP_START to show its deeper history.
+  // Standardize charts on one x window: a fixed start of 1980 through the
+  // latest point any series reports. Series that don't reach back to 1980
+  // begin partway in, leaving their early years blank.
   let maxEnd = -Infinity;
   for (const slug of SOTN_MEASURE_SLUGS) {
     const series = get(slug)?.data.series.find(
@@ -845,7 +904,7 @@ export function buildIndicators(get: Getter): SotnView[] {
     if (!series || series.points.length < 2) continue;
     maxEnd = Math.max(maxEnd, series.points[series.points.length - 1].year);
   }
-  sharedDomain = [2000, Number.isFinite(maxEnd) ? maxEnd : 2001];
+  sharedDomain = [1980, Number.isFinite(maxEnd) ? maxEnd : 1981];
 
   return INDICATORS.flatMap((indicator) => {
     const built = indicator.build(get);

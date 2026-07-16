@@ -216,7 +216,7 @@ const INDICATORS: SotnIndicator[] = [
         statSub: `Real GDP per capita, chained 2017 $ · ${quarterLabel(latest)}`,
         ...sourceLink(get, "gdp-per-capita-canada"),
         spec: line({
-          unit: "Economic output per person",
+          unit: "Real GDP per capita",
           fmt: "money",
           legend: [{ label: "Canada", color: "au" }],
           series: [{ color: "au", xs: xs(ps), points: ps.map((p) => p.value) }],
@@ -244,7 +244,7 @@ const INDICATORS: SotnIndicator[] = [
         statSub: `Employment rate, 25–54 · ${monthLabel(latest)}`,
         ...sourceLink(get, "employment-rate-25-to-54"),
         spec: line({
-          unit: "Who's working, by age group",
+          unit: "Employment rate by age group",
           fmt: "pct",
           legend: [
             { label: "25–54", color: "au" },
@@ -277,7 +277,7 @@ const INDICATORS: SotnIndicator[] = [
         statSub: `New businesses, monthly · ${monthLabel(latest)}`,
         ...sourceLink(get, "business-entrants"),
         spec: line({
-          unit: "New businesses started each month",
+          unit: "New business formation, monthly",
           fmt: "count",
           legend: [{ label: "New businesses", color: "au" }],
           series: [{ color: "au", xs: xs(entrants), points: entrants.map((p) => p.value) }],
@@ -300,7 +300,7 @@ const INDICATORS: SotnIndicator[] = [
         statSub: `Employment rate, 15+ · ${Math.floor(latest.year)}`,
         ...sourceLink(get, "employment-rate"),
         spec: line({
-          unit: "The share of Canadians who work",
+          unit: "Employment rate, ages 15 and over",
           fmt: "pct",
           legend: [{ label: "Canada", color: "au" }],
           series: [{ color: "au", xs: xs(ps), points: ps.map((p) => p.value) }],
@@ -333,8 +333,8 @@ const INDICATORS: SotnIndicator[] = [
         ...sourceLink(get, "average-hourly-wage"),
         spec: line({
           unit: deflator
-            ? `What Canadians earn per hour, in ${deflator.baseYear} dollars`
-            : "What Canadians earn per hour",
+            ? `Real hourly wages, average vs median (${deflator.baseYear} dollars)`
+            : "Hourly wages, average vs median",
           fmt: "money",
           legend: [
             { label: "Average", color: "au" },
@@ -391,8 +391,8 @@ const INDICATORS: SotnIndicator[] = [
         ...sourceLink(get, "fdi-inflows"),
         spec: line({
           unit: deflator
-            ? `Investment coming into Canada vs leaving it, in ${deflator.baseYear} dollars`
-            : "Investment coming into Canada vs leaving it",
+            ? `Foreign direct investment, inflows vs outflows (${deflator.baseYear} dollars)`
+            : "Foreign direct investment, inflows vs outflows",
           fmt: "count",
           legend: [
             { label: "Into Canada (4-qtr avg)", color: "au" },
@@ -421,7 +421,7 @@ const INDICATORS: SotnIndicator[] = [
         statSub: `Gross capital formation, % of GDP · ${Math.floor(latest.year)}`,
         ...sourceLink(get, "capital-formation-pct-gdp"),
         spec: line({
-          unit: "How much of the economy goes to building",
+          unit: "Gross capital formation, share of GDP",
           fmt: "pct",
           legend: [{ label: "Canada", color: "au" }],
           series: [{ color: "au", xs: xs(ps), points: ps.map((p) => p.value) }],
@@ -447,7 +447,7 @@ const INDICATORS: SotnIndicator[] = [
         statSub: `General government gross debt to GDP · ${quarterLabel(latest)}`,
         ...sourceLink(get, "govt-gross-debt-to-gdp"),
         spec: line({
-          unit: "What every level of government owes",
+          unit: "General government debt, share of GDP",
           fmt: "pct",
           legend: [
             { label: "Gross debt", color: "au" },
@@ -485,7 +485,7 @@ const INDICATORS: SotnIndicator[] = [
         statSub: `Public share of employment · ${monthLabel(latest)}`,
         ...sourceLink(get, "employment-all-classes"),
         spec: line({
-          unit: "Where Canadians work: public vs private",
+          unit: "Employment share by class of worker",
           fmt: "pct",
           legend: [
             { label: "Public sector", color: "au" },
@@ -517,7 +517,7 @@ const INDICATORS: SotnIndicator[] = [
         statSub: `CPI, all items (2002 = 100) · ${monthLabel(latest)}`,
         ...sourceLink(get, "cpi-all-items"),
         spec: line({
-          unit: "Consumer prices vs the 2% target",
+          unit: "Consumer Price Index vs the 2% target path",
           fmt: "index",
           legend: [
             { label: "CPI", color: "au" },
@@ -546,7 +546,7 @@ const INDICATORS: SotnIndicator[] = [
         statSub: `House price to income vs. long-term norm · ${Math.floor(latest.year)}`,
         ...sourceLink(get, "house-price-to-income"),
         spec: line({
-          unit: "Home prices vs incomes (100 = the long-term norm)",
+          unit: "House-price-to-income ratio (100 = long-term norm)",
           fmt: "index",
           legend: [{ label: "Canada", color: "au" }],
           series: [{ color: "au", xs: xs(ps), points: ps.map((p) => p.value) }],
@@ -569,7 +569,7 @@ const INDICATORS: SotnIndicator[] = [
         statSub: `Dwelling units started · ${Math.floor(latest.year)}`,
         ...sourceLink(get, "housing-starts-canada"),
         spec: line({
-          unit: "Homes started each year",
+          unit: "Annual housing starts",
           fmt: "count",
           legend: [{ label: "Housing starts", color: "au" }],
           series: [{ color: "au", xs: xs(ps), points: ps.map((p) => p.value) }],
@@ -596,7 +596,7 @@ const INDICATORS: SotnIndicator[] = [
         statSub: `Net emigration · ${Math.floor(latest.year)} (July–June year)`,
         ...sourceLink(get, "emigrants-annual"),
         spec: line({
-          unit: "People leaving Canada for good",
+          unit: "Emigrants, net of returning Canadians",
           fmt: "count",
           legend: [{ label: "Net emigration", color: "au" }],
           series: [{ color: "au", xs: xs(aligned.base), points: net }],
@@ -619,7 +619,7 @@ const INDICATORS: SotnIndicator[] = [
         statSub: `Immigrants admitted · ${Math.floor(latest.year)} (July–June year)`,
         ...sourceLink(get, "immigrants-annual"),
         spec: line({
-          unit: "New permanent residents each year",
+          unit: "Permanent residents admitted per year",
           fmt: "count",
           legend: [{ label: "Immigrants", color: "au" }],
           series: [{ color: "au", xs: xs(ps), points: ps.map((p) => p.value) }],
@@ -645,7 +645,7 @@ const INDICATORS: SotnIndicator[] = [
         statSub: `Work-permit holders · ${quarterLabel(latest)}`,
         ...sourceLink(get, "npr-work-permit-holders"),
         spec: line({
-          unit: "People in Canada on temporary permits",
+          unit: "Work-permit holders vs all non-permanent residents",
           fmt: "count",
           legend: [
             { label: "Work permits", color: "au" },
@@ -680,7 +680,7 @@ const INDICATORS: SotnIndicator[] = [
         statSub: `Permanent residents admitted, monthly · ${monthLabel(latest)}`,
         ...sourceLink(get, "pr-admissions-total"),
         spec: line({
-          unit: "Permanent residents by immigration class",
+          unit: "Permanent-resident admissions by class",
           fmt: "count",
           legend: [
             { label: "Economic", color: "au" },

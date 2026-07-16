@@ -16,13 +16,20 @@ export type LineSpec = {
   kind: "line";
   unit: string;
   fmt: ChartFmt;
-  // Tick labels for the first, middle, and last x positions.
+  // Time domain in fractional years. Every chart on the page passes the same
+  // domain, so a given horizontal position means the same date on every
+  // graph; series that begin later simply start partway in.
+  xDomain: [number, number];
+  // Tick labels for the left edge, middle, and right edge of the domain.
   xLabels: [string, string, string];
   legend?: LegendItem[];
-  // Series must share the same start and cadence but may differ in length —
-  // a shorter series (e.g. business exits, confirmed ~6 months late) simply
-  // stops early instead of being stretched or clipping the others.
-  series: { color: SeriesColor; dash?: boolean; points: number[] }[];
+  // xs holds each point's fractional year, parallel to points.
+  series: {
+    color: SeriesColor;
+    dash?: boolean;
+    xs: number[];
+    points: number[];
+  }[];
 };
 
 export type BarSpec = {
@@ -57,6 +64,48 @@ function fmt(v: number, f: ChartFmt): string {
   return Math.round(v).toLocaleString("en-CA");
 }
 
+// A round-number step (1, 2, 2.5, 5, ×10ⁿ) closest to the raw interval, so
+// axis labels land on clean values.
+function niceStep(raw: number): number {
+  const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const norm = raw / mag;
+  const nice = norm <= 1 ? 1 : norm <= 2 ? 2 : norm <= 2.5 ? 2.5 : norm <= 5 ? 5 : 10;
+  return nice * mag;
+}
+
+// Frames the y axis around the data's own range rather than forcing a zero
+// baseline. Most of these series never approach zero — employment rates in the
+// 80s, index values near 150, GDP per capita in the tens of thousands — so
+// anchoring there flattens every line into a straight streak near the top.
+// Returns a padded range snapped to round tick values (~4–6 gridlines). Zero
+// is kept on the chart whenever the data goes negative, and a positive series
+// that sits close to zero still floors at zero rather than floating above it.
+function niceAxis(
+  dataMin: number,
+  dataMax: number,
+): { mn: number; mx: number; ticks: number[] } {
+  let lo = dataMin;
+  let hi = dataMax;
+  if (lo === hi) {
+    lo -= 1;
+    hi += 1;
+  }
+  const span = hi - lo;
+  lo -= span * 0.08;
+  hi += span * 0.08;
+  if (dataMin >= 0 && lo < 0) lo = 0;
+  const step = niceStep((hi - lo) / 4);
+  const mn = Math.floor(lo / step) * step;
+  const mx = Math.ceil(hi / step) * step;
+  const ticks: number[] = [];
+  // The 0.001·step slack absorbs floating-point drift so the top tick isn't
+  // dropped or doubled.
+  for (let v = mn; v <= mx + step * 0.001; v += step) {
+    ticks.push(Math.abs(v) < step * 1e-9 ? 0 : v);
+  }
+  return { mn, mx, ticks };
+}
+
 function LineChart({ spec, wide }: { spec: LineSpec; wide?: boolean }) {
   // Full-width (wide) charts get a panoramic viewBox so the SVG renders at
   // roughly 1:1 scale instead of stretching the half-column geometry — which
@@ -70,17 +119,18 @@ function LineChart({ spec, wide }: { spec: LineSpec; wide?: boolean }) {
   const iw = W - L - R,
     ih = H - T - B;
   const all = spec.series.flatMap((s) => s.points);
-  let mx = Math.max(...all),
-    mn = Math.min(...all);
-  const pad = (mx - mn) * 0.14 || 1;
-  mx += pad;
-  mn -= pad;
-  const n = Math.max(...spec.series.map((s) => s.points.length));
-  const X = (i: number) => L + iw * (i / (n - 1));
+  // Frame the y axis around the data's own range (see niceAxis) so each trend
+  // fills the panel instead of flattening against a zero baseline.
+  const { mn, mx, ticks } = niceAxis(Math.min(...all), Math.max(...all));
+  const crossesZero = mn < 0 && mx > 0;
+  const [d0, d1] = spec.xDomain;
+  const X = (x: number) => L + iw * ((x - d0) / (d1 - d0));
   const Y = (v: number) => T + ih * (1 - (v - mn) / (mx - mn));
-  const baseY = T + ih;
-  const gridlines = [0, 1, 2, 3, 4];
-  const ticks = [0, Math.floor((n - 1) / 2), n - 1];
+  // Area fills close at the bottom of the framed panel — or at the zero line
+  // when the data straddles it.
+  const baseY = Y(crossesZero ? 0 : mn);
+  // Ticks sit at the domain edges and middle — identical across charts.
+  const tickX = [L, L + iw / 2, L + iw];
 
   return (
     <svg
@@ -89,18 +139,19 @@ function LineChart({ spec, wide }: { spec: LineSpec; wide?: boolean }) {
       style={{ display: "block", overflow: "visible" }}
       preserveAspectRatio="xMidYMid meet"
     >
-      {gridlines.map((g) => {
-        const gy = T + (ih * g) / 4;
-        const gv = mx - ((mx - mn) * g) / 4;
+      {ticks.map((tv, i) => {
+        const gy = Y(tv);
+        // The lowest tick doubles as the bottom axis and gets the ink weight.
+        const isBase = i === 0;
         return (
-          <g key={g}>
+          <g key={tv}>
             <line
               x1={L}
               y1={gy}
               x2={L + iw}
               y2={gy}
-              stroke={g === 4 ? INK : GRID}
-              strokeWidth={g === 4 ? 1.5 : 1}
+              stroke={isBase ? INK : GRID}
+              strokeWidth={isBase ? 1.5 : 1}
             />
             <text
               x={L + iw + 8}
@@ -109,15 +160,25 @@ function LineChart({ spec, wide }: { spec: LineSpec; wide?: boolean }) {
               fontSize={11}
               fill={GRAY}
             >
-              {fmt(gv, spec.fmt)}
+              {fmt(tv, spec.fmt)}
             </text>
           </g>
         );
       })}
+      {crossesZero && (
+        <line
+          x1={L}
+          y1={Y(0)}
+          x2={L + iw}
+          y2={Y(0)}
+          stroke={INK}
+          strokeWidth={1}
+        />
+      )}
       {spec.xLabels.map((label, k) => (
         <text
           key={label + k}
-          x={X(ticks[k])}
+          x={tickX[k]}
           y={H - 16}
           fontFamily={MONO}
           fontSize={11}
@@ -130,12 +191,12 @@ function LineChart({ spec, wide }: { spec: LineSpec; wide?: boolean }) {
       {spec.series.map((s, si) => {
         const col = SERIES_COLORS[s.color];
         const end = s.points.length - 1;
-        const pts = s.points.map((v, i) => `${X(i)},${Y(v)}`).join(" ");
+        const pts = s.points.map((v, i) => `${X(s.xs[i])},${Y(v)}`).join(" ");
         const area =
           si === 0
-            ? `M${X(0)},${Y(s.points[0])} ` +
-              s.points.map((v, i) => `L${X(i)},${Y(v)}`).join(" ") +
-              ` L${X(end)},${baseY} L${X(0)},${baseY} Z`
+            ? `M${X(s.xs[0])},${Y(s.points[0])} ` +
+              s.points.map((v, i) => `L${X(s.xs[i])},${Y(v)}`).join(" ") +
+              ` L${X(s.xs[end])},${baseY} L${X(s.xs[0])},${baseY} Z`
             : null;
         return (
           <g key={si}>
@@ -149,7 +210,7 @@ function LineChart({ spec, wide }: { spec: LineSpec; wide?: boolean }) {
               strokeLinejoin="round"
               strokeLinecap="round"
             />
-            <circle cx={X(end)} cy={Y(s.points[end])} r={3.5} fill={col} />
+            <circle cx={X(s.xs[end])} cy={Y(s.points[end])} r={3.5} fill={col} />
           </g>
         );
       })}

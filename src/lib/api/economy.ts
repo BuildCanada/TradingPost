@@ -158,6 +158,13 @@ export function humanizeSourceUrl(
   );
   if (worldBank)
     return `https://data.worldbank.org/indicator/${worldBank[1].replace(/^GOV_WGI_/, "")}`;
+  // OECD source URLs are raw SDMX CSV queries; deep-link the OECD Data
+  // Explorer for the same agency + dataflow instead.
+  const oecd = url?.match(
+    /^https:\/\/sdmx\.oecd\.org\/public\/rest\/data\/([^,]+),([^,]+),/,
+  );
+  if (oecd)
+    return `https://data-explorer.oecd.org/vis?df[ds]=dsDisseminate&df[id]=${encodeURIComponent(oecd[2])}&df[ag]=${encodeURIComponent(oecd[1])}`;
   return url;
 }
 

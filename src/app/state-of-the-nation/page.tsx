@@ -1,16 +1,12 @@
 import type { Metadata } from "next";
 import { getSiteConfig } from "@/lib/api";
-import {
-  getEconomicSeries,
-  type EconomySeriesResponse,
-} from "@/lib/api/economy";
+import { getEconomicSeries } from "@/lib/api/economy";
 import { buildGraph } from "@/lib/schemas/graph";
 import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
 import { generateBreadcrumbSchema } from "@/lib/schemas/generators/breadcrumb";
 import StateChart from "./StateChart";
 import {
   buildSections,
-  SOTN_INDICATOR_COUNT,
   SOTN_MEASURE_SLUGS,
   type SotnView,
 } from "./state-of-the-nation";
@@ -37,21 +33,6 @@ export const metadata: Metadata = {
 const GRAY = "#6f6a63";
 const BD = "#CDC4BD";
 
-function lastUpdatedLabel(
-  responses: (EconomySeriesResponse | null)[],
-): string | null {
-  const dates = responses
-    .map((r) => r?.meta.source?.last_fetched_at)
-    .filter((d): d is string => !!d)
-    .sort();
-  const latest = dates[dates.length - 1];
-  if (!latest) return null;
-  return new Intl.DateTimeFormat("en-CA", {
-    month: "long",
-    year: "numeric",
-  }).format(new Date(latest));
-}
-
 // A chart card: meta row, chart title + chart, and the source attribution
 // the data licences require. Cards tile 2×2 on desktop within their section,
 // ruled by the design's warm hairlines; `wide` cards span both columns
@@ -65,9 +46,9 @@ function IndicatorCard({
 }) {
   return (
     <section
-      className={`flex flex-col border-[#CDC4BD] border-b px-[clamp(24px,5vw,88px)] py-[clamp(32px,4vw,56px)] ${wide
-        ? "lg:col-span-2"
-        : "lg:[&:nth-child(odd):not(:last-child)]:border-r"
+      className={`flex flex-col border-[#CDC4BD] border-b px-[clamp(24px,5vw,88px)] pb-[clamp(32px,4vw,56px)] ${wide
+        ? "pt-[clamp(20px,2.5vw,32px)] lg:col-span-2"
+        : "pt-[clamp(32px,4vw,56px)] lg:[&:nth-child(odd):not(:last-child)]:border-r"
         }`}
     >
       <div className="mb-5 flex flex-wrap items-baseline gap-4">
@@ -86,7 +67,19 @@ function IndicatorCard({
         className="mt-5 pt-3.5 type-label-sm uppercase tracking-[0.08em]"
         style={{ color: GRAY, borderTop: `1px solid ${BD}` }}
       >
-        Source · {indicator.source}
+        Source ·{" "}
+        {indicator.sourceUrl ? (
+          <a
+            href={indicator.sourceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-2 hover:text-dark"
+          >
+            {indicator.source}
+          </a>
+        ) : (
+          indicator.source
+        )}
       </div>
     </section>
   );
@@ -106,10 +99,6 @@ export default async function StateOfTheNationPage() {
   );
 
   const sections = buildSections((slug) => responseBySlug.get(slug) ?? null);
-  const indicators = sections.flatMap((section) => section.indicators);
-  const leadCount = indicators.filter((m) => m.verdict === "lead").length;
-  const lagCount = indicators.filter((m) => m.verdict === "lag").length;
-  const updated = lastUpdatedLabel(results);
 
   const jsonLd = buildGraph(
     generateOrganizationSchema(configData),
@@ -127,16 +116,15 @@ export default async function StateOfTheNationPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <header
-        className="max-w-[1180px] px-[clamp(24px,5vw,88px)] pt-[clamp(48px,8vw,104px)] pb-[clamp(36px,5vw,64px)]"
-      >
-        <div className="mb-7 type-label uppercase tracking-[0.16em] text-auburn-800">
+      {/* Compact masthead — the first chart must land above the fold on
+          desktop. */}
+      <header className="max-w-[1180px] px-[clamp(24px,5vw,88px)] pt-[clamp(28px,3.5vw,48px)] pb-[clamp(16px,2vw,28px)]">
+        <div className="mb-4 type-label uppercase tracking-[0.16em] text-auburn-800">
           State of the Nation · 2026
         </div>
-        <h1 className="m-0 mb-8 font-display font-medium text-[clamp(2.8rem,6.2vw,5.4rem)] leading-[0.99] tracking-[-0.03em] text-balance">
+        <h1 className="m-0 font-display font-medium text-[clamp(2.4rem,4.6vw,3.8rem)] leading-[0.99] tracking-[-0.03em] text-balance">
           State of the Nation
         </h1>
-
       </header>
 
       <div id="indicators">
@@ -148,10 +136,10 @@ export default async function StateOfTheNationPage() {
           return (
             <section key={section.id} id={section.id}>
               <div
-                className="px-[clamp(24px,5vw,88px)] pt-[clamp(40px,5vw,72px)] pb-[clamp(16px,2vw,28px)]"
+                className="px-[clamp(24px,5vw,88px)] pt-[clamp(24px,3vw,40px)] pb-[clamp(12px,1.5vw,20px)]"
                 style={{ borderBottom: `1px solid ${BD}` }}
               >
-                <h2 className="m-0 font-display font-medium text-[clamp(1.9rem,3.4vw,2.8rem)] leading-[1.02] tracking-[-0.02em]">
+                <h2 className="m-0 font-display font-medium text-[clamp(1.7rem,2.6vw,2.3rem)] leading-[1.02] tracking-[-0.02em]">
                   {section.title}
                 </h2>
               </div>

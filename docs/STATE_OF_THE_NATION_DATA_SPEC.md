@@ -47,7 +47,7 @@ existing `economy` / `welfare` / etc.
 
 ## 1. Employment by age group
 
-Monthly, seasonally adjusted, percent, ~1993→present. Source: StatCan LFS
+Monthly, seasonally adjusted, percent, 1976→present. Source: StatCan LFS
 table 14-10-0287. All four share unit and frequency, so they work as a
 combined overlay chart.
 
@@ -63,7 +63,7 @@ different measure and stays as-is; these are the Canadian monthly detail.
 
 ## 2. Private vs public employment
 
-Monthly, seasonally adjusted, **thousands of persons**, ~1993→present.
+Monthly, seasonally adjusted, **thousands of persons**, 1976→present.
 Source: StatCan LFS table 14-10-0288.
 
 | slug | series |
@@ -217,6 +217,37 @@ StatCan's `immigrants-annual` (which also uses July–June years). "Student" is
 not a PR class — students appear in `npr-study-permit-holders` above.
 
 ---
+
+## History coverage & matched chart windows
+
+Every series is served at its **full published history** — nothing is
+truncated on the backend. The series cannot all start at the same date
+because the underlying StatCan programs began at different times, so
+matching happens client-side with the `from=` parameter. Confirmed coverage
+(first data point, verified against loaded data):
+
+| starts | series |
+|---|---|
+| 1961 | capital formation (both StatCan levels and World Bank % of GDP) |
+| 1971 | population components (immigrants, emigrants, returning, net NPR) |
+| 1976 | employment rates by age; employment by class of worker |
+| 1990 | debt-to-GDP (gross and net) |
+| 1997 | average/median hourly wage |
+| 2007 | FDI inflows/outflows |
+| 2015 | business entrants/exits/active; PR admissions by category |
+| 2021 Q3 | non-permanent residents by type |
+
+Recommended convention for visual consistency:
+
+- **Default window: `from=1990`** — 5 of 8 dataset families cover it fully,
+  and it spans a full generation. Use it wherever the section's series reach
+  that far (employment, wages from 1997, capital formation, debt, population
+  components).
+- Series that physically can't reach 1990 (FDI, business dynamics, PR
+  admissions, NPR) should render their full history and state the start year
+  in the chart subtitle (e.g. "since 2015") rather than pad empty space.
+- Within a combined/overlay chart, clip all series to the **latest common
+  start** so lines begin together.
 
 ## Suggested section mapping
 

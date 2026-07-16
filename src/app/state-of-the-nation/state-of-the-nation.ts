@@ -9,7 +9,12 @@
 // Every chart derives its stat and series from york_factory at request time;
 // a chart whose data is unavailable is skipped rather than shown stale.
 
-import type { EconomySeriesPoint, EconomySeriesResponse } from "@/lib/api/economy";
+import {
+  humanizeSourceName,
+  humanizeSourceUrl,
+  type EconomySeriesPoint,
+  type EconomySeriesResponse,
+} from "@/lib/api/economy";
 import type { ChartSpec, LineSpec } from "./StateChart";
 
 export type Verdict = "lead" | "lag" | "mixed";
@@ -23,6 +28,9 @@ export type SotnView = {
   headline: string;
   body: string;
   source: string;
+  // Public landing page for the source (humanizeSourceUrl maps raw API
+  // endpoints to human pages); null when the API reports no URL.
+  sourceUrl: string | null;
   spec: ChartSpec;
   // Renders full-width above its section's card grid.
   wide?: boolean;
@@ -39,7 +47,6 @@ export const SOTN_MEASURE_SLUGS = [
   "employment-rate-55-to-64",
   "employment-rate-15-plus",
   "business-entrants",
-  "business-exits",
   "employment-rate",
   "average-hourly-wage",
   "median-hourly-wage",
@@ -81,6 +88,46 @@ function points(get: Getter, slug: string): EconomySeriesPoint[] | null {
 
 const last = (ps: EconomySeriesPoint[]) => ps[ps.length - 1];
 
+// Converts nominal dollars to real dollars using the all-items CPI, expressed
+// in the latest CPI year's dollars. Values are deflated by each point's
+// calendar-year average CPI.
+function cpiDeflator(
+  get: Getter,
+): { toReal: (value: number, year: number) => number; baseYear: number } | null {
+  const cpi = points(get, "cpi-all-items");
+  if (!cpi) return null;
+  const sums = new Map<number, { sum: number; n: number }>();
+  for (const p of cpi) {
+    const year = Math.floor(p.year);
+    const entry = sums.get(year) ?? { sum: 0, n: 0 };
+    entry.sum += p.value;
+    entry.n += 1;
+    sums.set(year, entry);
+  }
+  const avg = new Map(
+    [...sums].map(([year, { sum, n }]) => [year, sum / n]),
+  );
+  const baseYear = Math.max(...avg.keys());
+  const base = avg.get(baseYear)!;
+  return {
+    baseYear,
+    toReal: (value, year) => value * (base / (avg.get(Math.floor(year)) ?? base)),
+  };
+}
+
+// Attribution name + public link for a chart, from its primary measure's
+// source record.
+function sourceLink(
+  get: Getter,
+  slug: string,
+): { source: string; sourceUrl: string | null } {
+  const source = get(slug)?.meta.source ?? null;
+  return {
+    source: source ? humanizeSourceName(source.name) : "",
+    sourceUrl: source ? humanizeSourceUrl(source.name, source.url) : null,
+  };
+}
+
 const int = (v: number) => Math.round(v).toLocaleString("en-CA");
 
 function monthLabel(p: EconomySeriesPoint): string {
@@ -95,13 +142,24 @@ function quarterLabel(p: EconomySeriesPoint): string {
   return `Q${Math.floor((Number(m) - 1) / 3) + 1} ${y}`;
 }
 
-// First / middle / last tick labels: month-year for short dated series,
-// plain years otherwise.
-function xLabels(ps: EconomySeriesPoint[]): [string, string, string] {
-  const span = last(ps).year - ps[0].year;
-  const label = (p: EconomySeriesPoint) =>
-    p.date && span < 8 ? monthLabel(p) : String(Math.floor(p.year));
-  return [label(ps[0]), label(ps[Math.floor((ps.length - 1) / 2)]), label(last(ps))];
+// Each chart spans exactly the years it has data for, so short series fill
+// their own panel and long ones show their whole history — the x axis is no
+// longer shared across graphs.
+function domainLabels(domain: [number, number]): [string, string, string] {
+  const [a, b] = domain;
+  return [
+    String(Math.floor(a)),
+    String(Math.round((a + b) / 2)),
+    String(Math.floor(b)),
+  ];
+}
+
+const xs = (ps: EconomySeriesPoint[]) => ps.map((p) => p.year);
+
+// The [min, max] year span across every series a chart plots.
+function domainOf(...xsList: number[][]): [number, number] {
+  const all = xsList.flat();
+  return [Math.min(...all), Math.max(...all)];
 }
 
 // Restrict several series to the time keys they all report, so every line in
@@ -123,12 +181,23 @@ type SotnIndicator = {
   headline: string;
   body: string;
   wide?: boolean;
-  build: (get: Getter) => (Pick<SotnView, "stat" | "statSub" | "source"> & { spec: ChartSpec }) | null;
+  build: (
+    get: Getter,
+  ) =>
+    | (Pick<SotnView, "stat" | "statSub" | "source" | "sourceUrl"> & {
+        spec: ChartSpec;
+      })
+    | null;
 };
 
+// The x domain and its labels are derived from the series themselves, so each
+// chart spans exactly the years it plots — no shared axis, no clipping.
 const line = (
-  spec: Omit<LineSpec, "kind">,
-): LineSpec => ({ kind: "line", ...spec });
+  spec: Omit<LineSpec, "kind" | "xDomain" | "xLabels">,
+): LineSpec => {
+  const xDomain = domainOf(...spec.series.map((s) => s.xs));
+  return { kind: "line", xDomain, xLabels: domainLabels(xDomain), ...spec };
+};
 
 const INDICATORS: SotnIndicator[] = [
   {
@@ -145,13 +214,12 @@ const INDICATORS: SotnIndicator[] = [
       return {
         stat: `$${int(latest.value)}`,
         statSub: `Real GDP per capita, chained 2017 $ · ${quarterLabel(latest)}`,
-        source: "Statistics Canada (table 36-10-0706)",
+        ...sourceLink(get, "gdp-per-capita-canada"),
         spec: line({
           unit: "Economic output per person",
           fmt: "money",
-          xLabels: xLabels(ps),
           legend: [{ label: "Canada", color: "au" }],
-          series: [{ color: "au", points: ps.map((p) => p.value) }],
+          series: [{ color: "au", xs: xs(ps), points: ps.map((p) => p.value) }],
         }),
       };
     },
@@ -174,11 +242,10 @@ const INDICATORS: SotnIndicator[] = [
       return {
         stat: `${latest.value.toFixed(1)}%`,
         statSub: `Employment rate, 25–54 · ${monthLabel(latest)}`,
-        source: "Statistics Canada (table 14-10-0287)",
+        ...sourceLink(get, "employment-rate-25-to-54"),
         spec: line({
           unit: "Who's working, by age group",
           fmt: "pct",
-          xLabels: xLabels(aligned.base),
           legend: [
             { label: "25–54", color: "au" },
             { label: "15–24", color: "clay" },
@@ -186,10 +253,10 @@ const INDICATORS: SotnIndicator[] = [
             { label: "15+", color: "ink", dash: true },
           ],
           series: [
-            { color: "au", points: aligned.values[0] },
-            { color: "clay", points: aligned.values[1] },
-            { color: "stone", points: aligned.values[2] },
-            { color: "ink", dash: true, points: aligned.values[3] },
+            { color: "au", xs: xs(aligned.base), points: aligned.values[0] },
+            { color: "clay", xs: xs(aligned.base), points: aligned.values[1] },
+            { color: "stone", xs: xs(aligned.base), points: aligned.values[2] },
+            { color: "ink", dash: true, xs: xs(aligned.base), points: aligned.values[3] },
           ],
         }),
       };
@@ -199,36 +266,21 @@ const INDICATORS: SotnIndicator[] = [
     n: "03",
     title: "Business formation",
     verdict: "lag",
-    headline: "More businesses now close for good than start.",
-    body: "Businesses appearing for the first time versus permanently ceasing operations, monthly and seasonally adjusted — true births and deaths, not seasonal reopenings. Experimental estimates (Statistics Canada); an exit is only confirmed once a business stays closed, so the exits line ends about six months before the entrants line.",
+    headline: "New business creation has stalled.",
+    body: "Businesses appearing for the first time, monthly and seasonally adjusted — true new-business formation, not seasonal reopenings. Experimental estimates (Statistics Canada).",
     build: (get) => {
       const entrants = points(get, "business-entrants");
-      const exits = points(get, "business-exits");
-      if (!entrants || !exits) return null;
-      // Exits lag entrants ~6 months: chart both full-length (the exits line
-      // simply stops early), and compute net formation only for the months
-      // where both exist.
-      const exitByKey = new Map(exits.map((p) => [p.date ?? p.year, p.value]));
-      const overlap = entrants.filter((p) => exitByKey.has(p.date ?? p.year));
-      if (overlap.length === 0) return null;
-      const lastCommon = last(overlap);
-      const net = lastCommon.value - exitByKey.get(lastCommon.date ?? lastCommon.year)!;
+      if (!entrants) return null;
+      const latest = last(entrants);
       return {
-        stat: `${net < 0 ? "−" : "+"}${int(Math.abs(net))}`,
-        statSub: `Net business formation (entrants − exits) · ${monthLabel(lastCommon)}`,
-        source: "Statistics Canada (table 33-10-0270)",
+        stat: int(latest.value),
+        statSub: `New businesses, monthly · ${monthLabel(latest)}`,
+        ...sourceLink(get, "business-entrants"),
         spec: line({
-          unit: "Businesses starting vs closing for good",
+          unit: "New businesses started each month",
           fmt: "count",
-          xLabels: xLabels(entrants),
-          legend: [
-            { label: "Entrants", color: "au" },
-            { label: "Exits", color: "ink", dash: true },
-          ],
-          series: [
-            { color: "au", points: entrants.map((p) => p.value) },
-            { color: "ink", dash: true, points: exits.map((p) => p.value) },
-          ],
+          legend: [{ label: "New businesses", color: "au" }],
+          series: [{ color: "au", xs: xs(entrants), points: entrants.map((p) => p.value) }],
         }),
       };
     },
@@ -246,13 +298,12 @@ const INDICATORS: SotnIndicator[] = [
       return {
         stat: `${latest.value.toFixed(1)}%`,
         statSub: `Employment rate, 15+ · ${Math.floor(latest.year)}`,
-        source: "World Bank, World Development Indicators",
+        ...sourceLink(get, "employment-rate"),
         spec: line({
           unit: "The share of Canadians who work",
           fmt: "pct",
-          xLabels: xLabels(ps),
           legend: [{ label: "Canada", color: "au" }],
-          series: [{ color: "au", points: ps.map((p) => p.value) }],
+          series: [{ color: "au", xs: xs(ps), points: ps.map((p) => p.value) }],
         }),
       };
     },
@@ -262,29 +313,36 @@ const INDICATORS: SotnIndicator[] = [
     title: "Wage growth",
     verdict: "mixed",
     headline: "Average pay keeps pulling away from the median — gains tilt to the top.",
-    body: "Hourly wages for all employees, in current dollars (not adjusted for inflation). StatCan's public API carries no 10th or 90th percentile series, so average vs median is the closest available dispersion signal: when the average pulls away from the median, gains are concentrating at the top.",
+    body: "Hourly wages for all employees, adjusted for inflation with the all-items CPI and expressed in the latest year's dollars. StatCan's public API carries no 10th or 90th percentile series, so average vs median is the closest available dispersion signal: when the average pulls away from the median, gains are concentrating at the top.",
     build: (get) => {
       const avg = points(get, "average-hourly-wage");
       const med = points(get, "median-hourly-wage");
       if (!avg || !med) return null;
       const aligned = align([avg, med]);
       if (!aligned) return null;
+      const deflator = cpiDeflator(get);
+      const real = (values: number[]) =>
+        deflator
+          ? values.map((v, i) => deflator.toReal(v, aligned.base[i].year))
+          : values;
+      const [realAvg, realMed] = [real(aligned.values[0]), real(aligned.values[1])];
       const latest = last(aligned.base);
       return {
-        stat: `$${last(avg).value.toFixed(2)}`,
-        statSub: `Average hourly wage · ${Math.floor(latest.year)}`,
-        source: "Statistics Canada (table 14-10-0064)",
+        stat: `$${realAvg[realAvg.length - 1].toFixed(2)}`,
+        statSub: `Average hourly wage${deflator ? `, ${deflator.baseYear} dollars` : ""} · ${Math.floor(latest.year)}`,
+        ...sourceLink(get, "average-hourly-wage"),
         spec: line({
-          unit: "What Canadians earn per hour",
+          unit: deflator
+            ? `What Canadians earn per hour, in ${deflator.baseYear} dollars`
+            : "What Canadians earn per hour",
           fmt: "money",
-          xLabels: xLabels(aligned.base),
           legend: [
             { label: "Average", color: "au" },
             { label: "Median", color: "ink", dash: true },
           ],
           series: [
-            { color: "au", points: aligned.values[0] },
-            { color: "ink", dash: true, points: aligned.values[1] },
+            { color: "au", xs: xs(aligned.base), points: realAvg },
+            { color: "ink", dash: true, xs: xs(aligned.base), points: realMed },
           ],
         }),
       };
@@ -295,32 +353,54 @@ const INDICATORS: SotnIndicator[] = [
     title: "Investment flows",
     verdict: "lag",
     headline: "Canadian capital would rather invest abroad than at home.",
-    body: "Quarterly foreign-direct-investment flows into Canada and Canadian direct investment abroad. Outflows are not a loss — they are Canadian firms investing elsewhere — but the persistent gap shows where capital would rather be. Flows can turn negative when investment is withdrawn.",
+    body: "Quarterly foreign-direct-investment flows into Canada and Canadian direct investment abroad, adjusted for inflation and smoothed as four-quarter averages (the raw quarters are far too jagged to read). Outflows are not a loss — they are Canadian firms investing elsewhere — but the persistent gap shows where capital would rather be.",
     build: (get) => {
       const inflows = points(get, "fdi-inflows");
       const outflows = points(get, "fdi-outflows");
       if (!inflows || !outflows) return null;
       const aligned = align([inflows, outflows]);
       if (!aligned) return null;
-      const net =
-        aligned.values[0][aligned.values[0].length - 1] -
-        aligned.values[1][aligned.values[1].length - 1];
-      const latest = last(aligned.base);
+      const deflator = cpiDeflator(get);
+      const real = (values: number[]) =>
+        deflator
+          ? values.map((v, i) => deflator.toReal(v, aligned.base[i].year))
+          : values;
+      const [realIn, realOut] = aligned.values.map(real);
+      // Quarterly FDI is extremely noisy; a trailing four-quarter average
+      // keeps the in-vs-out comparison legible.
+      const WINDOW = 4;
+      if (aligned.base.length <= WINDOW) return null;
+      const smooth = (values: number[]) =>
+        values
+          .slice(WINDOW - 1)
+          .map(
+            (_, i) =>
+              values.slice(i, i + WINDOW).reduce((a, b) => a + b, 0) / WINDOW,
+          );
+      const base = aligned.base.slice(WINDOW - 1);
+      // Trailing-year net flow: what actually arrived minus what left over
+      // the last four quarters.
+      const net = realIn
+        .slice(-WINDOW)
+        .reduce((a, b) => a + b, 0) -
+        realOut.slice(-WINDOW).reduce((a, b) => a + b, 0);
+      const latest = last(base);
       return {
         stat: `${net < 0 ? "−" : "+"}$${int(Math.abs(net) / 1000)}B`,
-        statSub: `Net direct investment flow · ${quarterLabel(latest)}`,
-        source: "Statistics Canada (table 36-10-0025)",
+        statSub: `Net direct investment, trailing year${deflator ? `, ${deflator.baseYear} dollars` : ""} · ${quarterLabel(latest)}`,
+        ...sourceLink(get, "fdi-inflows"),
         spec: line({
-          unit: "Investment coming into Canada vs leaving it",
+          unit: deflator
+            ? `Investment coming into Canada vs leaving it, in ${deflator.baseYear} dollars`
+            : "Investment coming into Canada vs leaving it",
           fmt: "count",
-          xLabels: xLabels(aligned.base),
           legend: [
-            { label: "Into Canada", color: "au" },
-            { label: "Canadian investment abroad", color: "ink", dash: true },
+            { label: "Into Canada (4-qtr avg)", color: "au" },
+            { label: "Abroad (4-qtr avg)", color: "ink", dash: true },
           ],
           series: [
-            { color: "au", points: aligned.values[0] },
-            { color: "ink", dash: true, points: aligned.values[1] },
+            { color: "au", xs: xs(base), points: smooth(realIn) },
+            { color: "ink", dash: true, xs: xs(base), points: smooth(realOut) },
           ],
         }),
       };
@@ -339,13 +419,12 @@ const INDICATORS: SotnIndicator[] = [
       return {
         stat: `${latest.value.toFixed(1)}%`,
         statSub: `Gross capital formation, % of GDP · ${Math.floor(latest.year)}`,
-        source: "World Bank, World Development Indicators",
+        ...sourceLink(get, "capital-formation-pct-gdp"),
         spec: line({
           unit: "How much of the economy goes to building",
           fmt: "pct",
-          xLabels: xLabels(ps),
           legend: [{ label: "Canada", color: "au" }],
-          series: [{ color: "au", points: ps.map((p) => p.value) }],
+          series: [{ color: "au", xs: xs(ps), points: ps.map((p) => p.value) }],
         }),
       };
     },
@@ -366,18 +445,17 @@ const INDICATORS: SotnIndicator[] = [
       return {
         stat: `${Math.round(latest.value)}%`,
         statSub: `General government gross debt to GDP · ${quarterLabel(latest)}`,
-        source: "Statistics Canada (table 38-10-0237)",
+        ...sourceLink(get, "govt-gross-debt-to-gdp"),
         spec: line({
           unit: "What every level of government owes",
           fmt: "pct",
-          xLabels: xLabels(aligned.base),
           legend: [
             { label: "Gross debt", color: "au" },
             { label: "Net liabilities", color: "ink", dash: true },
           ],
           series: [
-            { color: "au", points: aligned.values[0] },
-            { color: "ink", dash: true, points: aligned.values[1] },
+            { color: "au", xs: xs(aligned.base), points: aligned.values[0] },
+            { color: "ink", dash: true, xs: xs(aligned.base), points: aligned.values[1] },
           ],
         }),
       };
@@ -405,20 +483,19 @@ const INDICATORS: SotnIndicator[] = [
       return {
         stat: `${pubShare[pubShare.length - 1].toFixed(1)}%`,
         statSub: `Public share of employment · ${monthLabel(latest)}`,
-        source: "Statistics Canada (table 14-10-0288)",
+        ...sourceLink(get, "employment-all-classes"),
         spec: line({
           unit: "Where Canadians work: public vs private",
           fmt: "pct",
-          xLabels: xLabels(aligned.base),
           legend: [
             { label: "Public sector", color: "au" },
             { label: "Private sector", color: "ink", dash: true },
             { label: "Self-employed", color: "stone" },
           ],
           series: [
-            { color: "au", points: pubShare },
-            { color: "ink", dash: true, points: share(privV) },
-            { color: "stone", points: share(selfV) },
+            { color: "au", xs: xs(aligned.base), points: pubShare },
+            { color: "ink", dash: true, xs: xs(aligned.base), points: share(privV) },
+            { color: "stone", xs: xs(aligned.base), points: share(selfV) },
           ],
         }),
       };
@@ -438,18 +515,17 @@ const INDICATORS: SotnIndicator[] = [
       return {
         stat: String(latest.value.toFixed(1)),
         statSub: `CPI, all items (2002 = 100) · ${monthLabel(latest)}`,
-        source: "Statistics Canada (table 18-10-0004)",
+        ...sourceLink(get, "cpi-all-items"),
         spec: line({
           unit: "Consumer prices vs the 2% target",
           fmt: "index",
-          xLabels: xLabels(cpi),
           legend: [
             { label: "CPI", color: "au" },
             { label: "2% target path", color: "ink", dash: true },
           ],
           series: [
-            { color: "au", points: cpi.map((p) => p.value) },
-            { color: "ink", dash: true, points: target },
+            { color: "au", xs: xs(cpi), points: cpi.map((p) => p.value) },
+            { color: "ink", dash: true, xs: xs(cpi), points: target },
           ],
         }),
       };
@@ -468,13 +544,12 @@ const INDICATORS: SotnIndicator[] = [
       return {
         stat: `${(latest.value / 100).toFixed(1)}×`,
         statSub: `House price to income vs. long-term norm · ${Math.floor(latest.year)}`,
-        source: "OECD Analytical House Prices Database",
+        ...sourceLink(get, "house-price-to-income"),
         spec: line({
           unit: "Home prices vs incomes (100 = the long-term norm)",
           fmt: "index",
-          xLabels: xLabels(ps),
           legend: [{ label: "Canada", color: "au" }],
-          series: [{ color: "au", points: ps.map((p) => p.value) }],
+          series: [{ color: "au", xs: xs(ps), points: ps.map((p) => p.value) }],
         }),
       };
     },
@@ -492,13 +567,12 @@ const INDICATORS: SotnIndicator[] = [
       return {
         stat: int(latest.value),
         statSub: `Dwelling units started · ${Math.floor(latest.year)}`,
-        source: "CMHC via Statistics Canada (table 34-10-0126)",
+        ...sourceLink(get, "housing-starts-canada"),
         spec: line({
           unit: "Homes started each year",
           fmt: "count",
-          xLabels: xLabels(ps),
           legend: [{ label: "Housing starts", color: "au" }],
-          series: [{ color: "au", points: ps.map((p) => p.value) }],
+          series: [{ color: "au", xs: xs(ps), points: ps.map((p) => p.value) }],
         }),
       };
     },
@@ -520,13 +594,12 @@ const INDICATORS: SotnIndicator[] = [
       return {
         stat: int(net[net.length - 1]),
         statSub: `Net emigration · ${Math.floor(latest.year)} (July–June year)`,
-        source: "Statistics Canada (table 17-10-0008)",
+        ...sourceLink(get, "emigrants-annual"),
         spec: line({
           unit: "People leaving Canada for good",
           fmt: "count",
-          xLabels: xLabels(aligned.base),
           legend: [{ label: "Net emigration", color: "au" }],
-          series: [{ color: "au", points: net }],
+          series: [{ color: "au", xs: xs(aligned.base), points: net }],
         }),
       };
     },
@@ -544,13 +617,12 @@ const INDICATORS: SotnIndicator[] = [
       return {
         stat: int(latest.value),
         statSub: `Immigrants admitted · ${Math.floor(latest.year)} (July–June year)`,
-        source: "Statistics Canada (table 17-10-0008)",
+        ...sourceLink(get, "immigrants-annual"),
         spec: line({
           unit: "New permanent residents each year",
           fmt: "count",
-          xLabels: xLabels(ps),
           legend: [{ label: "Immigrants", color: "au" }],
-          series: [{ color: "au", points: ps.map((p) => p.value) }],
+          series: [{ color: "au", xs: xs(ps), points: ps.map((p) => p.value) }],
         }),
       };
     },
@@ -571,18 +643,17 @@ const INDICATORS: SotnIndicator[] = [
       return {
         stat: `${(last(permits).value / 1_000_000).toFixed(2)}M`,
         statSub: `Work-permit holders · ${quarterLabel(latest)}`,
-        source: "Statistics Canada (table 17-10-0121)",
+        ...sourceLink(get, "npr-work-permit-holders"),
         spec: line({
           unit: "People in Canada on temporary permits",
           fmt: "count",
-          xLabels: xLabels(aligned.base),
           legend: [
             { label: "Work permits", color: "au" },
             { label: "All non-permanent residents", color: "ink", dash: true },
           ],
           series: [
-            { color: "au", points: aligned.values[0] },
-            { color: "ink", dash: true, points: aligned.values[1] },
+            { color: "au", xs: xs(aligned.base), points: aligned.values[0] },
+            { color: "ink", dash: true, xs: xs(aligned.base), points: aligned.values[1] },
           ],
         }),
       };
@@ -607,11 +678,10 @@ const INDICATORS: SotnIndicator[] = [
       return {
         stat: int(last(total).value),
         statSub: `Permanent residents admitted, monthly · ${monthLabel(latest)}`,
-        source: "Immigration, Refugees and Citizenship Canada",
+        ...sourceLink(get, "pr-admissions-total"),
         spec: line({
           unit: "Permanent residents by immigration class",
           fmt: "count",
-          xLabels: xLabels(aligned.base),
           legend: [
             { label: "Economic", color: "au" },
             { label: "Total", color: "ink", dash: true },
@@ -620,11 +690,11 @@ const INDICATORS: SotnIndicator[] = [
             { label: "Other", color: "sand" },
           ],
           series: [
-            { color: "au", points: aligned.values[1] },
-            { color: "ink", dash: true, points: aligned.values[0] },
-            { color: "clay", points: aligned.values[2] },
-            { color: "stone", points: aligned.values[3] },
-            { color: "sand", points: aligned.values[4] },
+            { color: "au", xs: xs(aligned.base), points: aligned.values[1] },
+            { color: "ink", dash: true, xs: xs(aligned.base), points: aligned.values[0] },
+            { color: "clay", xs: xs(aligned.base), points: aligned.values[2] },
+            { color: "stone", xs: xs(aligned.base), points: aligned.values[3] },
+            { color: "sand", xs: xs(aligned.base), points: aligned.values[4] },
           ],
         }),
       };

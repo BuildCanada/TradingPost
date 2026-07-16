@@ -4,7 +4,14 @@
 // labels) are the design's own values and have no site token; ink and
 // auburn map to the site palette.
 
-export type ChartFmt = "money" | "pct" | "pct1" | "x" | "index" | "count";
+export type ChartFmt =
+  | "money"
+  | "pct"
+  | "pct1"
+  | "x"
+  | "index"
+  | "count"
+  | "num";
 
 // au = brand accent for the headline series; ink = comparison (usually
 // dashed); clay/stone/sand = warm muted tones for additional series.
@@ -22,6 +29,9 @@ export type LineSpec = {
   xDomain: [number, number];
   // Tick labels for the left edge, middle, and right edge of the domain.
   xLabels: [string, string, string];
+  // Optional explicit x-axis tick years (e.g. decade marks). When present they
+  // replace the start/mid/end labels and sit at their true date on the axis.
+  xTicks?: number[];
   legend?: LegendItem[];
   // xs holds each point's fractional year, parallel to points.
   series: {
@@ -61,6 +71,8 @@ function fmt(v: number, f: ChartFmt): string {
   if (f === "pct1") return v.toFixed(1) + "%";
   if (f === "x") return v.toFixed(1) + "×";
   if (f === "index") return String(Math.round(v));
+  if (f === "num")
+    return v.toLocaleString("en-CA", { maximumFractionDigits: 1 });
   return Math.round(v).toLocaleString("en-CA");
 }
 
@@ -175,19 +187,39 @@ function LineChart({ spec, wide }: { spec: LineSpec; wide?: boolean }) {
           strokeWidth={1}
         />
       )}
-      {spec.xLabels.map((label, k) => (
-        <text
-          key={label + k}
-          x={tickX[k]}
-          y={H - 16}
-          fontFamily={MONO}
-          fontSize={11}
-          fill={GRAY}
-          textAnchor={k === 0 ? "start" : k === 2 ? "end" : "middle"}
-        >
-          {label}
-        </text>
-      ))}
+      {spec.xTicks
+        ? spec.xTicks.map((t) => {
+            const [d0, d1] = spec.xDomain;
+            // Keep a tick that lands on the domain edge from spilling past it.
+            const anchor =
+              t <= d0 ? "start" : t >= d1 ? "end" : "middle";
+            return (
+              <text
+                key={t}
+                x={X(t)}
+                y={H - 16}
+                fontFamily={MONO}
+                fontSize={11}
+                fill={GRAY}
+                textAnchor={anchor}
+              >
+                {t}
+              </text>
+            );
+          })
+        : spec.xLabels.map((label, k) => (
+            <text
+              key={label + k}
+              x={tickX[k]}
+              y={H - 16}
+              fontFamily={MONO}
+              fontSize={11}
+              fill={GRAY}
+              textAnchor={k === 0 ? "start" : k === 2 ? "end" : "middle"}
+            >
+              {label}
+            </text>
+          ))}
       {spec.series.map((s, si) => {
         const col = SERIES_COLORS[s.color];
         const end = s.points.length - 1;

@@ -62,6 +62,7 @@ export const SOTN_MEASURE_SLUGS = [
   "cpi-all-items",
   "house-price-to-income",
   "housing-starts-canada",
+  "population-canada",
   "emigrants-annual",
   "returning-emigrants-annual",
   "immigrants-annual",
@@ -162,6 +163,14 @@ function domainOf(...xsList: number[][]): [number, number] {
   return [Math.min(...all), Math.max(...all)];
 }
 
+// The decade marks (1970, 1980, …) that fall inside a domain — used to label
+// the x axis of long-running charts.
+function decades([a, b]: [number, number]): number[] {
+  const ticks: number[] = [];
+  for (let y = Math.ceil(a / 10) * 10; y <= b; y += 10) ticks.push(y);
+  return ticks;
+}
+
 // Restrict several series to the time keys they all report, so every line in
 // a combined chart has the same length.
 function align(
@@ -211,15 +220,24 @@ const INDICATORS: SotnIndicator[] = [
       const ps = points(get, "gdp-per-capita-canada");
       if (!ps) return null;
       const latest = last(ps);
+      // Index to the first point (= 100) so the chart reads as cumulative
+      // growth in living standards rather than an abstract dollar level: the
+      // long climb and the post-2022 plateau both show at a glance. The
+      // headline stat keeps the concrete dollar figure.
+      const baseYear = Math.floor(ps[0].year);
+      const indexed = ps.map((p) => (p.value / ps[0].value) * 100);
       return {
         stat: `$${int(latest.value)}`,
         statSub: `Real GDP per capita, chained 2017 $ · ${quarterLabel(latest)}`,
         ...sourceLink(get, "gdp-per-capita-canada"),
         spec: line({
-          unit: "Real GDP per capita",
-          fmt: "money",
+          unit: `Real GDP per capita (index, ${baseYear} = 100)`,
+          fmt: "index",
+          // The headline chart spans decades; label each one rather than just
+          // the endpoints.
+          xTicks: decades(domainOf(xs(ps))),
           legend: [{ label: "Canada", color: "au" }],
-          series: [{ color: "au", xs: xs(ps), points: ps.map((p) => p.value) }],
+          series: [{ color: "au", xs: xs(ps), points: indexed }],
         }),
       };
     },
@@ -557,22 +575,46 @@ const INDICATORS: SotnIndicator[] = [
   {
     n: "12",
     title: "Housing starts",
-    verdict: "lead",
-    headline: "Homebuilding is running at rates last sustained in the 1970s.",
-    body: "Dwelling units started per year across Canada, from CMHC's starts and completions survey. The supply side of the housing equation — rising at last, and still short of what population growth demands.",
+    verdict: "lag",
+    headline: "Per person, Canada builds barely half as many homes as it did in the 1970s.",
+    body: "Dwelling units started each year per 1,000 people, from CMHC's starts and completions survey against StatCan's population estimates. In absolute terms starts are back near their 1970s highs — but the population has more than doubled since then, so on a per-person basis homebuilding runs at roughly half the mid-1970s rate. This is the honest read on whether supply is keeping up with the people who need homes.",
     build: (get) => {
       const ps = points(get, "housing-starts-canada");
-      if (!ps) return null;
-      const latest = last(ps);
+      const pop = points(get, "population-canada");
+      if (!ps || !pop) return null;
+      // Population is quarterly; collapse it to a calendar-year average so it
+      // divides the annual starts flow cleanly. Then express starts per 1,000
+      // people — the only way to compare a period over which the population
+      // more than doubled.
+      const popByYear = new Map<number, { sum: number; n: number }>();
+      for (const p of pop) {
+        const y = Math.floor(p.year);
+        const e = popByYear.get(y) ?? { sum: 0, n: 0 };
+        e.sum += p.value;
+        e.n += 1;
+        popByYear.set(y, e);
+      }
+      const perCapita = ps.flatMap((p) => {
+        const e = popByYear.get(Math.floor(p.year));
+        return e ? [{ year: p.year, value: (p.value / (e.sum / e.n)) * 1000 }] : [];
+      });
+      if (perCapita.length < 2) return null;
+      const latest = perCapita[perCapita.length - 1];
       return {
-        stat: int(latest.value),
-        statSub: `Dwelling units started · ${Math.floor(latest.year)}`,
+        stat: latest.value.toFixed(1),
+        statSub: `Dwelling units started per 1,000 people · ${Math.floor(latest.year)}`,
         ...sourceLink(get, "housing-starts-canada"),
         spec: line({
-          unit: "Annual housing starts",
-          fmt: "count",
-          legend: [{ label: "Housing starts", color: "au" }],
-          series: [{ color: "au", xs: xs(ps), points: ps.map((p) => p.value) }],
+          unit: "Housing starts per 1,000 people",
+          fmt: "num",
+          legend: [{ label: "Starts per 1,000", color: "au" }],
+          series: [
+            {
+              color: "au",
+              xs: perCapita.map((p) => p.year),
+              points: perCapita.map((p) => p.value),
+            },
+          ],
         }),
       };
     },

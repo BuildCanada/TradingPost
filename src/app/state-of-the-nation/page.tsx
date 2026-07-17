@@ -51,7 +51,7 @@ function IndicatorCard({
         : "pt-[clamp(32px,4vw,56px)] lg:[&:nth-child(odd):not(:last-child)]:border-r"
         }`}
     >
-      <StateChart spec={indicator.spec} wide={wide} />
+      <StateChart spec={indicator.spec} title={indicator.title} wide={wide} />
       <div
         className="mt-5 pt-3.5 type-label-sm uppercase tracking-[0.08em]"
         style={{ color: GRAY, borderTop: `1px solid ${BD}` }}

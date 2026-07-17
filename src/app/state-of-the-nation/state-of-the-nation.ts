@@ -1,7 +1,7 @@
 // The State of the Nation indicators, in the design's layout with the
 // dashboard's real chart order and contents:
 //   Headline — GDP per capita
-//   Economy — employment by age, business formation, employment, wages,
+//   Economy — unemployment by age, business formation, employment, wages,
 //             investment flows, capital formation
 //   Government Sustainability — debt to GDP, private vs public employment
 //   Cost of Living — CPI, house price to income, housing starts
@@ -42,15 +42,16 @@ type Getter = (slug: string) => EconomySeriesResponse | null;
 // against Canada's own record.
 export const SOTN_MEASURE_SLUGS = [
   "gdp-per-capita-canada",
-  "employment-rate-25-to-54",
-  "employment-rate-15-to-24",
-  "employment-rate-55-to-64",
-  // "employment-rate-15-plus" removed — the 15+ line cluttered "Employment by
-  // age" and added little over the 25–54 core-age read.
-  // Business entries chart: true first-time business formation, monthly
-  // (2015→present). Openings/historical-entries series are no longer charted —
-  // openings counted any 0↔1+ employee crossing, including seasonal reopenings.
-  "business-entrants",
+  // Unemployment by age — a more meaningful labour-market read than the
+  // employment rate. Employment-rate-by-age slugs are no longer charted.
+  "unemployment-rate-25-to-54",
+  "unemployment-rate-15-to-24",
+  "unemployment-rate-55-to-64",
+  // Business entries chart: LEAP annual firm entrants, national total,
+  // 2001–2023 (StatCan 33-10-0087). A single consistent long-run series —
+  // preferred over the churny quarterly 33-10-0165 and the shorter monthly
+  // 33-10-0270 entrants, which are no longer charted here.
+  "business-entrants-annual",
   // "employment-rate" (annual 15+) removed with the "Employment" chart below —
   // redundant with "Employment by age", which carries the 15+ line monthly.
   // "employment-rate",
@@ -301,24 +302,24 @@ const INDICATORS: SotnIndicator[] = [
   },
   {
     n: "02",
-    title: "Employment by age",
+    title: "Unemployment by age",
     verdict: "mixed",
-    headline: "Core-age employment is near record highs; the young trail behind.",
-    body: "Share of each age group that is employed, monthly and seasonally adjusted. The 25–54 core-working-age line is the cleanest read — it strips out students and retirees.",
+    headline: "Core-age unemployment stays low, but the young are locked out.",
+    body: "Share of each age group's labour force that is unemployed, monthly and seasonally adjusted. The 25–54 core-working-age line is the cleanest read — it strips out students and retirees. Youth unemployment runs far higher and moves first when the labour market turns.",
     build: (get) => {
-      const core = points(get, "employment-rate-25-to-54");
-      const youth = points(get, "employment-rate-15-to-24");
-      const older = points(get, "employment-rate-55-to-64");
+      const core = points(get, "unemployment-rate-25-to-54");
+      const youth = points(get, "unemployment-rate-15-to-24");
+      const older = points(get, "unemployment-rate-55-to-64");
       if (!core || !youth || !older) return null;
       const aligned = align([core, youth, older]);
       if (!aligned) return null;
       const latest = last(core);
       return {
         stat: `${latest.value.toFixed(1)}%`,
-        statSub: `Employment rate, 25–54 · ${monthLabel(latest)}`,
-        ...sourceLink(get, "employment-rate-25-to-54"),
+        statSub: `Unemployment rate, 25–54 · ${monthLabel(latest)}`,
+        ...sourceLink(get, "unemployment-rate-25-to-54"),
         spec: line({
-          unit: "Employment rate by age group",
+          unit: "Unemployment rate by age group",
           fmt: "pct",
           legend: [
             { label: "25–54", color: "au" },
@@ -336,45 +337,26 @@ const INDICATORS: SotnIndicator[] = [
   },
   {
     n: "03",
-    title: "New business entries per year",
+    title: "Business creation",
     verdict: "mixed",
-    headline: "New-business formation has been broadly flat since 2015.",
-    body: "New business entries per year — businesses appearing for the first time (true new-business formation), not seasonal reopenings. Monthly, seasonally adjusted counts summed into complete calendar years. StatCan labels these experimental estimates. Source table 33-10-0270 (business sector industries).",
+    headline: "New-business creation is up only modestly over two decades.",
+    body: "New employer businesses entering the private sector each year — firms hiring their first paid employee (true formation, not seasonal reopenings). Annual, from Statistics Canada's Longitudinal Employment Analysis Program (LEAP), summed to a national total across the provinces and territories. One consistent methodology across the whole span. Source table 33-10-0087, 2001–2023.",
     build: (get) => {
-      const raw = points(get, "business-entrants");
-      if (!raw) return null;
-      // Sum the 12 monthly points into complete calendar years only.
-      const annualize = (ps: EconomySeriesPoint[]): Map<number, number> => {
-        const acc = new Map<number, { sum: number; n: number }>();
-        for (const p of ps) {
-          const y = Math.floor(p.year);
-          const e = acc.get(y) ?? { sum: 0, n: 0 };
-          e.sum += p.value;
-          e.n += 1;
-          acc.set(y, e);
-        }
-        const out = new Map<number, number>();
-        for (const [y, e] of acc) if (e.n === 12) out.set(y, e.sum);
-        return out;
-      };
-      const annual = annualize(raw);
-      const series = [...annual.entries()]
-        .map(([year, value]) => ({ year, value }))
-        .sort((a, b) => a.year - b.year);
-      if (series.length < 2) return null;
-      const latest = series[series.length - 1];
+      const series = points(get, "business-entrants-annual");
+      if (!series || series.length < 2) return null;
+      const latest = last(series);
       return {
         stat: int(latest.value),
-        statSub: `Business entries per year · ${Math.floor(latest.year)}`,
-        ...sourceLink(get, "business-entrants"),
+        statSub: `New business entrants · ${Math.floor(latest.year)}`,
+        ...sourceLink(get, "business-entrants-annual"),
         spec: line({
           unit: "New business entries per year",
           fmt: "count",
-          legend: [{ label: "Business entries", color: "au" }],
+          legend: [{ label: "Business entrants", color: "au" }],
           series: [
             {
               color: "au",
-              xs: series.map((p) => p.year),
+              xs: xs(series),
               points: series.map((p) => p.value),
             },
           ],
@@ -791,7 +773,7 @@ const INDICATORS: SotnIndicator[] = [
   */
   {
     n: "16",
-    title: "By class",
+    title: "Immigration by type",
     verdict: "mixed",
     headline: "A shrinking intake, still anchored by the economic class.",
     body: "Permanent residents admitted per year by immigration class. Two IRCC sources are spliced per class: the archived by-category series through 2014, then the ongoing monthly admissions (summed to calendar years) from 2015 on. IRCC rounds counts and suppresses small cells, so values are approximate; the archived 'Other' bucket is narrower than today's, so that line's pre-2015 level isn't directly comparable. Students are not a PR class — they appear under work and study permits.",

@@ -343,15 +343,26 @@ function BarChart({ spec }: { spec: BarSpec }) {
 
 export default function StateChart({
   spec,
+  title,
   wide,
 }: {
   spec: ChartSpec;
+  title?: string;
   wide?: boolean;
 }) {
   return (
     <div>
-      {/* Same treatment as the section headline on the left column. */}
-      <div className="mb-4 font-display font-medium text-[clamp(1.4rem,2.4vw,1.9rem)] leading-[1.12] tracking-[-0.01em] text-dark text-balance">
+      {/* The plain-language title leads, large and bold; the descriptive
+          unit line sits under it as smaller subtext. */}
+      {title && (
+        <div className="font-display font-medium text-[clamp(1.4rem,2.4vw,1.9rem)] leading-[1.12] tracking-[-0.01em] text-dark text-balance">
+          {title}
+        </div>
+      )}
+      <div
+        className="mb-4 mt-1 text-[clamp(0.82rem,1.15vw,0.95rem)] leading-snug"
+        style={{ color: GRAY }}
+      >
         {spec.unit}
       </div>
       {spec.kind === "line" && spec.legend && (

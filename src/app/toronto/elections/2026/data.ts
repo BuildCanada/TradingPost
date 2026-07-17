@@ -1,6 +1,7 @@
-// Toronto 2026 municipal election — illustrative placeholder data.
-// Candidate lists and photographs are placeholders pending nomination day;
-// official lists are certified by the City Clerk. See the disclaimers on the page.
+// Toronto 2026 municipal election — data layer.
+// Candidate lists come from the City Clerk's registered-candidate list (see
+// ./candidates) and are not final until nominations close; photographs and
+// profiles are filled in over time. See the disclaimers on the page.
 
 import { differenceInCalendarDays } from "date-fns";
 import { WARD_SHAPES } from "./wardGeo";
@@ -24,15 +25,40 @@ export function daysUntilElection(now: Date = new Date()): number {
 // Hand-maintained candidate data lives in ./candidates — see that file to
 // add or edit the mayoral field and per-ward councillor candidates.
 import {
-  MAYORAL_CANDIDATES,
+  MAYORAL_CANDIDATES as RAW_MAYORAL_CANDIDATES,
   WARD_CANDIDATES,
   type MayoralCandidate,
   type CouncillorCandidate,
   type CouncillorTag,
 } from "./candidates";
 
-export { MAYORAL_CANDIDATES, WARD_CANDIDATES };
+export { WARD_CANDIDATES };
 export type { MayoralCandidate, CouncillorCandidate, CouncillorTag };
+
+/** Generational suffixes ignored when deriving a last-name sort key, so e.g.
+ *  "Kannan S'ree Jr" sorts under "s", not "j". */
+const NAME_SUFFIXES = new Set(["jr", "jr.", "sr", "sr.", "ii", "iii", "iv", "v"]);
+
+/** Last-name sort key from a full name, e.g. "Eleanor Voss" → "voss".
+ *  Used to order candidate lists alphabetically by last name. Trailing
+ *  generational suffixes (Jr, Sr, III, …) are skipped. */
+export function lastNameKey(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  while (parts.length > 1 && NAME_SUFFIXES.has(parts[parts.length - 1].toLowerCase())) {
+    parts.pop();
+  }
+  return (parts[parts.length - 1] ?? "").toLowerCase();
+}
+
+/** Sort candidates alphabetically by last name (stable, non-mutating). */
+function byLastName<T extends { name: string }>(candidates: T[]): T[] {
+  return [...candidates].sort((a, b) =>
+    lastNameKey(a.name).localeCompare(lastNameKey(b.name)),
+  );
+}
+
+/** Mayoral candidates, always sorted alphabetically by last name. */
+export const MAYORAL_CANDIDATES = byLastName(RAW_MAYORAL_CANDIDATES);
 
 /** Initials from a name, e.g. "Eleanor Voss" → "EV" (used when a candidate
  *  has no explicit `initials` and no photo). */
@@ -49,60 +75,14 @@ export type Ward = {
   count: number;
 };
 
-/* ── Councillor placeholders ─────────────────────────────────────────────
- * Wards without hand-entered data in WARD_CANDIDATES fall back to this
- * deterministic illustrative field so the pages stay populated. Delete this
- * block (and the fallback in councillorCandidatesForWard) once every ward is
- * populated in ./candidates.                                               */
-
-const PLACEHOLDER_COUNTS = [5, 4, 7, 6, 4, 5, 3, 6, 8, 9, 7, 6, 8, 7, 4, 5, 4, 6, 5, 4, 5, 6, 3, 4, 5];
-const FIRST_NAMES = ["Aisha", "Marco", "Priya", "Daniel", "Grace", "Omar", "Lena", "Theo", "Nadia", "Simon", "Clara", "Raj", "Maeve", "Victor", "Yara", "Hugh"];
-const LAST_NAMES = ["Okafor", "Bianchi", "Nguyen", "MacLeod", "Ferreira", "Haddad", "Kowalski", "Osei", "Rossi", "Patel", "Lindqvist", "Tanaka", "Dubois", "Reyes", "Brennan", "Sandhu"];
-const BIOS = [
-  "Local business owner focused on main-street revitalization.",
-  "Community organizer and tenant-rights advocate.",
-  "Urban planner specializing in mid-rise housing.",
-  "School trustee and youth-sports coach.",
-  "Former city hall policy adviser turned neighbourhood volunteer.",
-  "Transit operator and union representative.",
-  "Family physician and public-health advocate.",
-  "Real-estate developer and heritage-preservation volunteer.",
-  "Environmental engineer and cycling-infrastructure champion.",
-  "Small-business accountant and residents’ association chair.",
-];
-const COMMITTEES = ["the budget committee", "the planning and housing committee", "the infrastructure committee", "the economic development committee"];
-
-function placeholderCouncillors(wardIndex: number): CouncillorCandidate[] {
-  const count = PLACEHOLDER_COUNTS[wardIndex];
-  const out: CouncillorCandidate[] = [];
-  for (let i = 0; i < count; i++) {
-    const first = FIRST_NAMES[(wardIndex * 5 + i * 7) % FIRST_NAMES.length];
-    const last = LAST_NAMES[(wardIndex * 3 + i * 11 + 2) % LAST_NAMES.length];
-    let tag: CouncillorTag;
-    let bio: string;
-    if (i === 0) {
-      tag = "Incumbent";
-      bio = `Incumbent councillor since 2022; chairs ${COMMITTEES[wardIndex % COMMITTEES.length]}.`;
-    } else if (i === count - 1 && count > 3) {
-      tag = "Registered";
-      bio = BIOS[(wardIndex * 2 + i * 3) % BIOS.length];
-    } else {
-      tag = "Challenger";
-      bio = BIOS[(wardIndex * 2 + i * 3) % BIOS.length];
-    }
-    out.push({ name: `${first} ${last}`, tag, bio });
-  }
-  return out;
-}
-
 /**
- * Councillor field for a ward (0-based index): hand-entered data from
- * ./candidates when present, otherwise the illustrative placeholder field.
+ * Councillor candidates for a ward (0-based index), from the hand-maintained
+ * data in ./candidates, sorted by last name. Returns an empty array for wards
+ * with no registered candidates yet.
  */
 export function councillorCandidatesForWard(wardIndex: number): CouncillorCandidate[] {
   const key = String(wardIndex + 1).padStart(2, "0");
-  const manual = WARD_CANDIDATES[key];
-  return manual && manual.length > 0 ? manual : placeholderCouncillors(wardIndex);
+  return byLastName(WARD_CANDIDATES[key] ?? []);
 }
 
 /** Number of candidates shown for a ward — drives the ward-card counts. */

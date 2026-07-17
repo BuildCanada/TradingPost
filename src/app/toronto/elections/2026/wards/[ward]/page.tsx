@@ -147,6 +147,13 @@ export default async function WardDetailPage({
             </h2>
           </div>
           <div>
+            {candidates.length === 0 && (
+              <p className="px-6 md:px-14 py-10 font-serif text-[1.08rem] leading-[1.45] text-dark/80 border-t border-border-light">
+                No candidates have registered in {w.name} yet. Nominations close
+                on {NOMINATION_CLOSE_LABEL} — check back as more candidates
+                register.
+              </p>
+            )}
             {candidates.map((cand, i) => (
               <div
                 key={`${cand.name}-${i}`}
@@ -199,8 +206,8 @@ export default async function WardDetailPage({
             ))}
           </div>
           <p className="px-6 md:px-14 py-4 type-label-sm text-text-muted border-t border-border-light">
-            Illustrative field — candidates are placeholders pending
-            certification by the City Clerk after nomination day.
+            Registered candidates from the City Clerk&rsquo;s list. The field is
+            not final until nominations close on {NOMINATION_CLOSE_LABEL}.
           </p>
         </section>
 

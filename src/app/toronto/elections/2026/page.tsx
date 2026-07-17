@@ -4,7 +4,13 @@ import Image from "next/image";
 import { ArrowUpRight, ArrowRight } from "lucide-react";
 import CountdownDays from "./CountdownDays";
 import { WardMap, WardMapDefs } from "./WardMap";
-import { MAYORAL_CANDIDATES, WARDS, daysUntilElection, initialsFor } from "./data";
+import {
+  MAYORAL_CANDIDATES,
+  WARDS,
+  daysUntilElection,
+  initialsFor,
+  NOMINATION_CLOSE_LABEL,
+} from "./data";
 
 export const metadata: Metadata = {
   title: "Toronto 2026 Election",
@@ -148,8 +154,9 @@ export default function Toronto2026ElectionPage() {
             ))}
           </div>
           <p className="px-6 md:px-14 py-4 type-label-sm text-text-muted border-t border-border-light">
-            Illustrative field — candidates and photographs are placeholders
-            pending nomination day.
+            Registered candidates from the City Clerk&rsquo;s list; photographs
+            and profiles are added as they become available. The field is not
+            final until nominations close on {NOMINATION_CLOSE_LABEL}.
           </p>
         </section>
 

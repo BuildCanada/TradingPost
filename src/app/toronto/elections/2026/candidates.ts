@@ -101,7 +101,7 @@ export const MAYORAL_CANDIDATES: MayoralCandidate[] = [
   { name: "Renato Fallico", tag: "Declared", bio: "" },
   { name: "Martin Fraser", tag: "Declared", bio: "" },
   // Edward Gong: social links only (gmail email) — add the real URL manually.
-  { name: "Edward Gong", tag: "Declared", bio: "" },
+  { name: "Edward Gong", tag: "Declared", bio: "" ,  image: "/elections/toronto/2026/mayor/edward-gong.png"},
   {
     name: "Faizan Haider",
     tag: "Declared",

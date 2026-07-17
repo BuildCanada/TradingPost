@@ -100,44 +100,27 @@ function buildTicks(mn: number, mx: number, step: number): number[] {
 }
 
 // Chooses the y-axis range and round tick values.
-// - Default: anchored at zero, so every line reads as a magnitude from zero
-//   and the charts are comparable (extends below zero only for negative data).
-// - With a `baseline` (e.g. an index's 100): frames the data around that
-//   reference instead — zero carries no meaning for an indexed series — while
-//   guaranteeing the baseline itself stays on the chart.
+// Frames the data itself — the axis fits [dataMin, dataMax] (plus the
+// `baseline`, when given, e.g. an index's 100) with a little padding on each
+// side, rather than forcing every chart to anchor at zero. Each series shows
+// its own variation instead of flattening against a distant zero.
 function niceAxis(
   dataMin: number,
   dataMax: number,
   baseline?: number,
 ): { mn: number; mx: number; ticks: number[] } {
-  if (baseline !== undefined) {
-    let lo = Math.min(dataMin, baseline);
-    let hi = Math.max(dataMax, baseline);
-    if (hi === lo) {
-      lo -= 1;
-      hi += 1;
-    }
-    const span = hi - lo;
-    lo -= span * 0.08;
-    hi += span * 0.08;
-    const step = niceStep((hi - lo) / 4);
-    const mn = Math.floor(lo / step) * step;
-    const mx = Math.ceil(hi / step) * step;
-    return { mn, mx, ticks: buildTicks(mn, mx, step) };
+  let lo = baseline !== undefined ? Math.min(dataMin, baseline) : dataMin;
+  let hi = baseline !== undefined ? Math.max(dataMax, baseline) : dataMax;
+  if (hi === lo) {
+    lo -= 1;
+    hi += 1;
   }
-  // Start from zero on both ends, then open whichever side the data occupies.
-  let lo = Math.min(0, dataMin);
-  let hi = Math.max(0, dataMax);
-  if (hi === lo) hi += 1;
   const span = hi - lo;
-  // Pad only away from zero; the zero side stays pinned to the axis.
-  if (hi > 0) hi += span * 0.08;
-  if (lo < 0) lo -= span * 0.08;
+  lo -= span * 0.08;
+  hi += span * 0.08;
   const step = niceStep((hi - lo) / 4);
-  // Zero stays exactly on a gridline: the positive side ceils to a round tick,
-  // the negative side (if any) floors to one.
-  const mn = lo < 0 ? Math.floor(lo / step) * step : 0;
-  const mx = hi > 0 ? Math.ceil(hi / step) * step : 0;
+  const mn = Math.floor(lo / step) * step;
+  const mx = Math.ceil(hi / step) * step;
   return { mn, mx, ticks: buildTicks(mn, mx, step) };
 }
 

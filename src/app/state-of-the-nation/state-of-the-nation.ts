@@ -45,12 +45,12 @@ export const SOTN_MEASURE_SLUGS = [
   "employment-rate-25-to-54",
   "employment-rate-15-to-24",
   "employment-rate-55-to-64",
-  "employment-rate-15-plus",
-  // Business entries chart: the discontinued quarterly series (2000-2019)
-  // chain-linked with the ongoing monthly openings series. "business-entrants"
-  // (the narrower 2015+ first-ever formation) is no longer charted.
-  "business-entries-historical",
-  "business-openings",
+  // "employment-rate-15-plus" removed — the 15+ line cluttered "Employment by
+  // age" and added little over the 25–54 core-age read.
+  // Business entries chart: true first-time business formation, monthly
+  // (2015→present). Openings/historical-entries series are no longer charted —
+  // openings counted any 0↔1+ employee crossing, including seasonal reopenings.
+  "business-entrants",
   // "employment-rate" (annual 15+) removed with the "Employment" chart below —
   // redundant with "Employment by age", which carries the 15+ line monthly.
   // "employment-rate",
@@ -282,24 +282,19 @@ const INDICATORS: SotnIndicator[] = [
       const ps = points(get, "gdp-per-capita-canada");
       if (!ps) return null;
       const latest = last(ps);
-      // Index to the first point (= 100) so the chart reads as cumulative
-      // growth in living standards rather than an abstract dollar level: the
-      // long climb and the post-2022 plateau both show at a glance. The
-      // headline stat keeps the concrete dollar figure.
-      const baseYear = Math.floor(ps[0].year);
-      const indexed = ps.map((p) => (p.value / ps[0].value) * 100);
       return {
         stat: `$${int(latest.value)}`,
         statSub: `Real GDP per capita, chained 2017 $ · ${quarterLabel(latest)}`,
         ...sourceLink(get, "gdp-per-capita-canada"),
         spec: line({
-          unit: `Real GDP per capita (index, ${baseYear} = 100)`,
-          fmt: "index",
-          // Indexed series: frame around 100 with a floating baseline there,
-          // rather than anchoring the axis at zero.
-          baseline: 100,
-          legend: [{ label: "Canada", color: "au" }],
-          series: [{ color: "au", xs: xs(ps), points: indexed }],
+          unit: `Real GDP per capita`,
+          fmt: "money",
+          // Real dollar levels, not an index. Frame around the base-year level
+          // with a floating baseline rather than anchoring the axis at zero, so
+          // the long climb and the post-2022 plateau both read at a glance.
+          baseline: ps[0].value,
+          legend: [{ label: `Canada`, color: "au" }],
+          series: [{ color: "au", xs: xs(ps), points: ps.map((p) => p.value) }],
         }),
       };
     },
@@ -314,9 +309,8 @@ const INDICATORS: SotnIndicator[] = [
       const core = points(get, "employment-rate-25-to-54");
       const youth = points(get, "employment-rate-15-to-24");
       const older = points(get, "employment-rate-55-to-64");
-      const all = points(get, "employment-rate-15-plus");
-      if (!core || !youth || !older || !all) return null;
-      const aligned = align([core, youth, older, all]);
+      if (!core || !youth || !older) return null;
+      const aligned = align([core, youth, older]);
       if (!aligned) return null;
       const latest = last(core);
       return {
@@ -330,13 +324,11 @@ const INDICATORS: SotnIndicator[] = [
             { label: "25–54", color: "au" },
             { label: "15–24", color: "clay" },
             { label: "55–64", color: "stone" },
-            { label: "15+", color: "ink", dash: true },
           ],
           series: [
             { color: "au", xs: xs(aligned.base), points: aligned.values[0] },
             { color: "clay", xs: xs(aligned.base), points: aligned.values[1] },
             { color: "stone", xs: xs(aligned.base), points: aligned.values[2] },
-            { color: "ink", dash: true, xs: xs(aligned.base), points: aligned.values[3] },
           ],
         }),
       };
@@ -344,19 +336,15 @@ const INDICATORS: SotnIndicator[] = [
   },
   {
     n: "03",
-    title: "Business entries",
+    title: "New business entries per year",
     verdict: "mixed",
-    headline: "Business entry has held up since 2000, but much of it is churn.",
-    body: "New business entries per year — businesses gaining a paid employee, including seasonal reopenings, not only first-ever formation. Two StatCan sources are chain-linked: the discontinued quarterly entry series (2000–2019, private sector) rescaled to meet the ongoing monthly openings series (2015→present, business sector) at their overlap, so the trend is continuous across the 2015 join. Source tables 33-10-0165 and 33-10-0270.",
+    headline: "New-business formation has been broadly flat since 2015.",
+    body: "New business entries per year — businesses appearing for the first time (true new-business formation), not seasonal reopenings. Monthly, seasonally adjusted counts summed into complete calendar years. StatCan labels these experimental estimates. Source table 33-10-0270 (business sector industries).",
     build: (get) => {
-      const histRaw = points(get, "business-entries-historical");
-      const openRaw = points(get, "business-openings");
-      if (!histRaw || !openRaw) return null;
-      // Sum sub-annual points into complete calendar years only.
-      const annualize = (
-        ps: EconomySeriesPoint[],
-        perYear: number,
-      ): Map<number, number> => {
+      const raw = points(get, "business-entrants");
+      if (!raw) return null;
+      // Sum the 12 monthly points into complete calendar years only.
+      const annualize = (ps: EconomySeriesPoint[]): Map<number, number> => {
         const acc = new Map<number, { sum: number; n: number }>();
         for (const p of ps) {
           const y = Math.floor(p.year);
@@ -366,33 +354,21 @@ const INDICATORS: SotnIndicator[] = [
           acc.set(y, e);
         }
         const out = new Map<number, number>();
-        for (const [y, e] of acc) if (e.n === perYear) out.set(y, e.sum);
+        for (const [y, e] of acc) if (e.n === 12) out.set(y, e.sum);
         return out;
       };
-      const hist = annualize(histRaw, 4); // quarterly
-      const open = annualize(openRaw, 12); // monthly
-      // Chain-link: the two tables differ in scope (~11% level), so rescale the
-      // ongoing openings series to the historical level over their overlap,
-      // preserving the trend across the join.
-      const overlap = [...hist.keys()].filter((y) => open.has(y));
-      if (overlap.length === 0) return null;
-      const factor =
-        overlap.reduce((a, y) => a + hist.get(y)! / open.get(y)!, 0) /
-        overlap.length;
-      // Historical before the cutover, rescaled openings from it on.
-      const CUTOVER = 2015;
-      const series: { year: number; value: number }[] = [];
-      for (const [y, v] of hist) if (y < CUTOVER) series.push({ year: y, value: v });
-      for (const [y, v] of open) if (y >= CUTOVER) series.push({ year: y, value: v * factor });
-      series.sort((a, b) => a.year - b.year);
+      const annual = annualize(raw);
+      const series = [...annual.entries()]
+        .map(([year, value]) => ({ year, value }))
+        .sort((a, b) => a.year - b.year);
       if (series.length < 2) return null;
       const latest = series[series.length - 1];
       return {
         stat: int(latest.value),
         statSub: `Business entries per year · ${Math.floor(latest.year)}`,
-        ...sourceLink(get, "business-openings"),
+        ...sourceLink(get, "business-entrants"),
         spec: line({
-          unit: "Business entries per year",
+          unit: "New business entries per year",
           fmt: "count",
           legend: [{ label: "Business entries", color: "au" }],
           series: [

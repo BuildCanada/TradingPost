@@ -102,6 +102,9 @@ const SOURCE_NAMES: Record<string, string> = {
   econ_statcan_investment_position: "Statistics Canada (table 36-10-0008)",
   econ_statcan_capital_formation: "Statistics Canada (table 36-10-0104)",
   econ_statcan_govt_debt_to_gdp: "Statistics Canada (table 38-10-0237)",
+  econ_statcan_govt_net_debt_excl_pension:
+    "Statistics Canada (tables 10-10-0015 and 36-10-0104)",
+  econ_statcan_mortgage_debt_service: "Statistics Canada (table 11-10-0065)",
   econ_statcan_population_components: "Statistics Canada (table 17-10-0008)",
   econ_statcan_population_total: "Statistics Canada (table 17-10-0009)",
   econ_statcan_npr_by_type: "Statistics Canada (table 17-10-0121)",
@@ -139,6 +142,9 @@ const STATCAN_TABLES: Record<string, string> = {
   econ_statcan_investment_position: "36-10-0008",
   econ_statcan_capital_formation: "36-10-0104",
   econ_statcan_govt_debt_to_gdp: "38-10-0237",
+  // Computed from two tables; link to the primary balance-sheet source.
+  econ_statcan_govt_net_debt_excl_pension: "10-10-0015",
+  econ_statcan_mortgage_debt_service: "11-10-0065",
   econ_statcan_population_components: "17-10-0008",
   econ_statcan_population_total: "17-10-0009",
   econ_statcan_npr_by_type: "17-10-0121",

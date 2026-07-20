@@ -12,7 +12,7 @@ import {
 } from "./state-of-the-nation";
 
 const DESCRIPTION =
-  "Sixteen indicators, read honestly. Where Canada leads, where we lag, and where the picture is genuinely mixed — measured against our own record.";
+  "The key indicators of Canadian prosperity, read honestly. Where Canada leads, where we lag, and where the picture is genuinely mixed — measured against our own record.";
 
 export const metadata: Metadata = {
   title: "State of the Nation",
@@ -56,19 +56,24 @@ function IndicatorCard({
         className="mt-5 pt-3.5 type-label-sm uppercase tracking-[0.08em]"
         style={{ color: GRAY, borderTop: `1px solid ${BD}` }}
       >
-        Source ·{" "}
-        {indicator.sourceUrl ? (
-          <a
-            href={indicator.sourceUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="underline underline-offset-2 hover:text-dark"
-          >
-            {indicator.source}
-          </a>
-        ) : (
-          indicator.source
-        )}
+        {indicator.sources.length > 1 ? "Sources" : "Source"} ·{" "}
+        {indicator.sources.map((source, i) => (
+          <span key={source.name}>
+            {i > 0 && " · "}
+            {source.url ? (
+              <a
+                href={source.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2 hover:text-dark"
+              >
+                {source.name}
+              </a>
+            ) : (
+              source.name
+            )}
+          </span>
+        ))}
       </div>
     </section>
   );
@@ -114,6 +119,9 @@ export default async function StateOfTheNationPage() {
         <h1 className="m-0 font-display font-medium text-[clamp(2.4rem,4.6vw,3.8rem)] leading-[0.99] tracking-[-0.03em] text-balance">
           State of the Nation
         </h1>
+        <p className="mt-3 font-display text-[clamp(1.05rem,1.9vw,1.45rem)] leading-snug text-dark/70 text-balance">
+          We are not yet the most prosperous country on earth. But we could be.
+        </p>
       </header>
 
       <div id="indicators">
@@ -148,18 +156,32 @@ export default async function StateOfTheNationPage() {
       </div>
 
       <section className="px-[clamp(24px,5vw,88px)] py-[clamp(48px,6vw,80px)] text-center">
-        <h2 className="type-h3 text-dark">Missing a measure that matters?</h2>
-        <p className="mt-2 type-body text-dark/70 max-w-[560px] mx-auto">
-          We&rsquo;re expanding this dashboard. If there&rsquo;s an indicator
-          that would sharpen the picture — for better or worse — tell us and
-          we&rsquo;ll track it.
+        <h2 className="type-h3 text-dark">Are we missing something?</h2>
+        <p className="mt-4 type-body text-dark/70 max-w-[640px] mx-auto">
+          We&rsquo;re trying to answer the question: are we on the right track?
         </p>
-        <a
-          href="mailto:hi@buildcanada.com?subject=State%20of%20the%20Nation%20indicator%20request"
-          className="mt-6 inline-block border border-dark px-5 py-2.5 type-label text-dark hover:bg-dark hover:text-bg transition-colors"
-        >
-          Email us
-        </a>
+        <p className="mt-3 type-body text-dark/70 max-w-[640px] mx-auto">
+          It&rsquo;s a nuanced question. We can be growing our economy, but if
+          our young people can&rsquo;t buy a house and start a family, we&rsquo;re
+          not really prosperous. We care about prosperity in the broadest sense —
+          so come tell us what we&rsquo;re missing on{" "}
+          <a
+            href="https://x.com/buildcanada"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-2 hover:text-dark"
+          >
+            X
+          </a>{" "}
+          or email us at{" "}
+          <a
+            href="mailto:hi@buildcanada.com?subject=State%20of%20the%20Nation"
+            className="underline underline-offset-2 hover:text-dark"
+          >
+            hi@buildcanada.com
+          </a>
+          .
+        </p>
       </section>
     </div>
   );

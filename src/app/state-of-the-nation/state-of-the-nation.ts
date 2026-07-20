@@ -1,11 +1,10 @@
 // The State of the Nation indicators, in the design's layout with the
 // dashboard's real chart order and contents:
 //   Headline — GDP per capita
-//   Economy — unemployment by age, business formation, employment, wages,
-//             investment flows, capital formation
+//   Economy — unemployment by age, business creation, wages, inflation
 //   Government Sustainability — debt to GDP, private vs public employment
-//   Cost of Living — CPI, house price to income, housing starts
-//   Immigration — net emigration, immigration, TFWs, immigration by class
+//   Housing — house price to income, housing starts
+//   Immigration — Canadians leaving, admissions to Canada
 // Every chart derives its stat and series from york_factory at request time;
 // a chart whose data is unavailable is skipped rather than shown stale.
 
@@ -27,10 +26,11 @@ export type SotnView = {
   statSub: string;
   headline: string;
   body: string;
-  source: string;
-  // Public landing page for the source (humanizeSourceUrl maps raw API
-  // endpoints to human pages); null when the API reports no URL.
-  sourceUrl: string | null;
+  // Every table the chart's numbers come from (e.g. a per-1,000 chart credits
+  // both its own series and the population divisor). `url` is the public
+  // landing page for the source (humanizeSourceUrl maps raw API endpoints to
+  // human pages); null when the API reports no URL.
+  sources: { name: string; url: string | null }[];
   spec: ChartSpec;
   // Renders full-width above its section's card grid.
   wide?: boolean;
@@ -57,19 +57,27 @@ export const SOTN_MEASURE_SLUGS = [
   // "employment-rate",
   "average-hourly-wage",
   "median-hourly-wage",
-  "fdi-position-in-canada",
-  "cdi-position-abroad",
-  "capital-formation-pct-gdp",
+  // Investment position (fdi/cdi) and capital formation moved to V2 — their
+  // charts add noise to the core story, so the series are no longer fetched.
+  // "fdi-position-in-canada",
+  // "cdi-position-abroad",
+  // "capital-formation-pct-gdp",
   // Gross debt is deliberately not fetched or charted — it ignores the
   // financial assets governments hold and overstates the burden. The debt
-  // chart shows net financial debt only (govt-net-debt-to-gdp).
-  "govt-net-debt-to-gdp",
+  // chart shows net debt excluding the CPP/QPP pension holdings, whose ~$1T
+  // in assets are earmarked for future pensions rather than available to pay
+  // down debt — netting them out (as StatCan's headline 38-10-0237 net figure
+  // does) understates the burden. Computed upstream from table 10-10-0015.
+  "govt-net-debt-excl-pension-to-gdp",
   "employment-all-classes",
   "employment-private-sector",
   "employment-public-sector",
   "employment-self-employed",
   "cpi-all-items",
-  "house-price-to-income",
+  // Housing affordability is charted as the mortgage debt service ratio (an
+  // actual % of disposable income) rather than the OECD's indexed price-to-
+  // income measure — a non-indexed, quarterly carrying-cost read.
+  "mortgage-debt-service-ratio",
   "housing-starts-canada",
   "population-canada",
   "emigrants-annual",
@@ -82,14 +90,15 @@ export const SOTN_MEASURE_SLUGS = [
   // "npr-work-permit-holders",
   // "npr-total",
   "pr-admissions-total",
-  "pr-admissions-economic",
-  "pr-admissions-family",
-  "pr-admissions-refugee",
-  "pr-admissions-other",
-  "pr-admissions-economic-historical",
-  "pr-admissions-family-historical",
-  "pr-admissions-refugee-historical",
-  "pr-admissions-other-historical",
+  // Per-class PR series powered the "by class" chart, now killed — no longer fetched.
+  // "pr-admissions-economic",
+  // "pr-admissions-family",
+  // "pr-admissions-refugee",
+  // "pr-admissions-other",
+  // "pr-admissions-economic-historical",
+  // "pr-admissions-family-historical",
+  // "pr-admissions-refugee-historical",
+  // "pr-admissions-other-historical",
 ];
 
 const MONTHS = [
@@ -154,17 +163,22 @@ function cpiDeflator(
   };
 }
 
-// Attribution name + public link for a chart, from its primary measure's
-// source record.
-function sourceLink(
+// Attribution names + public links for a chart, one per measure whose numbers
+// feed it (deduped — measures from the same table credit it once). Pass every
+// slug the chart draws on, including divisors like population.
+function sourceLinks(
   get: Getter,
-  slug: string,
-): { source: string; sourceUrl: string | null } {
-  const source = get(slug)?.meta.source ?? null;
-  return {
-    source: source ? humanizeSourceName(source.name) : "",
-    sourceUrl: source ? humanizeSourceUrl(source.name, source.url) : null,
-  };
+  ...slugs: string[]
+): { sources: { name: string; url: string | null }[] } {
+  const sources: { name: string; url: string | null }[] = [];
+  for (const slug of slugs) {
+    const source = get(slug)?.meta.source;
+    if (!source) continue;
+    const name = humanizeSourceName(source.name);
+    if (sources.some((s) => s.name === name)) continue;
+    sources.push({ name, url: humanizeSourceUrl(source.name, source.url) });
+  }
+  return { sources };
 }
 
 const int = (v: number) => Math.round(v).toLocaleString("en-CA");
@@ -217,7 +231,7 @@ type SotnIndicator = {
   build: (
     get: Getter,
   ) =>
-    | (Pick<SotnView, "stat" | "statSub" | "source" | "sourceUrl"> & {
+    | (Pick<SotnView, "stat" | "statSub" | "sources"> & {
         spec: ChartSpec;
       })
     | null;
@@ -286,9 +300,9 @@ const INDICATORS: SotnIndicator[] = [
       return {
         stat: `$${int(latest.value)}`,
         statSub: `Real GDP per capita, chained 2017 $ · ${quarterLabel(latest)}`,
-        ...sourceLink(get, "gdp-per-capita-canada"),
+        ...sourceLinks(get, "gdp-per-capita-canada"),
         spec: line({
-          unit: `Real GDP per capita`,
+          unit: `Gross Domestic Product (GDP) per capita, chained 2017 dollars`,
           fmt: "money",
           // Real dollar levels, not an index. Frame around the base-year level
           // with a floating baseline rather than anchoring the axis at zero, so
@@ -317,7 +331,7 @@ const INDICATORS: SotnIndicator[] = [
       return {
         stat: `${latest.value.toFixed(1)}%`,
         statSub: `Unemployment rate, 25–54 · ${monthLabel(latest)}`,
-        ...sourceLink(get, "unemployment-rate-25-to-54"),
+        ...sourceLinks(get, "unemployment-rate-25-to-54"),
         spec: line({
           unit: "Unemployment rate by age group",
           fmt: "pct",
@@ -337,27 +351,43 @@ const INDICATORS: SotnIndicator[] = [
   },
   {
     n: "03",
-    title: "Business creation",
-    verdict: "mixed",
-    headline: "New-business creation is up only modestly over two decades.",
-    body: "New employer businesses entering the private sector each year — firms hiring their first paid employee (true formation, not seasonal reopenings). Annual, from Statistics Canada's Longitudinal Employment Analysis Program (LEAP), summed to a national total across the provinces and territories. One consistent methodology across the whole span. Source table 33-10-0087, 2001–2023.",
+    title: "New Business Creation",
+    verdict: "lag",
+    headline: "Per person, Canadians are starting fewer businesses than two decades ago.",
+    body: "New employer businesses entering the private sector each year — firms hiring their first paid employee (true formation, not seasonal reopenings) — expressed per 1,000 people so it holds up as the population grows. Annual firm counts from Statistics Canada's Longitudinal Employment Analysis Program (LEAP), summed to a national total across the provinces and territories, divided by StatCan's population estimates. Source table 33-10-0087, 2001–2023.",
     build: (get) => {
       const series = points(get, "business-entrants-annual");
-      if (!series || series.length < 2) return null;
-      const latest = last(series);
+      const pop = points(get, "population-canada");
+      if (!series || series.length < 2 || !pop) return null;
+      // Population is quarterly; collapse to a calendar-year average so it
+      // divides the annual entrant flow cleanly. Then express per 1,000 people.
+      const popByYear = new Map<number, { sum: number; n: number }>();
+      for (const p of pop) {
+        const y = Math.floor(p.year);
+        const e = popByYear.get(y) ?? { sum: 0, n: 0 };
+        e.sum += p.value;
+        e.n += 1;
+        popByYear.set(y, e);
+      }
+      const perCapita = series.flatMap((p) => {
+        const e = popByYear.get(Math.floor(p.year));
+        return e ? [{ year: p.year, value: (p.value / (e.sum / e.n)) * 1000 }] : [];
+      });
+      if (perCapita.length < 2) return null;
+      const latest = perCapita[perCapita.length - 1];
       return {
-        stat: int(latest.value),
-        statSub: `New business entrants · ${Math.floor(latest.year)}`,
-        ...sourceLink(get, "business-entrants-annual"),
+        stat: latest.value.toFixed(1),
+        statSub: `New businesses started per 1,000 people · ${Math.floor(latest.year)}`,
+        ...sourceLinks(get, "business-entrants-annual", "population-canada"),
         spec: line({
-          unit: "New business entries per year",
-          fmt: "count",
-          legend: [{ label: "Business entrants", color: "au" }],
+          unit: "New businesses started per 1,000 people",
+          fmt: "num",
+          legend: [{ label: "Entrants per 1,000", color: "au" }],
           series: [
             {
               color: "au",
-              xs: xs(series),
-              points: series.map((p) => p.value),
+              xs: perCapita.map((p) => p.year),
+              points: perCapita.map((p) => p.value),
             },
           ],
         }),
@@ -379,7 +409,7 @@ const INDICATORS: SotnIndicator[] = [
       return {
         stat: `${latest.value.toFixed(1)}%`,
         statSub: `Employment rate, 15+ · ${Math.floor(latest.year)}`,
-        ...sourceLink(get, "employment-rate"),
+        ...sourceLinks(get, "employment-rate"),
         spec: line({
           unit: "Employment rate, ages 15 and over",
           fmt: "pct",
@@ -412,7 +442,7 @@ const INDICATORS: SotnIndicator[] = [
       return {
         stat: `$${realAvg[realAvg.length - 1].toFixed(2)}`,
         statSub: `Average hourly wage${deflator ? `, ${deflator.baseYear} dollars` : ""} · ${Math.floor(latest.year)}`,
-        ...sourceLink(get, "average-hourly-wage"),
+        ...sourceLinks(get, "average-hourly-wage"),
         spec: line({
           unit: deflator
             ? `Real hourly wages, average vs median (${deflator.baseYear} dollars)`
@@ -430,6 +460,8 @@ const INDICATORS: SotnIndicator[] = [
       };
     },
   },
+  /* Moved to V2 — investment position and capital formation add noise to the
+     core story. Kept commented for easy restore.
   {
     n: "06",
     title: "Investment position",
@@ -452,7 +484,7 @@ const INDICATORS: SotnIndicator[] = [
       return {
         stat: `${net < 0 ? "−" : "+"}$${int(Math.abs(net))}B`,
         statSub: `Net direct investment position · ${Math.floor(latest.year)}`,
-        ...sourceLink(get, "fdi-position-in-canada"),
+        ...sourceLinks(get, "fdi-position-in-canada"),
         spec: line({
           unit: "Direct investment position: in Canada vs abroad ($B)",
           fmt: "count",
@@ -481,7 +513,7 @@ const INDICATORS: SotnIndicator[] = [
       return {
         stat: `${latest.value.toFixed(1)}%`,
         statSub: `Gross capital formation, % of GDP · ${Math.floor(latest.year)}`,
-        ...sourceLink(get, "capital-formation-pct-gdp"),
+        ...sourceLinks(get, "capital-formation-pct-gdp"),
         spec: line({
           unit: "Gross capital formation, share of GDP",
           fmt: "pct",
@@ -491,24 +523,25 @@ const INDICATORS: SotnIndicator[] = [
       };
     },
   },
+  */
   {
     n: "08",
-    title: "Net financial debt",
+    title: "Net debt",
     verdict: "lead",
-    headline: "Net financial debt sits near its lowest since 1990, far below the mid-1990s peak.",
-    body: "Every level of government — federal, provincial, local, CPP and QPP — on a national-balance-sheet basis. This is net financial debt: total liabilities minus financial assets (the pension plans' holdings included). It excludes tangible capital assets like roads and buildings, and it is the honest measure of the public sector's financial position. Gross debt ignores the assets held against those liabilities and overstates the burden; a net-worth measure would wrongly net out non-financial assets. This is neither — just liabilities net of financial assets.",
+    headline: "Net debt is roughly half its mid-1990s peak — but has been climbing back since 2023.",
+    body: "Every level of government — federal, provincial, and local — on a national-balance-sheet basis: total liabilities minus the financial assets held against them, but excluding the Canada and Quebec Pension Plans. The CPP and QPP hold close to $1 trillion, yet that money is set aside for future pensions, not available to pay down government debt — netting it out, as the headline national-accounts figure does, flatters the picture. Excluded, net debt reached above 100 per cent of GDP in the mid-1990s fiscal crisis, fell to its low in 2023, and has edged up since.",
     build: (get) => {
-      const net = points(get, "govt-net-debt-to-gdp");
+      const net = points(get, "govt-net-debt-excl-pension-to-gdp");
       if (!net) return null;
       const latest = last(net);
       return {
         stat: `${Math.round(latest.value)}%`,
-        statSub: `General government net financial debt to GDP · ${quarterLabel(latest)}`,
-        ...sourceLink(get, "govt-net-debt-to-gdp"),
+        statSub: `General government net debt, excl. CPP/QPP, to GDP · ${quarterLabel(latest)}`,
+        ...sourceLinks(get, "govt-net-debt-excl-pension-to-gdp"),
         spec: line({
-          unit: "Government net financial debt, share of GDP",
+          unit: "Government net debt (excl. CPP/QPP), share of GDP",
           fmt: "pct",
-          legend: [{ label: "Net financial debt", color: "au" }],
+          legend: [{ label: "Net debt (excl. pensions)", color: "au" }],
           series: [{ color: "au", xs: xs(net), points: net.map((p) => p.value) }],
         }),
       };
@@ -536,7 +569,7 @@ const INDICATORS: SotnIndicator[] = [
       return {
         stat: `${pubShare[pubShare.length - 1].toFixed(1)}%`,
         statSub: `Public share of employment · ${monthLabel(latest)}`,
-        ...sourceLink(get, "employment-all-classes"),
+        ...sourceLinks(get, "employment-all-classes"),
         spec: line({
           unit: "Employment share by class of worker",
           fmt: "pct",
@@ -556,7 +589,7 @@ const INDICATORS: SotnIndicator[] = [
   },
   {
     n: "10",
-    title: "Consumer prices",
+    title: "Inflation",
     verdict: "lag",
     headline: "Inflation broke above target in 2021–22 and is only now easing back toward 2%.",
     body: "The 12-month change in the all-items Consumer Price Index — the headline inflation rate, month by month. The dashed line is the Bank of Canada's 2% target. After four decades of gradual disinflation from the double-digit early 1980s, inflation spiked above 8% in 2022 before easing back toward target.",
@@ -585,9 +618,9 @@ const INDICATORS: SotnIndicator[] = [
       return {
         stat: `${rate[rate.length - 1].value.toFixed(1)}%`,
         statSub: `CPI inflation, 12-month change · ${monthLabel(raw[raw.length - 1])}`,
-        ...sourceLink(get, "cpi-all-items"),
+        ...sourceLinks(get, "cpi-all-items"),
         spec: line({
-          unit: "Consumer price inflation vs the 2% target",
+          unit: "Inflation (CPI) vs 2% target",
           fmt: "pct1",
           legend: [
             { label: "Inflation (12-month)", color: "au" },
@@ -603,25 +636,22 @@ const INDICATORS: SotnIndicator[] = [
   },
   {
     n: "11",
-    title: "Housing affordability",
+    title: "Housing Affordability",
     verdict: "lag",
-    headline: "House prices have swung from below their long-term norm to roughly 50% above it.",
-    body: "The OECD's headline affordability measure, indexed so 100 is the long-term average of Canada's house-price-to-income ratio. Below the line, homes are cheaper than the historical norm relative to incomes; above it, more stretched. Canada sat below through the 1990s and 2000s, crossed the norm around 2009, and now runs about fifty per cent above — among the most stretched in the developed world.",
+    headline: "Mortgage payments now claim a near-record share of household income.",
+    body: "The mortgage debt service ratio — obligated principal and interest payments as a share of household disposable income, seasonally adjusted. It measures the real carrying-cost burden of housing, not just prices. After holding near six per cent through the 2000s, it climbed to a record 8.2 per cent in 2023 as interest rates rose, and remains close to that high.",
     build: (get) => {
-      const ps = points(get, "house-price-to-income");
+      const ps = points(get, "mortgage-debt-service-ratio");
       if (!ps) return null;
       const latest = last(ps);
       return {
-        stat: `+${Math.round(latest.value - 100)}%`,
-        statSub: `Above the long-term price-to-income average · ${Math.floor(latest.year)}`,
-        ...sourceLink(get, "house-price-to-income"),
+        stat: `${latest.value.toFixed(1)}%`,
+        statSub: `Mortgage payments as a share of disposable income · ${quarterLabel(latest)}`,
+        ...sourceLinks(get, "mortgage-debt-service-ratio"),
         spec: line({
-          unit: "House-price-to-income ratio (100 = long-term average)",
-          fmt: "index",
-          // Index where 100 = the long-term norm: frame around it with a
-          // floating baseline instead of anchoring at zero.
-          baseline: 100,
-          legend: [{ label: "Canada", color: "au" }],
+          unit: "Mortgage debt service ratio, % of disposable income",
+          fmt: "pct",
+          legend: [{ label: "Mortgage debt service ratio", color: "au" }],
           series: [{ color: "au", xs: xs(ps), points: ps.map((p) => p.value) }],
         }),
       };
@@ -629,7 +659,7 @@ const INDICATORS: SotnIndicator[] = [
   },
   {
     n: "12",
-    title: "Housing starts",
+    title: "Housing Starts",
     verdict: "lag",
     headline: "Per person, Canada builds barely half as many homes as it did in the 1970s.",
     body: "Dwelling units started each year per 1,000 people, from CMHC's starts and completions survey against StatCan's population estimates. In absolute terms starts are back near their 1970s highs — but the population has more than doubled since then, so on a per-person basis homebuilding runs at roughly half the mid-1970s rate. This is the honest read on whether supply is keeping up with the people who need homes.",
@@ -658,7 +688,7 @@ const INDICATORS: SotnIndicator[] = [
       return {
         stat: latest.value.toFixed(1),
         statSub: `Dwelling units started per 1,000 people · ${Math.floor(latest.year)}`,
-        ...sourceLink(get, "housing-starts-canada"),
+        ...sourceLinks(get, "housing-starts-canada", "population-canada"),
         spec: line({
           unit: "Housing starts per 1,000 people",
           fmt: "num",
@@ -676,7 +706,7 @@ const INDICATORS: SotnIndicator[] = [
   },
   {
     n: "13",
-    title: "Net emigration",
+    title: "Canadians Leaving Canada",
     verdict: "mixed",
     headline: "The counterflow is growing: more people leave than come back.",
     body: "Emigrants minus returning emigrants, on StatCan's July–June demographic years (the 2024 point covers July 2023 to June 2024). StatCan stopped publishing its own net series after a 2016 methodology change, so this line is derived from the components.",
@@ -691,7 +721,7 @@ const INDICATORS: SotnIndicator[] = [
       return {
         stat: int(net[net.length - 1]),
         statSub: `Net emigration · ${Math.floor(latest.year)} (July–June year)`,
-        ...sourceLink(get, "emigrants-annual"),
+        ...sourceLinks(get, "emigrants-annual"),
         spec: line({
           unit: "Emigrants, net of returning Canadians",
           fmt: "count",
@@ -703,7 +733,7 @@ const INDICATORS: SotnIndicator[] = [
   },
   {
     n: "14",
-    title: "Permanent residents",
+    title: "Admissions to Canada",
     verdict: "lead",
     headline: "Still one of the world's great immigration destinations — intake is easing off record highs.",
     body: "Permanent residents admitted per calendar year. Two IRCC sources are spliced into one continuous line: the archived by-category series (1980–2015) for the historical years, and IRCC's ongoing monthly admissions (summed to calendar years) from 2015 on. Handled well, this is an engine of growth; handled poorly, it strains the housing and services shown elsewhere on this page.",
@@ -718,9 +748,9 @@ const INDICATORS: SotnIndicator[] = [
       return {
         stat: int(latest.value),
         statSub: `Permanent residents admitted · ${Math.floor(latest.year)}`,
-        ...sourceLink(get, "pr-admissions-total"),
+        ...sourceLinks(get, "pr-admissions-total"),
         spec: line({
-          unit: "Permanent residents admitted per year",
+          unit: "Permanent residents admitted to Canada per year",
           fmt: "count",
           legend: [{ label: "PR admissions", color: "au" }],
           series: [
@@ -754,7 +784,7 @@ const INDICATORS: SotnIndicator[] = [
       return {
         stat: `${(last(permits).value / 1_000_000).toFixed(2)}M`,
         statSub: `Work-permit holders · ${quarterLabel(latest)}`,
-        ...sourceLink(get, "npr-work-permit-holders"),
+        ...sourceLinks(get, "npr-work-permit-holders"),
         spec: line({
           unit: "Work-permit holders vs all non-permanent residents",
           fmt: "count",
@@ -771,6 +801,7 @@ const INDICATORS: SotnIndicator[] = [
     },
   },
   */
+  /* Killed — the "by class" breakdown adds noise. Kept commented for easy restore.
   {
     n: "16",
     title: "Immigration by type",
@@ -792,7 +823,7 @@ const INDICATORS: SotnIndicator[] = [
       return {
         stat: int(latest.value),
         statSub: `Permanent residents admitted, by class · ${Math.floor(latest.year)}`,
-        ...sourceLink(get, "pr-admissions-total"),
+        ...sourceLinks(get, "pr-admissions-total"),
         spec: line({
           unit: "Permanent-resident admissions by class",
           fmt: "count",
@@ -814,6 +845,7 @@ const INDICATORS: SotnIndicator[] = [
       };
     },
   },
+  */
 ];
 
 export const SOTN_INDICATOR_COUNT = INDICATORS.length;
@@ -824,15 +856,17 @@ const SECTION_DEFS = [
   {
     id: "economy",
     title: "Economy",
-    ns: ["01", "02", "03", "04", "05", "06", "07"],
+    // Inflation (10) lives here now for balance; investment position (06) and
+    // capital formation (07) moved to V2.
+    ns: ["01", "02", "03", "05", "10"],
   },
   {
     id: "government-sustainability",
     title: "Government Sustainability",
     ns: ["08", "09"],
   },
-  { id: "cost-of-living", title: "Cost of Living", ns: ["10", "11", "12"] },
-  { id: "immigration", title: "Immigration", ns: ["13", "14", "15", "16"] },
+  { id: "housing", title: "Housing", ns: ["11", "12"] },
+  { id: "immigration", title: "Immigration", ns: ["13", "14"] },
 ];
 
 export type SotnSection = {

@@ -1,8 +1,8 @@
-import { fetchTools } from "@/lib/api";
+import { PROJECTS } from "@/constants/projects";
 import WidgetCard from "./widgets/WidgetCard";
 import { ProjectData } from "./widgets/types";
 
-export default async function ProjectsGrid({
+export default function ProjectsGrid({
   featured,
   maxItems,
   filter,
@@ -17,9 +17,9 @@ export default async function ProjectsGrid({
   includeSlugs?: string[];
   columns?: 1 | 2;
 }) {
-  const raw = await fetchTools(featured ? { featured: true } : undefined);
-
-  let projects: ProjectData[] = raw;
+  let projects: ProjectData[] = featured
+    ? PROJECTS.filter((p) => p.featured)
+    : PROJECTS;
 
   if (includeSlugs?.length) {
     projects = includeSlugs

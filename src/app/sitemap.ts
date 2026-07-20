@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
-import { fetchBuilders, fetchFeedItems, fetchMemos, fetchPosts, fetchTools } from "@/lib/api";
+import { fetchBuilders, fetchFeedItems, fetchMemos, fetchPosts } from "@/lib/api";
+import { PROJECTS } from "@/constants/projects";
 import { fetchApi } from "@/lib/tracker-api";
 import type {
   CommitmentsResponse,
@@ -41,10 +42,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/privacy-notice`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
   ];
 
-  const tools = await fetchTools();
   const staticUrls = new Set(staticPages.map((p) => p.url));
   const redirectedPaths = new Set(["/great-canadian-builders", "/toronto"]);
-  const projectPages: MetadataRoute.Sitemap = tools
+  const projectPages: MetadataRoute.Sitemap = PROJECTS
     .map((t) => {
       if (!t.externalUrl) return null;
       let path: string | null = null;

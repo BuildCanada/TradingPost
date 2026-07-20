@@ -4,12 +4,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getSiteConfig } from "@/lib/api";
-import {
-  getEconomicSeries,
-  humanizeSourceName,
-  humanizeSourceUrl,
-  type EconomySeriesResponse,
-} from "@/lib/api/economy";
+import { getEconomicSeries } from "@/lib/api/economy";
 import { PageHeader } from "@/components/ui/page-header";
 import { buildGraph } from "@/lib/schemas/graph";
 import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
@@ -18,6 +13,7 @@ import { Signpost } from "@/components/custom/signpost";
 import CombinedSectionChartClient from "../CombinedSectionChartClient";
 import IndicatorChartClient from "../IndicatorChartClient";
 import SectionNav from "../SectionNav";
+import SourceLine from "../SourceLine";
 import { SECTIONS } from "../indicators";
 
 export const dynamicParams = false;
@@ -34,11 +30,11 @@ export async function generateMetadata({
   const { section: sectionId } = await params;
   const section = SECTIONS.find((s) => s.id === sectionId);
   if (!section) return {};
-  const title = `${section.title} — Prosperity Dashboard`;
+  const title = `${section.title} — State of the Nation`;
   return {
     title,
     description: section.description,
-    alternates: { canonical: `/prosperity-dashboard/${section.id}` },
+    alternates: { canonical: `/state-of-the-nation/${section.id}` },
     openGraph: {
       title,
       description: section.description,
@@ -49,40 +45,6 @@ export async function generateMetadata({
       title,
     },
   };
-}
-
-function formatFetchedDate(iso: string): string {
-  const date = new Date(iso);
-  if (Number.isNaN(date.getTime())) return "";
-  return new Intl.DateTimeFormat("en-CA", { dateStyle: "long" }).format(date);
-}
-
-function SourceLine({ response }: { response: EconomySeriesResponse }) {
-  const source = response.meta.source;
-  if (!source) return null;
-  const updated = source.last_fetched_at
-    ? formatFetchedDate(source.last_fetched_at)
-    : "";
-  const sourceName = humanizeSourceName(source.name);
-  const sourceUrl = humanizeSourceUrl(source.name, source.url);
-  return (
-    <p className="mt-3 type-label-sm text-dark/60">
-      Source:{" "}
-      {sourceUrl ? (
-        <a
-          href={sourceUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="underline hover:text-dark"
-        >
-          {sourceName}
-        </a>
-      ) : (
-        sourceName
-      )}
-      {updated && <> &middot; Updated {updated}</>}
-    </p>
-  );
 }
 
 // Deep-link targets must clear the sticky navbar + SectionNav stack, whose
@@ -133,7 +95,7 @@ export default async function IndicatorSectionPage({ params }: PageProps) {
   const jsonLd = buildGraph(
     generateOrganizationSchema(configData),
     generateBreadcrumbSchema(
-      `/prosperity-dashboard/${section.id}`,
+      `/state-of-the-nation/${section.id}`,
       section.title,
       configData.siteUrl,
     ),
@@ -145,24 +107,34 @@ export default async function IndicatorSectionPage({ params }: PageProps) {
     ),
   );
 
-  const combinedItems = section.combined
-    ? section.indicators.flatMap((indicator, i) => {
-        const response = results[i];
-        return response
-          ? [{ label: indicator.chartLabel ?? indicator.heading, response }]
-          : [];
-      })
-    : [];
+  // Each combined chart overlays a subset of the section's indicators
+  // (defaulting to all of them), in the order its slugs list them.
+  const combinedCharts = (section.combined ?? []).flatMap((chart) => {
+    const slugs = chart.slugs ?? section.indicators.map((i) => i.slug);
+    const items = slugs.flatMap((slug) => {
+      const index = section.indicators.findIndex((i) => i.slug === slug);
+      const indicator = section.indicators[index];
+      const response = index >= 0 ? results[index] : null;
+      return indicator && response
+        ? [{ label: indicator.chartLabel ?? indicator.heading, response }]
+        : [];
+    });
+    return items.length > 0 ? [{ ...chart, items }] : [];
+  });
 
   const signpostHeadings = [
-    ...(section.combined && combinedItems.length > 0
-      ? [{ id: "combined", text: section.combined.heading, level: 2 as const }]
-      : []),
-    ...section.indicators.map((indicator) => ({
-      id: indicator.slug,
-      text: indicator.heading,
+    ...combinedCharts.map((chart) => ({
+      id: chart.id,
+      text: chart.heading,
       level: 2 as const,
     })),
+    ...section.indicators
+      .filter((indicator) => !indicator.combinedOnly)
+      .map((indicator) => ({
+        id: indicator.slug,
+        text: indicator.heading,
+        level: 2 as const,
+      })),
   ];
 
   return (
@@ -189,22 +161,23 @@ export default async function IndicatorSectionPage({ params }: PageProps) {
             showTopBorder={false}
           />
           <div className="max-w-[1080px] mx-auto 2xl-memo:mx-0 w-full min-w-0 space-y-16">
-            {section.combined && combinedItems.length > 0 && (
-              <section id="combined" className={SECTION_SCROLL_MT}>
-                <AnchoredHeading id="combined" text={section.combined.heading} />
+            {combinedCharts.map((chart) => (
+              <section key={chart.id} id={chart.id} className={SECTION_SCROLL_MT}>
+                <AnchoredHeading id={chart.id} text={chart.heading} />
                 <p className="mt-1 mb-6 type-body-sm text-dark/60 max-w-[720px]">
-                  {section.combined.blurb}
+                  {chart.blurb}
                 </p>
                 <CombinedSectionChartClient
-                  heading={section.combined.heading}
-                  items={combinedItems}
+                  heading={chart.heading}
+                  items={chart.items}
                   benchmark={section.benchmark}
                 />
-                <SourceLine response={combinedItems[0].response} />
+                <SourceLine response={chart.items[0].response} />
               </section>
-            )}
+            ))}
 
             {section.indicators.map((indicator, i) => {
+              if (indicator.combinedOnly) return null;
               const response = results[i];
               return (
                 <section
@@ -242,7 +215,7 @@ export default async function IndicatorSectionPage({ params }: PageProps) {
             >
               {prev ? (
                 <Link
-                  href={`/prosperity-dashboard/${prev.id}`}
+                  href={`/state-of-the-nation/${prev.id}`}
                   className="type-label text-dark/70 hover:text-dark underline-offset-4 hover:underline"
                 >
                   &larr; {prev.title}
@@ -252,7 +225,7 @@ export default async function IndicatorSectionPage({ params }: PageProps) {
               )}
               {next ? (
                 <Link
-                  href={`/prosperity-dashboard/${next.id}`}
+                  href={`/state-of-the-nation/${next.id}`}
                   className="type-label text-dark/70 hover:text-dark underline-offset-4 hover:underline text-right"
                 >
                   {next.title} &rarr;

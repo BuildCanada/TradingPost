@@ -51,6 +51,31 @@ const UNIT_DISPLAY: Record<string, UnitDisplay> = {
     axisLabel: "million $",
     formatValue: (v) => `$${int(v)}M`,
   },
+  // CAD levels (e.g. hourly wage rates in current dollars).
+  $: {
+    name: "CAD",
+    shortUnit: "$",
+    numDecimalPlaces: 2,
+    axisLabel: "$",
+    formatValue: (v) => `$${v.toFixed(2)}`,
+  },
+  count: {
+    name: "count",
+    shortUnit: "",
+    numDecimalPlaces: 0,
+    axisLabel: "count",
+    formatValue: int,
+  },
+  // Values arrive in thousands (e.g. LFS employment levels); convert to
+  // persons so Grapher's magnitude abbreviations ("20 million") come out true.
+  count_thousands: {
+    name: "persons",
+    shortUnit: "",
+    numDecimalPlaces: 0,
+    conversionFactor: 1_000,
+    axisLabel: "thousands",
+    formatValue: (v) => `${int(v)}k`,
+  },
   index: {
     name: "index",
     shortUnit: "",

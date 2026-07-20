@@ -1,5 +1,5 @@
 // Shared catalog of the economic indicator measures served by york_factory's
-// /kpis/series endpoint — each section gets its own /prosperity-dashboard/[section]
+// /kpis/series endpoint — each section gets its own /state-of-the-nation/[section]
 // page and the canvas page uses the flat list as the feed picker.
 
 export type Indicator = {
@@ -8,6 +8,19 @@ export type Indicator = {
   blurb: string;
   // Short line label used when the indicator appears in a combined chart.
   chartLabel?: string;
+  // Renders only as a line in one of the section's combined charts, with no
+  // standalone chart of its own (still fetched, and still a canvas feed).
+  combinedOnly?: boolean;
+};
+// An overlay chart of several of the section's indicators. Every slug listed
+// must share the same unit and frequency; the first slug renders emphasized
+// in brand red. Omit slugs to overlay the whole section.
+export type CombinedChart = {
+  // DOM id — the chart's #anchor on the section page.
+  id: string;
+  heading: string;
+  blurb: string;
+  slugs?: string[];
 };
 // Reference line drawn on every chart in a section (including the combined
 // chart): a value compounding at annualRatePct per year through
@@ -24,10 +37,8 @@ export type IndicatorSection = {
   description: string;
   // The section's most striking chart, previewed on the landing-page card.
   featuredSlug: string;
-  // Renders one overlay chart of every indicator in the section above the
-  // individual charts. Only for sections whose indicators all share the
-  // same unit and frequency.
-  combined?: { heading: string; blurb: string };
+  // Overlay charts rendered above the section's individual charts.
+  combined?: CombinedChart[];
   benchmark?: IndicatorBenchmark;
   indicators: Indicator[];
 };
@@ -92,11 +103,14 @@ export const SECTIONS: IndicatorSection[] = [
     description:
       "What Canadians actually pay for the essentials — monthly consumer prices for food, shelter, and getting around (2002 = 100).",
     featuredSlug: "cpi-all-items",
-    combined: {
-      heading: "The essentials, side by side",
-      blurb:
-        "Every cost-of-living component on one chart, indexed to 2002 = 100. The grey line is where prices would sit had they grown at the Bank of Canada's 2% inflation target — everything above it has outrun the target.",
-    },
+    combined: [
+      {
+        id: "combined",
+        heading: "The essentials, side by side",
+        blurb:
+          "Every cost-of-living component on one chart, indexed to 2002 = 100. The grey line is where prices would sit had they grown at the Bank of Canada's 2% inflation target — everything above it has outrun the target.",
+      },
+    ],
     // Bank of Canada inflation-control target (2% midpoint), compounded
     // through the CPI's 2002 = 100 index base.
     benchmark: {

@@ -101,7 +101,7 @@ export default function Toronto2026ElectionPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-px bg-border-light border-t border-border-light">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-px bg-border-light border-t border-border-light">
             {MAYORAL_CANDIDATES.map((cand) => (
               <article key={cand.name} className="bg-bg flex flex-col">
                 <div className="aspect-[4/5] bg-dark relative flex items-center justify-center overflow-hidden">
@@ -110,28 +110,28 @@ export default function Toronto2026ElectionPage() {
                       src={cand.image}
                       alt={cand.name}
                       fill
-                      sizes="(min-width: 956px) 320px, (min-width: 612px) 50vw, 100vw"
+                      sizes="(min-width: 956px) 240px, (min-width: 612px) 50vw, 100vw"
                       className="object-cover object-center"
                     />
                   ) : (
-                    <span className="font-sans font-medium text-[5rem] tracking-[-0.04em] text-bg opacity-[0.14]">
+                    <span className="font-sans font-medium text-[3.5rem] tracking-[-0.04em] text-bg opacity-[0.14]">
                       {cand.initials ?? initialsFor(cand.name)}
                     </span>
                   )}
-                  <span className="absolute top-4 left-4 type-label-sm text-bg border border-text-secondary px-2 py-1 bg-dark/40">
+                  <span className="absolute top-3 left-3 type-label-sm text-bg border border-text-secondary px-2 py-1 bg-dark/40">
                     {cand.tag}
                   </span>
                   {!cand.image && (
-                    <span className="absolute bottom-3.5 left-4 type-label-sm text-text-secondary">
+                    <span className="absolute bottom-3 left-3 type-label-sm text-text-secondary">
                       Portrait to come
                     </span>
                   )}
                 </div>
-                <div className="px-7 pt-6 pb-7 flex flex-col flex-1">
-                  <h3 className="font-sans font-medium text-[1.5rem] tracking-[-0.02em] leading-[1.1] mb-2.5">
+                <div className="px-5 pt-4 pb-5 flex flex-col flex-1">
+                  <h3 className="font-sans font-medium text-[1.2rem] tracking-[-0.02em] leading-[1.1] mb-2">
                     {cand.name}
                   </h3>
-                  <p className="font-serif text-[1.02rem] leading-[1.45] text-dark/80 flex-1 mb-5">
+                  <p className="font-serif text-[0.95rem] leading-[1.45] text-dark/80 flex-1 mb-4">
                     {cand.bio}
                   </p>
                   {cand.website ? (

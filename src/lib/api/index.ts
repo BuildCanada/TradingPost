@@ -8,5 +8,4 @@ export { fetchPost, fetchPosts } from "./posts";
 export type { PostDetail } from "./posts";
 export { fetchTeamMembers } from "./team";
 export { fetchTestimonials } from "./testimonials";
-export { fetchTools } from "./tools";
 export type { SiteConfigData } from "./config";

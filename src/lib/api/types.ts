@@ -56,19 +56,6 @@ export interface YFTeamMember {
   profile_photo_url: string | null;
 }
 
-export interface YFTool {
-  id: number;
-  slug: string;
-  title: string;
-  description: string | null;
-  url: string;
-  featured: boolean;
-  position: number;
-  accent_color: string | null;
-  size: "small" | "big";
-  image_url: string | null;
-}
-
 export interface YFTestimonial {
   id: number;
   name: string;

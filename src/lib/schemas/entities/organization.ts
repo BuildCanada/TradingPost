@@ -11,7 +11,7 @@ export function createOrganization(): Organization {
       "Build Canada is a civic organization on a mission to make Canada the most prosperous country in the world.",
     logo: `${SITE_URL}/assets/logos/buildcanada-logo-square.svg`,
     sameAs: [
-      "https://x.com/build_canada",
+      "https://x.com/buildcanada",
       "https://www.linkedin.com/company/buildcanada",
       "https://www.instagram.com/build_canada/",
       "https://www.tiktok.com/@build_canada",

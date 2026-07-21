@@ -14,7 +14,7 @@ export function getSiteConfig(): SiteConfigData {
     siteUrl: process.env.NEXT_PUBLIC_SITE_URL || "https://buildcanada.com",
     logoUrl: "/assets/logos/logo-standard.svg",
     socialLinks: JSON.stringify([
-      { platform: "x", url: "https://x.com/build_canada" },
+      { platform: "x", url: "https://x.com/buildcanada" },
       { platform: "linkedin", url: "https://www.linkedin.com/company/buildcanada" },
       { platform: "tiktok", url: "https://www.tiktok.com/@build_canada" },
       { platform: "instagram", url: "https://www.instagram.com/build_canada/" },

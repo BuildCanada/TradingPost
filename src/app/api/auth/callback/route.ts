@@ -13,7 +13,10 @@ export async function GET(request: NextRequest) {
   const state = searchParams.get("state");
   const error = searchParams.get("error");
 
-  const siteUrl = new URL(request.url).origin;
+  // Build redirects from the configured callback origin, not the inbound
+  // request host. Behind the prod proxy `request.url`'s host is the internal
+  // `localhost:5050`, which would send users to https://localhost:5050/...
+  const siteUrl = new URL(callbackUrl).origin;
 
   if (error) {
     return NextResponse.redirect(`${siteUrl}/?preview_error=oauth_denied`);

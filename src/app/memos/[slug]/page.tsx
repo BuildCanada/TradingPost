@@ -86,6 +86,9 @@ export default async function MemoDetailPage({
   const { slug } = await params;
 
   const accessToken = await resolveAccessToken();
+  // Cached per-request alongside resolveAccessToken's call — drives the
+  // engagement UI's signed-in / postal-code-ready states.
+  const viewer = await getCurrentUser();
 
   let memo;
   try {
@@ -270,6 +273,8 @@ export default async function MemoDetailPage({
             critiquesCount={memo.critiquesCount}
             recentEndorsers={memo.recentEndorsers}
             critiques={memo.critiques}
+            signedIn={!!viewer}
+            engagementReady={viewer?.engagementReady ?? false}
           />
 
           <div className="print-hide 2xl-memo:hidden mt-10 pt-8 border-t border-border-light">

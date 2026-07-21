@@ -102,6 +102,8 @@ export async function fetchMemo(slug: string, params?: { publication?: string })
   const m = await apiFetch<YFMemoDetail>(`/memos/${slug}`, {
     revalidate: 300,
     params: queryParams,
+    // Tag by slug so York Factory can bust just this memo (POST /api/revalidate)
+    // when an endorsement is added or a critique is approved.
     tags: [`memo:${slug}`],
   });
   const keyMessages = extractKeyMessages((m.key_messages ?? []) as unknown[]);
@@ -151,23 +153,6 @@ export async function fetchMemo(slug: string, params?: { publication?: string })
     publishedAt: m.published_at ?? null,
     createdAt: m.published_at ?? new Date().toISOString(),
     updatedAt: m.published_at ?? new Date().toISOString(),
-    endorsementsCount: m.endorsements_count ?? 0,
-    critiquesCount: m.critiques_count ?? 0,
-    recentEndorsers: m.recent_endorsers ?? [],
-    critiques: m.critiques ?? [],
-  };
-}
-
-export interface MemoEngagement {
-  endorsementsCount: number;
-  critiquesCount: number;
-  recentEndorsers: { name: string; created_at: string }[];
-  critiques: { id: number; name: string; body: string; created_at: string }[];
-}
-
-export async function fetchMemoEngagement(slug: string): Promise<MemoEngagement> {
-  const m = await apiFetch<YFMemoDetail>(`/memos/${slug}`, { revalidate: 0 });
-  return {
     endorsementsCount: m.endorsements_count ?? 0,
     critiquesCount: m.critiques_count ?? 0,
     recentEndorsers: m.recent_endorsers ?? [],

@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { Dialog } from "@base-ui/react/dialog";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { API_ORIGIN, API_URL, apiPost, type ApiPostError } from "@/lib/api/client";
 
 type Endorser = { name: string; created_at: string };
 type Critique = { id: number; name: string; body: string; created_at: string };
@@ -16,46 +15,36 @@ interface Props {
   critiquesCount: number;
   recentEndorsers: Endorser[];
   critiques: Critique[];
-}
-
-interface LinkedinPayload {
-  sub: string;
-  name: string;
-  given_name?: string;
-  family_name?: string;
-  email?: string;
-  email_verified?: boolean;
-  picture?: string;
+  // Resolved server-side from the OAuth session (/me).
+  signedIn: boolean;
+  engagementReady: boolean;
 }
 
 type Kind = "endorsement" | "critique";
 
 const POSTAL_CODE_REGEX = /^[A-Za-z]\d[A-Za-z] ?\d[A-Za-z]\d$/;
 
-// Remember the visitor's postal code between submissions so they don't retype
-// it for every endorsement/critique. Stored only in the browser — never in the DB.
-const POSTAL_CODE_STORAGE_KEY = "bc:engagement:postal-code";
-
-function readCachedPostalCode(): string {
-  if (typeof window === "undefined") return "";
-  try {
-    return window.localStorage.getItem(POSTAL_CODE_STORAGE_KEY) ?? "";
-  } catch {
-    return "";
-  }
+function loginHref(memoSlug: string) {
+  return `/api/auth/login?redirect=${encodeURIComponent(`/memos/${memoSlug}`)}`;
 }
 
-function writeCachedPostalCode(value: string) {
-  if (typeof window === "undefined") return;
+async function postJson(
+  url: string,
+  body: unknown,
+): Promise<{ ok: boolean; status: number; data: unknown }> {
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify(body),
+  });
+  let data: unknown = null;
   try {
-    window.localStorage.setItem(POSTAL_CODE_STORAGE_KEY, value);
+    data = await res.json();
   } catch {
-    // Ignore private-mode / quota errors — caching is best-effort.
+    // non-JSON body
   }
+  return { ok: res.ok, status: res.status, data };
 }
-
-const TRUSTED_API_ORIGIN =
-  process.env.NEXT_PUBLIC_YORK_FACTORY_ORIGIN || API_ORIGIN;
 
 function formatDate(iso: string) {
   try {
@@ -72,8 +61,6 @@ function formatDate(iso: string) {
 
 function splitFirstSentence(text: string): { first: string; rest: string } {
   const trimmed = text.trim();
-  // Match characters up to and including the first sentence-ending punctuation
-  // followed by whitespace or end of string.
   const match = trimmed.match(/^[\s\S]*?[.!?](?=\s|$)/);
   if (!match) return { first: trimmed, rest: "" };
   const first = match[0];
@@ -84,11 +71,22 @@ function splitFirstSentence(text: string): { first: string; rest: string } {
 export function MemoEngagement(props: Props) {
   const router = useRouter();
   const [endorsementsCount, setEndorsementsCount] = useState(props.endorsementsCount);
-  const [critiquesCount, setCritiquesCount] = useState(props.critiquesCount);
   const [recentEndorsers, setRecentEndorsers] = useState<Endorser[]>(props.recentEndorsers);
-  const [critiques, setCritiques] = useState<Critique[]>(props.critiques);
   const [pendingCritique, setPendingCritique] = useState<Critique | null>(null);
+  // Never mutated client-side — read straight from props (no state needed).
+  const critiquesCount = props.critiquesCount;
+  const critiques = props.critiques;
   const [openKind, setOpenKind] = useState<Kind | null>(null);
+
+  const openEngagement = (kind: Kind) => {
+    // Not signed in → bounce through York Factory's OAuth (LinkedIn) and come
+    // back to this memo. The button effectively becomes "sign in to <kind>".
+    if (!props.signedIn) {
+      window.location.href = loginHref(props.memoSlug);
+      return;
+    }
+    setOpenKind(kind);
+  };
 
   const handleEndorsed = (endorser: Endorser) => {
     setEndorsementsCount((c) => c + 1);
@@ -114,25 +112,20 @@ export function MemoEngagement(props: Props) {
     setOpenKind(null);
   };
 
+  const endorseLabel = props.signedIn ? "Endorse this memo" : "Sign in to endorse";
+  const critiqueLabel = props.signedIn ? "Critique this memo" : "Sign in to critique";
+
   return (
     <section
       data-testid="memo-engagement"
       className="print-hide mt-12 pt-10 border-t border-border-light"
     >
       <div className="flex flex-wrap items-center gap-3 mb-6">
-        <Button
-          as="button"
-          variant="charcoal"
-          onClick={() => setOpenKind("endorsement")}
-        >
-          Endorse this memo
+        <Button as="button" variant="charcoal" onClick={() => openEngagement("endorsement")}>
+          {endorseLabel}
         </Button>
-        <Button
-          as="button"
-          variant="ghost"
-          onClick={() => setOpenKind("critique")}
-        >
-          Critique this memo
+        <Button as="button" variant="ghost" onClick={() => openEngagement("critique")}>
+          {critiqueLabel}
         </Button>
         <span className="type-label text-text-secondary ml-auto">
           {endorsementsCount} {endorsementsCount === 1 ? "endorsement" : "endorsements"}
@@ -168,14 +161,10 @@ export function MemoEngagement(props: Props) {
         <div>
           <h3 className="type-label mb-3">Critiques</h3>
           {critiques.length === 0 && !pendingCritique ? (
-            <p className="type-body text-text-secondary">
-              No critiques yet.
-            </p>
+            <p className="type-body text-text-secondary">No critiques yet.</p>
           ) : (
             <ul className="space-y-5">
-              {pendingCritique && (
-                <CritiqueItem critique={pendingCritique} pending />
-              )}
+              {pendingCritique && <CritiqueItem critique={pendingCritique} pending />}
               {critiques.map((c) => (
                 <CritiqueItem key={c.id} critique={c} />
               ))}
@@ -187,6 +176,7 @@ export function MemoEngagement(props: Props) {
       <EngagementDialog
         kind={openKind}
         memoSlug={props.memoSlug}
+        engagementReady={props.engagementReady}
         onClose={() => setOpenKind(null)}
         onEndorsed={handleEndorsed}
         onCritiqued={handleCritiqued}
@@ -262,6 +252,7 @@ function CritiqueItem({ critique, pending = false }: { critique: Critique; pendi
 interface DialogProps {
   kind: Kind | null;
   memoSlug: string;
+  engagementReady: boolean;
   onClose: () => void;
   onEndorsed: (endorser: Endorser) => void;
   onCritiqued: (critique: Critique) => void;
@@ -271,119 +262,35 @@ interface DialogProps {
 function EngagementDialog({
   kind,
   memoSlug,
+  engagementReady,
   onClose,
   onEndorsed,
   onCritiqued,
   onDuplicate,
 }: DialogProps) {
-  const [phase, setPhase] = useState<"connect" | "verifying" | "ready">("connect");
-  const [payload, setPayload] = useState<LinkedinPayload | null>(null);
-  const [verifiedTicket, setVerifiedTicket] = useState<string | null>(null);
+  const [needsPostal, setNeedsPostal] = useState(!engagementReady);
   const [postalCode, setPostalCode] = useState("");
   const [body, setBody] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const popupRef = useRef<Window | null>(null);
-  const popupTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const open = kind !== null;
 
-  // Reset state every time we open or change kind.
   useEffect(() => {
     if (!open) return;
-
-    setPhase("connect");
-    setPayload(null);
-    setVerifiedTicket(null);
-    setPostalCode(readCachedPostalCode());
+    setNeedsPostal(!engagementReady);
+    setPostalCode("");
     setBody("");
     setError(null);
     setSubmitting(false);
-  }, [open, kind]);
-
-  // Listen for the popup's postMessage.
-  useEffect(() => {
-    if (!open) return;
-
-    const handler = (event: MessageEvent) => {
-      if (TRUSTED_API_ORIGIN && event.origin !== TRUSTED_API_ORIGIN) return;
-      const data = event.data as
-        | { type?: string; verifiedTicket?: string; payload?: LinkedinPayload; error?: string }
-        | null;
-      if (!data || data.type !== "linkedin-verified") return;
-
-      if (data.error) {
-        setError(`LinkedIn verification failed: ${data.error}`);
-        setPhase("connect");
-        return;
-      }
-      if (data.verifiedTicket && data.payload) {
-        setVerifiedTicket(data.verifiedTicket);
-        setPayload(data.payload);
-        setPhase("ready");
-      }
-    };
-
-    window.addEventListener("message", handler);
-    return () => window.removeEventListener("message", handler);
-  }, [open]);
-
-  // Clean up popup polling on close.
-  useEffect(() => {
-    if (open) return;
-    if (popupTimerRef.current) {
-      clearInterval(popupTimerRef.current);
-      popupTimerRef.current = null;
-    }
-    if (popupRef.current && !popupRef.current.closed) {
-      popupRef.current.close();
-    }
-    popupRef.current = null;
-  }, [open]);
-
-  const startLinkedin = () => {
-    if (!kind) return;
-    setError(null);
-    setPhase("verifying");
-
-    const startUrl = `${API_URL.replace(/\/api\/v1\/?$/, "")}/api/v1/auth/linkedin/start?kind=${kind}&memo_slug=${encodeURIComponent(memoSlug)}`;
-
-    const w = 600;
-    const h = 720;
-    const left = window.screenX + (window.outerWidth - w) / 2;
-    const top = window.screenY + (window.outerHeight - h) / 2;
-    const popup = window.open(
-      startUrl,
-      "linkedin-verify",
-      `width=${w},height=${h},left=${left},top=${top}`,
-    );
-
-    if (!popup) {
-      setError("Popup blocked. Please allow popups for this site and try again.");
-      setPhase("connect");
-      return;
-    }
-    popupRef.current = popup;
-
-    popupTimerRef.current = setInterval(() => {
-      if (popup.closed) {
-        if (popupTimerRef.current) {
-          clearInterval(popupTimerRef.current);
-          popupTimerRef.current = null;
-        }
-        // Only revert to connect if we never received the ticket.
-        setPhase((p) => (p === "verifying" ? "connect" : p));
-      }
-    }, 500);
-  };
+  }, [open, kind, engagementReady]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (!kind || !verifiedTicket || !payload) return;
-
+    if (!kind) return;
     setError(null);
 
-    if (!POSTAL_CODE_REGEX.test(postalCode)) {
+    if (needsPostal && !POSTAL_CODE_REGEX.test(postalCode.trim())) {
       setError("Please enter a valid Canadian postal code (e.g. A1A 1A1).");
       return;
     }
@@ -394,21 +301,41 @@ function EngagementDialog({
 
     setSubmitting(true);
     try {
-      const path = `/memos/${memoSlug}/${kind === "endorsement" ? "endorsements" : "critiques"}`;
-      const responseBody: Record<string, unknown> = {
-        verified_ticket: verifiedTicket,
-        postal_code: postalCode,
-      };
-      if (kind === "critique") responseBody.body = body.trim();
+      // 1) Save the postal code first if we still need it.
+      if (needsPostal) {
+        const postalRes = await postJson("/api/profile/postal", {
+          postal_code: postalCode.trim(),
+        });
+        if (postalRes.status === 401) return redirectToLogin();
+        if (!postalRes.ok) {
+          setError(messageFrom(postalRes.data, "Could not save your postal code."));
+          return;
+        }
+      }
 
-      const data = await apiPost<{ id: number; name: string; body?: string; created_at: string }>(
-        path,
-        responseBody,
-      );
+      // 2) Submit the engagement.
+      const res = await postJson(`/api/memos/${memoSlug}/engagement`, {
+        kind,
+        ...(kind === "critique" ? { body: body.trim() } : {}),
+      });
 
-      // Remember the postal code for next time (browser-only, opt-out by clearing storage).
-      writeCachedPostalCode(postalCode);
+      if (res.status === 401) return redirectToLogin();
+      if (res.status === 409) {
+        onDuplicate(kind);
+        return;
+      }
+      if (res.status === 422 && errorCode(res.data) === "postal_code_required") {
+        // Session said ready but York Factory disagrees (token race) — collect it.
+        setNeedsPostal(true);
+        setError("Please add your postal code to continue.");
+        return;
+      }
+      if (!res.ok) {
+        setError(messageFrom(res.data, "Something went wrong. Please try again."));
+        return;
+      }
 
+      const data = res.data as { id: number; name: string; body?: string; created_at: string };
       if (kind === "endorsement") {
         onEndorsed({ name: data.name, created_at: data.created_at });
       } else {
@@ -419,21 +346,13 @@ function EngagementDialog({
           created_at: data.created_at,
         });
       }
-    } catch (err) {
-      const apiErr = err as ApiPostError;
-      if (apiErr?.status === 409) {
-        onDuplicate(kind);
-        return;
-      }
-      const errBody = apiErr?.body as { errors?: string[]; message?: string } | undefined;
-      const message =
-        errBody?.errors?.join(", ") ||
-        errBody?.message ||
-        "Something went wrong. Please try again.";
-      setError(message);
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const redirectToLogin = () => {
+    window.location.href = loginHref(memoSlug);
   };
 
   const inputClass =
@@ -452,77 +371,51 @@ function EngagementDialog({
           </Dialog.Title>
           <Dialog.Description className="type-body text-charcoal-600" style={{ marginBottom: "clamp(0.75rem, 2vw, 1.25rem)" }}>
             {kind === "endorsement"
-              ? "Verify your identity through LinkedIn so your endorsement carries weight."
-              : "Verify your identity through LinkedIn and share your critique.  A critique must target the memo content in a constructive or positive way.  Anything self-promotional, including an ad hominen, or is deemed anyway unwelcome or hostile, will not be approved and may be removed."}
+              ? "Your endorsement is published under your name."
+              : "Share your critique. A critique must target the memo content constructively. Anything self-promotional, ad hominem, or otherwise hostile will not be approved and may be removed."}
           </Dialog.Description>
 
-          {phase === "connect" && (
-            <div className="flex flex-col gap-3">
-              <Button as="button" variant="charcoal" onClick={startLinkedin}>
-                Continue with LinkedIn
-              </Button>
-              {error && <p className="type-label-sm text-auburn-800">{error}</p>}
-            </div>
-          )}
-
-          {phase === "verifying" && (
-            <div className="flex flex-col gap-3">
-              <p className="type-body text-charcoal-600">
-                Waiting for LinkedIn… Complete the sign-in in the popup window.
-              </p>
-              <button
-                type="button"
-                onClick={() => setPhase("connect")}
-                className="type-label-sm text-charcoal-600 underline self-start cursor-pointer"
-              >
-                Cancel
-              </button>
-              {error && <p className="type-label-sm text-auburn-800">{error}</p>}
-            </div>
-          )}
-
-          {phase === "ready" && payload && (
-            <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-              <div className="border border-border-light bg-white p-3">
-                <p className="type-label-sm text-text-secondary mb-1">Verified via LinkedIn</p>
-                <p className="type-body font-medium">{payload.name}</p>
-                {payload.email && (
-                  <p className="type-label-sm text-text-secondary">
-                    {payload.email}
-                    {payload.email_verified && " (verified)"}
-                  </p>
-                )}
-              </div>
-
-              <input
-                type="text"
-                value={postalCode}
-                onChange={(e) => setPostalCode(e.target.value)}
-                placeholder="Postal code (e.g. A1A 1A1)"
-                required
-                maxLength={7}
-                className={inputClass}
-              />
-
-              {kind === "critique" && (
-                <textarea
-                  value={body}
-                  onChange={(e) => setBody(e.target.value)}
-                  placeholder="Write your critique…"
+          <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+            {needsPostal && (
+              <div className="flex flex-col gap-1.5">
+                <label htmlFor="engagement-postal" className="type-label-sm text-text-secondary">
+                  Postal code
+                </label>
+                <input
+                  id="engagement-postal"
+                  type="text"
+                  value={postalCode}
+                  onChange={(e) => setPostalCode(e.target.value)}
+                  placeholder="A1A 1A1"
                   required
-                  rows={6}
-                  maxLength={10000}
-                  className={`${inputClass} resize-vertical`}
+                  maxLength={7}
+                  className={inputClass}
                 />
-              )}
+              </div>
+            )}
 
-              <Button as="button" type="submit" disabled={submitting} className="self-start">
-                {submitting ? "Submitting…" : kind === "endorsement" ? "Submit endorsement" : "Submit critique"}
-              </Button>
+            {kind === "critique" && (
+              <textarea
+                value={body}
+                onChange={(e) => setBody(e.target.value)}
+                placeholder="Write your critique…"
+                required
+                rows={6}
+                maxLength={10000}
+                className={`${inputClass} resize-vertical`}
+              />
+            )}
 
-              {error && <p className="type-label-sm text-auburn-800">{error}</p>}
-            </form>
-          )}
+            <Button as="button" type="submit" disabled={submitting} className="self-start">
+              {submitting
+                ? "Submitting…"
+                : kind === "endorsement"
+                  ? "Submit endorsement"
+                  : "Submit critique"}
+            </Button>
+
+            {error && <p className="type-label-sm text-auburn-800">{error}</p>}
+          </form>
 
           <Dialog.Close
             aria-label="Close dialog"
@@ -537,4 +430,13 @@ function EngagementDialog({
       </Dialog.Portal>
     </Dialog.Root>
   );
+}
+
+function errorCode(data: unknown): string | undefined {
+  return (data as { error?: string } | null)?.error;
+}
+
+function messageFrom(data: unknown, fallback: string): string {
+  const body = data as { errors?: string[]; error?: string; message?: string } | null;
+  return body?.errors?.join(", ") || body?.message || body?.error || fallback;
 }

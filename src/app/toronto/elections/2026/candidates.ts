@@ -264,40 +264,172 @@ export const MAYORAL_CANDIDATES: MayoralCandidate[] = [
 // no registered candidates. `bio`/`image`/`website` are filled in by hand.
 export const WARD_CANDIDATES: Record<string, CouncillorCandidate[]> = {
   "01": [
-    { name: "Vincent Crisanti", tag: "Incumbent", bio: "" },
+    {
+      name: "Vincent Crisanti",
+      tag: "Incumbent",
+      bio: "Incumbent councillor for Etobicoke North, running on community engagement and working hand-in-glove with local residents to build a brighter future for Ward 1. Keeps a constituency office on Kipling Avenue and gathers resident feedback through regular surveys and office hours.",
+      website: "https://www.vincentcrisanti.com",
+      image: "/elections/toronto/2026/councillors/ward-1/vincent-crisanti.webp",
+    },
     { name: "Abraham Abbey", tag: "Challenger", bio: "" },
-    { name: "Ala'a Adib", tag: "Challenger", bio: "" },
+    {
+      name: "Ala'a Adib",
+      tag: "Challenger",
+      bio: "Humber College graduate, lifelong Etobicoke resident, and community organizer with over a decade of service — founding food-insecurity programs and youth mentorship and sports initiatives. Recognized with the 2025 King Charles III Coronation Medal and named one of Canada's Top 100 Black Women to Watch. Campaigns on improving city services and accountability, supporting youth and families, strengthening neighbourhoods, and creating economic opportunity.",
+      website: "https://www.alaaadib.ca",
+      image: "/elections/toronto/2026/councillors/ward-1/alaa-adib.png",
+    },
     { name: "Saima Babar", tag: "Challenger", bio: "" },
-    { name: "Norman Hamilton", tag: "Challenger", bio: "" },
+    { name: "Norman Hamilton",
+image: "/elections/toronto/2026/councillors/ward-1/norman-hamilton.png",
+      tag: "Challenger",
+      bio: "Etobicoke North business owner who runs a local truck-repair company and hires locally, bringing the perspective of someone who understands meeting payroll and the pressures on working families. Campaigns on accountable leadership for youth, mothers, seniors, immigrants, and working families across North Etobicoke, powered by grassroots resident contributions rather than corporate or union interests.",
+      website: "https://www.normanhamilton.ca/" },
   ],
   "02": [
-    { name: "Stephen Holyday", tag: "Incumbent", bio: "" },
-    { name: "Jennifer Alexander", tag: "Challenger", bio: "" },
+    {
+      name: "Stephen Holyday",
+      tag: "Incumbent",
+      bio: "",
+      website: "https://stephenholyday.ca/",
+      image: "/elections/toronto/2026/councillors/ward-2/stephen-holyday.jpg",
+    },
+    {
+      name: "Jennifer Alexander",
+      tag: "Challenger",
+      bio: "",
+      website: "https://jenalexander.ca/",
+      // Cropped from a community-event photo on her campaign site — no dedicated
+      // headshot is published.
+      image: "/elections/toronto/2026/councillors/ward-2/jen-alexander.jpg",
+    },
   ],
   "03": [
-    { name: "Amber Morley", tag: "Incumbent", bio: "" },
-    { name: "Anthony Internicola", tag: "Challenger", bio: "" },
-    { name: "Ted Opitz", tag: "Challenger", bio: "" },
+    {
+      name: "Amber Morley",
+      tag: "Incumbent",
+      bio: "",
+      website: "https://www.ambermorley.com/",
+      image: "/elections/toronto/2026/councillors/ward-3/amber-morley.jpg",
+    },
+    // Anthony Internicola: perennial candidate; his old sites point to past
+    // Scarborough/provincial runs, no current Ward 3 site or usable photo found.
+    { name: "Anthony Internicola", tag: "Challenger", bio: "",
+      website: "https://www.toronto4life.ca/meet-our-candidate.html"
+     },
+    {
+      name: "Ted Opitz",
+      tag: "Challenger",
+      bio: "",
+      // Former Conservative MP for Etobicoke Centre (2011–2015); no 2026
+      // campaign site filed or found. Photo is an MP-era portrait.
+      image: "/elections/toronto/2026/councillors/ward-3/ted-opitz.png",
+    },
   ],
   "04": [
-    // Incumbent Gord Perks is retiring.
+    // Incumbent Gord Perks is retiring — open seat, large field.
+    // Michael Corcoran: no campaign site or photo found; no online footprint.
     { name: "Michael Corcoran", tag: "Challenger", bio: "" },
-    { name: "Nadia Guerrera", tag: "Challenger", bio: "" },
-    { name: "Debbie King", tag: "Challenger", bio: "" },
-    { name: "Diana Chan McNally", tag: "Challenger", bio: "" },
-    { name: "Bridget Ogundipe", tag: "Challenger", bio: "" },
-    { name: "Adam Pham", tag: "Challenger", bio: "" },
-    { name: "Vanessa Raponi", tag: "Challenger", bio: "" },
+    {
+      name: "Nadia Guerrera",
+      tag: "Challenger",
+      bio: "",
+      website: "https://www.nadiaguerrera.ca",
+      image: "/elections/toronto/2026/councillors/ward-4/nadia-guerrera.png",
+    },
+    {
+      name: "Debbie King",
+      tag: "Challenger",
+      bio: "",
+      website: "https://www.votedebbieking.ca/",
+      // Cropped from her campaign banner — no standalone headshot published.
+      image: "/elections/toronto/2026/councillors/ward-4/debbie-king.jpg",
+    },
+    {
+      name: "Diana Chan McNally",
+      tag: "Challenger",
+      bio: "",
+      website: "https://www.dianachanmcnally.ca",
+      image: "/elections/toronto/2026/councillors/ward-4/diana-chan-mcnally.jpg",
+    },
+    // Bridget Ogundipe: site has no genuine portrait (only stock/streetscape
+    // images), so no usable photo.
+    {
+      name: "Bridget Ogundipe",
+      tag: "Challenger",
+      bio: "",
+      website: "https://www.bridgetogundipe.ca",
+    },
+    {
+      name: "Adam Pham",
+      tag: "Challenger",
+      bio: "",
+      website: "https://adampham.ca/",
+      // Cropped from a High Park candid — only photos on his site are candids.
+      image: "/elections/toronto/2026/councillors/ward-4/adam-pham.jpg",
+    },
+    {
+      name: "Vanessa Raponi",
+      tag: "Challenger",
+      bio: "",
+      website: "https://www.vanessaraponi.ca",
+      // Her campaign site has no photo; this is a cropped 2023 McMaster
+      // Engineering award photo (she's a P.Eng / EngiQueers Canada founder).
+      image: "/elections/toronto/2026/councillors/ward-4/vanessa-raponi.jpg",
+    },
+    // Lloyd Traiforos: no campaign site or photo found.
     { name: "Lloyd Traiforos", tag: "Challenger", bio: "" },
-    { name: "Holly Weber", tag: "Challenger", bio: "" },
+    {
+      name: "Holly Weber",
+      tag: "Challenger",
+      bio: "",
+      website: "https://www.hollyweber.ca",
+      image: "/elections/toronto/2026/councillors/ward-4/holly-weber.png",
+    },
   ],
   "05": [
-    { name: "Frances Nunziata", tag: "Incumbent", bio: "" },
+    {
+      name: "Frances Nunziata",
+      tag: "Incumbent",
+      bio: "",
+      // No campaign site filed; this is her own councillor site. Photo is the
+      // official City of Toronto Ward 5 portrait.
+      website: "https://www.councillornunziata.com/",
+      image: "/elections/toronto/2026/councillors/ward-5/frances-nunziata.jpg",
+    },
+    // Sharmarke Ali: sharmarkeali.ca is a parked domain; no photo found.
     { name: "Sharmarke Ali", tag: "Challenger", bio: "" },
-    { name: "Daniel Di Giorgio", tag: "Challenger", bio: "" },
-    { name: "Nekpen Obasogie", tag: "Challenger", bio: "" },
-    { name: "Chiara Padovani", tag: "Challenger", bio: "" },
-    { name: "Sileen Phillips", tag: "Challenger", bio: "" },
+    {
+      name: "Daniel Di Giorgio",
+      tag: "Challenger",
+      bio: "",
+      website: "https://www.danieldigiorgio.com/",
+      // His site has only candids (base64-embedded); cropped from a two-person
+      // community photo.
+      image: "/elections/toronto/2026/councillors/ward-5/daniel-digiorgio.jpg",
+    },
+    {
+      name: "Nekpen Obasogie",
+      tag: "Challenger",
+      bio: "",
+      website: "https://nekpenobasogie.ca",
+      image: "/elections/toronto/2026/councillors/ward-5/nekpen-obasogie.png",
+    },
+    {
+      name: "Chiara Padovani",
+      tag: "Challenger",
+      bio: "",
+      website: "https://www.chiarapadovani.ca/",
+      // Cropped from an environmental portrait outside the YSW Community Hub.
+      image: "/elections/toronto/2026/councillors/ward-5/chiara-padovani.jpg",
+    },
+    {
+      name: "Sileen Phillips",
+      tag: "Challenger",
+      bio: "",
+      website: "https://www.sileenphillips-ysw.ca",
+      image: "/elections/toronto/2026/councillors/ward-5/sileen-phillips.webp",
+    },
   ],
   "06": [
     { name: "James Pasternak", tag: "Incumbent", bio: "" },

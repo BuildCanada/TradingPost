@@ -6,8 +6,9 @@ import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
 import CountdownDays from "../../CountdownDays";
 import { WardMap, WardMapDefs } from "../../WardMap";
 import {
-  WARDS,
-  councillorCandidatesForWard,
+  WARD_NUMBERS,
+  getWards,
+  getCouncillorCandidates,
   findWardIndex,
   initialsFor,
   daysUntilElection,
@@ -15,9 +16,10 @@ import {
   ELECTION_DAY_LABEL,
   type CouncillorTag,
 } from "../../data";
+import { WARD_SHAPES } from "../../wardGeo";
 
 export function generateStaticParams() {
-  return WARDS.map((w) => ({ ward: w.n }));
+  return WARD_NUMBERS.map((n) => ({ ward: n }));
 }
 
 export async function generateMetadata({
@@ -28,7 +30,7 @@ export async function generateMetadata({
   const { ward } = await params;
   const idx = findWardIndex(ward);
   if (idx === -1) return { title: "Ward not found" };
-  const w = WARDS[idx];
+  const w = WARD_SHAPES[idx];
   return {
     title: `Ward ${w.n} — ${w.name}`,
     description: `The council race in Ward ${w.n} (${w.name}) for Toronto's October 26, 2026 municipal election. See every candidate registered to represent it.`,
@@ -56,12 +58,15 @@ export default async function WardDetailPage({
   const idx = findWardIndex(ward);
   if (idx === -1) notFound();
 
-  const w = WARDS[idx];
-  const candidates = councillorCandidatesForWard(idx);
+  const [wards, candidates] = await Promise.all([
+    getWards(),
+    getCouncillorCandidates(idx),
+  ]);
+  const w = wards[idx];
   const initialDays = daysUntilElection();
 
-  const prev = WARDS[(idx + WARDS.length - 1) % WARDS.length];
-  const next = WARDS[(idx + 1) % WARDS.length];
+  const prev = wards[(idx + wards.length - 1) % wards.length];
+  const next = wards[(idx + 1) % wards.length];
 
   return (
     <div className="theme-election bg-bg text-dark">

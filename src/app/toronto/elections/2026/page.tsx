@@ -5,8 +5,8 @@ import { ArrowUpRight, ArrowRight } from "lucide-react";
 import CountdownDays from "./CountdownDays";
 import { WardMap, WardMapDefs } from "./WardMap";
 import {
-  MAYORAL_CANDIDATES,
-  WARDS,
+  getMayoralCandidates,
+  getWards,
   daysUntilElection,
   initialsFor,
   NOMINATION_CLOSE_LABEL,
@@ -25,7 +25,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function Toronto2026ElectionPage() {
+export default async function Toronto2026ElectionPage() {
+  const [mayoralCandidates, wards] = await Promise.all([
+    getMayoralCandidates(),
+    getWards(),
+  ]);
   const initialDays = daysUntilElection();
 
   return (
@@ -97,12 +101,12 @@ export default function Toronto2026ElectionPage() {
               </h2>
             </div>
             <p className="type-label text-text-secondary pb-1.5 !tracking-[0.08em]">
-              {MAYORAL_CANDIDATES.length} declared · field open
+              {mayoralCandidates.length} declared · field open
             </p>
           </div>
 
           <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-px bg-border-light border-t border-border-light">
-            {MAYORAL_CANDIDATES.map((cand) => (
+            {mayoralCandidates.map((cand) => (
               <article key={cand.name} className="bg-bg flex flex-col">
                 <div className="aspect-[4/5] bg-dark relative flex items-center justify-center overflow-hidden">
                   {cand.image ? (
@@ -176,13 +180,13 @@ export default function Toronto2026ElectionPage() {
               </p>
             </div>
             <p className="type-label text-text-secondary pb-1.5 !tracking-[0.08em]">
-              {WARDS.length} wards
+              {wards.length} wards
             </p>
           </div>
 
           <WardMapDefs />
           <div className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-px bg-border-light border-t border-border-light">
-            {WARDS.map((ward) => (
+            {wards.map((ward) => (
               <Link
                 key={ward.n}
                 href={`/toronto/elections/2026/wards/${ward.n}`}

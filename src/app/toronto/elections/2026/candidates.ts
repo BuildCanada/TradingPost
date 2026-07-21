@@ -1,9 +1,14 @@
 // ─────────────────────────────────────────────────────────────────────────
-// Toronto 2026 election — candidate data (edit this file by hand).
+// Toronto 2026 election — candidate enrichment (edit this file by hand).
 //
-// This is the single place to maintain the mayoral field and the councillor
-// field for each ward. It is plain data — no framework code — so it is safe
-// to edit without touching the page components.
+// The candidate roster now comes from the York Factory API (see ./api and
+// ./data), which mirrors the City Clerk's registered-candidate feeds daily.
+// This file enriches that roster — photos, bios, Incumbent/Challenger tags,
+// and hand-verified campaign sites — matched to API candidates by name
+// (case-, accent-, and punctuation-insensitive). It is also the fallback
+// roster when the API is unreachable. Entries for candidates no longer in
+// the API roster are simply ignored. It is plain data — no framework code —
+// so it is safe to edit without touching the page components.
 //
 // IMAGES
 //   Drop candidate photos in /public/elections/toronto/2026/… and reference

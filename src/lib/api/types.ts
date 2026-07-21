@@ -33,6 +33,18 @@ export interface YFMemo {
   author: YFAuthor;
 }
 
+export interface YFMemoEndorser {
+  name: string;
+  created_at: string;
+}
+
+export interface YFMemoCritique {
+  id: number;
+  name: string;
+  body: string;
+  created_at: string;
+}
+
 export interface YFMemoDetail extends YFMemo {
   body: string;
   appendix: string | null;
@@ -42,6 +54,10 @@ export interface YFMemoDetail extends YFMemo {
   author_name: string | null;
   author_title: string | null;
   co_author: YFAuthor | null;
+  endorsements_count: number;
+  critiques_count: number;
+  recent_endorsers: YFMemoEndorser[];
+  critiques: YFMemoCritique[];
 }
 
 export interface YFTeamMember {

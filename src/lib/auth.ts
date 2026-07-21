@@ -9,6 +9,8 @@ export interface YfUser {
   role: string | null;
   avatarUrl: string | null;
   admin: boolean;
+  // True once the user has the postal code required to endorse/critique a memo.
+  engagementReady: boolean;
 }
 
 // Reads the signed-in user's OAuth access token from the httpOnly cookie.
@@ -42,6 +44,7 @@ export const getCurrentUser = cache(async (): Promise<YfUser | null> => {
         role: data.role ?? null,
         avatarUrl: data.avatar_url ?? null,
         admin: data.admin === true,
+        engagementReady: data.engagement_ready === true,
       };
     }
 

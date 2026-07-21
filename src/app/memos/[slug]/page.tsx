@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { fetchMemo, fetchMemos, getSiteConfig } from "@/lib/api";
 import { extractHeadings } from "@/lib/extract-headings";
 import { TwitterEmbed, MemoSubscribe, RelatedMemos } from "./MemoClientParts";
+import { MemoEngagement } from "./MemoEngagement";
 import { ShareSection } from "@/components/share";
 import { MemoHero } from "./MemoHero";
 import { Signpost } from "@/components/custom/signpost";
@@ -85,6 +86,9 @@ export default async function MemoDetailPage({
   const { slug } = await params;
 
   const accessToken = await resolveAccessToken();
+  // Cached per-request alongside resolveAccessToken's call — drives the
+  // engagement UI's signed-in / postal-code-ready states.
+  const viewer = await getCurrentUser();
 
   let memo;
   try {
@@ -261,6 +265,16 @@ export default async function MemoDetailPage({
           <div
             className="prose-bc"
             dangerouslySetInnerHTML={{ __html: bodyHtml }}
+          />
+
+          <MemoEngagement
+            memoSlug={memo.slug}
+            endorsementsCount={memo.endorsementsCount}
+            critiquesCount={memo.critiquesCount}
+            recentEndorsers={memo.recentEndorsers}
+            critiques={memo.critiques}
+            signedIn={!!viewer}
+            engagementReady={viewer?.engagementReady ?? false}
           />
 
           <div className="print-hide 2xl-memo:hidden mt-10 pt-8 border-t border-border-light">

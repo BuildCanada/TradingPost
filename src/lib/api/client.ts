@@ -9,6 +9,7 @@ export async function apiFetch<T>(
   options?: {
     revalidate?: number;
     params?: Record<string, string>;
+    tags?: string[];
   },
 ): Promise<T> {
   const url = new URL(`${API_URL}${path}`);
@@ -26,12 +27,17 @@ export async function apiFetch<T>(
     headers["Authorization"] = `Bearer ${accessToken}`;
   }
 
-  const res = await fetch(url.toString(), {
-    headers,
-    next: accessToken
-      ? { revalidate: 0 }
-      : { revalidate: options?.revalidate ?? 60 },
-  });
+  // Admin (token) reads bypass the cache; public reads use ISR plus optional
+  // cache tags so on-demand revalidation (e.g. a new endorsement) can target a
+  // single memo via revalidateTag.
+  const next: { revalidate: number; tags?: string[] } = {
+    revalidate: accessToken ? 0 : (options?.revalidate ?? 60),
+  };
+  if (!accessToken && options?.tags && options.tags.length > 0) {
+    next.tags = options.tags;
+  }
+
+  const res = await fetch(url.toString(), { headers, next });
 
   if (!res.ok) {
     throw new Error(`API error ${res.status}: ${path}`);

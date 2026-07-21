@@ -118,9 +118,11 @@ export default function Toronto2026ElectionPage() {
                       {cand.initials ?? initialsFor(cand.name)}
                     </span>
                   )}
-                  <span className="absolute top-3 left-3 type-label-sm text-bg border border-text-secondary px-2 py-1 bg-dark/40">
-                    {cand.tag}
-                  </span>
+                  {cand.tag === 'Incumbent' &&
+                    <span className="absolute top-3 left-3 type-label-sm text-bg border border-text-secondary px-2 py-1 bg-dark/40">
+                      {cand.tag}
+                    </span>
+                  }
                   {!cand.image && (
                     <span className="absolute bottom-3 left-3 type-label-sm text-text-secondary">
                       Portrait to come

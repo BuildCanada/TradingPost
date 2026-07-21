@@ -63,7 +63,6 @@ export const MAYORAL_CANDIDATES: MayoralCandidate[] = [
     name: "Brad Bradford",
     tag: "Declared",
     bio: "",
-    // website inferred from campaign email bradford26.ca — verify before enabling
     website: "https://bradford26.ca",
     image: "/elections/toronto/2026/mayor/brad-bradford.png",
   },
@@ -82,7 +81,6 @@ export const MAYORAL_CANDIDATES: MayoralCandidate[] = [
     name: "Olivia Chow",
     tag: "Incumbent",
     bio: "",
-    // website inferred from campaign email oliviachow.ca — verify before enabling
     website: "https://oliviachow.ca",
     image: "/elections/toronto/2026/mayor/olivia-chow.png",
   },
@@ -90,7 +88,6 @@ export const MAYORAL_CANDIDATES: MayoralCandidate[] = [
     name: "Cory Deville",
     tag: "Declared",
     bio: "",
-    // website inferred from campaign email deville2026.ca — verify before enabling
     website: "https://deville2026.ca",
     image: "/elections/toronto/2026/mayor/cory-deville.png",
   },
@@ -98,71 +95,148 @@ export const MAYORAL_CANDIDATES: MayoralCandidate[] = [
     website: "https://running4you.ca/",
     image: "/elections/toronto/2026/mayor/laura-ellis.png",
    },
+  // Renato Fallico: no website, email, or socials on the Clerk's filing; no
+  // published photo found.
   { name: "Renato Fallico", tag: "Declared", bio: "" },
+  // Martin Fraser: no contact info on the Clerk's filing; name too generic to
+  // safely match a photo.
   { name: "Martin Fraser", tag: "Declared", bio: "" },
-  // Edward Gong: social links only (gmail email) — add the real URL manually.
-  { name: "Edward Gong", tag: "Declared", bio: "" ,  image: "/elections/toronto/2026/mayor/edward-gong.png"},
+  {
+    name: "Edward Gong",
+    tag: "Declared",
+    bio: "",
+    // His generic "for Mayor" site, kept current through 2026 (not on his
+    // Clerk filing, which lists only email + socials).
+    website: "https://gong4mayor.com",
+    image: "/elections/toronto/2026/mayor/edward-gong.png",
+  },
   {
     name: "Faizan Haider",
     tag: "Declared",
     bio: "",
-    // website inferred from campaign email faizanhaider.ca — verify before enabling
-    website: "https://faizanhaider.ca",
+    // Must be the www URL — the bare faizanhaider.ca domain has broken TLS.
+    website: "https://www.faizanhaider.ca",
+    image: "/elections/toronto/2026/mayor/faizan-haider.jpg",
   },
-  { name: "Peter Handjis", tag: "Declared", bio: "" },
-  { name: "Heather He", tag: "Declared", bio: "" },
+  {
+    name: "Peter Handjis",
+    tag: "Declared",
+    bio: "",
+    // Prior campaign domains are all dead; no website on his 2026 filing.
+    // Photo from his VoteMate 2023 profile (him with his own campaign sign).
+    image: "/elections/toronto/2026/mayor/peter-handjis.webp",
+  },
+  {
+    name: "Heather He",
+    tag: "Declared",
+    bio: "",
+    // Her Care Bank nonprofit site — printed on her campaign signs, but the
+    // site itself has no campaign content. Photo shows her campaign banner.
+    website: "https://www.carebank.world",
+    image: "/elections/toronto/2026/mayor/heather-he.jpg",
+  },
+  // Mohamad Kaaki: registered 13-Jul-2026; no email, website, socials, or
+  // photo found anywhere.
   { name: "Mohamad Kaaki", tag: "Declared", bio: "" },
   {
     name: "Georgios Kalkounis",
     tag: "Declared",
     bio: "",
-    // website inferred from campaign email kalkounis.com — verify before enabling
-    website: "https://kalkounis.com",
+    // kalkounis.com (from his email) is a parked domain; real URL is from the
+    // Clerk's candidate JSON.
+    website: "https://georgioskalkounisformayor.com/",
+    image: "/elections/toronto/2026/mayor/georgios-kalkounis.jpg",
   },
-  // Isidoros Kyrlangitses: has a website per the Clerk's list, but no email to
-  // infer a domain from — add the real URL manually.
-  { name: "Isidoros Kyrlangitses", tag: "Declared", bio: "" },
+  {
+    name: "Isidoros Kyrlangitses",
+    tag: "Declared",
+    bio: "",
+    // From the Clerk's candidate JSON. Single-page site with no headshot —
+    // no photo of him found anywhere.
+    website: "https://www.ambitioustoronto.com",
+  },
   {
     name: "Michael Lamoureux",
     tag: "Declared",
     bio: "",
-    // website inferred from campaign email michaellamoureux.ca — verify before enabling
-    website: "https://michaellamoureux.ca",
+    website: "https://www.michaellamoureux.ca/",
+    image: "/elections/toronto/2026/mayor/michael-lamoureux.jpg",
   },
-  { name: "Rick Lee", tag: "Declared", bio: "" },
+  {
+    name: "Rick Lee",
+    tag: "Declared",
+    bio: "",
+    // Satirical Canva site, carried over from his 2023 run and updated for
+    // 2026. Not filed with the Clerk, so identity match is likely-not-certain.
+    website: "https://oscarpool.my.canva.site/voteforrick",
+    image: "/elections/toronto/2026/mayor/rick-lee.png",
+  },
+  // Eddie Mayanja: no website or email on the Clerk's record; no reliably
+  // attributable photo found.
   { name: "Eddie Mayanja", tag: "Declared", bio: "" },
-  // Sarah McVie: has a website per the Clerk's list, but only a gmail email —
-  // add the real URL manually.
-  { name: "Sarah McVie", tag: "Declared", bio: "" },
+  {
+    name: "Sarah McVie",
+    tag: "Declared",
+    bio: "",
+    // URL confirmed in the Clerk's candidate JSON. Photo is a landscape hero
+    // shot (she's on the right third) — crop if a tighter portrait is needed.
+    website: "https://www.mayormcvie.ca",
+    image: "/elections/toronto/2026/mayor/sarah-mcvie.jpg",
+  },
+  // Joseph Osuji: no website or email on the Clerk's record; several Joseph
+  // Osujis in Toronto, so no photo could be confidently attributed.
   { name: "Joseph Osuji", tag: "Declared", bio: "" },
   {
     name: "Odessa Paloma Parker",
     tag: "Declared",
     bio: "",
-    // website inferred from campaign email odessaformayor.ca — verify before enabling
     website: "https://odessaformayor.ca",
+    image: "/elections/toronto/2026/mayor/odessa-paloma-parker.jpg",
   },
   {
     name: "Amy Rosen",
     tag: "Declared",
     bio: "",
-    // website inferred from campaign email rosenformayor.ca — verify before enabling
     website: "https://rosenformayor.ca",
+    image: "/elections/toronto/2026/mayor/amy-rosen.jpg",
   },
+  // Kannan S'ree Jr: no discoverable web presence beyond the Clerk's list.
   { name: "Kannan S'ree Jr", tag: "Declared", bio: "" },
   {
     name: "Lyall Sanders",
     tag: "Declared",
     bio: "",
-    // website inferred from campaign email sanders4mayor.ca — verify before enabling
+    // sanders4mayor.ca is his campaign domain but currently stuck in a redirect
+    // loop (Wix misconfig) — confirmed via Wayback 2026-07-14; re-check later.
     website: "https://sanders4mayor.ca",
+    image: "/elections/toronto/2026/mayor/lyall-sanders.jpg",
   },
-  { name: "Naomi Sayers", tag: "Declared", bio: "" },
-  // Robert Shusterman: has a website per the Clerk's list, but only a gmail
-  // email — add the real URL manually.
-  { name: "Robert Shusterman", tag: "Declared", bio: "" },
-  { name: "Weizhen Tang", tag: "Declared", bio: "" },
-  { name: "Jeffery Tunney", tag: "Declared", bio: "" },
+  // Naomi Sayers: no 2026 campaign site found; naomisayers.com is her law
+  // practice, not a campaign site. Photo from her professional site.
+  { name: "Naomi Sayers", tag: "Declared", bio: "",
+    image: "/elections/toronto/2026/mayor/naomi-sayers.jpg",
+    website: "https://www.naomisayers.com/"
+  },
+  {
+    name: "Robert Shusterman",
+    tag: "Declared",
+    bio: "",
+    // His realtor site, but it announces his mayoral run — matches Clerk's list.
+    website: "https://www.robertshusterman.com/",
+    image: "/elections/toronto/2026/mayor/robert-shusterman.png",
+  },
+  // Weizhen Tang: no site of his own (weizhentang.com/.ca DNS dead); campaign
+  // info page lives on torontonewsnet.com/weizhentang/. Photo from that page.
+  { name: "Weizhen Tang", tag: "Declared", bio: "",
+    image: "/elections/toronto/2026/mayor/weizhen-tang.jpg",
+    website: "https://weizhentang.today/?blogcategory=Toronto+Mayoral+Candidacy"
+  },
+  // Jeffery Tunney: 2023 site jefferytunney4mayor.ca is dead; no 2026 site yet.
+  // Photo recovered from the Wayback archive of his own campaign site.
+  { name: "Jeffery Tunney", tag: "Declared", bio: "",
+    image: "/elections/toronto/2026/mayor/jeffery-tunney.png",
+    website: "https://jefferytunney4mayor.com/"
+  },
 ];
 
 // ── Councillors, by ward ─────────────────────────────────────────────────────

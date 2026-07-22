@@ -71,8 +71,9 @@ export function initialsFor(name: string): string {
 
 /** Matching key for enrichment lookups: lowercase, diacritics and
  *  punctuation stripped, so the Clerk's "Ala'a Adib" matches a local entry
- *  written "Alaa Adib". */
-function nameKey(name: string): string {
+ *  written "Alaa Adib". Also used as the stable candidate key in analytics
+ *  events, since the Clerk's feed has no candidate IDs. */
+export function nameKey(name: string): string {
   return name
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")

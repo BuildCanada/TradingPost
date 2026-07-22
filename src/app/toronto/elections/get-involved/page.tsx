@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { FileCheck2, Users, HeartHandshake, ArrowRight } from "lucide-react";
+import { PledgeButton } from "./PledgeButton";
 
 export const metadata: Metadata = {
   title: "Get Involved — Toronto 2026 Election",
@@ -84,13 +84,10 @@ export default function GetInvolvedPage() {
             decide what this city builds for the next four years. Old thinking
             won&rsquo;t save us. You might.
           </p>
-          <Link
-            href="/toronto/elections/2026/pledge"
-            className="group/btn inline-flex items-center gap-3 type-button text-bg bg-accent px-7 py-4 transition-colors hover:bg-auburn-700"
-          >
+          <PledgeButton className="group/btn inline-flex items-center gap-3 type-button text-bg bg-accent px-7 py-4 transition-colors hover:bg-auburn-700 cursor-pointer">
             Pledge to vote
             <ArrowRight className="size-4 shrink-0 transition-transform group-hover/btn:translate-x-0.5" />
-          </Link>
+          </PledgeButton>
         </section>
 
         {/* ── Ways to get involved (full-width card grid) ──────── */}
@@ -143,13 +140,10 @@ export default function GetInvolvedPage() {
           <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.035em] text-[clamp(2rem,5vw,3.75rem)] max-w-[22ch] text-balance text-linen-100 mb-10">
             The Toronto you know is possible doesn&rsquo;t vote itself in.
           </h2>
-          <Link
-            href="/toronto/elections/2026/pledge"
-            className="group/btn inline-flex items-center gap-3 type-button text-dark bg-bg px-7 py-4 transition-colors hover:bg-linen-100"
-          >
+          <PledgeButton className="group/btn inline-flex items-center gap-3 type-button text-dark bg-bg px-7 py-4 transition-colors hover:bg-linen-100 cursor-pointer">
             Pledge to vote
             <ArrowRight className="size-4 shrink-0 transition-transform group-hover/btn:translate-x-0.5" />
-          </Link>
+          </PledgeButton>
         </section>
       </div>
     </div>

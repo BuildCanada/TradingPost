@@ -4,6 +4,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
 import CountdownDays from "../../CountdownDays";
+import { CandidateSiteLink } from "../../CandidateSiteLink";
 import { WardMap, WardMapDefs } from "../../WardMap";
 import {
   WARD_NUMBERS,
@@ -11,6 +12,7 @@ import {
   getCouncillorCandidates,
   findWardIndex,
   initialsFor,
+  nameKey,
   daysUntilElection,
   NOMINATION_CLOSE_LABEL,
   ELECTION_DAY_LABEL,
@@ -193,15 +195,19 @@ export default async function WardDetailPage({
                   </p>
                 </div>
                 {cand.website ? (
-                  <a
+                  <CandidateSiteLink
                     href={cand.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    candidate={cand.name}
+                    candidateKey={nameKey(cand.name)}
+                    race="councillor"
+                    tag={cand.tag}
+                    ward={w.n}
+                    wardName={w.name}
                     className="group/btn hidden sm:inline-flex flex-none items-center gap-1.5 type-label-sm text-accent hover:underline"
                   >
                     Campaign site
                     <ArrowUpRight className="size-3 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
-                  </a>
+                  </CandidateSiteLink>
                 ) : (
                   <span className="hidden sm:block flex-none type-label-sm text-text-secondary">
                     Profile to come

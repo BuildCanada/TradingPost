@@ -3,12 +3,14 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight, ArrowRight } from "lucide-react";
 import CountdownDays from "./CountdownDays";
+import { CandidateSiteLink } from "./CandidateSiteLink";
 import { WardMap, WardMapDefs } from "./WardMap";
 import {
   getMayoralCandidates,
   getWards,
   daysUntilElection,
   initialsFor,
+  nameKey,
   NOMINATION_CLOSE_LABEL,
 } from "./data";
 
@@ -141,15 +143,17 @@ export default async function Toronto2026ElectionPage() {
                     {cand.bio}
                   </p>
                   {cand.website ? (
-                    <a
+                    <CandidateSiteLink
                       href={cand.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                      candidate={cand.name}
+                      candidateKey={nameKey(cand.name)}
+                      race="mayor"
+                      tag={cand.tag}
                       className="group/btn self-start inline-flex items-center gap-1.5 type-label-sm text-accent hover:underline"
                     >
                       Campaign site
                       <ArrowUpRight className="size-3 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
-                    </a>
+                    </CandidateSiteLink>
                   ) : (
                     <span className="self-start type-label-sm text-text-secondary">
                       Profile to come

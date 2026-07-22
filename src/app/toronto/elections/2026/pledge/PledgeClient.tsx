@@ -2,15 +2,17 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { pledgeSharePath } from "./pledge-slug";
 
-const BallotScene = dynamic(() => import("./BallotScene"), {
+const StampScene = dynamic(() => import("./StampScene"), {
   ssr: false,
   loading: () => (
     <div className="flex h-full items-center justify-center">
       <span className="type-label text-text-secondary">
-        Printing your ballot…
+        Printing your stamp…
       </span>
     </div>
   ),
@@ -26,6 +28,7 @@ export default function PledgeClient({
   /** e.g. "ward-5" from a ward-scoped pledge link; defaults to city-wide */
   region?: string;
 }) {
+  const router = useRouter();
   const [name, setName] = useState(initialName);
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<PledgeStatus>("idle");
@@ -48,6 +51,7 @@ export default function PledgeClient({
         throw new Error(data.error || "Something went wrong");
       }
       setStatus("pledged");
+      router.push(pledgeSharePath(name));
     } catch (err) {
       setStatus("error");
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -57,9 +61,9 @@ export default function PledgeClient({
   return (
     <div className="theme-election bg-bg text-dark">
       <div className="relative h-[calc(100dvh-20px)] min-h-[480px] border-2 border-dark bg-[#efe4da] overflow-clip">
-        {/* ── The ballot, full bleed ─────────────────────────── */}
+        {/* ── The stamp, full bleed ──────────────────────────── */}
         <div className="absolute inset-0">
-          <BallotScene name={name} />
+          <StampScene postmarkName={name.trim() ? name : null} />
         </div>
 
         {/* ── Overlaid header ────────────────────────────────── */}
@@ -71,7 +75,7 @@ export default function PledgeClient({
             <h1 className="font-sans font-medium leading-[0.98] tracking-[-0.04em] text-[clamp(2.25rem,4.5vw,3.75rem)] max-w-[14ch] text-balance">
               {status === "pledged"
                 ? "You’re on the record."
-                : "Put it in writing."}
+                : "My pledge to vote."}
             </h1>
           </div>
 
@@ -85,7 +89,7 @@ export default function PledgeClient({
                 htmlFor="pledge-name"
                 className="type-label-sm text-text-secondary block mb-2"
               >
-                Name on ballot
+                Your name
               </label>
               <input
                 id="pledge-name"
@@ -147,7 +151,7 @@ export default function PledgeClient({
             Back to the election tracker
           </Link>
           <p className="type-label-sm text-text-secondary">
-            Drag the ballot around · Polls open 10:00 a.m. – 8:00 p.m.
+            Drag the stamp around · Polls open 10:00 a.m. – 8:00 p.m.
           </p>
         </div>
       </div>

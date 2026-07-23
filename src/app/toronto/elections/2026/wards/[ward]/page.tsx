@@ -110,7 +110,7 @@ export default async function WardDetailPage({
         </section>
 
         {/* ── Key stats ──────────────────────────────────────── */}
-        <section className="grid grid-cols-2 md:grid-cols-4 border-b-2 border-dark">
+        <section className="grid grid-cols-2 md:grid-cols-3 border-b-2 border-dark">
           <div className="px-8 py-7 border-r border-b md:border-b-0 border-border-light">
             <div className="font-sans font-semibold text-[2.75rem] leading-none tracking-[-0.03em] tabular-nums">
               {w.count}
@@ -128,15 +128,7 @@ export default async function WardDetailPage({
               Days until polls open
             </div>
           </div>
-          <div className="px-8 py-7 border-r border-border-light">
-            <div className="font-sans font-medium text-[1.4rem] leading-[1.1] tracking-[-0.01em] pt-1.5">
-              {NOMINATION_CLOSE_LABEL}
-            </div>
-            <div className="type-label-sm !tracking-[0.1em] text-text-secondary mt-3">
-              Nominations close
-            </div>
-          </div>
-          <div className="px-8 py-7">
+          <div className="px-8 py-7 col-span-2 md:col-span-1">
             <div className="font-sans font-medium text-[1.4rem] leading-[1.1] tracking-[-0.01em] pt-1.5 text-accent">
               {ELECTION_DAY_LABEL}
             </div>

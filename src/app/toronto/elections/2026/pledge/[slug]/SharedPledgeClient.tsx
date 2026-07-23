@@ -42,7 +42,7 @@ export default function SharedPledgeClient({ name }: { name: string }) {
       <div className="relative h-[calc(100dvh-20px)] min-h-[480px] border-2 border-dark bg-[#efe4da] overflow-clip">
         {/* ── The stamp, full bleed ──────────────────────────── */}
         <div className="absolute inset-0">
-          <StampScene postmarkName={name} />
+          <StampScene />
         </div>
 
         {/* ── Overlaid header ────────────────────────────────── */}
@@ -92,9 +92,9 @@ export default function SharedPledgeClient({ name }: { name: string }) {
         <div className="pointer-events-none absolute bottom-0 inset-x-0 flex flex-wrap items-center justify-between gap-4 p-6 md:px-10 md:py-8">
           <Link
             href="/toronto/elections/2026"
-            className="pointer-events-auto group/btn inline-flex items-center gap-2 type-button text-dark hover:text-accent"
+            className="pointer-events-auto group/btn inline-flex items-center gap-3 type-button text-dark border-2 border-dark px-6 py-3.5 transition-colors hover:bg-dark hover:text-bg"
           >
-            <ArrowLeft className="size-3.5 transition-transform group-hover/btn:-translate-x-0.5" />
+            <ArrowLeft className="size-4 shrink-0 transition-transform group-hover/btn:-translate-x-0.5" />
             Back to the election tracker
           </Link>
           <p className="type-label-sm text-text-secondary">

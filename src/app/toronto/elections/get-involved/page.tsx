@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { FileCheck2, Users, HeartHandshake, ArrowRight } from "lucide-react";
-import { PledgeButton } from "./PledgeButton";
+import { PledgeButton } from "../PledgeButton";
 
 export const metadata: Metadata = {
   title: "Get Involved — Toronto 2026 Election",
@@ -131,19 +132,28 @@ export default function GetInvolvedPage() {
           </div>
         </section>
 
-        {/* ── Closing CTA (dark band, full bleed) ──────────────── */}
-        <section className="bg-dark text-bg px-6 py-20 md:px-14 md:py-28 text-center flex flex-col items-center">
-          <p className="mb-8 font-serif italic text-[1.1rem] leading-[1.5] text-charcoal-400">
+        {/* ── Closing CTA (Toronto-blue band, full bleed) ──────── */}
+        <section className="bg-[#003086] text-bg px-6 py-20 md:px-14 md:py-28 text-center flex flex-col items-center">
+          <p className="mb-8 font-serif italic text-[1.1rem] leading-[1.5] text-bg/70">
             &ldquo;We shall not err for want of boldness.&rdquo;
             <br className="sm:hidden" /> — Sir Wilfrid Laurier
           </p>
           <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.035em] text-[clamp(2rem,5vw,3.75rem)] max-w-[22ch] text-balance text-linen-100 mb-10">
-            The Toronto you know is possible doesn&rsquo;t vote itself in.
+            Build the Toronto you know is possible.
           </h2>
-          <PledgeButton className="group/btn inline-flex items-center gap-3 type-button text-dark bg-bg px-7 py-4 transition-colors hover:bg-linen-100 cursor-pointer">
-            Pledge to vote
-            <ArrowRight className="size-4 shrink-0 transition-transform group-hover/btn:translate-x-0.5" />
-          </PledgeButton>
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <Link
+              href="/toronto/elections/2026"
+              className="group/btn inline-flex items-center gap-3 type-button text-bg border-2 border-bg px-7 py-[calc(1rem-2px)] transition-colors hover:bg-bg hover:text-accent"
+            >
+              Explore the candidates
+              <ArrowRight className="size-4 shrink-0 transition-transform group-hover/btn:translate-x-0.5" />
+            </Link>
+            <PledgeButton className="group/btn inline-flex items-center gap-3 type-button text-accent bg-bg px-7 py-4 transition-colors hover:bg-linen-100 cursor-pointer">
+              Pledge to vote
+              <ArrowRight className="size-4 shrink-0 transition-transform group-hover/btn:translate-x-0.5" />
+            </PledgeButton>
+          </div>
         </section>
       </div>
     </div>

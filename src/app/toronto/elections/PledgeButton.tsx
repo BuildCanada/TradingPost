@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import posthog from "posthog-js";
 import { Button } from "@/components/ui/button";
-import { pledgeSharePath } from "../2026/pledge/pledge-slug";
+import { pledgeSharePath } from "./2026/pledge/pledge-slug";
 
 /* "Pledge to vote" CTA — opens the same modal treatment as the navbar
    Subscribe button. Submitting records the pledge (via /api/elections/pledge
@@ -13,14 +13,20 @@ import { pledgeSharePath } from "../2026/pledge/pledge-slug";
 export function PledgeButton({
   className,
   children,
+  region = "toronto",
+  source = "get-involved",
 }: {
   className?: string;
   children: React.ReactNode;
+  /** e.g. "ward-5" for ward-scoped pledges; defaults to city-wide */
+  region?: string;
+  source?: string;
 }) {
   const router = useRouter();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
+  const [postalCode, setPostalCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,13 +40,19 @@ export function PledgeButton({
       return;
     }
 
+    const postalRegex = /^[A-Za-z]\d[A-Za-z] ?\d[A-Za-z]\d$/;
+    if (!postalRegex.test(postalCode)) {
+      setError("Please enter a valid Canadian postal code (e.g. A1A 1A1)");
+      return;
+    }
+
     setLoading(true);
     try {
       const name = `${firstName.trim()} ${lastName.trim()}`.trim();
       const res = await fetch("/api/elections/pledge", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name, region: "toronto" }),
+        body: JSON.stringify({ email, name, region, postal_code: postalCode }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -49,9 +61,10 @@ export function PledgeButton({
         return;
       }
       posthog.identify(email, { email });
-      posthog.capture("pledged_to_vote", { source: "get-involved" });
-      // keep the button disabled while we navigate to the shared page
-      router.push(pledgeSharePath(name));
+      posthog.capture("pledged_to_vote", { source });
+      // keep the button disabled while we navigate to the shared page;
+      // prefer the server's record (canonical name + unguessable token)
+      router.push(pledgeSharePath(data.name || name, data.shareToken));
     } catch {
       setError("Network error. Please try again.");
       setLoading(false);
@@ -64,7 +77,7 @@ export function PledgeButton({
   return (
     <Dialog.Root
       onOpenChange={(open) => {
-        if (open) posthog.capture("pledge_modal_opened", { source: "get-involved" });
+        if (open) posthog.capture("pledge_modal_opened", { source });
       }}
     >
       <Dialog.Trigger className={className}>{children}</Dialog.Trigger>
@@ -111,6 +124,15 @@ export function PledgeButton({
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email"
               required
+              className={inputClass}
+            />
+            <input
+              type="text"
+              value={postalCode}
+              onChange={(e) => setPostalCode(e.target.value)}
+              placeholder="Postal code (e.g. A1A 1A1)"
+              required
+              maxLength={7}
               className={inputClass}
             />
             <Button

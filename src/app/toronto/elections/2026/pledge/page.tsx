@@ -17,8 +17,8 @@ export const metadata: Metadata = {
 export default async function PledgePage({
   searchParams,
 }: {
-  searchParams: Promise<{ name?: string; region?: string }>;
+  searchParams: Promise<{ region?: string }>;
 }) {
-  const { name, region } = await searchParams;
-  return <PledgeClient initialName={name ?? ""} region={region} />;
+  const { region } = await searchParams;
+  return <PledgeClient region={region} />;
 }

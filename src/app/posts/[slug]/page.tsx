@@ -10,7 +10,6 @@ import { buildGraph } from "@/lib/schemas/graph";
 import { generateBreadcrumbSchema } from "@/lib/schemas/generators/breadcrumb";
 import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
 import { DraftPreviewBanner } from "@/components/auth/DraftPreviewBanner";
-import { PreviewNotFound } from "@/components/auth/PreviewNotFound";
 import { isDraft, primeAdminPreviewToken } from "@/lib/preview";
 
 export async function generateStaticParams() {
@@ -77,8 +76,7 @@ export default async function PostDetailPage({
   try {
     post = await fetchPost(slug);
   } catch {
-    if (!accessToken) notFound();
-    return <PreviewNotFound label="Post" slug={slug} />;
+    notFound();
   }
 
   if (post.slug !== slug) {

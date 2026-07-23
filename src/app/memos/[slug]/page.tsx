@@ -12,7 +12,6 @@ import { generateArticleSchema } from "@/lib/schemas/generators/article";
 import { generateBreadcrumbSchema } from "@/lib/schemas/generators/breadcrumb";
 import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
 import { DraftPreviewBanner } from "@/components/auth/DraftPreviewBanner";
-import { PreviewNotFound } from "@/components/auth/PreviewNotFound";
 import { primeAdminPreviewToken } from "@/lib/preview";
 import { getCurrentUser } from "@/lib/auth";
 
@@ -84,8 +83,7 @@ export default async function MemoDetailPage({
   try {
     memo = await fetchMemo(slug);
   } catch {
-    if (!accessToken) notFound();
-    return <PreviewNotFound label="Memo" slug={slug} />;
+    notFound();
   }
 
   if (memo.slug !== slug) {

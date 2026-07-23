@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { fetchBuilder } from "@/lib/api/builders";
 import { DraftPreviewBanner } from "@/components/auth/DraftPreviewBanner";
-import { PreviewNotFound } from "@/components/auth/PreviewNotFound";
 import { isDraft, primeAdminPreviewToken } from "@/lib/preview";
 
 export async function generateMetadata({
@@ -49,8 +48,7 @@ export default async function BuilderPage({
   try {
     builder = await fetchBuilder(slug);
   } catch {
-    if (!accessToken) notFound();
-    return <PreviewNotFound label="Builder" slug={slug} />;
+    notFound();
   }
 
   if (builder.slug !== slug) {

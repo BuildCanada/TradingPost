@@ -12,19 +12,9 @@ import { generateArticleSchema } from "@/lib/schemas/generators/article";
 import { generateBreadcrumbSchema } from "@/lib/schemas/generators/breadcrumb";
 import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
 import { DraftPreviewBanner } from "@/components/auth/DraftPreviewBanner";
-import { setAccessToken } from "@/lib/auth-token";
-import { getCurrentUser, getAccessTokenCookie } from "@/lib/auth";
-
-// Draft preview is gated on the signed-in user actually being an admin (live
-// from /me), never on a baked cookie. When they are, we hand apiFetch the
-// access token so it fetches drafts; otherwise the request store stays empty
-// and only published content is returned.
-async function resolveAccessToken(): Promise<string | undefined> {
-  const user = await getCurrentUser();
-  const token = user?.admin ? await getAccessTokenCookie() : undefined;
-  setAccessToken(token);
-  return token;
-}
+import { PreviewNotFound } from "@/components/auth/PreviewNotFound";
+import { primeAdminPreviewToken } from "@/lib/preview";
+import { getCurrentUser } from "@/lib/auth";
 
 export async function generateStaticParams() {
   try {
@@ -42,7 +32,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   // Prime the request-scoped token so draft metadata resolves for admins.
-  await resolveAccessToken();
+  await primeAdminPreviewToken();
   let memo;
   try {
     memo = await fetchMemo(slug);
@@ -85,8 +75,8 @@ export default async function MemoDetailPage({
 }) {
   const { slug } = await params;
 
-  const accessToken = await resolveAccessToken();
-  // Cached per-request alongside resolveAccessToken's call — drives the
+  const accessToken = await primeAdminPreviewToken();
+  // Cached per-request alongside primeAdminPreviewToken's call — drives the
   // engagement UI's signed-in / postal-code-ready states.
   const viewer = await getCurrentUser();
 
@@ -95,19 +85,7 @@ export default async function MemoDetailPage({
     memo = await fetchMemo(slug);
   } catch {
     if (!accessToken) notFound();
-
-    return (
-      <div className="mx-[10px] my-[10px] border border-border-light bg-bg">
-        <div className="max-w-[720px] mx-auto px-[5vw] md:px-[10vw] py-24 flex flex-col items-center gap-8 text-center">
-          <p className="type-label text-text-secondary">404</p>
-          <h1 className="type-title">Memo not found</h1>
-          <p className="type-body text-text-secondary">
-            This memo doesn&apos;t exist or hasn&apos;t been published yet.
-          </p>
-          <DraftPreviewBanner state="draft-not-found" slug={slug} />
-        </div>
-      </div>
-    );
+    return <PreviewNotFound label="Memo" slug={slug} />;
   }
 
   if (memo.slug !== slug) {

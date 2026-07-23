@@ -3,6 +3,20 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { fetchBuilder } from "@/lib/api/builders";
+import { DraftPreviewBanner } from "@/components/auth/DraftPreviewBanner";
+import { setAccessToken } from "@/lib/auth-token";
+import { getCurrentUser, getAccessTokenCookie } from "@/lib/auth";
+
+// Draft preview is gated on the signed-in user actually being an admin (live
+// from /me), never on a baked cookie. When they are, we hand apiFetch the
+// access token so it fetches drafts; otherwise the request store stays empty
+// and only published content is returned.
+async function resolveAccessToken(): Promise<string | undefined> {
+  const user = await getCurrentUser();
+  const token = user?.admin ? await getAccessTokenCookie() : undefined;
+  setAccessToken(token);
+  return token;
+}
 
 export async function generateMetadata({
   params,
@@ -10,6 +24,8 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
+  // Prime the request-scoped token so draft metadata resolves for admins.
+  await resolveAccessToken();
   try {
     const builder = await fetchBuilder(slug);
     return {
@@ -37,19 +53,44 @@ export default async function BuilderPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+
+  const accessToken = await resolveAccessToken();
+
   let builder;
   try {
     builder = await fetchBuilder(slug);
   } catch {
-    notFound();
+    if (!accessToken) notFound();
+
+    return (
+      <div className="mx-[10px] my-[10px] border border-border-light bg-bg">
+        <div className="max-w-[720px] mx-auto px-[5vw] md:px-[10vw] py-24 flex flex-col items-center gap-8 text-center">
+          <p className="type-label text-text-secondary">404</p>
+          <h1 className="type-title">Builder not found</h1>
+          <p className="type-body text-text-secondary">
+            This builder doesn&apos;t exist or hasn&apos;t been published yet.
+          </p>
+          <DraftPreviewBanner state="draft-not-found" slug={slug} />
+        </div>
+      </div>
+    );
   }
 
   if (builder.slug !== slug) {
     permanentRedirect(`/builders/${builder.slug}`);
   }
 
+  // A builder is a draft when it has no publish date, or one scheduled in the
+  // future. The preview banner is for genuine drafts only — not every builder
+  // an admin happens to be viewing.
+  const isDraft =
+    !builder.publishedAt || new Date(builder.publishedAt) > new Date();
+
   return (
     <div className="mx-[10px] my-[10px] border border-border-light bg-bg">
+      {accessToken && isDraft && (
+        <DraftPreviewBanner state="viewing-draft" slug={slug} />
+      )}
       <article className="animate-fade-in max-w-2xl mx-auto px-5 pt-[50px] pb-[60px]">
         <Link
           href="/builders"

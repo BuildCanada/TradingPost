@@ -11,7 +11,7 @@ import { buildGraph } from "@/lib/schemas/graph";
 import { generateArticleSchema } from "@/lib/schemas/generators/article";
 import { generateBreadcrumbSchema } from "@/lib/schemas/generators/breadcrumb";
 import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
-import { DraftPreviewBanner } from "./DraftPreviewBanner";
+import { DraftPreviewBanner } from "@/components/auth/DraftPreviewBanner";
 import { setAccessToken } from "@/lib/auth-token";
 import { getCurrentUser, getAccessTokenCookie } from "@/lib/auth";
 

@@ -9,6 +9,20 @@ import { SubscribeButton } from "@/components/ui/subscribe-button";
 import { buildGraph } from "@/lib/schemas/graph";
 import { generateBreadcrumbSchema } from "@/lib/schemas/generators/breadcrumb";
 import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
+import { DraftPreviewBanner } from "@/components/auth/DraftPreviewBanner";
+import { setAccessToken } from "@/lib/auth-token";
+import { getCurrentUser, getAccessTokenCookie } from "@/lib/auth";
+
+// Draft preview is gated on the signed-in user actually being an admin (live
+// from /me), never on a baked cookie. When they are, we hand apiFetch the
+// access token so it fetches drafts; otherwise the request store stays empty
+// and only published content is returned.
+async function resolveAccessToken(): Promise<string | undefined> {
+  const user = await getCurrentUser();
+  const token = user?.admin ? await getAccessTokenCookie() : undefined;
+  setAccessToken(token);
+  return token;
+}
 
 export async function generateStaticParams() {
   try {
@@ -25,6 +39,8 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
+  // Prime the request-scoped token so draft metadata resolves for admins.
+  await resolveAccessToken();
   let post;
   try {
     post = await fetchPost(slug);
@@ -65,16 +81,37 @@ export default async function PostDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+
+  const accessToken = await resolveAccessToken();
+
   let post;
   try {
     post = await fetchPost(slug);
   } catch {
-    notFound();
+    if (!accessToken) notFound();
+
+    return (
+      <div className="mx-[10px] my-[10px] border border-border-light bg-bg">
+        <div className="max-w-[720px] mx-auto px-[5vw] md:px-[10vw] py-24 flex flex-col items-center gap-8 text-center">
+          <p className="type-label text-text-secondary">404</p>
+          <h1 className="type-title">Post not found</h1>
+          <p className="type-body text-text-secondary">
+            This post doesn&apos;t exist or hasn&apos;t been published yet.
+          </p>
+          <DraftPreviewBanner state="draft-not-found" slug={slug} />
+        </div>
+      </div>
+    );
   }
 
   if (post.slug !== slug) {
     permanentRedirect(`/posts/${post.slug}`);
   }
+
+  // A post is a draft when it has no publish date, or one scheduled in the
+  // future. The preview banner is for genuine drafts only — not every post an
+  // admin happens to be viewing.
+  const isDraft = !post.publishedAt || new Date(post.publishedAt) > new Date();
 
   const date = new Date(post.publishedAt || post.createdAt).toLocaleDateString(
     "en-CA",
@@ -102,6 +139,9 @@ export default async function PostDetailPage({
 
   return (
     <div className="mx-[10px] my-[10px] border border-border-light bg-bg">
+      {accessToken && isDraft && (
+        <DraftPreviewBanner state="viewing-draft" slug={slug} />
+      )}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

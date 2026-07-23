@@ -121,6 +121,12 @@ export default async function MemoDetailPage({
 
   const keyMessages = memo.keyMessages;
 
+  // A memo is a draft when it has no publish date, or one scheduled in the
+  // future. The preview banner is for genuine drafts only — not every memo an
+  // admin happens to be viewing.
+  const isDraft =
+    !memo.publishedAt || new Date(memo.publishedAt) > new Date();
+
   const date = new Date(
     memo.publishedAt || memo.createdAt
   ).toLocaleDateString("en-CA", {
@@ -180,7 +186,7 @@ export default async function MemoDetailPage({
 
   return (
     <div className="mx-[10px] my-[10px] border border-border-light bg-bg">
-      {accessToken && (
+      {accessToken && isDraft && (
         <DraftPreviewBanner state="viewing-draft" slug={slug} />
       )}
       <script

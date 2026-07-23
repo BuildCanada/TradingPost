@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { fetchBuilder } from "@/lib/api/builders";
+import { DraftPreviewBanner } from "@/components/auth/DraftPreviewBanner";
+import { isDraft, primeAdminPreviewToken } from "@/lib/preview";
 
 export async function generateMetadata({
   params,
@@ -10,6 +12,8 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
+  // Prime the request-scoped token so draft metadata resolves for admins.
+  await primeAdminPreviewToken();
   try {
     const builder = await fetchBuilder(slug);
     return {
@@ -37,6 +41,9 @@ export default async function BuilderPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+
+  const accessToken = await primeAdminPreviewToken();
+
   let builder;
   try {
     builder = await fetchBuilder(slug);
@@ -50,6 +57,9 @@ export default async function BuilderPage({
 
   return (
     <div className="mx-[10px] my-[10px] border border-border-light bg-bg">
+      {accessToken && isDraft(builder.publishedAt) && (
+        <DraftPreviewBanner state="viewing-draft" slug={slug} />
+      )}
       <article className="animate-fade-in max-w-2xl mx-auto px-5 pt-[50px] pb-[60px]">
         <Link
           href="/builders"

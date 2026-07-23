@@ -13,6 +13,7 @@ interface YFBuilder {
 interface YFBuilderDetail extends YFBuilder {
   body: string | null;
   author: string | null;
+  published_at: string | null;
 }
 
 export interface BuilderSerialized {
@@ -27,6 +28,7 @@ export interface BuilderSerialized {
 export interface BuilderDetailSerialized extends BuilderSerialized {
   body: string | null;
   author: string | null;
+  publishedAt: string | null;
 }
 
 function stripHtml(html: string | null): string | null {
@@ -68,5 +70,6 @@ export async function fetchBuilder(slug: string): Promise<BuilderDetailSerialize
     ...mapBuilder(b),
     body: b.body,
     author: stripHtml(b.author),
+    publishedAt: b.published_at,
   };
 }

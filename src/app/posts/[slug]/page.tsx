@@ -9,6 +9,8 @@ import { SubscribeButton } from "@/components/ui/subscribe-button";
 import { buildGraph } from "@/lib/schemas/graph";
 import { generateBreadcrumbSchema } from "@/lib/schemas/generators/breadcrumb";
 import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
+import { DraftPreviewBanner } from "@/components/auth/DraftPreviewBanner";
+import { isDraft, primeAdminPreviewToken } from "@/lib/preview";
 
 export async function generateStaticParams() {
   try {
@@ -25,6 +27,8 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
+  // Prime the request-scoped token so draft metadata resolves for admins.
+  await primeAdminPreviewToken();
   let post;
   try {
     post = await fetchPost(slug);
@@ -65,6 +69,9 @@ export default async function PostDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+
+  const accessToken = await primeAdminPreviewToken();
+
   let post;
   try {
     post = await fetchPost(slug);
@@ -102,6 +109,9 @@ export default async function PostDetailPage({
 
   return (
     <div className="mx-[10px] my-[10px] border border-border-light bg-bg">
+      {accessToken && isDraft(post.publishedAt) && (
+        <DraftPreviewBanner state="viewing-draft" slug={slug} />
+      )}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

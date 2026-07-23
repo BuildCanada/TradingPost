@@ -1,0 +1,24 @@
+import { ImageResponse } from "next/og";
+import { resolvePledgeName } from "../pledge-data";
+import { OG_SIZE, PledgeOGImage, stampDataUri } from "../og-template";
+
+export const alt = "A pledge to vote in Toronto's 2026 municipal election";
+export const size = OG_SIZE;
+export const contentType = "image/png";
+
+/* Query params aren't available to OG image routes; the name resolves from
+   the pledge record via the slug's share token, else from the slug itself. */
+export default async function Image({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
+  return new ImageResponse(
+    <PledgeOGImage
+      stampSrc={await stampDataUri()}
+      name={await resolvePledgeName(slug)}
+    />,
+    { ...size },
+  );
+}

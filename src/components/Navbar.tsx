@@ -16,6 +16,9 @@ export default function Navbar() {
   const pathname = usePathname();
   const isToronto = pathname?.startsWith("/toronto") ?? false;
   const navLinks = isToronto ? TORONTO_NAV_LINKS : NAV_LINKS;
+  // full-screen page, no site chrome
+  const isChromeless =
+    pathname?.startsWith("/toronto/elections/2026/pledge") ?? false;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -30,6 +33,8 @@ export default function Navbar() {
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  if (isChromeless) return null;
 
   return (
     <nav className="border-y-2 border-border flex items-stretch sticky top-[10px] z-50 bg-bg">

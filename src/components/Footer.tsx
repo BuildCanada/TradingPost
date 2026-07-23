@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useSubscribeStore } from "@/components/subscribe/store";
@@ -10,6 +11,10 @@ export default function Footer() {
   const footerRef = useRef<HTMLElement>(null);
   const [leafVisible, setLeafVisible] = useState(false);
   const openModal = useSubscribeStore((s) => s.openModal);
+  const pathname = usePathname();
+  // full-screen page, no site chrome
+  const isChromeless =
+    pathname?.startsWith("/toronto/elections/2026/pledge") ?? false;
 
   useEffect(() => {
     const el = footerRef.current;
@@ -26,6 +31,8 @@ export default function Footer() {
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
+
+  if (isChromeless) return null;
 
   return (
     <footer

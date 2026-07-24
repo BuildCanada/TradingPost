@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight, ArrowRight } from "lucide-react";
@@ -6,6 +7,7 @@ import CountdownDays from "./CountdownDays";
 import { CandidateSiteLink } from "./CandidateSiteLink";
 import { WardMap, WardMapDefs } from "./WardMap";
 import { PledgeButton } from "../PledgeButton";
+import { ResidencyModal } from "../ResidencyModal";
 import {
   getMayoralCandidates,
   getWards,
@@ -37,6 +39,9 @@ export default async function Toronto2026ElectionPage() {
 
   return (
     <div className="theme-election bg-bg text-dark">
+      <Suspense fallback={null}>
+        <ResidencyModal />
+      </Suspense>
       <div className="mx-[10px] my-[10px] border border-border-light bg-bg overflow-x-clip">
         {/* ── Hero ─────────────────────────────────────────────── */}
         <section className="px-6 py-14 md:px-14 md:py-16 border-b-2 border-dark">

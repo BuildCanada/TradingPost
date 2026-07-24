@@ -266,21 +266,19 @@ html {
   --color-auburn-900: #00266d;
 }
 
-/* Toronto 2026 Election tracker — warm "newsprint" broadsheet palette with
-   the Toronto blue accent. Warm linen panels + hairlines, but the accent
-   stays the Toronto blue from .theme-toronto (set explicitly here so the
-   page renders correctly even outside that wrapper). */
+/* Toronto 2026 Election tracker — the soft Toronto-blue "linen" palette shared
+   with the rest of /toronto, plus the Toronto blue accent (set explicitly here
+   so the page renders correctly even outside the .theme-toronto wrapper). */
 .theme-election {
-  --color-linen-50: #fbf6f1;
-  --color-linen-100: #f6ece3;
-  --color-linen-200: #ead2be;
+  --color-linen-50: #f2f6fb;
+  --color-linen-100: #e3ecf6;
+  --color-linen-200: #c7d7e8;
+  --color-linen-300: #9bb7d6;
   /* Toronto blue accent */
   --color-auburn-600: #0040b0;
   --color-auburn-700: #003592;
   --color-auburn-800: #003086;
   --color-auburn-900: #00266d;
-  /* hairline dividers between cards/sections */
-  --color-border-light: #cdc4bd;
 }
 
 @custom-variant compact (@media (min-width: 425px));

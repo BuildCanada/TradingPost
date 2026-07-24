@@ -223,27 +223,27 @@ export default async function Toronto2026ElectionPage() {
           </div>
         </section>
 
-        {/* ── Closing CTA (Toronto-blue band, full bleed) ──────── */}
-        <section className="bg-accent text-bg px-6 py-20 md:px-14 md:py-28 text-center flex flex-col items-center">
-          <p className="mb-8 font-serif italic text-[1.1rem] leading-[1.5] text-bg/70">
+        {/* ── Closing CTA (soft-linen band, full bleed) ────────── */}
+        <section className="bg-bg text-dark px-6 py-20 md:px-14 md:py-28 text-center flex flex-col items-center">
+          <p className="mb-8 font-serif italic text-[1.1rem] leading-[1.5] text-dark/60">
             &ldquo;We shall not err for want of boldness.&rdquo;
             <br className="sm:hidden" /> — Sir Wilfrid Laurier
           </p>
-          <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.035em] text-[clamp(2rem,5vw,3.75rem)] max-w-[22ch] text-balance text-linen-100 mb-6">
+          <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.035em] text-[clamp(2rem,5vw,3.75rem)] max-w-[22ch] text-balance mb-6">
             The Toronto you know is possible doesn&rsquo;t vote itself in.
           </h2>
-          <p className="mb-10 font-serif text-[1.15rem] leading-[1.5] text-bg/80 max-w-[46ch]">
+          <p className="mb-10 font-serif text-[1.15rem] leading-[1.5] text-dark/75 max-w-[46ch]">
             Toronto votes Monday, October 26. Add your name — then bring someone
             with you.
           </p>
           <PledgeButton
             source="election-landing"
-            className="group/btn inline-flex items-center gap-3 type-button text-accent bg-bg px-7 py-4 transition-colors hover:bg-linen-100 cursor-pointer"
+            className="group/btn inline-flex items-center gap-3 type-button text-bg bg-accent px-7 py-4 transition-colors hover:bg-accent-hover cursor-pointer"
           >
             Pledge to vote
             <ArrowRight className="size-4 shrink-0 transition-transform group-hover/btn:translate-x-0.5" />
           </PledgeButton>
-          <p className="mt-14 pt-5 border-t border-bg/20 type-label-sm text-bg/50 !tracking-[0.06em] max-w-[60ch]">
+          <p className="mt-14 pt-5 border-t border-dark/15 type-label-sm text-text-muted !tracking-[0.06em] max-w-[60ch]">
             Data shown is illustrative and for demonstration only. Official
             candidate lists are certified by the City Clerk after nomination
             day.

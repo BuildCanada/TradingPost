@@ -72,7 +72,7 @@ export default async function WardDetailPage({
 
   return (
     <div className="theme-election bg-bg text-dark">
-      <div className="mx-[10px] my-[10px] border-2 border-dark bg-bg overflow-x-clip">
+      <div className="mx-[10px] my-[10px] border border-border-light bg-bg overflow-x-clip">
         <WardMapDefs />
 
         {/* ── Breadcrumb ─────────────────────────────────────── */}

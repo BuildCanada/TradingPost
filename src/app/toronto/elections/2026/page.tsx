@@ -15,14 +15,7 @@ import {
   initialsFor,
   nameKey,
   NOMINATION_CLOSE_LABEL,
-  type MayoralTag,
 } from "./data";
-
-const MAYORAL_TAG_STYLES: Record<MayoralTag, string> = {
-  Incumbent: "border-accent text-accent",
-  Declared: "border-text-secondary text-dark",
-  Exploratory: "border-border-light text-text-secondary",
-};
 
 export const metadata: Metadata = {
   title: "Toronto 2026 Election",
@@ -142,11 +135,11 @@ export default async function Toronto2026ElectionPage() {
                     <h3 className="font-sans font-medium text-[1.5rem] tracking-[-0.02em] leading-[1.1]">
                       {cand.name}
                     </h3>
-                    <span
-                      className={`type-label-sm !text-[10px] !tracking-[0.12em] px-2 py-1 border ${MAYORAL_TAG_STYLES[cand.tag]}`}
-                    >
-                      {cand.tag}
-                    </span>
+                    {cand.tag === "Incumbent" && (
+                      <span className="type-label-sm !text-[10px] !tracking-[0.12em] px-2 py-1 border border-accent text-accent">
+                        {cand.tag}
+                      </span>
+                    )}
                   </div>
                   <p className="font-serif text-[1.08rem] leading-[1.45] text-dark/80 max-w-[64ch]">
                     {cand.bio}

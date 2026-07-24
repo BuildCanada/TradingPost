@@ -251,34 +251,40 @@ html {
   --color-dark: var(--color-charcoal-1000);
 }
 
-/* Toronto subsection theme — swap auburn → #003086, linen → #e3ecf6 */
-.theme-toronto {
+/* Toronto subsection theme — the warm brand palette swapped wholesale for
+   Toronto blue. Every linen and auburn tier is overridden, so any component
+   built on the standard tokens (bg-bg, bg-linen-*, text-accent, …) renders
+   blue under /toronto automatically — no per-component theming needed.
+   ThemeShell mirrors the class onto <html>, which is what themes portalled
+   content (Base UI dialogs render into <body>, outside the page wrapper).
+   .theme-election is an alias kept for the election pages so they render
+   correctly even when embedded outside the /toronto shell. */
+.theme-toronto,
+.theme-election {
+  /* linen → soft Toronto-blue ramp */
   --color-linen-50: #f2f6fb;
   --color-linen-100: #e3ecf6;
   --color-linen-200: #c7d7e8;
   --color-linen-300: #9bb7d6;
+  --color-linen-400: #6e93c0;
+  --color-linen-500: #4a76ac;
+  --color-linen-600: #3a629a;
+  --color-linen-700: #2e4e7e;
+  --color-linen-800: #274263;
+  --color-linen-900: #203450;
+  --color-linen-950: #101b2b;
+  /* auburn → Toronto-blue accent ramp */
   --color-auburn-50: #e9effa;
   --color-auburn-100: #cbd8ef;
   --color-auburn-200: #94aede;
+  --color-auburn-300: #6389d3;
+  --color-auburn-400: #3a6ac6;
+  --color-auburn-500: #1653bb;
   --color-auburn-600: #0040b0;
   --color-auburn-700: #003592;
   --color-auburn-800: #003086;
   --color-auburn-900: #00266d;
-}
-
-/* Toronto 2026 Election tracker — the soft Toronto-blue "linen" palette shared
-   with the rest of /toronto, plus the Toronto blue accent (set explicitly here
-   so the page renders correctly even outside the .theme-toronto wrapper). */
-.theme-election {
-  --color-linen-50: #f2f6fb;
-  --color-linen-100: #e3ecf6;
-  --color-linen-200: #c7d7e8;
-  --color-linen-300: #9bb7d6;
-  /* Toronto blue accent */
-  --color-auburn-600: #0040b0;
-  --color-auburn-700: #003592;
-  --color-auburn-800: #003086;
-  --color-auburn-900: #00266d;
+  --color-auburn-950: #001543;
 }
 
 @custom-variant compact (@media (min-width: 425px));

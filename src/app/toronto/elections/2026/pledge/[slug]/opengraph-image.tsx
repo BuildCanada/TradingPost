@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 import { resolvePledgeName } from "../pledge-data";
-import { OG_SIZE, PledgeOGImage, stampDataUri } from "../og-template";
+import { OG_SIZE, PledgeOGImage, stampDataUri, logoDataUri } from "../og-template";
 
 export const alt = "A pledge to vote in Toronto's 2026 municipal election";
 export const size = OG_SIZE;
@@ -18,6 +18,7 @@ export default async function Image({
     <PledgeOGImage
       stampSrc={await stampDataUri()}
       name={await resolvePledgeName(slug)}
+      logoSrc={await logoDataUri()}
     />,
     { ...size },
   );

@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { ElectionOGImage, OG_SIZE } from "./election-og";
+import { ElectionOGImage, OG_SIZE, logoDataUri } from "./election-og";
 
 export const alt = "Toronto 2026 Election — Build Canada";
 export const size = OG_SIZE;
@@ -10,6 +10,7 @@ export default async function Image() {
     <ElectionOGImage
       title="Toronto 2026 Election"
       subtitle="Every race, tracked: the candidates for mayor and all 25 council wards."
+      logoSrc={await logoDataUri()}
     />,
     { ...size },
   );

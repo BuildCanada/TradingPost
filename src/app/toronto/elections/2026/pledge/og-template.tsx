@@ -1,5 +1,8 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { TorontoLockup } from "../election-og";
+
+export { logoDataUri } from "../election-og";
 
 /* Shared template for the pledge OG images: the Toronto stamp on election
    paper inside the site's dark frame, with an optional postmark overlay
@@ -108,10 +111,13 @@ function Postmark({ name }: { name: string }) {
 export function PledgeOGImage({
   stampSrc,
   name,
+  logoSrc = "",
 }: {
   stampSrc: string;
   /** when set, the stamp is postmarked and the headline names the pledger */
   name?: string;
+  /** data URI from logoDataUri(); the corner lockup falls back to text without it */
+  logoSrc?: string;
 }) {
   const firstName = name?.trim().split(/\s+/)[0];
   const headline = firstName
@@ -192,6 +198,18 @@ export function PledgeOGImage({
         <div style={{ fontSize: 32, color: "#4c4c4c", display: "flex" }}>
           Toronto votes Monday, October 26
         </div>
+      </div>
+
+      {/* corner lockup */}
+      <div
+        style={{
+          position: "absolute",
+          bottom: 52,
+          right: 84,
+          display: "flex",
+        }}
+      >
+        <TorontoLockup logoSrc={logoSrc} />
       </div>
     </div>
   );

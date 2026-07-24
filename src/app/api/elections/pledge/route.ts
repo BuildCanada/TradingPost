@@ -65,6 +65,18 @@ export async function POST(req: NextRequest) {
     }
 
     const data = await res.json();
+
+    // Outside the City of Toronto: York Factory kept the newsletter subscriber
+    // but recorded no pledge. Tell the client to redirect them to explore
+    // rather than to a (non-existent) shareable pledge page.
+    if (data.outside_toronto) {
+      return NextResponse.json({
+        outsideToronto: true,
+        subscribed: data.subscribed ?? true,
+        name: data.name ?? null,
+      });
+    }
+
     return NextResponse.json({
       success: true,
       region: data.region,

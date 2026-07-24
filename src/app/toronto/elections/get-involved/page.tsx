@@ -71,7 +71,7 @@ const WAYS = [
 export default function GetInvolvedPage() {
   return (
     <div className="theme-election bg-bg text-dark">
-      <div className="mx-[10px] my-[10px] border-2 border-dark bg-bg overflow-x-clip">
+      <div className="mx-[10px] my-[10px] border border-border-light bg-bg overflow-x-clip">
         {/* ── Hero ─────────────────────────────────────────────── */}
         <section className="px-6 py-16 md:px-14 md:py-24 border-b-2 border-dark text-center flex flex-col items-center">
           <p className="type-label text-accent mb-6">

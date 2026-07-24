@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight, ArrowRight } from "lucide-react";
 import CountdownDays from "./CountdownDays";
 import { CandidateSiteLink } from "./CandidateSiteLink";
 import { WardMap, WardMapDefs } from "./WardMap";
+import { PledgeButton } from "../PledgeButton";
+import { ResidencyModal } from "../ResidencyModal";
 import {
   getMayoralCandidates,
   getWards,
@@ -36,7 +39,10 @@ export default async function Toronto2026ElectionPage() {
 
   return (
     <div className="theme-election bg-bg text-dark">
-      <div className="mx-[10px] my-[10px] border-2 border-dark bg-bg overflow-x-clip">
+      <Suspense fallback={null}>
+        <ResidencyModal />
+      </Suspense>
+      <div className="mx-[10px] my-[10px] border border-border-light bg-bg overflow-x-clip">
         {/* ── Hero ─────────────────────────────────────────────── */}
         <section className="px-6 py-14 md:px-14 md:py-16 border-b-2 border-dark">
           <p className="type-label text-accent mb-5">
@@ -68,21 +74,19 @@ export default async function Toronto2026ElectionPage() {
               </span>
             </div>
           </div>
-          <div className="px-6 py-12 md:px-14 md:py-14 border-t-2 md:border-t-0 md:border-l border-border-light bg-[#efe4da] flex flex-col justify-center">
+          <div className="px-6 py-12 md:px-14 md:py-14 border-t-2 md:border-t-0 md:border-l border-border-light bg-bg-alt flex flex-col justify-center">
             <p className="type-label text-accent mb-3.5">Ready to vote?</p>
             <p className="font-serif text-[1.15rem] leading-[1.45] max-w-[34ch] mb-6">
-              Check your eligibility, find your voting location, and learn what
-              to bring on election day.
+              Put your name on the record. Pledging takes ten seconds — and it&rsquo;s
+              the first step to showing up on election day.
             </p>
-            <a
-              href="https://www.toronto.ca/city-government/elections/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="group/btn self-start inline-flex items-center gap-3 type-button text-bg bg-dark px-5 py-4 transition-colors hover:bg-black"
+            <PledgeButton
+              source="election-ready-to-vote"
+              className="group/btn self-start inline-flex items-center gap-3 type-button text-bg bg-dark px-5 py-4 transition-colors hover:bg-black cursor-pointer"
             >
-              How to Vote
-              <ArrowUpRight className="size-3.5 shrink-0 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
-            </a>
+              Pledge to vote
+              <ArrowRight className="size-3.5 shrink-0 transition-transform group-hover/btn:translate-x-0.5" />
+            </PledgeButton>
             <p className="mt-7 pt-5 border-t border-border-light font-serif text-[1.05rem] leading-[1.4]">
               Polls open{" "}
               <span className="text-accent">
@@ -194,7 +198,7 @@ export default async function Toronto2026ElectionPage() {
               <Link
                 key={ward.n}
                 href={`/toronto/elections/2026/wards/${ward.n}`}
-                className="group bg-bg px-6 pt-5 pb-5 flex flex-col gap-3 min-h-[172px] transition-colors hover:bg-[#ebdfd4]"
+                className="group bg-bg px-6 pt-5 pb-5 flex flex-col gap-3 min-h-[172px] transition-colors hover:bg-linen-200"
               >
                 <div className="flex justify-between items-start gap-3">
                   <span className="type-label text-accent pt-1 !tracking-[0.1em]">
@@ -219,20 +223,32 @@ export default async function Toronto2026ElectionPage() {
           </div>
         </section>
 
-        {/* ── Editorial footer band ────────────────────────────── */}
-        <footer className="bg-dark text-bg px-6 py-14 md:px-14">
-          <blockquote className="max-w-[60ch] font-serif italic text-[1.25rem] leading-[1.5] text-linen-100 m-0">
-            &ldquo;Whatever our errors are otherwise, we shall not err for want
-            of boldness… Canada shall be the star towards which all men who love
-            progress and freedom shall come.&rdquo;
-          </blockquote>
-          <p className="mt-4 type-label-sm text-charcoal-400">Sir Wilfrid Laurier</p>
-          <p className="mt-11 pt-5 border-t border-charcoal-800 type-label-sm text-charcoal-400 !tracking-[0.06em]">
+        {/* ── Closing CTA (soft-linen band, full bleed) ────────── */}
+        <section className="bg-bg text-dark px-6 py-20 md:px-14 md:py-28 text-center flex flex-col items-center">
+          <p className="mb-8 font-serif italic text-[1.1rem] leading-[1.5] text-dark/60">
+            &ldquo;We shall not err for want of boldness.&rdquo;
+            <br className="sm:hidden" /> — Sir Wilfrid Laurier
+          </p>
+          <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.035em] text-[clamp(2rem,5vw,3.75rem)] max-w-[22ch] text-balance mb-6">
+            The Toronto you know is possible doesn&rsquo;t vote itself in.
+          </h2>
+          <p className="mb-10 font-serif text-[1.15rem] leading-[1.5] text-dark/75 max-w-[46ch]">
+            Toronto votes Monday, October 26. Add your name — then bring someone
+            with you.
+          </p>
+          <PledgeButton
+            source="election-landing"
+            className="group/btn inline-flex items-center gap-3 type-button text-bg bg-accent px-7 py-4 transition-colors hover:bg-accent-hover cursor-pointer"
+          >
+            Pledge to vote
+            <ArrowRight className="size-4 shrink-0 transition-transform group-hover/btn:translate-x-0.5" />
+          </PledgeButton>
+          <p className="mt-14 pt-5 border-t border-dark/15 type-label-sm text-text-muted !tracking-[0.06em] max-w-[60ch]">
             Data shown is illustrative and for demonstration only. Official
             candidate lists are certified by the City Clerk after nomination
             day.
           </p>
-        </footer>
+        </section>
       </div>
     </div>
   );

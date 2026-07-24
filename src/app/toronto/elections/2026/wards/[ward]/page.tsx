@@ -72,7 +72,7 @@ export default async function WardDetailPage({
 
   return (
     <div className="theme-election bg-bg text-dark">
-      <div className="mx-[10px] my-[10px] border-2 border-dark bg-bg overflow-x-clip">
+      <div className="mx-[10px] my-[10px] border border-border-light bg-bg overflow-x-clip">
         <WardMapDefs />
 
         {/* ── Breadcrumb ─────────────────────────────────────── */}
@@ -129,10 +129,12 @@ export default async function WardDetailPage({
             </div>
           </div>
           <div className="px-8 py-7 col-span-2 md:col-span-1">
-            <div className="font-sans font-medium text-[1.4rem] leading-[1.1] tracking-[-0.01em] pt-1.5 text-accent">
-              {ELECTION_DAY_LABEL}
+            <div className="flex items-end h-[2.75rem]">
+              <div className="font-sans font-semibold text-[1.75rem] leading-none tracking-[-0.03em]">
+                {ELECTION_DAY_LABEL}
+              </div>
             </div>
-            <div className="type-label-sm !tracking-[0.1em] text-text-secondary mt-3">
+            <div className="type-label-sm !tracking-[0.1em] text-text-secondary mt-2.5">
               Election day
             </div>
           </div>

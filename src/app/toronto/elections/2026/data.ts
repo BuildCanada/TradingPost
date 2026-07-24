@@ -30,11 +30,12 @@ import {
   MAYORAL_CANDIDATES as RAW_MAYORAL_CANDIDATES,
   WARD_CANDIDATES,
   type MayoralCandidate,
+  type MayoralTag,
   type CouncillorCandidate,
   type CouncillorTag,
 } from "./candidates";
 
-export type { MayoralCandidate, CouncillorCandidate, CouncillorTag };
+export type { MayoralCandidate, MayoralTag, CouncillorCandidate, CouncillorTag };
 
 /** Generational suffixes ignored when deriving a last-name sort key, so e.g.
  *  "Kannan S'ree Jr" sorts under "s", not "j". */

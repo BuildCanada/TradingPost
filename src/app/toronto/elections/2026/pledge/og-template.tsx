@@ -14,15 +14,19 @@ const BLUE = "#003086";
 const INK = "#2e5fa3";
 const SANS = "system-ui, -apple-system, sans-serif";
 
+/* The stamp artwork lives under public/ — the only asset directory shipped
+   into the production (Docker) runtime image, where this renders on demand
+   for shared-pledge URLs. Reading from src/ here 500'd in production. */
 export async function stampDataUri(): Promise<string> {
-  const data = await readFile(
-    join(
-      process.cwd(),
-      "src/app/toronto/elections/2026/pledge/toronto-stamp-og.png",
-    ),
-    "base64",
-  );
-  return `data:image/png;base64,${data}`;
+  try {
+    const data = await readFile(
+      join(process.cwd(), "public/elections/toronto/2026/toronto-stamp-og.png"),
+      "base64",
+    );
+    return `data:image/png;base64,${data}`;
+  } catch {
+    return ""; // degraded stamp-less image beats a broken share card
+  }
 }
 
 /* The cancellation mark, as SVG waves + frame with the name laid over it */
@@ -150,8 +154,10 @@ export function PledgeOGImage({
           transform: "rotate(-8deg)",
         }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={stampSrc} width={400} height={400} alt="" />
+        {stampSrc ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={stampSrc} width={400} height={400} alt="" />
+        ) : null}
         {name ? <Postmark name={name} /> : null}
       </div>
 

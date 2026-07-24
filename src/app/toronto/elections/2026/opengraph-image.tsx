@@ -1,15 +1,15 @@
 import { ImageResponse } from "next/og";
-import { ElectionOGImage, OG_SIZE } from "../electionOg";
+import { ElectionOGImage, OG_SIZE } from "./election-og";
 
-export const alt = "Toronto's 2026 municipal election — tracking every race";
+export const alt = "Toronto 2026 Election — Build Canada";
 export const size = OG_SIZE;
 export const contentType = "image/png";
 
 export default async function Image() {
   return new ImageResponse(
     <ElectionOGImage
-      headline="Toronto's 2026 election."
-      subline="Every race for mayor and all 25 council wards."
+      title="Toronto 2026 Election"
+      subtitle="Every race, tracked: the candidates for mayor and all 25 council wards."
     />,
     { ...size },
   );

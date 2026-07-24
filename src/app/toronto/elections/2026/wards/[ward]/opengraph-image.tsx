@@ -1,10 +1,14 @@
 import { ImageResponse } from "next/og";
 import { ElectionOGImage, OG_SIZE } from "../../election-og";
-import { findWardIndex, getWards } from "../../data";
+import { WARD_NUMBERS, findWardIndex, getWards } from "../../data";
 
 export const alt = "Toronto 2026 Election ward race — Build Canada";
 export const size = OG_SIZE;
 export const contentType = "image/png";
+
+export function generateStaticParams() {
+  return WARD_NUMBERS.map((n) => ({ ward: n }));
+}
 
 export default async function Image({
   params,

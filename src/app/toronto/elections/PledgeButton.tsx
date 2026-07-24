@@ -61,6 +61,16 @@ export function PledgeButton({
         return;
       }
       posthog.identify(email, { email });
+
+      // Outside Toronto: they're subscribed but not pledged. Send them to the
+      // election landing page with a flag so it can explain and invite them to
+      // explore, and keep the button disabled while we navigate.
+      if (data.outsideToronto) {
+        posthog.capture("pledge_outside_toronto", { source });
+        router.push("/toronto/elections/2026?residency=outside");
+        return;
+      }
+
       posthog.capture("pledged_to_vote", { source });
       // keep the button disabled while we navigate to the shared page;
       // prefer the server's record (canonical name + unguessable token)

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import posthog from "posthog-js";
 import { Button } from "@/components/ui/button";
+import { hubspotPageContext } from "@/lib/hubspot-context";
 import { pledgeSharePath } from "./2026/pledge/pledge-slug";
 
 /* "Pledge to vote" CTA — opens the same modal treatment as the navbar
@@ -52,7 +53,13 @@ export function PledgeButton({
       const res = await fetch("/api/elections/pledge", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, name, region, postal_code: postalCode }),
+        body: JSON.stringify({
+          email,
+          name,
+          region,
+          postal_code: postalCode,
+          ...hubspotPageContext(),
+        }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {

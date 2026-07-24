@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import posthog from "posthog-js";
 import { Button } from "@/components/ui/button";
+import { hubspotPageContext } from "@/lib/hubspot-context";
 import { useSubscribeStore } from "../store";
 
 interface SubscribeFormProps {
@@ -46,6 +47,7 @@ export function SubscribeForm({ source, onSuccess }: SubscribeFormProps) {
           last_name: lastName,
           postal_code: postalCode,
           source,
+          ...hubspotPageContext(),
         }),
       });
       const data = await res.json();

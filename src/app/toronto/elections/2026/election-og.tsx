@@ -8,9 +8,9 @@ import { WARD_SHAPES } from "./wardGeo";
 
 export const OG_SIZE = { width: 1200, height: 630 };
 
-const PAPER = "#efe4da";
-const LINEN = "#f6ece3";
-const HAIRLINE = "#cdc4bd";
+const PAPER = "#e3ecf6";
+const LINEN = "#f2f6fb";
+const HAIRLINE = "#c7d7e8";
 const DARK = "#272727";
 const BLUE = "#003086";
 const MUTED = "#4c4c4c";

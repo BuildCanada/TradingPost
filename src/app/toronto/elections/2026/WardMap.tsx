@@ -16,8 +16,8 @@ export function WardMapDefs() {
             <path
               key={w.n}
               d={w.d}
-              fill="#efe4da"
-              stroke="#cdc4bd"
+              fill="#f2f6fb"
+              stroke="#c7d7e8"
               strokeWidth={0.5}
               strokeLinejoin="round"
               vectorEffect="non-scaling-stroke"

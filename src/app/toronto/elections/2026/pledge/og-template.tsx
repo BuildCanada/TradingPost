@@ -8,7 +8,7 @@ import { join } from "node:path";
 
 export const OG_SIZE = { width: 1200, height: 630 };
 
-const PAPER = "#efe4da";
+const PAPER = "#e3ecf6";
 const DARK = "#272727";
 const INK = "#2e5fa3";
 const SANS = "system-ui, -apple-system, sans-serif";

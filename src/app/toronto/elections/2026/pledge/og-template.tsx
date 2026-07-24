@@ -10,7 +10,6 @@ export const OG_SIZE = { width: 1200, height: 630 };
 
 const PAPER = "#efe4da";
 const DARK = "#272727";
-const BLUE = "#003086";
 const INK = "#2e5fa3";
 const SANS = "system-ui, -apple-system, sans-serif";
 
@@ -114,9 +113,12 @@ export function PledgeOGImage({
   /** when set, the stamp is postmarked and the headline names the pledger */
   name?: string;
 }) {
-  const headline = name ? `${name} pledged to vote.` : "I pledge to vote.";
+  const firstName = name?.trim().split(/\s+/)[0];
+  const headline = firstName
+    ? `${firstName} pledged to vote.`
+    : "I pledge to vote.";
   const headlineSize =
-    headline.length > 34 ? 52 : headline.length > 24 ? 62 : 74;
+    headline.length > 30 ? 68 : headline.length > 22 ? 80 : 92;
 
   return (
     <div
@@ -158,7 +160,7 @@ export function PledgeOGImage({
           // eslint-disable-next-line @next/next/no-img-element
           <img src={stampSrc} width={400} height={400} alt="" />
         ) : null}
-        {name ? <Postmark name={name} /> : null}
+        {firstName ? <Postmark name={firstName} /> : null}
       </div>
 
       {/* headline block */}
@@ -166,25 +168,15 @@ export function PledgeOGImage({
         style={{
           position: "absolute",
           top: 0,
-          bottom: 60,
+          bottom: 0,
           left: 560,
           right: 84,
           display: "flex",
           flexDirection: "column",
           justifyContent: "center",
-          gap: 26,
+          gap: 30,
         }}
       >
-        <div
-          style={{
-            fontSize: 19,
-            fontWeight: 700,
-            letterSpacing: 3,
-            color: BLUE,
-          }}
-        >
-          MUNICIPAL ELECTION · CITY OF TORONTO
-        </div>
         <div
           style={{
             fontSize: headlineSize,
@@ -197,42 +189,8 @@ export function PledgeOGImage({
           {headline}
         </div>
         <div style={{ width: 96, height: 4, backgroundColor: DARK, display: "flex" }} />
-        <div style={{ fontSize: 27, color: "#4c4c4c", display: "flex" }}>
+        <div style={{ fontSize: 32, color: "#4c4c4c", display: "flex" }}>
           Toronto votes Monday, October 26
-        </div>
-      </div>
-
-      {/* footer strip */}
-      <div
-        style={{
-          position: "absolute",
-          bottom: 52,
-          left: 92,
-          right: 84,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <div
-          style={{
-            fontSize: 18,
-            fontWeight: 700,
-            letterSpacing: 3,
-            color: "#4c4c4c",
-          }}
-        >
-          POLLS OPEN 10:00 A.M. – 8:00 P.M.
-        </div>
-        <div
-          style={{
-            fontSize: 18,
-            fontWeight: 700,
-            letterSpacing: 3,
-            color: BLUE,
-          }}
-        >
-          BUILDCANADA.COM/TORONTO
         </div>
       </div>
     </div>

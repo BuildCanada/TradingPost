@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { ElectionOGImage, OG_SIZE } from "../../election-og";
+import { ElectionOGImage, OG_SIZE, logoDataUri } from "../../election-og";
 import { WARD_NUMBERS, findWardIndex, getWards } from "../../data";
 
 export const alt = "Toronto 2026 Election ward race — Build Canada";
@@ -17,12 +17,14 @@ export default async function Image({
 }) {
   const { ward } = await params;
   const idx = findWardIndex(ward);
+  const logoSrc = await logoDataUri();
 
   if (idx === -1) {
     return new ImageResponse(
       <ElectionOGImage
         title="Toronto 2026 Election"
         subtitle="Every race, tracked: the candidates for mayor and all 25 council wards."
+        logoSrc={logoSrc}
       />,
       { ...size },
     );
@@ -40,6 +42,7 @@ export default async function Image({
       title={w.name}
       subtitle={subtitle}
       activeWard={w.n}
+      logoSrc={logoSrc}
     />,
     { ...size },
   );

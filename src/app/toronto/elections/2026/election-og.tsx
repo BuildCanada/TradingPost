@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { WARD_SHAPES } from "./wardGeo";
 
 /* Shared template for the election-tracker OG images: the site's dark frame
@@ -18,6 +20,56 @@ const SANS = "system-ui, -apple-system, sans-serif";
 
 /* WARD_MAP_VIEWBOX is "0 0 300 157" */
 const MAP_RATIO = 157 / 300;
+
+/* The white Build Canada wordmark, from public/ — the only asset directory
+   shipped into the production (Docker) runtime image. */
+export async function logoDataUri(): Promise<string> {
+  try {
+    const data = await readFile(
+      join(process.cwd(), "public/assets/logos/logo-standard.svg"),
+      "base64",
+    );
+    return `data:image/svg+xml;base64,${data}`;
+  } catch {
+    return "";
+  }
+}
+
+/* The nav's Toronto lockup: the wordmark and "Toronto" in the accent-blue
+   box (see Navbar.tsx). Logo SVG is 321×149. */
+export function TorontoLockup({ logoSrc }: { logoSrc: string }) {
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 14,
+        backgroundColor: BLUE,
+        padding: "11px 16px",
+      }}
+    >
+      {logoSrc ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={logoSrc} width={60} height={28} alt="" />
+      ) : (
+        <span style={{ color: "#ffffff", fontSize: 19, fontWeight: 700 }}>
+          Build Canada
+        </span>
+      )}
+      <div
+        style={{
+          width: 1,
+          height: 28,
+          backgroundColor: PAPER,
+          display: "flex",
+        }}
+      />
+      <span style={{ color: "#ffffff", fontSize: 19, fontWeight: 500 }}>
+        Toronto
+      </span>
+    </div>
+  );
+}
 
 /** The 25-ward locator map; `activeWard` (e.g. "04") is filled Toronto blue.
  *  Paths are drawn inline (satori has no <defs>/<use>), active ward last so
@@ -57,12 +109,17 @@ export function ElectionOGImage({
   title,
   subtitle,
   activeWard,
+  logoSrc = "",
+  footerRight = "TORONTO VOTES MONDAY, OCTOBER 26",
 }: {
   kicker?: string;
   title: string;
   subtitle: string;
   /** zero-padded ward number to highlight, e.g. "04" */
   activeWard?: string;
+  /** data URI from logoDataUri(); the footer lockup falls back to text without it */
+  logoSrc?: string;
+  footerRight?: string;
 }) {
   const titleSize = title.length > 26 ? 58 : title.length > 18 ? 66 : 76;
 
@@ -155,16 +212,7 @@ export function ElectionOGImage({
           alignItems: "center",
         }}
       >
-        <div
-          style={{
-            fontSize: 18,
-            fontWeight: 700,
-            letterSpacing: 3,
-            color: MUTED,
-          }}
-        >
-          TORONTO VOTES MONDAY, OCTOBER 26
-        </div>
+        <TorontoLockup logoSrc={logoSrc} />
         <div
           style={{
             fontSize: 18,
@@ -173,7 +221,7 @@ export function ElectionOGImage({
             color: BLUE,
           }}
         >
-          BUILDCANADA.COM/TORONTO
+          {footerRight}
         </div>
       </div>
     </div>

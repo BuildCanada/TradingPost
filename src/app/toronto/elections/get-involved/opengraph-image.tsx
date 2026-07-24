@@ -1,5 +1,5 @@
 import { ImageResponse } from "next/og";
-import { ElectionOGImage, OG_SIZE } from "../2026/election-og";
+import { ElectionOGImage, OG_SIZE, logoDataUri } from "../2026/election-og";
 
 export const alt = "Get involved in Toronto's 2026 election — Build Canada";
 export const size = OG_SIZE;
@@ -10,6 +10,7 @@ export default async function Image() {
     <ElectionOGImage
       title="Get Involved"
       subtitle="Pledge to vote, register, volunteer, or donate — the Toronto you want doesn't vote itself in."
+      logoSrc={await logoDataUri()}
     />,
     { ...size },
   );

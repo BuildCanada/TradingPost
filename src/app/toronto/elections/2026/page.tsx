@@ -111,60 +111,58 @@ export default async function Toronto2026ElectionPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-px bg-border-light border-t border-border-light">
-            {mayoralCandidates.map((cand) => (
-              <article key={cand.name} className="bg-bg flex flex-col">
-                <div className="aspect-[4/5] bg-dark relative flex items-center justify-center overflow-hidden">
+          <div>
+            {mayoralCandidates.map((cand, i) => (
+              <div
+                key={`${cand.name}-${i}`}
+                className="flex gap-5 sm:gap-7 items-center px-6 md:px-14 py-7 border-t border-border-light"
+              >
+                <div className="flex-none size-16 bg-dark relative overflow-hidden flex items-center justify-center font-sans font-medium text-[1.35rem] tracking-[-0.02em] text-bg">
                   {cand.image ? (
                     <Image
                       src={cand.image}
                       alt={cand.name}
                       fill
-                      sizes="(min-width: 956px) 240px, (min-width: 612px) 50vw, 100vw"
+                      sizes="64px"
                       className="object-cover object-center"
                     />
                   ) : (
-                    <span className="font-sans font-medium text-[3.5rem] tracking-[-0.04em] text-bg opacity-[0.14]">
-                      {cand.initials ?? initialsFor(cand.name)}
-                    </span>
-                  )}
-                  {cand.tag === 'Incumbent' &&
-                    <span className="absolute top-3 left-3 type-label-sm text-bg border border-text-secondary px-2 py-1 bg-dark/40">
-                      {cand.tag}
-                    </span>
-                  }
-                  {!cand.image && (
-                    <span className="absolute bottom-3 left-3 type-label-sm text-text-secondary">
-                      Portrait to come
-                    </span>
+                    (cand.initials ?? initialsFor(cand.name))
                   )}
                 </div>
-                <div className="px-5 pt-4 pb-5 flex flex-col flex-1">
-                  <h3 className="font-sans font-medium text-[1.2rem] tracking-[-0.02em] leading-[1.1] mb-2">
-                    {cand.name}
-                  </h3>
-                  <p className="font-serif text-[0.95rem] leading-[1.45] text-dark/80 flex-1 mb-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline gap-3.5 flex-wrap mb-2">
+                    <h3 className="font-sans font-medium text-[1.5rem] tracking-[-0.02em] leading-[1.1]">
+                      {cand.name}
+                    </h3>
+                    {cand.tag === "Incumbent" && (
+                      <span className="type-label-sm !text-[10px] !tracking-[0.12em] px-2 py-1 border border-accent text-accent">
+                        {cand.tag}
+                      </span>
+                    )}
+                  </div>
+                  <p className="font-serif text-[1.08rem] leading-[1.45] text-dark/80 max-w-[64ch]">
                     {cand.bio}
                   </p>
-                  {cand.website ? (
-                    <CandidateSiteLink
-                      href={cand.website}
-                      candidate={cand.name}
-                      candidateKey={nameKey(cand.name)}
-                      race="mayor"
-                      tag={cand.tag}
-                      className="group/btn self-start inline-flex items-center gap-1.5 type-label-sm text-accent hover:underline"
-                    >
-                      Campaign site
-                      <ArrowUpRight className="size-3 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
-                    </CandidateSiteLink>
-                  ) : (
-                    <span className="self-start type-label-sm text-text-secondary">
-                      Profile to come
-                    </span>
-                  )}
                 </div>
-              </article>
+                {cand.website ? (
+                  <CandidateSiteLink
+                    href={cand.website}
+                    candidate={cand.name}
+                    candidateKey={nameKey(cand.name)}
+                    race="mayor"
+                    tag={cand.tag}
+                    className="group/btn hidden sm:inline-flex flex-none items-center gap-1.5 type-label-sm text-accent hover:underline"
+                  >
+                    Campaign site
+                    <ArrowUpRight className="size-3 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
+                  </CandidateSiteLink>
+                ) : (
+                  <span className="hidden sm:block flex-none type-label-sm text-text-secondary">
+                    Profile to come
+                  </span>
+                )}
+              </div>
             ))}
           </div>
           <p className="px-6 md:px-14 py-4 type-label-sm text-text-muted border-t border-border-light">

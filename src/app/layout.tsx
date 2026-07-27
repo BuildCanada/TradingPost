@@ -8,6 +8,7 @@ import ThemeShell from "@/components/ThemeShell";
 import { Toaster } from "sonner";
 import { SubscribeModal } from "@/components/subscribe";
 import { IdentifyUser } from "@/components/auth/IdentifyUser";
+import { HubspotTracking } from "@/components/HubspotTracking";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
@@ -75,6 +76,7 @@ export default function RootLayout({
         <Toaster position="bottom-right" />
         <SubscribeModal />
         <IdentifyUser />
+        <HubspotTracking />
       </body>
     </html>
   );

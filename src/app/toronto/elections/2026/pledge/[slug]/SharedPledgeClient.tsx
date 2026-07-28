@@ -4,8 +4,9 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useState } from "react";
 import { ArrowLeft, ArrowRight, Check, Link2 } from "lucide-react";
+import stampImage from "../toronto-stamp.png";
 
-const StampScene = dynamic(() => import("../StampScene"), {
+const StampScene = dynamic(() => import("@/components/elections/StampScene"), {
   ssr: false,
   loading: () => (
     <div className="flex h-full items-center justify-center">
@@ -42,7 +43,7 @@ export default function SharedPledgeClient({ name }: { name: string }) {
       <div className="relative h-[calc(100dvh-20px)] min-h-[480px] border-2 border-dark bg-[#efe4da] overflow-clip">
         {/* ── The stamp, full bleed ──────────────────────────── */}
         <div className="absolute inset-0">
-          <StampScene />
+          <StampScene stampSrc={stampImage.src} />
         </div>
 
         {/* ── Overlaid header ────────────────────────────────── */}

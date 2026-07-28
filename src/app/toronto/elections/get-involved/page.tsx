@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FileCheck2, Users, HeartHandshake, ArrowRight } from "lucide-react";
-import { PledgeButton } from "../PledgeButton";
+import { PledgeButton } from "@/components/elections/PledgeButton";
 
 export const metadata: Metadata = {
   title: "Get Involved — Toronto 2026 Election",

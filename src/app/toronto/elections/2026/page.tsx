@@ -6,8 +6,8 @@ import { ArrowUpRight, ArrowRight } from "lucide-react";
 import CountdownDays from "./CountdownDays";
 import { CandidateSiteLink } from "./CandidateSiteLink";
 import { WardMap, WardMapDefs } from "./WardMap";
-import { PledgeButton } from "../PledgeButton";
-import { ResidencyModal } from "../ResidencyModal";
+import { PledgeButton } from "@/components/elections/PledgeButton";
+import { ResidencyModal } from "@/components/elections/ResidencyModal";
 import {
   getMayoralCandidates,
   getWards,
@@ -40,7 +40,7 @@ export default async function Toronto2026ElectionPage() {
   return (
     <div className="theme-election bg-bg text-dark">
       <Suspense fallback={null}>
-        <ResidencyModal />
+        <ResidencyModal election="toronto-2026" />
       </Suspense>
       <div className="mx-[10px] my-[10px] border border-border-light bg-bg overflow-x-clip">
         {/* ── Hero ─────────────────────────────────────────────── */}

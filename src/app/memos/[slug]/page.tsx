@@ -6,6 +6,7 @@ import { TwitterEmbed, MemoSubscribe, RelatedMemos } from "./MemoClientParts";
 import { MemoEngagement } from "./MemoEngagement";
 import { ShareSection } from "@/components/share";
 import { MemoHero } from "./MemoHero";
+import { MemoPrintHeader } from "./MemoPrintHeader";
 import { Signpost } from "@/components/custom/signpost";
 import { buildGraph } from "@/lib/schemas/graph";
 import { generateArticleSchema } from "@/lib/schemas/generators/article";
@@ -170,55 +171,26 @@ export default async function MemoDetailPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      {/* Print-only header: Build Canada branding + memo meta */}
-      <div className="print-only mb-10 pb-5 border-b border-black">
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center gap-2">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/assets/logos/sticker-build-canada-logo.webp"
-              alt="Build Canada"
-              width={32}
-              height={32}
-              className="w-8 h-8"
-            />
-            <span className="type-label font-semibold tracking-wider">Build Canada</span>
-          </div>
-          <span className="type-label break-all text-right">
-            {fullUrl.replace(/^https?:\/\//, "")}
-          </span>
-        </div>
-        <h1 className="type-title mb-4">{memo.title}</h1>
-        <div className="flex items-center gap-4">
-          {authorImage && (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img
-              src={authorImage}
-              alt={memo.author.name}
-              width={56}
-              height={56}
-              className="w-14 h-14 object-cover shrink-0"
-            />
-          )}
-          <div className="min-w-0">
-            <p className="type-label font-medium m-0">{memo.author.name}</p>
-            {memo.author.title && (
-              <p className="type-label text-text-secondary m-0 mt-0.5">
-                {memo.author.title}
-              </p>
-            )}
-            <p className="type-label text-text-secondary m-0 mt-0.5">{date}</p>
-          </div>
-        </div>
-      </div>
-
-      <MemoHero
+      <MemoPrintHeader
         title={memo.title}
         authorName={memo.author.name}
+        authorTitle={memo.author.title}
         authorImage={authorImage}
         date={date}
-        supporters={memo.supporters}
+        url={fullUrl}
       />
+
+      {/* Hidden in print — the print-only header above already carries the
+          title, author, and date. */}
+      <div className="print-hide">
+        <MemoHero
+          title={memo.title}
+          authorName={memo.author.name}
+          authorImage={authorImage}
+          date={date}
+          supporters={memo.supporters}
+        />
+      </div>
 
       <div
         className="animate-fade-in max-w-[1400px] mx-auto px-[5vw] md:px-[10vw] pt-4 pb-[52px] 2xl-memo:grid 2xl-memo:grid-cols-[240px_minmax(0,1fr)] 2xl-memo:gap-12"

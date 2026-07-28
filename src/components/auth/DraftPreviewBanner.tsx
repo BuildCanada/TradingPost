@@ -31,7 +31,7 @@ function ExitPreviewButton({
 export function DraftPreviewBanner({ state }: DraftPreviewBannerProps) {
   if (state === "viewing-draft") {
     return (
-      <div className="w-full bg-amber-500 text-white text-sm px-4 py-2 flex items-center justify-between">
+      <div className="print-hide w-full bg-amber-500 text-white text-sm px-4 py-2 flex items-center justify-between">
         <span className="font-medium">DRAFT — not yet published</span>
         <ExitPreviewButton className="underline" label="Exit preview" />
       </div>
@@ -39,7 +39,7 @@ export function DraftPreviewBanner({ state }: DraftPreviewBannerProps) {
   }
 
   return (
-    <div className="w-full border border-amber-400 bg-amber-50 text-amber-900 text-sm px-4 py-3 flex items-center gap-2">
+    <div className="print-hide w-full border border-amber-400 bg-amber-50 text-amber-900 text-sm px-4 py-3 flex items-center gap-2">
       <span>No draft found for this slug.</span>
       <ExitPreviewButton className="underline ml-auto" label="Exit preview mode" />
     </div>

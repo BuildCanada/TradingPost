@@ -33,7 +33,7 @@ export function MobileBar() {
       <div ref={sentinelRef} className="2xl-memo:hidden" aria-hidden="true" />
       <div
         className={cn(
-          "2xl-memo:hidden sticky top-[70px] z-10 border-b transition-all duration-300",
+          "print-hide 2xl-memo:hidden sticky top-[70px] z-10 border-b transition-all duration-300",
           isStuck ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none",
           isOpen ? "border-dark bg-dark" : "border-border-light bg-bg",
         )}

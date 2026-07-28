@@ -421,6 +421,19 @@ body {
   margin: 1.4em 0;
 }
 
+/* Image captions: an <em> directly after an <img> */
+.prose-bc img:has(+ em) {
+  margin-bottom: 0;
+}
+
+.prose-bc img + em {
+  @apply type-button;
+  display: block;
+  font-style: normal;
+  color: var(--color-charcoal-500);
+  margin-top: 0.5em;
+}
+
 /* ─── Supporters list (memo detail) ─── */
 
 .memo-supporters p {

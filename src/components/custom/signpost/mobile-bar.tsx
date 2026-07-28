@@ -33,7 +33,11 @@ export function MobileBar() {
       <div ref={sentinelRef} className="2xl-memo:hidden" aria-hidden="true" />
       <div
         className={cn(
-          "print-hide 2xl-memo:hidden sticky top-[70px] z-10 border-b transition-all duration-300",
+          /* -mb cancels the bar's reserved flow height (44px button + 1px
+             progress rule + 1px border) — hidden at page top, it would
+             otherwise leave a ghost gap above the article. Stuck, it
+             overlays content as before. */
+          "print-hide 2xl-memo:hidden sticky top-[70px] z-10 -mb-[46px] border-b transition-all duration-300",
           isStuck ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-full pointer-events-none",
           isOpen ? "border-dark bg-dark" : "border-border-light bg-bg",
         )}

@@ -116,7 +116,7 @@ body {
 @utility type-body {
   font-family: var(--font-body);
   font-size: clamp(1.25rem, 1.071rem + 0.476vw, 1.5rem);
-  line-height: 1.6;
+  line-height: 1.4;
   font-weight: 400;
   letter-spacing: -0.015rem;
   max-width: 65ch;

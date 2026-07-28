@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { API_URL } from "@/lib/api/client";
+import { forwardedHubspotContext } from "@/lib/hubspot-context";
 
 // "Pledge to vote" submissions — same low-friction pattern as /api/subscribe.
 // Forwards {email, name, region} to York Factory, which signs the email up
@@ -52,6 +53,7 @@ export async function POST(req: NextRequest) {
         name: typeof name === "string" ? name.slice(0, 100) : undefined,
         region: safeRegion,
         postal_code: normalizePostalCode(postal_code),
+        ...forwardedHubspotContext(body, req),
       }),
       cache: "no-store",
     });

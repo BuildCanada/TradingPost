@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import { API_URL } from "@/lib/api/client";
+import { forwardedHubspotContext } from "@/lib/hubspot-context";
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { email, first_name, last_name, postal_code } = body;
+    const { email, first_name, last_name, postal_code, source } = body;
 
     if (!email || typeof email !== "string") {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
@@ -27,6 +28,9 @@ export async function POST(req: NextRequest) {
         first_name: first_name || undefined,
         last_name: last_name || undefined,
         postal_code: postal_code || undefined,
+        // where on the site the form was submitted (navbar, footer, ...)
+        placement: typeof source === "string" ? source.slice(0, 50) : undefined,
+        ...forwardedHubspotContext(body, req),
       }),
     });
 

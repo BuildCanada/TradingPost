@@ -8,9 +8,9 @@
  ******************************************************************************/
 
 @theme {
-  --font-display: "Soehne Kraftig", "Test Soehne", system-ui, sans-serif;
-  --font-body: "Financier Text", "Test Financier Text", Georgia, serif;
-  --font-label: "Founders Grotesk Mono", "Test Founders Grotesk Mono", monospace;
+  --font-display: "Soehne Kraftig", system-ui, sans-serif;
+  --font-body: "Financier Text", Georgia, serif;
+  --font-label: "Founders Grotesk Mono", monospace;
 }
 
 /*******************************************************************************

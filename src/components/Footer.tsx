@@ -83,7 +83,7 @@ export default function Footer() {
               className="text-linen-100 text-[clamp(36px,10vw,120px)]"
               style={{
                 fontFamily: '"Soehne Kraftig", sans-serif',
-                fontWeight: 700,
+                fontWeight: 500,
                 letterSpacing: "-0.03em",
                 lineHeight: 1.1,
               }}

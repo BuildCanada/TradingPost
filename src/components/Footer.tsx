@@ -82,7 +82,10 @@ export default function Footer() {
             <h2
               className="text-linen-100 text-[clamp(36px,10vw,120px)]"
               style={{
-                fontFamily: '"Soehne Kraftig", sans-serif',
+                /* Söhne Buch isn't licensed and Kraftig reads too heavy at
+                   this size, so the wordmark intentionally uses system sans
+                   (its long-standing rendering). Swap to Buch if licensed. */
+                fontFamily: "system-ui, sans-serif",
                 fontWeight: 500,
                 letterSpacing: "-0.03em",
                 lineHeight: 1.1,

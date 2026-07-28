@@ -427,8 +427,9 @@ body {
 }
 
 .prose-bc img + em {
-  @apply type-button;
   display: block;
+  font-family: var(--font-label);
+  font-size: 0.8125rem;
   font-style: normal;
   color: var(--color-charcoal-500);
   margin-top: 0.5em;

@@ -16,10 +16,10 @@ export async function generateMetadata({
   const name = await resolvePledgeName("brampton-2026", slug, n);
   return {
     title: `${name} pledged to vote — Brampton 2026`,
-    description: `${name} is on the record for Brampton's 2026 municipal election, Monday, October 26. Will you be?`,
+    description: `${name} pledged to vote in Brampton's 2026 municipal election, Monday, October 26. Will you?`,
     openGraph: {
       title: `${name} pledged to vote — Brampton 2026 | Build Canada`,
-      description: `${name} pledged to vote in Brampton's 2026 municipal election on October 26, 2026. Join them on the record.`,
+      description: `${name} pledged to vote in Brampton's 2026 municipal election on October 26, 2026. Join them — pledge to vote.`,
       type: "website",
     },
   };

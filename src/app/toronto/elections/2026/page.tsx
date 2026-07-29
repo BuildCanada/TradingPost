@@ -77,8 +77,8 @@ export default async function Toronto2026ElectionPage() {
           <div className="px-6 py-12 md:px-14 md:py-14 border-t-2 md:border-t-0 md:border-l border-border-light bg-bg-alt flex flex-col justify-center">
             <p className="type-label text-accent mb-3.5">Ready to vote?</p>
             <p className="font-serif text-[1.15rem] leading-[1.45] max-w-[34ch] mb-6">
-              Put your name on the record. Pledging takes ten seconds — and it&rsquo;s
-              the first step to showing up on election day.
+              Pledging takes ten seconds — and it&rsquo;s the first step to
+              showing up on election day.
             </p>
             <PledgeButton
               source="election-ready-to-vote"

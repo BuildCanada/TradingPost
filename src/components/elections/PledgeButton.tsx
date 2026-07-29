@@ -16,7 +16,13 @@ import { DEFAULT_ELECTION_SLUG, getElection } from "@/lib/elections/registry";
    Works for any election in the registry: `election` picks which one, and the
    copy, the redirect targets and the share URL follow from it. Residency is
    judged upstream against that election's jurisdiction, so a Brampton pledge
-   is checked against Brampton. */
+   is checked against Brampton.
+
+   `election="broad"` is the Canada-wide variant for pages not tied to one
+   election (e.g. /elections): the copy names no city, and the API matches the
+   pledge to whichever supported election the pledger lives in — landing on
+   that election's share page — or, when none matches, subscribes them and
+   confirms in the modal. */
 export function PledgeButton({
   className,
   children,
@@ -26,13 +32,14 @@ export function PledgeButton({
 }: {
   className?: string;
   children: React.ReactNode;
-  /** York Factory election slug, e.g. "brampton-2026" */
+  /** York Factory election slug, e.g. "brampton-2026", or "broad" for a
+   *  Canada-wide pledge aimed at no single election */
   election?: string;
   /** e.g. "ward-5" for ward-scoped pledges; defaults to the whole city */
   region?: string;
   source?: string;
 }) {
-  const config = getElection(election);
+  const config = election === "broad" ? null : getElection(election);
   const router = useRouter();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -40,6 +47,9 @@ export function PledgeButton({
   const [postalCode, setPostalCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Broad pledges with no matching election confirm here instead of
+  // redirecting to an election share page.
+  const [subscribedOnly, setSubscribedOnly] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -66,9 +76,9 @@ export function PledgeButton({
         body: JSON.stringify({
           email,
           name,
-          region: region ?? config.jurisdictionSlug,
+          region: region ?? config?.jurisdictionSlug,
           postal_code: postalCode,
-          election: config.slug,
+          election: config?.slug ?? "broad",
           ...hubspotPageContext(),
         }),
       });
@@ -84,8 +94,9 @@ export function PledgeButton({
       // and let them fix it, since they may well live here — or they're outside
       // the jurisdiction, in which case they're subscribed but not pledged, and
       // the landing page explains and invites them to explore. Keep the button
-      // disabled while we navigate.
-      if (data.outsideRegion) {
+      // disabled while we navigate. (Broad pledges never take this branch —
+      // the API turns "outside every supported election" into success below.)
+      if (data.outsideRegion && config) {
         if (data.unverifiedPostalCode) {
           setError(
             "We couldn't verify that postal code. Please check it and try again.",
@@ -101,10 +112,20 @@ export function PledgeButton({
         return;
       }
 
-      posthog.capture("pledged_to_vote", { source, election: config.slug });
+      // A broad pledge that matched a supported election redirects to that
+      // election's share page; one that matched none confirms in place.
+      const matched = config ?? (data.election ? getElection(data.election) : null);
+      if (!matched) {
+        posthog.capture("pledged_to_vote", { source, election: "broad" });
+        setSubscribedOnly(true);
+        setLoading(false);
+        return;
+      }
+
+      posthog.capture("pledged_to_vote", { source, election: matched.slug });
       // keep the button disabled while we navigate to the shared page;
       // prefer the server's record (canonical name + unguessable token)
-      router.push(pledgeSharePath(config, data.name || name, data.shareToken));
+      router.push(pledgeSharePath(matched, data.name || name, data.shareToken));
     } catch {
       setError("Network error. Please try again.");
       setLoading(false);
@@ -120,7 +141,7 @@ export function PledgeButton({
         if (open)
           posthog.capture("pledge_modal_opened", {
             source,
-            election: config.slug,
+            election: config?.slug ?? "broad",
           });
       }}
     >
@@ -142,10 +163,18 @@ export function PledgeButton({
               className="type-body"
               style={{ marginBottom: "clamp(0.375rem, 1.5vw, 0.75rem)" }}
             >
-              {config.cityLabel} votes {config.voteDayLabel}. Put your name on
-              the record.
+              {config
+                ? `${config.cityLabel} votes ${config.voteDayLabel}. Add your name — it takes ten seconds.`
+                : "Elections are won by the people who show up. Add your name — it takes ten seconds."}
             </Dialog.Description>
           </div>
+          {subscribedOnly ? (
+            <p className="type-body">
+              Thanks — we&rsquo;ll let you know when we&rsquo;re covering an
+              election where you live.
+            </p>
+          ) : (
+          <>
           {/* id/name attributes double as autofill hints and give HubSpot's
               collected-forms feature (if enabled) a sane form name and field →
               contact-property mapping instead of CSS-class guesses */}
@@ -206,6 +235,8 @@ export function PledgeButton({
             </Button>
             {error && <p className="type-label-sm text-auburn-800">{error}</p>}
           </form>
+          </>
+          )}
           <Dialog.Close
             aria-label="Close dialog"
             className="absolute w-11 h-11 flex items-center justify-center text-charcoal-600 hover:text-charcoal-1000 hover:bg-charcoal-200/30 rounded-sm transition-colors cursor-pointer"

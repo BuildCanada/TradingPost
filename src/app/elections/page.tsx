@@ -1,17 +1,18 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { PledgeButton } from "@/components/elections/PledgeButton";
 import { getActiveElections, type ActiveElection } from "./data";
 
 export const metadata: Metadata = {
   title: "Elections",
   description:
-    "Every election Build Canada is tracking — who is running, what they intend to build, and when the polls open.",
+  "Every election is an opportunity for Canadians to vote for to build. We are working to track every race in Canada, help you see who's running, and find where and how you can vote. Pledge to vote.",
   alternates: { canonical: "/elections" },
   openGraph: {
-    title: "Elections — Build Canada",
+    title: "Elections — Pledge to Vote | Build Canada",
     description:
-      "Every election Build Canada is tracking — who is running, what they intend to build, and when the polls open.",
+      "Every election is an opportunity for Canadians to vote for growth. We track every race in Canada, help you see who's running, and find where and how you can vote. Pledge to vote.",
     type: "website",
   },
 };
@@ -98,19 +99,32 @@ export default async function ElectionsPage() {
   const elections = await getActiveElections();
 
   return (
-    <div className="mx-[10px] my-[10px] border border-border-light bg-bg overflow-x-clip text-dark">
+    <div className="border border-border-light bg-bg overflow-x-clip text-dark">
       {/* ── Hero ─────────────────────────────────────────────── */}
       <section className="px-6 py-14 md:px-14 md:py-16 border-b-2 border-dark">
-        <p className="type-label text-accent mb-5">Elections</p>
         <h1 className="font-sans font-medium leading-[0.98] tracking-[-0.04em] text-[clamp(3rem,7vw,5.75rem)] max-w-[16ch] text-balance mb-7">
-          Every race we&rsquo;re tracking
+          Canada belongs to those that show up.
+        </h1>
+        <h1 className="font-sans font-medium leading-[0.98] tracking-[-0.04em] text-[clamp(3rem,7vw,5.75rem)] max-w-[16ch] text-balance mb-7">
+          Pledge to Vote.
         </h1>
         <p className="font-serif text-[clamp(1.15rem,1.6vw,1.4rem)] leading-[1.5] max-w-[62ch]">
-          Elections are where the country decides what it will build next.
-          Build&nbsp;Canada tracks the races that matter: who is running, what
-          they intend to build, and when the polls open. Pick an election below
-          to see the full field.
+          Elections decide what Canada will build next. Or if we build at all.
         </p>
+        <p className="font-serif text-[clamp(1.15rem,1.6vw,1.4rem)] leading-[1.5] max-w-[62ch]">
+          Every election is an opportunity for Canadians to vote for to build.
+          We are working to track every race in Canada, help you see
+          who&rsquo;s running, and find where and how you can vote. Pledge to
+          vote.
+        </p>
+        <PledgeButton
+          election="broad"
+          source="elections-index"
+          className="group/btn mt-9 inline-flex items-center gap-3 type-button text-bg bg-dark px-5 py-4 transition-colors hover:bg-black cursor-pointer"
+        >
+          Pledge to Vote
+          <ArrowRight className="size-3.5 shrink-0 transition-transform group-hover/btn:translate-x-0.5" />
+        </PledgeButton>
       </section>
 
       {/* ── Active elections ─────────────────────────────────── */}

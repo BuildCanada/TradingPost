@@ -213,7 +213,7 @@ export default async function WardDetailPage({
         <section className="grid grid-cols-2 border-b-2 border-dark">
           <Link
             href={`/toronto/elections/2026/wards/${prev.n}`}
-            className="group px-6 md:px-14 py-7 border-r border-border-light transition-colors hover:bg-[#ebdfd4]"
+            className="group px-6 md:px-14 py-7 border-r border-border-light transition-colors hover:bg-linen-200"
           >
             <div className="type-label-sm !tracking-[0.1em] text-text-secondary mb-2 flex items-center gap-2">
               <ArrowLeft className="size-3.5" /> Ward {prev.n}
@@ -224,7 +224,7 @@ export default async function WardDetailPage({
           </Link>
           <Link
             href={`/toronto/elections/2026/wards/${next.n}`}
-            className="group px-6 md:px-14 py-7 text-right transition-colors hover:bg-[#ebdfd4]"
+            className="group px-6 md:px-14 py-7 text-right transition-colors hover:bg-linen-200"
           >
             <div className="type-label-sm !tracking-[0.1em] text-text-secondary mb-2 flex items-center justify-end gap-2">
               Ward {next.n} <ArrowRight className="size-3.5" />

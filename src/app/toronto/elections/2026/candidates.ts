@@ -272,7 +272,7 @@ export const WARD_CANDIDATES: Record<string, CouncillorCandidate[]> = {
     {
       name: "Vincent Crisanti",
       tag: "Incumbent",
-      bio: "Incumbent councillor for Etobicoke North, running on community engagement and working hand-in-glove with local residents to build a brighter future for Ward 1. Keeps a constituency office on Kipling Avenue and gathers resident feedback through regular surveys and office hours.",
+      bio: "",
       website: "https://www.vincentcrisanti.com",
       image: "/elections/toronto/2026/councillors/ward-1/vincent-crisanti.webp",
     },
@@ -280,7 +280,7 @@ export const WARD_CANDIDATES: Record<string, CouncillorCandidate[]> = {
     {
       name: "Ala'a Adib",
       tag: "Challenger",
-      bio: "Humber College graduate, lifelong Etobicoke resident, and community organizer with over a decade of service — founding food-insecurity programs and youth mentorship and sports initiatives. Recognized with the 2025 King Charles III Coronation Medal and named one of Canada's Top 100 Black Women to Watch. Campaigns on improving city services and accountability, supporting youth and families, strengthening neighbourhoods, and creating economic opportunity.",
+      bio: "",
       website: "https://www.alaaadib.ca",
       image: "/elections/toronto/2026/councillors/ward-1/alaa-adib.png",
     },
@@ -288,7 +288,7 @@ export const WARD_CANDIDATES: Record<string, CouncillorCandidate[]> = {
     { name: "Norman Hamilton",
 image: "/elections/toronto/2026/councillors/ward-1/norman-hamilton.png",
       tag: "Challenger",
-      bio: "Etobicoke North business owner who runs a local truck-repair company and hires locally, bringing the perspective of someone who understands meeting payroll and the pressures on working families. Campaigns on accountable leadership for youth, mothers, seniors, immigrants, and working families across North Etobicoke, powered by grassroots resident contributions rather than corporate or union interests.",
+      bio: "",
       website: "https://www.normanhamilton.ca/" },
   ],
   "02": [

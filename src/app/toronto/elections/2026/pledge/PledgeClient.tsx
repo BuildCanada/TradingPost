@@ -25,7 +25,7 @@ export default function PledgeClient({
 }) {
   return (
     <div className="theme-election bg-bg text-dark">
-      <div className="relative h-[calc(100dvh-20px)] min-h-[480px] border-2 border-dark bg-[#efe4da] overflow-clip">
+      <div className="relative h-[calc(100dvh-20px)] min-h-[480px] border-2 border-dark bg-bg overflow-clip">
         {/* ── The stamp, full bleed ──────────────────────────── */}
         <div className="absolute inset-0">
           <StampScene stampSrc={stampImage.src} />

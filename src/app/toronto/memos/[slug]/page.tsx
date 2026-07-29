@@ -9,6 +9,7 @@ import {
 } from "@/app/memos/[slug]/MemoClientParts";
 import { ShareSection } from "@/components/share";
 import { MemoHero } from "@/app/memos/[slug]/MemoHero";
+import { MemoPrintHeader } from "@/app/memos/[slug]/MemoPrintHeader";
 import { Signpost } from "@/components/custom/signpost";
 import { buildGraph } from "@/lib/schemas/graph";
 import { generateArticleSchema } from "@/lib/schemas/generators/article";
@@ -160,15 +161,29 @@ export default async function TorontoMemoDetailPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <MemoHero
+      <MemoPrintHeader
         title={memo.title}
         authorName={memo.author.name}
+        authorTitle={memo.author.title}
         authorImage={authorImage}
         date={date}
-        supporters={memo.supporters}
-        backHref={BASE_PATH}
-        backLabel="All Toronto Memos"
+        url={fullUrl}
+        brand="toronto"
       />
+
+      {/* Hidden in print — the print-only header above already carries the
+          title, author, and date. */}
+      <div className="print-hide">
+        <MemoHero
+          title={memo.title}
+          authorName={memo.author.name}
+          authorImage={authorImage}
+          date={date}
+          supporters={memo.supporters}
+          backHref={BASE_PATH}
+          backLabel="All Toronto Memos"
+        />
+      </div>
 
       <div
         className="animate-fade-in max-w-[1400px] mx-auto px-[5vw] md:px-[10vw] pt-[42px] pb-[52px] 2xl-memo:grid 2xl-memo:grid-cols-[240px_minmax(0,1fr)] 2xl-memo:gap-12"

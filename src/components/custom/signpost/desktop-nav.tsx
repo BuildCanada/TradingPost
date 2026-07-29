@@ -45,7 +45,7 @@ export function DesktopNav({
   );
 
   return (
-    <nav className="hidden 2xl-memo:block" aria-label="Table of contents">
+    <nav className="print-hide hidden 2xl-memo:block" aria-label="Table of contents">
       <div
         className={`sticky ${topClass} ${showTopBorder ? "border-accent border-t-[2px] " : ""}overflow-x-hidden [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`}
       >

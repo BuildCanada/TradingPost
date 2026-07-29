@@ -82,8 +82,8 @@ export default function Footer() {
             <h2
               className="text-linen-100 text-[clamp(36px,10vw,120px)]"
               style={{
-                fontFamily: '"Test Soehne Fett", "Test Soehne", sans-serif',
-                fontWeight: 500,
+                fontFamily: '"Soehne Kraftig", sans-serif',
+                fontWeight: 400,
                 letterSpacing: "-0.03em",
                 lineHeight: 1.1,
               }}

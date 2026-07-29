@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import posthog from "posthog-js";
 import { Button } from "@/components/ui/button";
+import { hubspotPageContext } from "@/lib/hubspot-context";
 import { pledgeSharePath } from "@/lib/elections/pledge-share";
 import { DEFAULT_ELECTION_SLUG, getElection } from "@/lib/elections/registry";
 
@@ -68,6 +69,7 @@ export function PledgeButton({
           region: region ?? config.jurisdictionSlug,
           postal_code: postalCode,
           election: config.slug,
+          ...hubspotPageContext(),
         }),
       });
       const data = await res.json().catch(() => ({}));
@@ -144,9 +146,19 @@ export function PledgeButton({
               the record.
             </Dialog.Description>
           </div>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          {/* id/name attributes double as autofill hints and give HubSpot's
+              collected-forms feature (if enabled) a sane form name and field →
+              contact-property mapping instead of CSS-class guesses */}
+          <form
+            id="pledge-to-vote"
+            name="pledge-to-vote"
+            onSubmit={handleSubmit}
+            className="flex flex-col gap-3"
+          >
             <input
               type="text"
+              name="firstname"
+              autoComplete="given-name"
               value={firstName}
               onChange={(e) => setFirstName(e.target.value)}
               placeholder="First name"
@@ -155,6 +167,8 @@ export function PledgeButton({
             />
             <input
               type="text"
+              name="lastname"
+              autoComplete="family-name"
               value={lastName}
               onChange={(e) => setLastName(e.target.value)}
               placeholder="Last name"
@@ -163,6 +177,8 @@ export function PledgeButton({
             />
             <input
               type="email"
+              name="email"
+              autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Email"
@@ -171,6 +187,8 @@ export function PledgeButton({
             />
             <input
               type="text"
+              name="zip"
+              autoComplete="postal-code"
               value={postalCode}
               onChange={(e) => setPostalCode(e.target.value)}
               placeholder="Postal code (e.g. A1A 1A1)"

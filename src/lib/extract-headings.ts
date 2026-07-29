@@ -31,10 +31,24 @@ function slugify(text: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
+/* Whitespace plus the invisible characters Webflow leaves in otherwise-empty
+   rich-text lines (zero-width space/joiners, word joiner, BOM, nbsp). */
+const INVISIBLE = "(?:\\s|&nbsp;|[\\u200b\\u200c\\u200d\\u2060\\ufeff\\u00a0])*";
+
+/* A paragraph with no visible content — e.g. Webflow's `<p>‍</p>` —
+   optionally wrapped in a single inline tag. Rendered, it still occupies a
+   full text line plus paragraph margin, leaving large gaps between sections. */
+const GHOST_PARAGRAPH = new RegExp(
+  `<p(?:\\s[^>]*)?>${INVISIBLE}(?:<(strong|em|b|i|span)(?:\\s[^>]*)?>${INVISIBLE}</\\1>${INVISIBLE})?</p>`,
+  "gi",
+);
+
 export function extractHeadings(html: string): {
   headings: Heading[];
   html: string;
 } {
+  html = html.replace(GHOST_PARAGRAPH, "");
+
   const headings: Heading[] = [];
   const usedIds = new Set<string>();
 

@@ -126,46 +126,22 @@ html {
 
 /* ─── Font Faces ─── */
 
+/* Licensed Klim webfonts (order 26070690). Weight ranges map every weight the
+   site requests onto the licensed cuts; italics and unlicensed bolds are
+   browser-synthesized. */
+
 /* Söhne Kraftig — Display/Headlines (primary brand font) */
 @font-face {
   font-family: "Soehne Kraftig";
-  src: url("/assets/fonts/test-soehne/test-soehne-buch.woff2") format("woff2");
-  font-weight: 400;
+  src: url("/assets/fonts/soehne-kraftig.woff2") format("woff2");
+  font-weight: 400 500;
   font-style: normal;
   font-display: swap;
 }
 @font-face {
   font-family: "Soehne Kraftig";
-  src: url("/assets/fonts/test-soehne/test-soehne-buch-kursiv.woff2") format("woff2");
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Soehne Kraftig";
-  src: url("/assets/fonts/test-soehne/test-soehne-kraftig.woff2") format("woff2");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Soehne Kraftig";
-  src: url("/assets/fonts/test-soehne/test-soehne-kraftig-kursiv.woff2") format("woff2");
-  font-weight: 500;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Soehne Kraftig";
-  src: url("/assets/fonts/test-soehne/test-soehne-dreiviertelfett.woff2") format("woff2");
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Soehne Kraftig";
-  src: url("/assets/fonts/test-soehne/test-soehne-fett.woff2") format("woff2");
-  font-weight: 700;
+  src: url("/assets/fonts/soehne-fett.woff2") format("woff2");
+  font-weight: 600 700;
   font-style: normal;
   font-display: swap;
 }
@@ -173,29 +149,8 @@ html {
 /* Financier Text — Body copy */
 @font-face {
   font-family: "Financier Text";
-  src: url("/assets/fonts/Test Financier Text/test-financier-text-regular.woff2") format("woff2");
+  src: url("/assets/fonts/financier-text-regular.woff2") format("woff2");
   font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Financier Text";
-  src: url("/assets/fonts/Test Financier Text/test-financier-text-regular-italic.woff2") format("woff2");
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Financier Text";
-  src: url("/assets/fonts/Test Financier Text/test-financier-text-medium.woff2") format("woff2");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Financier Text";
-  src: url("/assets/fonts/Test Financier Text/test-financier-text-bold.woff2") format("woff2");
-  font-weight: 700;
   font-style: normal;
   font-display: swap;
 }
@@ -203,29 +158,8 @@ html {
 /* Founders Grotesk Mono — Buttons, labels, meta */
 @font-face {
   font-family: "Founders Grotesk Mono";
-  src: url("/assets/fonts/Test Founders Grotesk Mono/test-founders-grotesk-mono-regular.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Founders Grotesk Mono";
-  src: url("/assets/fonts/Test Founders Grotesk Mono/test-founders-grotesk-mono-medium.woff2") format("woff2");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Founders Grotesk Mono";
-  src: url("/assets/fonts/Test Founders Grotesk Mono/test-founders-grotesk-mono-semibold.woff2") format("woff2");
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "Founders Grotesk Mono";
-  src: url("/assets/fonts/Test Founders Grotesk Mono/test-founders-grotesk-mono-bold.woff2") format("woff2");
-  font-weight: 700;
+  src: url("/assets/fonts/founders-grotesk-mono-regular.woff2") format("woff2");
+  font-weight: 400 500;
   font-style: normal;
   font-display: swap;
 }
@@ -419,6 +353,20 @@ body {
   max-width: 100%;
   border-radius: 4px;
   margin: 1.4em 0;
+}
+
+/* Image captions: an <em> directly after an <img> */
+.prose-bc img:has(+ em) {
+  margin-bottom: 0;
+}
+
+.prose-bc img + em {
+  display: block;
+  font-family: var(--font-label);
+  font-size: 0.8125rem;
+  font-style: normal;
+  color: var(--color-charcoal-500);
+  margin-top: 0.75em;
 }
 
 /* ─── Supporters list (memo detail) ─── */

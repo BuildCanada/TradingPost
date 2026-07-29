@@ -2,13 +2,24 @@
 
 import { Dialog } from "@base-ui/react/dialog";
 import { useRouter, useSearchParams } from "next/navigation";
+import { DEFAULT_ELECTION_SLUG, getElection } from "@/lib/elections/registry";
 
 /* Shown when someone submits the pledge form with a postal code outside the
-   City of Toronto (see PledgeButton → /api/elections/pledge). York Factory
-   keeps them as a newsletter subscriber but records no pledge and redirects
-   here with `?residency=outside`; this reads that flag, explains, and invites
-   them to explore the tracker. Closing clears the flag so a refresh is clean. */
-export function ResidencyModal() {
+   jurisdiction holding this election (see PledgeButton →
+   /api/elections/pledge). York Factory keeps them as a newsletter subscriber
+   but records no pledge, and the button redirects here with
+   `?residency=outside`; this reads that flag, explains, and invites them to
+   explore the tracker. Closing clears the flag so a refresh is clean.
+
+   Belongs on an election's landing page, with `election` naming that election
+   so the copy and the cleared URL match it. */
+export function ResidencyModal({
+  election = DEFAULT_ELECTION_SLUG,
+}: {
+  /** York Factory election slug, e.g. "brampton-2026" */
+  election?: string;
+}) {
+  const config = getElection(election);
   const params = useSearchParams();
   const router = useRouter();
 
@@ -18,7 +29,7 @@ export function ResidencyModal() {
 
   const handleOpenChange = (next: boolean) => {
     if (!next && isOutside) {
-      router.replace("/toronto/elections/2026", { scroll: false });
+      router.replace(config.basePath, { scroll: false });
     }
   };
 
@@ -34,15 +45,15 @@ export function ResidencyModal() {
             className="type-title"
             style={{ marginBottom: "clamp(0.375rem, 1.5vw, 0.75rem)" }}
           >
-            You&rsquo;re outside Toronto
+            You&rsquo;re outside {config.cityLabel}
           </Dialog.Title>
           <Dialog.Description
             className="type-body"
             style={{ marginBottom: "clamp(1rem, 3vw, 1.5rem)" }}
           >
-            The pledge to vote is for City of Toronto residents — but you&rsquo;re
-            welcome to explore the election here. Dig into the races for mayor
-            and all 25 council wards below.
+            The pledge to vote is for {config.regionLabel} residents — but
+            you&rsquo;re welcome to explore the election here. Dig into the races
+            and the candidates running in them below.
           </Dialog.Description>
           <button
             type="button"

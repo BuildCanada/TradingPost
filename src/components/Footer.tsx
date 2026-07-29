@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { isPledgePath } from "@/lib/elections/registry";
 import { useRef, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useSubscribeStore } from "@/components/subscribe/store";
@@ -12,9 +13,8 @@ export default function Footer() {
   const [leafVisible, setLeafVisible] = useState(false);
   const openModal = useSubscribeStore((s) => s.openModal);
   const pathname = usePathname();
-  // full-screen page, no site chrome
-  const isChromeless =
-    pathname?.startsWith("/toronto/elections/2026/pledge") ?? false;
+  // full-screen page, no site chrome — every region's pledge page
+  const isChromeless = isPledgePath(pathname);
 
   useEffect(() => {
     const el = footerRef.current;

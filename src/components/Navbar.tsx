@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { isPledgePath } from "@/lib/elections/registry";
 import { useState, useEffect, useRef } from "react";
 import { useSubscribeStore } from "@/components/subscribe/store";
 import { SOCIALS } from "@/constants/socials";
@@ -16,9 +17,8 @@ export default function Navbar() {
   const pathname = usePathname();
   const isToronto = pathname?.startsWith("/toronto") ?? false;
   const navLinks = isToronto ? TORONTO_NAV_LINKS : NAV_LINKS;
-  // full-screen page, no site chrome
-  const isChromeless =
-    pathname?.startsWith("/toronto/elections/2026/pledge") ?? false;
+  // full-screen page, no site chrome — every region's pledge page
+  const isChromeless = isPledgePath(pathname);
 
   useEffect(() => {
     const handleScroll = () => {

@@ -6,23 +6,33 @@ import { useState, type FormEvent } from "react";
 import posthog from "posthog-js";
 import { Button } from "@/components/ui/button";
 import { hubspotPageContext } from "@/lib/hubspot-context";
-import { pledgeSharePath } from "./2026/pledge/pledge-slug";
+import { pledgeSharePath } from "@/lib/elections/pledge-share";
+import { DEFAULT_ELECTION_SLUG, getElection } from "@/lib/elections/registry";
 
 /* "Pledge to vote" CTA — opens the same modal treatment as the navbar
    Subscribe button. Submitting records the pledge (via /api/elections/pledge
-   → pledges_to_vote) and redirects to the pledger's unique shareable page. */
+   → pledges_to_vote) and redirects to the pledger's unique shareable page.
+
+   Works for any election in the registry: `election` picks which one, and the
+   copy, the redirect targets and the share URL follow from it. Residency is
+   judged upstream against that election's jurisdiction, so a Brampton pledge
+   is checked against Brampton. */
 export function PledgeButton({
   className,
   children,
-  region = "toronto",
+  election = DEFAULT_ELECTION_SLUG,
+  region,
   source = "get-involved",
 }: {
   className?: string;
   children: React.ReactNode;
-  /** e.g. "ward-5" for ward-scoped pledges; defaults to city-wide */
+  /** York Factory election slug, e.g. "brampton-2026" */
+  election?: string;
+  /** e.g. "ward-5" for ward-scoped pledges; defaults to the whole city */
   region?: string;
   source?: string;
 }) {
+  const config = getElection(election);
   const router = useRouter();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -56,8 +66,9 @@ export function PledgeButton({
         body: JSON.stringify({
           email,
           name,
-          region,
+          region: region ?? config.jurisdictionSlug,
           postal_code: postalCode,
+          election: config.slug,
           ...hubspotPageContext(),
         }),
       });
@@ -69,19 +80,31 @@ export function PledgeButton({
       }
       posthog.identify(email, { email });
 
-      // Outside Toronto: they're subscribed but not pledged. Send them to the
-      // election landing page with a flag so it can explain and invite them to
-      // explore, and keep the button disabled while we navigate.
-      if (data.outsideToronto) {
-        posthog.capture("pledge_outside_toronto", { source });
-        router.push("/toronto/elections/2026?residency=outside");
+      // No pledge recorded. Either the postal code couldn't be judged — say so
+      // and let them fix it, since they may well live here — or they're outside
+      // the jurisdiction, in which case they're subscribed but not pledged, and
+      // the landing page explains and invites them to explore. Keep the button
+      // disabled while we navigate.
+      if (data.outsideRegion) {
+        if (data.unverifiedPostalCode) {
+          setError(
+            "We couldn't verify that postal code. Please check it and try again.",
+          );
+          setLoading(false);
+          return;
+        }
+        posthog.capture("pledge_outside_region", {
+          source,
+          election: config.slug,
+        });
+        router.push(`${config.basePath}?residency=outside`);
         return;
       }
 
-      posthog.capture("pledged_to_vote", { source });
+      posthog.capture("pledged_to_vote", { source, election: config.slug });
       // keep the button disabled while we navigate to the shared page;
       // prefer the server's record (canonical name + unguessable token)
-      router.push(pledgeSharePath(data.name || name, data.shareToken));
+      router.push(pledgeSharePath(config, data.name || name, data.shareToken));
     } catch {
       setError("Network error. Please try again.");
       setLoading(false);
@@ -94,7 +117,11 @@ export function PledgeButton({
   return (
     <Dialog.Root
       onOpenChange={(open) => {
-        if (open) posthog.capture("pledge_modal_opened", { source });
+        if (open)
+          posthog.capture("pledge_modal_opened", {
+            source,
+            election: config.slug,
+          });
       }}
     >
       <Dialog.Trigger className={className}>{children}</Dialog.Trigger>
@@ -115,7 +142,8 @@ export function PledgeButton({
               className="type-body"
               style={{ marginBottom: "clamp(0.375rem, 1.5vw, 0.75rem)" }}
             >
-              Toronto votes Monday, October 26. Put your name on the record.
+              {config.cityLabel} votes {config.voteDayLabel}. Put your name on
+              the record.
             </Dialog.Description>
           </div>
           {/* id/name attributes double as autofill hints and give HubSpot's

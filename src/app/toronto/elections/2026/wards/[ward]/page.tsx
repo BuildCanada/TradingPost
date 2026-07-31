@@ -89,12 +89,7 @@ export default async function WardDetailPage({
             <h1 className="font-sans font-medium leading-[0.98] tracking-[-0.04em] text-[clamp(2.75rem,6vw,5rem)] max-w-[16ch] text-balance mb-6">
               {w.name}
             </h1>
-            <p className="font-serif text-[clamp(1.1rem,1.5vw,1.35rem)] leading-[1.5] max-w-[60ch]">
-              One seat on Toronto city council, decided on
-              October&nbsp;26,&nbsp;2026. Below are the candidates registered to
-              represent {w.name} — the people who will set the direction on
-              housing, transit and local growth for this part of the city.
-            </p>
+
           </div>
           <WardMap
             activeWard={w.n}
@@ -104,7 +99,7 @@ export default async function WardDetailPage({
 
         {/* ── Key stats ──────────────────────────────────────── */}
         <section className="grid grid-cols-2 md:grid-cols-3 border-b-2 border-dark">
-          <div className="px-8 py-7 border-r border-b md:border-b-0 border-border-light">
+          <div className="px-6 py-7 md:px-14 border-r border-b md:border-b-0 border-border-light">
             <div className="font-sans font-semibold text-[2.75rem] leading-none tracking-[-0.03em] tabular-nums">
               {w.count}
             </div>
@@ -112,7 +107,7 @@ export default async function WardDetailPage({
               Candidates registered
             </div>
           </div>
-          <div className="px-8 py-7 md:border-r border-b md:border-b-0 border-border-light">
+          <div className="px-6 py-7 md:px-14 md:border-r border-b md:border-b-0 border-border-light">
             <CountdownDays
               initialDays={initialDays}
               className="font-sans font-semibold text-[2.75rem] leading-none tracking-[-0.03em] tabular-nums"
@@ -121,7 +116,7 @@ export default async function WardDetailPage({
               Days until polls open
             </div>
           </div>
-          <div className="px-8 py-7 col-span-2 md:col-span-1">
+          <div className="px-6 py-7 md:px-14 col-span-2 md:col-span-1">
             <div className="flex items-end h-[2.75rem]">
               <div className="font-sans font-semibold text-[1.75rem] leading-none tracking-[-0.03em]">
                 {ELECTION_DAY_LABEL}
@@ -134,10 +129,10 @@ export default async function WardDetailPage({
         </section>
 
         {/* ── Candidates ─────────────────────────────────────── */}
-        <section className="border-b-2 border-dark">
+        <section className=" border-dark">
           <div className="px-6 md:px-14 pt-11 pb-2">
             <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.75rem,3vw,2.5rem)]">
-              Candidates for Councillor
+              Candidates
             </h2>
           </div>
           <div>
@@ -210,7 +205,7 @@ export default async function WardDetailPage({
         </section>
 
         {/* ── Prev / next ward ───────────────────────────────── */}
-        <section className="grid grid-cols-2 border-b-2 border-dark">
+        <section className="grid grid-cols-2 border-t border-border-light border-dark">
           <Link
             href={`/toronto/elections/2026/wards/${prev.n}`}
             className="group px-6 md:px-14 py-7 border-r border-border-light transition-colors hover:bg-linen-200"
@@ -235,19 +230,7 @@ export default async function WardDetailPage({
           </Link>
         </section>
 
-        {/* ── Footer band ────────────────────────────────────── */}
-        <footer className="bg-dark text-bg px-6 py-12 md:px-14 flex justify-between gap-10 flex-wrap items-end">
-          <p className="type-label-sm !tracking-[0.08em] text-charcoal-400 leading-[1.7]">
-            Toronto 2026 Election Tracker
-            <br />A Build Canada project
-          </p>
-          <Link
-            href="/toronto/elections/2026#wards"
-            className="type-label !tracking-[0.1em] text-bg border-b-2 border-charcoal-800 pb-1 hover:border-bg transition-colors"
-          >
-            Back to all wards
-          </Link>
-        </footer>
+
       </div>
     </div>
   );

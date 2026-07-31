@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import Link from "next/link";
 import Image from "next/image";
 import { ArrowUpRight, ArrowRight } from "lucide-react";
 import CountdownDays from "./CountdownDays";
 import { CandidateSiteLink } from "./CandidateSiteLink";
-import { WardMap, WardMapDefs } from "./WardMap";
+import { WardMapDefs } from "./WardMap";
+import { WardCard } from "./WardCard";
+import WardLookup from "./WardLookup";
 import { PledgeButton } from "@/components/elections/PledgeButton";
 import { ResidencyModal } from "@/components/elections/ResidencyModal";
 import {
@@ -15,7 +16,6 @@ import {
   daysUntil,
   initialsFor,
   nameKey,
-  NOMINATION_CLOSE_LABEL,
   splitFrontRunners,
   FRONT_RUNNER_NOTE,
   ADVANCE_VOTE_START_ISO,
@@ -60,7 +60,7 @@ export default async function Toronto2026ElectionPage() {
             The 2026 Toronto Municipal Election
           </h1>
           <p className="font-serif text-[clamp(1.15rem,1.6vw,1.4rem)] leading-[1.5] max-w-[62ch]">
-            On October 26th, 2026, Toronto will elect it's mayor and 25 city councillors.
+            On October 26th, 2026, Toronto will elect its mayor and 25 city councillors.
             Explore who is running for mayor and for councillor in your ward.
           </p>
         </section>
@@ -141,13 +141,10 @@ export default async function Toronto2026ElectionPage() {
 
         {/* ── Candidates for mayor ─────────────────────────────── */}
         <section id="candidates" className="border-b-2 border-dark scroll-mt-24">
-          <div className="px-6 pt-12 pb-8 md:px-14 flex justify-between items-end gap-6 flex-wrap">
-            <div>
-              <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(2rem,3.5vw,2.75rem)]">
-                Candidates for Mayor
-              </h2>
-            </div>
-
+          <div className="px-6 pt-12 pb-8 md:px-14">
+            <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(2rem,3.5vw,2.75rem)]">
+              Candidates for Mayor
+            </h2>
           </div>
 
           {frontRunners.length > 0 && (
@@ -162,7 +159,7 @@ export default async function Toronto2026ElectionPage() {
                 {frontRunners.map((cand, i) => (
                   <div
                     key={`front-${cand.name}-${i}`}
-                    className="bg-bg-alt flex items-center gap-6 sm:gap-7 px-6 md:px-10 py-9"
+                    className="bg-bg-alt flex items-center gap-6 sm:gap-7 px-6 md:px-14 py-9"
                   >
                     <div className="relative flex-none size-[clamp(104px,11vw,148px)] bg-dark overflow-hidden flex items-center justify-center font-sans font-medium text-[clamp(2rem,3vw,2.6rem)] tracking-[-0.03em] text-bg">
                       {cand.image ? (
@@ -278,10 +275,11 @@ export default async function Toronto2026ElectionPage() {
               <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(2rem,3.5vw,2.75rem)] mb-2.5">
                 Find your ward
               </h2>
-              <p className="font-serif text-[1.1rem] leading-[1.45] max-w-[52ch] text-dark/80">
+              <p className="font-serif text-[1.1rem] leading-[1.45] max-w-[52ch] text-dark/80 mb-8">
                 Twenty-five wards, twenty-five council races. Select a ward to
                 see the candidates running to represent it.
               </p>
+              <WardLookup wards={wards} />
             </div>
             <p className="type-label text-text-secondary pb-1.5 !tracking-[0.08em]">
               {wards.length} wards
@@ -291,30 +289,11 @@ export default async function Toronto2026ElectionPage() {
           <WardMapDefs />
           <div className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] border-t border-l border-border-light">
             {wards.map((ward) => (
-              <Link
+              <WardCard
                 key={ward.n}
-                href={`/toronto/elections/2026/wards/${ward.n}`}
-                className="group bg-bg px-6 pt-5 pb-5 flex flex-col gap-3 min-h-[172px] border-b border-r border-border-light transition-colors hover:bg-linen-200"
-              >
-                <div className="flex justify-between items-start gap-3">
-                  <span className="type-label text-accent pt-1 !tracking-[0.1em]">
-                    Ward {ward.n}
-                  </span>
-                  <WardMap
-                    activeWard={ward.n}
-                    className="w-[92px] h-auto flex-none block"
-                  />
-                </div>
-                <span className="font-sans font-medium text-[1.2rem] tracking-[-0.015em] leading-[1.15] flex-1">
-                  {ward.name}
-                </span>
-                <div className="mt-1.5 flex items-center justify-between">
-                  <span className="type-label-sm text-text-secondary !tracking-[0.06em]">
-                    {ward.count} candidates
-                  </span>
-                  <ArrowRight className="size-4 text-text-secondary opacity-70 transition-transform group-hover:translate-x-1" />
-                </div>
-              </Link>
+                ward={ward}
+                className="border-b border-r border-border-light"
+              />
             ))}
           </div>
         </section>

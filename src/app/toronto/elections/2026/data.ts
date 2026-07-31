@@ -8,20 +8,33 @@ import { differenceInCalendarDays } from "date-fns";
 import { WARD_SHAPES } from "./wardGeo";
 import { fetchToronto2026, type ApiCandidate, type ApiElection } from "./api";
 
+// Key dates per the City Clerk's 2026 election calendar:
+// https://www.toronto.ca/city-government/elections/key-dates/
 export const ELECTION_DATE_ISO = "2026-10-26";
+/** First day of the advance vote period (runs through Sun, Oct 11). */
+export const ADVANCE_VOTE_START_ISO = "2026-10-06";
+/** Last day to apply to vote by mail (4:30 p.m. cut-off). */
+export const MAIL_IN_DEADLINE_ISO = "2026-09-24";
+
 /** Display strings for the key election-calendar dates. */
-export const NOMINATION_CLOSE_LABEL = "Sept 18, 2026";
+export const NOMINATION_CLOSE_LABEL = "Aug 21, 2026";
 export const ELECTION_DAY_LABEL = "Mon, Oct 26";
+export const ADVANCE_VOTE_LABEL = "Oct 6 – 11";
+export const MAIL_IN_DEADLINE_LABEL = "Thu, Sept 24";
 
 /**
- * Whole calendar days from `now` until election day. Counts calendar days
+ * Whole calendar days from `now` until `targetIso`. Counts calendar days
  * (not remaining 24h periods) so the counter reads the same all day, e.g.
  * "103 days" throughout Jul 15 rather than ticking to 102 by lunchtime.
  */
+export function daysUntil(targetIso: string, now: Date = new Date()): number {
+  const [y, m, d] = targetIso.split("-").map(Number);
+  const target = new Date(y, m - 1, d);
+  return Math.max(0, differenceInCalendarDays(target, now));
+}
+
 export function daysUntilElection(now: Date = new Date()): number {
-  const [y, m, d] = ELECTION_DATE_ISO.split("-").map(Number);
-  const electionDay = new Date(y, m - 1, d);
-  return Math.max(0, differenceInCalendarDays(electionDay, now));
+  return daysUntil(ELECTION_DATE_ISO, now);
 }
 
 // Hand-maintained enrichment (photos, bios, tags, verified sites) lives in
@@ -65,6 +78,34 @@ export function initialsFor(name: string): string {
   const first = parts[0]?.[0] ?? "";
   const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
   return (first + last).toUpperCase();
+}
+
+// ── Front runners ──────────────────────────────────────────────────────────
+
+/**
+ * Mayoral candidates given the prominent front-runner treatment. Keyed by
+ * `nameKey` (full name, not last name — the field has both an Olivia and a
+ * Braeden Chow). Hand-maintained: update as the race develops.
+ */
+export const MAYORAL_FRONT_RUNNER_KEYS = ["brad bradford", "olivia chow"];
+
+/** Caption under the front-runner heading — edit to match the current race. */
+export const FRONT_RUNNER_NOTE =
+  "The incumbent mayor and the leading declared challenger.";
+
+/**
+ * Splits the mayoral field into front runners and everyone else, preserving
+ * the incoming sort (last name) in both groups so the prominent slots imply
+ * no ranking between them.
+ */
+export function splitFrontRunners<T extends { name: string }>(
+  candidates: T[],
+): { frontRunners: T[]; field: T[] } {
+  const keys = new Set(MAYORAL_FRONT_RUNNER_KEYS);
+  return {
+    frontRunners: candidates.filter((c) => keys.has(nameKey(c.name))),
+    field: candidates.filter((c) => !keys.has(nameKey(c.name))),
+  };
 }
 
 // ── API roster + local enrichment ──────────────────────────────────────────

@@ -12,9 +12,16 @@ import {
   getMayoralCandidates,
   getWards,
   daysUntilElection,
+  daysUntil,
   initialsFor,
   nameKey,
   NOMINATION_CLOSE_LABEL,
+  splitFrontRunners,
+  FRONT_RUNNER_NOTE,
+  ADVANCE_VOTE_START_ISO,
+  ADVANCE_VOTE_LABEL,
+  MAIL_IN_DEADLINE_ISO,
+  MAIL_IN_DEADLINE_LABEL,
 } from "./data";
 
 export const metadata: Metadata = {
@@ -36,6 +43,9 @@ export default async function Toronto2026ElectionPage() {
     getWards(),
   ]);
   const initialDays = daysUntilElection();
+  const { frontRunners, field } = splitFrontRunners(mayoralCandidates);
+  const initialAdvanceDays = daysUntil(ADVANCE_VOTE_START_ISO);
+  const initialMailInDays = daysUntil(MAIL_IN_DEADLINE_ISO);
 
   return (
     <div className="theme-election bg-bg text-dark">
@@ -45,33 +55,65 @@ export default async function Toronto2026ElectionPage() {
       <div className="mx-[10px] my-[10px] border border-border-light bg-bg overflow-x-clip">
         {/* ── Hero ─────────────────────────────────────────────── */}
         <section className="px-6 py-14 md:px-14 md:py-16 border-b-2 border-dark">
-          <p className="type-label text-accent mb-5">
-            Municipal Election · City of Toronto
-          </p>
+
           <h1 className="font-sans font-medium leading-[0.98] tracking-[-0.04em] text-[clamp(3rem,7vw,5.75rem)] max-w-[15ch] text-balance mb-7">
-            Toronto 2026 Election
+            The 2026 Toronto Municipal Election
           </h1>
           <p className="font-serif text-[clamp(1.15rem,1.6vw,1.4rem)] leading-[1.5] max-w-[62ch]">
-            Toronto elects its mayor and 25 city councillors on
-            October&nbsp;26,&nbsp;2026 — the largest civic decision Canada makes
-            this year. Build&nbsp;Canada is tracking every race: who is running,
-            what they intend to build, and how each ward will shape the
-            direction of the country&rsquo;s largest city. Meet the candidates
-            for mayor below, then find your ward to see who is competing to
-            represent it.
+            On October 26th, 2026, Toronto will elect it's mayor and 25 city councillors.
+            Explore who is running for mayor and for councillor in your ward.
           </p>
         </section>
 
         {/* ── Countdown + how to vote ──────────────────────────── */}
-        <section className="grid md:grid-cols-[1.35fr_1fr] border-b-2 border-dark">
+        <section className="grid md:grid-cols-[1.15fr_0.85fr_1fr] border-b-2 border-dark">
           <div className="px-6 py-12 md:px-14 md:py-14 flex flex-col justify-center">
             <div className="flex items-end gap-5 flex-wrap">
-              <CountdownDays initialDays={initialDays} />
+              <CountdownDays
+                initialDays={initialDays}
+                className="font-sans font-semibold leading-[0.8] tracking-[-0.05em] text-[clamp(5rem,13vw,11rem)] tabular-nums"
+              />
               <span className="type-label !tracking-[0.12em] leading-[1.5] pb-3.5">
                 Days until
                 <br />
                 polls open
               </span>
+            </div>
+          </div>
+          <div className="px-6 py-12 md:px-14 md:py-14 border-t-2 md:border-t-0 md:border-l border-border-light flex flex-col justify-center gap-8">
+            <div>
+              <div className="flex items-end gap-3">
+                <CountdownDays
+                  initialDays={initialAdvanceDays}
+                  targetIso={ADVANCE_VOTE_START_ISO}
+                  className="font-sans font-semibold leading-[0.8] tracking-[-0.04em] text-[clamp(2.75rem,5.5vw,4rem)] tabular-nums"
+                />
+                <span className="type-label !tracking-[0.12em] leading-[1.4] pb-1">
+                  Days until
+                  <br />
+                  advance polls
+                </span>
+              </div>
+              <p className="mt-2.5 font-serif text-[1rem] leading-[1.4] text-accent">
+                {ADVANCE_VOTE_LABEL}
+              </p>
+            </div>
+            <div className="pt-7 border-t border-border-light">
+              <div className="flex items-end gap-3">
+                <CountdownDays
+                  initialDays={initialMailInDays}
+                  targetIso={MAIL_IN_DEADLINE_ISO}
+                  className="font-sans font-semibold leading-[0.8] tracking-[-0.04em] text-[clamp(2.75rem,5.5vw,4rem)] tabular-nums"
+                />
+                <span className="type-label !tracking-[0.12em] leading-[1.4] pb-1">
+                  Days to apply
+                  <br />
+                  to vote by mail
+                </span>
+              </div>
+              <p className="mt-2.5 font-serif text-[1rem] leading-[1.4] text-accent">
+                {MAIL_IN_DEADLINE_LABEL}, 4:30&nbsp;p.m.
+              </p>
             </div>
           </div>
           <div className="px-6 py-12 md:px-14 md:py-14 border-t-2 md:border-t-0 md:border-l border-border-light bg-bg-alt flex flex-col justify-center">
@@ -101,75 +143,131 @@ export default async function Toronto2026ElectionPage() {
         <section id="candidates" className="border-b-2 border-dark scroll-mt-24">
           <div className="px-6 pt-12 pb-8 md:px-14 flex justify-between items-end gap-6 flex-wrap">
             <div>
-              <p className="type-label text-accent mb-3.5">The Mayoralty</p>
               <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(2rem,3.5vw,2.75rem)]">
                 Candidates for Mayor
               </h2>
             </div>
-            <p className="type-label text-text-secondary pb-1.5 !tracking-[0.08em]">
-              {mayoralCandidates.length} declared · field open
-            </p>
+
           </div>
 
-          <div>
-            {mayoralCandidates.map((cand, i) => (
+          {frontRunners.length > 0 && (
+            <>
+              <div className="px-6 md:px-14 pb-6 border-t border-border-light pt-8">
+                <p className="type-label text-accent mb-2.5">Front runners</p>
+                <p className="font-serif text-[1.05rem] leading-[1.45] text-dark/80 max-w-[52ch]">
+                  {FRONT_RUNNER_NOTE}
+                </p>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-px bg-border-light border-y-2 border-dark">
+                {frontRunners.map((cand, i) => (
+                  <div
+                    key={`front-${cand.name}-${i}`}
+                    className="bg-bg-alt flex items-center gap-6 sm:gap-7 px-6 md:px-10 py-9"
+                  >
+                    <div className="relative flex-none size-[clamp(104px,11vw,148px)] bg-dark overflow-hidden flex items-center justify-center font-sans font-medium text-[clamp(2rem,3vw,2.6rem)] tracking-[-0.03em] text-bg">
+                      {cand.image ? (
+                        <Image
+                          src={cand.image}
+                          alt={cand.name}
+                          fill
+                          sizes="148px"
+                          className="object-cover object-center"
+                          priority
+                        />
+                      ) : (
+                        (cand.initials ?? initialsFor(cand.name))
+                      )}
+                    </div>
+                    <div className="min-w-0 flex flex-col gap-3">
+                      <div className="flex items-center gap-3 flex-wrap">
+                        <h3 className="font-sans font-medium text-[clamp(1.6rem,2.6vw,2.15rem)] tracking-[-0.03em] leading-[1.05]">
+                          {cand.name}
+                        </h3>
+                        {cand.tag === "Incumbent" && (
+                          <span className="inline-flex items-center type-label-sm !text-[10px] !leading-none !tracking-[0.12em] pl-2 pr-[calc(0.5rem-0.12em)] py-1.5 border border-accent text-accent">
+                            {cand.tag}
+                          </span>
+                        )}
+                      </div>
+                      {cand.website ? (
+                        <CandidateSiteLink
+                          href={cand.website}
+                          candidate={cand.name}
+                          candidateKey={nameKey(cand.name)}
+                          race="mayor"
+                          tag={cand.tag}
+                          className="group/btn self-start inline-flex items-center gap-1.5 type-label-sm text-accent hover:underline"
+                        >
+                          Campaign site
+                          <ArrowUpRight className="size-3 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
+                        </CandidateSiteLink>
+                      ) : (
+                        <span className="type-label-sm text-text-secondary">
+                          Profile to come
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <p className="px-6 md:px-14 pt-8 pb-6 type-label text-text-secondary !tracking-[0.08em]">
+                The rest of the field
+              </p>
+            </>
+          )}
+
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(272px,1fr))] border-t border-l border-border-light">
+            {field.map((cand, i) => (
               <div
                 key={`${cand.name}-${i}`}
-                className="flex gap-5 sm:gap-7 items-center px-6 md:px-14 py-7 border-t border-border-light"
+                className="bg-bg flex gap-4 items-center px-6 py-5 border-b border-r border-border-light"
               >
-                <div className="flex-none size-16 bg-dark relative overflow-hidden flex items-center justify-center font-sans font-medium text-[1.35rem] tracking-[-0.02em] text-bg">
+                <div className="flex-none size-12 bg-dark relative overflow-hidden flex items-center justify-center font-sans font-medium text-[1rem] tracking-[-0.02em] text-bg">
                   {cand.image ? (
                     <Image
                       src={cand.image}
                       alt={cand.name}
                       fill
-                      sizes="64px"
+                      sizes="48px"
                       className="object-cover object-center"
                     />
                   ) : (
                     (cand.initials ?? initialsFor(cand.name))
                   )}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-baseline gap-3.5 flex-wrap mb-2">
-                    <h3 className="font-sans font-medium text-[1.5rem] tracking-[-0.02em] leading-[1.1]">
+                <div className="min-w-0 flex flex-col gap-1.5">
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    <h3 className="font-sans font-medium text-[1.15rem] tracking-[-0.02em] leading-[1.15]">
                       {cand.name}
                     </h3>
                     {cand.tag === "Incumbent" && (
-                      <span className="type-label-sm !text-[10px] !tracking-[0.12em] px-2 py-1 border border-accent text-accent">
+                      <span className="inline-flex items-center type-label-sm !text-[10px] !leading-none !tracking-[0.12em] pl-2 pr-[calc(0.5rem-0.12em)] py-1.5 border border-accent text-accent">
                         {cand.tag}
                       </span>
                     )}
                   </div>
-                  <p className="font-serif text-[1.08rem] leading-[1.45] text-dark/80 max-w-[64ch]">
-                    {cand.bio}
-                  </p>
+                  {cand.website ? (
+                    <CandidateSiteLink
+                      href={cand.website}
+                      candidate={cand.name}
+                      candidateKey={nameKey(cand.name)}
+                      race="mayor"
+                      tag={cand.tag}
+                      className="group/btn self-start inline-flex items-center gap-1.5 type-label-sm text-accent hover:underline"
+                    >
+                      Campaign site
+                      <ArrowUpRight className="size-3 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
+                    </CandidateSiteLink>
+                  ) : (
+                    <span className="type-label-sm text-text-secondary">
+                      Profile to come
+                    </span>
+                  )}
                 </div>
-                {cand.website ? (
-                  <CandidateSiteLink
-                    href={cand.website}
-                    candidate={cand.name}
-                    candidateKey={nameKey(cand.name)}
-                    race="mayor"
-                    tag={cand.tag}
-                    className="group/btn hidden sm:inline-flex flex-none items-center gap-1.5 type-label-sm text-accent hover:underline"
-                  >
-                    Campaign site
-                    <ArrowUpRight className="size-3 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
-                  </CandidateSiteLink>
-                ) : (
-                  <span className="hidden sm:block flex-none type-label-sm text-text-secondary">
-                    Profile to come
-                  </span>
-                )}
               </div>
             ))}
           </div>
-          <p className="px-6 md:px-14 py-4 type-label-sm text-text-muted border-t border-border-light">
-            Registered candidates from the City Clerk&rsquo;s list; photographs
-            and profiles are added as they become available. The field is not
-            final until nominations close on {NOMINATION_CLOSE_LABEL}.
-          </p>
+
         </section>
 
         {/* ── Wards ────────────────────────────────────────────── */}
@@ -191,12 +289,12 @@ export default async function Toronto2026ElectionPage() {
           </div>
 
           <WardMapDefs />
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-px bg-border-light border-t border-border-light">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] border-t border-l border-border-light">
             {wards.map((ward) => (
               <Link
                 key={ward.n}
                 href={`/toronto/elections/2026/wards/${ward.n}`}
-                className="group bg-bg px-6 pt-5 pb-5 flex flex-col gap-3 min-h-[172px] transition-colors hover:bg-linen-200"
+                className="group bg-bg px-6 pt-5 pb-5 flex flex-col gap-3 min-h-[172px] border-b border-r border-border-light transition-colors hover:bg-linen-200"
               >
                 <div className="flex justify-between items-start gap-3">
                   <span className="type-label text-accent pt-1 !tracking-[0.1em]">
@@ -223,10 +321,7 @@ export default async function Toronto2026ElectionPage() {
 
         {/* ── Closing CTA (soft-linen band, full bleed) ────────── */}
         <section className="bg-bg text-dark px-6 py-20 md:px-14 md:py-28 text-center flex flex-col items-center">
-          <p className="mb-8 font-serif italic text-[1.1rem] leading-[1.5] text-dark/60">
-            &ldquo;We shall not err for want of boldness.&rdquo;
-            <br className="sm:hidden" /> — Sir Wilfrid Laurier
-          </p>
+
           <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.035em] text-[clamp(2rem,5vw,3.75rem)] max-w-[22ch] text-balance mb-6">
             The Toronto you know is possible doesn&rsquo;t vote itself in.
           </h2>

@@ -1,89 +1,43 @@
-// Toronto 2026 municipal election — data layer.
-// The candidate roster comes from the York Factory API (which mirrors the
-// City Clerk's registered-candidate feeds daily); the hand-maintained data
-// in ./candidates enriches it with photos, bios, tags, and verified campaign
-// sites, and doubles as the fallback when the API is unreachable.
+// Toronto 2026 municipal election — this region's binding of the shared
+// election data layer (@/lib/elections/election-data).
+//
+// Two things are Toronto's alone and live here:
+//   · the hand-maintained enrichment in ./candidates — photos, bios,
+//     Incumbent/Challenger tags and verified campaign sites, matched to the
+//     API roster by name;
+//   · a local fallback roster, so the page still lists a field when York
+//     Factory is unreachable. No other region has one.
+//
+// Ward names and the zero-padded route tokens ("01".."25") come from the
+// official ward geometry in ./wardGeo, which also draws the locator map.
 
-import { differenceInCalendarDays } from "date-fns";
 import { WARD_SHAPES } from "./wardGeo";
-import { fetchToronto2026, type ApiCandidate, type ApiElection } from "./api";
-
-// Key dates per the City Clerk's 2026 election calendar:
-// https://www.toronto.ca/city-government/elections/key-dates/
-export const ELECTION_DATE_ISO = "2026-10-26";
-/** First day of the advance vote period (runs through Sun, Oct 11). */
-export const ADVANCE_VOTE_START_ISO = "2026-10-06";
-/** Last day to apply to vote by mail (4:30 p.m. cut-off). */
-export const MAIL_IN_DEADLINE_ISO = "2026-09-24";
-
-/** Display strings for the key election-calendar dates. */
-export const NOMINATION_CLOSE_LABEL = "Aug 21, 2026";
-export const ELECTION_DAY_LABEL = "Mon, Oct 26";
-export const ADVANCE_VOTE_LABEL = "Oct 6 – 11";
-export const MAIL_IN_DEADLINE_LABEL = "Thu, Sept 24";
-
-/**
- * Whole calendar days from `now` until `targetIso`. Counts calendar days
- * (not remaining 24h periods) so the counter reads the same all day, e.g.
- * "103 days" throughout Jul 15 rather than ticking to 102 by lunchtime.
- */
-export function daysUntil(targetIso: string, now: Date = new Date()): number {
-  const [y, m, d] = targetIso.split("-").map(Number);
-  const target = new Date(y, m - 1, d);
-  return Math.max(0, differenceInCalendarDays(target, now));
-}
-
-export function daysUntilElection(now: Date = new Date()): number {
-  return daysUntil(ELECTION_DATE_ISO, now);
-}
-
-// Hand-maintained enrichment (photos, bios, tags, verified sites) lives in
-// ./candidates — see that file to fill in a candidate's profile.
 import {
-  MAYORAL_CANDIDATES as RAW_MAYORAL_CANDIDATES,
+  getElectionView,
+  getWardDetail,
+  initialsFor,
+  nameKey,
+  type CandidateView,
+  type ElectionDataOptions,
+  type ElectionView,
+  type WardDetail,
+  type WardRosterEntry,
+} from "@/lib/elections/election-data";
+import { getElection } from "@/lib/elections/registry";
+import {
+  MAYORAL_CANDIDATES,
   WARD_CANDIDATES,
   type MayoralCandidate,
   type CouncillorCandidate,
-  type CouncillorTag,
 } from "./candidates";
 
-export type { MayoralCandidate, CouncillorCandidate, CouncillorTag };
+export type { MayoralCandidate, CouncillorCandidate };
+export { initialsFor, nameKey };
 
-/** Generational suffixes ignored when deriving a last-name sort key, so e.g.
- *  "Kannan S'ree Jr" sorts under "s", not "j". */
-const NAME_SUFFIXES = new Set(["jr", "jr.", "sr", "sr.", "ii", "iii", "iv", "v"]);
-
-/** Last-name sort key from a full name, e.g. "Eleanor Voss" → "voss".
- *  Used to order candidate lists alphabetically by last name. Trailing
- *  generational suffixes (Jr, Sr, III, …) are skipped. */
-export function lastNameKey(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  while (parts.length > 1 && NAME_SUFFIXES.has(parts[parts.length - 1].toLowerCase())) {
-    parts.pop();
-  }
-  return (parts[parts.length - 1] ?? "").toLowerCase();
-}
-
-/** Sort candidates alphabetically by last name (stable, non-mutating). */
-function byLastName<T extends { name: string }>(candidates: T[]): T[] {
-  return [...candidates].sort((a, b) =>
-    lastNameKey(a.name).localeCompare(lastNameKey(b.name)),
-  );
-}
-
-/** Initials from a name, e.g. "Eleanor Voss" → "EV" (used when a candidate
- *  has no explicit `initials` and no photo). */
-export function initialsFor(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  const first = parts[0]?.[0] ?? "";
-  const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
-  return (first + last).toUpperCase();
-}
-
-// ── Front runners ──────────────────────────────────────────────────────────
+export const ELECTION = getElection("toronto-2026");
 
 /**
- * Mayoral candidates given the prominent front-runner treatment. Keyed by
+ * Mayoral candidates given the prominent front-runner treatment, keyed by
  * `nameKey` (full name, not last name — the field has both an Olivia and a
  * Braeden Chow). Hand-maintained: update as the race develops.
  */
@@ -93,147 +47,117 @@ export const MAYORAL_FRONT_RUNNER_KEYS = ["brad bradford", "olivia chow"];
 export const FRONT_RUNNER_NOTE =
   "The incumbent mayor and the leading declared challenger.";
 
-/**
- * Splits the mayoral field into front runners and everyone else, preserving
- * the incoming sort (last name) in both groups so the prominent slots imply
- * no ranking between them.
- */
-export function splitFrontRunners<T extends { name: string }>(
-  candidates: T[],
-): { frontRunners: T[]; field: T[] } {
-  const keys = new Set(MAYORAL_FRONT_RUNNER_KEYS);
-  return {
-    frontRunners: candidates.filter((c) => keys.has(nameKey(c.name))),
-    field: candidates.filter((c) => !keys.has(nameKey(c.name))),
-  };
-}
-
-// ── API roster + local enrichment ──────────────────────────────────────────
-
-/** Matching key for enrichment lookups: lowercase, diacritics and
- *  punctuation stripped, so the Clerk's "Ala'a Adib" matches a local entry
- *  written "Alaa Adib". Also used as the stable candidate key in analytics
- *  events, since the Clerk's feed has no candidate IDs. */
-export function nameKey(name: string): string {
-  return name
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .replace(/[^a-z0-9 ]+/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-/** "First Last" display name from an API candidate ("Last, First"). */
-function displayName(candidate: ApiCandidate): string {
-  if (candidate.first_name && candidate.last_name) {
-    return `${candidate.first_name} ${candidate.last_name}`;
-  }
-  const [last, first] = candidate.full_name.split(",").map((s) => s.trim());
-  return first ? `${first} ${last}` : candidate.full_name;
-}
-
-const MAYORAL_ENRICHMENT = new Map(
-  RAW_MAYORAL_CANDIDATES.map((c) => [nameKey(c.name), c]),
-);
-
-function councillorEnrichment(wardNumber: number) {
-  const key = String(wardNumber).padStart(2, "0");
-  return new Map((WARD_CANDIDATES[key] ?? []).map((c) => [nameKey(c.name), c]));
-}
-
-function activeCandidates(election: ApiElection, wardNumber?: number): ApiCandidate[] {
-  const race = election.races.find((r) =>
-    wardNumber === undefined
-      ? r.office_type === "mayor"
-      : r.office_type === "councillor" && r.district_number === wardNumber,
-  );
-  return (race?.candidates ?? []).filter((c) => c.status === "active");
-}
-
-/** Mayoral candidates — API roster merged with local enrichment, sorted by
- *  last name. Falls back to the local list when the API is unreachable. */
-export async function getMayoralCandidates(): Promise<MayoralCandidate[]> {
-  const election = await fetchToronto2026();
-  if (!election) return byLastName(RAW_MAYORAL_CANDIDATES);
-
-  return byLastName(
-    activeCandidates(election).map((api): MayoralCandidate => {
-      const name = displayName(api);
-      const curated = MAYORAL_ENRICHMENT.get(nameKey(name));
-      return {
-        name,
-        tag: curated?.tag ?? "Declared",
-        bio: curated?.bio ?? "",
-        image: curated?.image ?? api.photo_url ?? undefined,
-        website: curated?.website ?? api.website ?? undefined,
-        initials: curated?.initials,
-      };
-    }),
-  );
-}
-
-/**
- * Councillor candidates for a ward (0-based index) — API roster merged with
- * local enrichment, sorted by last name. Falls back to the local list when
- * the API is unreachable; empty for wards with no registered candidates yet.
- */
-export async function getCouncillorCandidates(
-  wardIndex: number,
-): Promise<CouncillorCandidate[]> {
-  const election = await fetchToronto2026();
-  const wardNumber = wardIndex + 1;
-  if (!election) {
-    return byLastName(WARD_CANDIDATES[String(wardNumber).padStart(2, "0")] ?? []);
-  }
-
-  const enrichment = councillorEnrichment(wardNumber);
-  return byLastName(
-    activeCandidates(election, wardNumber).map((api): CouncillorCandidate => {
-      const name = displayName(api);
-      const curated = enrichment.get(nameKey(name));
-      return {
-        name,
-        tag: curated?.tag ?? "Registered",
-        bio: curated?.bio ?? "",
-        image: curated?.image ?? api.photo_url ?? undefined,
-        website: curated?.website ?? api.website ?? undefined,
-        initials: curated?.initials,
-      };
-    }),
-  );
-}
-
-// ── Wards ──────────────────────────────────────────────────────────────────
-
-export type Ward = {
-  n: string;
-  name: string;
-  count: number;
-};
-
 /** Zero-padded ward numbers ("01".."25") for static route generation. */
 export const WARD_NUMBERS: string[] = WARD_SHAPES.map((w) => w.n);
 
-/**
- * All 25 wards with live candidate counts from the API (local counts when it
- * is unreachable). Ward names/numbers come from the official City of Toronto
- * ward geometry (see wardGeo.ts).
- */
-export async function getWards(): Promise<Ward[]> {
-  const election = await fetchToronto2026();
-  return WARD_SHAPES.map((w, i) => ({
-    n: w.n,
-    name: w.name,
-    count: election
-      ? activeCandidates(election, i + 1).length
-      : (WARD_CANDIDATES[String(i + 1).padStart(2, "0")] ?? []).length,
-  }));
+const WARD_ROSTER: WardRosterEntry[] = WARD_SHAPES.map((w) => ({
+  n: w.n,
+  number: parseInt(w.n, 10),
+  name: w.name,
+}));
+
+/** The local roster for one ward, keyed as candidates.ts stores it ("01"). */
+function localWardCandidates(wardNumber: number): CouncillorCandidate[] {
+  return WARD_CANDIDATES[String(wardNumber).padStart(2, "0")] ?? [];
 }
 
-/** Look up a ward by its number ("01".."25" or "1".."25"). */
-export function findWardIndex(param: string): number {
-  const num = parseInt(param, 10);
-  if (Number.isNaN(num) || num < 1 || num > WARD_SHAPES.length) return -1;
-  return num - 1;
+const OPTIONS: ElectionDataOptions = {
+  wardRoster: WARD_ROSTER,
+  mayoralEnrichment: new Map(
+    MAYORAL_CANDIDATES.map((c) => [nameKey(c.name), c]),
+  ),
+  councillorEnrichment: (wardNumber) =>
+    new Map(localWardCandidates(wardNumber).map((c) => [nameKey(c.name), c])),
+};
+
+// ── Fallback ───────────────────────────────────────────────────────────────
+
+/** Shape a hand-maintained entry like an API-derived candidate. */
+function toView(
+  candidate: MayoralCandidate | CouncillorCandidate,
+): CandidateView {
+  return {
+    key: nameKey(candidate.name),
+    name: candidate.name,
+    initials: candidate.initials ?? initialsFor(candidate.name),
+    tag: candidate.tag,
+    bio: candidate.bio,
+    image: candidate.image,
+    website: candidate.website,
+    withdrawn: false,
+    socialLinks: [],
+  };
+}
+
+function byLastName<T extends { name: string }>(list: T[]): T[] {
+  const key = (name: string) =>
+    (name.trim().split(/\s+/).pop() ?? "").toLowerCase();
+  return [...list].sort((a, b) => key(a.name).localeCompare(key(b.name)));
+}
+
+/** The page as rendered from the local roster alone, for when York Factory is
+ *  unreachable. Counts and dates come from the same hand-maintained data. */
+function fallbackView(): ElectionView {
+  return {
+    slug: ELECTION.slug,
+    name: "Toronto 2026 General Municipal Election",
+    electionDateIso: ELECTION.electionDateIso,
+    electionDateLabel: "Mon, Oct 26, 2026",
+    nominationCloseLabel: null,
+    daysUntil: 0,
+    mayoral: byLastName(MAYORAL_CANDIDATES).map(toView),
+    wards: WARD_ROSTER.map((ward) => ({
+      ...ward,
+      count: localWardCandidates(ward.number).length,
+    })),
+    atLargeRaces: [],
+    raceCount: WARD_ROSTER.length + 1,
+    candidateCount:
+      MAYORAL_CANDIDATES.length +
+      WARD_ROSTER.reduce(
+        (total, ward) => total + localWardCandidates(ward.number).length,
+        0,
+      ),
+  };
+}
+
+// ── Public API ─────────────────────────────────────────────────────────────
+
+/** The election, falling back to the local roster when the API is down. */
+export async function getToronto2026(): Promise<ElectionView> {
+  return (await getElectionView(ELECTION.slug, OPTIONS)) ?? fallbackView();
+}
+
+/** One ward's races, or null for a ward number outside 1–25. Falls back to
+ *  the local roster when the API is unreachable. */
+export async function getToronto2026Ward(
+  wardToken: string,
+): Promise<WardDetail | null> {
+  const live = await getWardDetail(ELECTION.slug, wardToken, OPTIONS);
+  if (live) return live;
+
+  const number = parseInt(wardToken, 10);
+  const view = fallbackView();
+  const ward = view.wards.find((w) => w.number === number);
+  if (!ward) return null;
+
+  const candidates = byLastName(localWardCandidates(number)).map(toView);
+  return {
+    ward,
+    wards: view.wards,
+    councilRaces: [
+      {
+        id: `councillor||${number}`,
+        seat: "Councillor",
+        label: `Councillor — ${ward.name}`,
+        officeBody: null,
+        districtName: ward.name,
+        wardNumbers: [number],
+        atLarge: false,
+        candidates,
+        registeredCount: candidates.length,
+      },
+    ],
+    trusteeRaces: [],
+  };
 }

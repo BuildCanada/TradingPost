@@ -1,8 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { WardCard } from "./WardCard";
-import type { Ward } from "./data";
+import { useState, type ReactNode } from "react";
+import type { WardView } from "@/lib/elections/election-data";
 import type { WardLookupResponse } from "@/lib/elections/ward-lookup";
 
 type State =
@@ -16,8 +15,21 @@ type State =
  * — postal centroids sit off-line near ward boundaries — so it reads as "looks
  * like Ward 19", always offers the full ward list beside it, and never
  * navigates on its own. See docs/WARD_LOOKUP_API_SPEC.md.
+ *
+ * `cards` holds this region's ward tiles pre-rendered on the server, keyed by
+ * ward number, because the tile's locator map is server-rendered geometry that
+ * can't be built here.
  */
-export default function WardLookup({ wards }: { wards: Ward[] }) {
+export default function WardLookup({
+  wards,
+  cards,
+  cityLabel,
+}: {
+  wards: WardView[];
+  cards: Record<number, ReactNode>;
+  /** e.g. "Toronto" — names the city in the out-of-boundary message */
+  cityLabel: string;
+}) {
   const [postalCode, setPostalCode] = useState("");
   const [state, setState] = useState<State>({ status: "idle" });
 
@@ -74,14 +86,14 @@ export default function WardLookup({ wards }: { wards: Ward[] }) {
         className="mt-4 empty:mt-0"
       >
         {state.status === "done" && (
-          <Result result={state.result} wards={wards} />
+          <Result
+            result={state.result}
+            wards={wards}
+            cards={cards}
+            cityLabel={cityLabel}
+          />
         )}
-        {state.status === "failed" && (
-          <p className="font-serif text-[1.05rem] leading-[1.45] text-dark/80">
-            We can&rsquo;t look that up right now. Try again shortly, or find
-            your ward in the list below.
-          </p>
-        )}
+        {state.status === "failed" && <Unavailable />}
       </div>
     </div>
   );
@@ -90,36 +102,36 @@ export default function WardLookup({ wards }: { wards: Ward[] }) {
 function Result({
   result,
   wards,
+  cards,
+  cityLabel,
 }: {
   result: WardLookupResponse;
-  wards: Ward[];
+  wards: WardView[];
+  cards: Record<number, ReactNode>;
+  cityLabel: string;
 }) {
   switch (result.reason) {
     case "resolved": {
-      // ward_number is never null for Toronto's numbered wards, but the type
+      // ward_number is never null for numbered municipal wards, but the type
       // allows null for named ones — without it there is nothing to match.
       const number = result.ward?.ward_number;
       // Matched against our own roster so the card shows the live candidate
       // count and the same ward name as the grid below it.
-      const ward = number
-        ? wards.find((w) => parseInt(w.n, 10) === number)
-        : undefined;
-      if (!ward) return <Unavailable />;
+      const ward = number ? wards.find((w) => w.number === number) : undefined;
+      const card = number ? cards[number] : undefined;
+      if (!ward || !card) return <Unavailable />;
       return (
         <div>
           <p className="font-serif text-[1.05rem] leading-[1.45] mb-3">
             Looks like you&rsquo;re in{" "}
             <span className="text-accent">Ward {number}</span>.
           </p>
-          <WardCard
-            ward={ward}
-            className="border border-border-light max-w-[300px]"
-          />
+          {card}
           <a
             href="#wards"
             className="mt-3 inline-block type-label-sm text-text-secondary hover:underline"
           >
-            Not right? Browse all 25 wards
+            Not right? Browse all {wards.length} wards
           </a>
         </div>
       );
@@ -135,8 +147,8 @@ function Result({
     case "outside_boundary":
       return (
         <p className="font-serif text-[1.05rem] leading-[1.45] text-dark/80">
-          That postal code looks like it&rsquo;s outside Toronto — so there
-          won&rsquo;t be a Toronto ward for it.
+          That postal code looks like it&rsquo;s outside {cityLabel} — so there
+          won&rsquo;t be a {cityLabel} ward for it.
         </p>
       );
     // boundary_data_unavailable, plus any reason added later.

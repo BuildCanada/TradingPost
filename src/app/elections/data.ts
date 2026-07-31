@@ -10,13 +10,7 @@ import {
   fetchElections,
   type ApiElectionSummary,
 } from "@/lib/api/elections";
-
-/** Coverage pages on this site, keyed by York Factory election slug. An
- *  election with no entry here is listed without a link. */
-const ELECTION_ROUTES: Record<string, string> = {
-  "toronto-2026": "/toronto/elections/2026",
-  "brampton-2026": "/elections/brampton/2026",
-};
+import { SUPPORTED_ELECTIONS } from "@/lib/elections/registry";
 
 export type ActiveElection = {
   slug: string;
@@ -89,7 +83,9 @@ async function describe(summary: ApiElectionSummary): Promise<ActiveElection> {
       ? SHORT_DATE.format(parseDateOnly(summary.nomination_close_date))
       : null,
     daysUntil: daysUntil(summary.election_date),
-    href: ELECTION_ROUTES[summary.slug] ?? null,
+    // The registry is the list of elections we have pages for; anything else
+    // York Factory knows about is listed here without a link.
+    href: SUPPORTED_ELECTIONS[summary.slug]?.basePath ?? null,
     raceCount: races?.length ?? null,
     candidateCount:
       races?.reduce(

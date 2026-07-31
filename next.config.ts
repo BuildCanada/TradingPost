@@ -52,6 +52,21 @@ const nextConfig: NextConfig = {
         destination: "/state-of-the-nation/:path*",
         permanent: true,
       },
+      // Election coverage moved to one shape for every region,
+      // /<city>/elections/<year>, matching Toronto's. Brampton shipped under
+      // /elections/<city>/<year> first; its pages and shared pledge links are
+      // already out in the world, so both it and everything beneath it
+      // redirect.
+      {
+        source: "/elections/brampton/2026",
+        destination: "/brampton/elections/2026",
+        permanent: true,
+      },
+      {
+        source: "/elections/brampton/2026/:path*",
+        destination: "/brampton/elections/2026/:path*",
+        permanent: true,
+      },
     ];
   },
   async rewrites() {

@@ -3,21 +3,13 @@
 // Toronto candidate-list map (d3.geoMercator().rotate([0,-13.45])) and
 // simplified (Douglas–Peucker) for a compact locator map.
 // Source: https://www.toronto.ca/resources/fepe_te_candidate_list/conf/map/COTGEO_WARD.json
-// Regenerate with scratchpad/geocompute/gen.mjs.
+// Regenerate with scripts/gen-ward-geo.mjs. Note that script uses an unrotated
+// Mercator, so a regeneration will shift these paths slightly — Toronto's were
+// rotated to sit square with the City's own candidate-list map.
+
+import type { WardGeo, WardShape } from "@/components/elections/WardMap";
 
 export const WARD_MAP_VIEWBOX = "0 0 300 157";
-
-export type WardShape = {
-  /** zero-padded ward number, e.g. "01" */
-  n: string;
-  /** City of Toronto ward name */
-  name: string;
-  /** SVG path in the WARD_MAP_VIEWBOX coordinate space */
-  d: string;
-  /** projected centroid */
-  cx: number;
-  cy: number;
-};
 
 export const WARD_SHAPES: WardShape[] = [
   {
@@ -196,3 +188,12 @@ export const WARD_SHAPES: WardShape[] = [
     "cy": 39.6
   }
 ];
+
+/** Everything <WardMap> needs to draw Toronto. The id namespaces the shared
+ *  <defs> geometry, so it must be unique across regions. */
+export const WARD_GEO: WardGeo = {
+  id: "toronto-ward-map",
+  viewBox: WARD_MAP_VIEWBOX,
+  shapes: WARD_SHAPES,
+  regionLabel: "City of Toronto",
+};

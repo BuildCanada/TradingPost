@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import PledgeClient from "./PledgeClient";
 
 export const metadata: Metadata = {
-  title: "I Pledge to Vote — Brampton 2026",
+  title: "I Pledge to Vote — Hamilton 2026",
   description:
-    "You pledged to vote in Brampton's 2026 municipal election. Here's your ballot for Monday, October 26, 2026.",
-  alternates: { canonical: "/elections/brampton/2026/pledge" },
+    "You pledged to vote in Hamilton's 2026 municipal election. Here's your ballot for Monday, October 26, 2026.",
+  alternates: { canonical: "/hamilton/elections/2026/pledge" },
   openGraph: {
-    title: "I Pledge to Vote — Brampton 2026 | Build Canada",
+    title: "I Pledge to Vote — Hamilton 2026 | Build Canada",
     description:
-      "Pledge to vote in Brampton's 2026 municipal election on October 26, 2026.",
+      "Pledge to vote in Hamilton's 2026 municipal election on October 26, 2026.",
     type: "website",
   },
 };

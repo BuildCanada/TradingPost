@@ -1,6 +1,6 @@
 import { ImageResponse } from "next/og";
 import { ElectionOGImage, OG_SIZE, logoDataUri } from "../../election-og";
-import { WARD_NUMBERS, findWardIndex, getWards } from "../../data";
+import { WARD_NUMBERS, getToronto2026 } from "../../data";
 
 export const alt = "Toronto 2026 Election ward race — Build Canada";
 export const size = OG_SIZE;
@@ -16,10 +16,12 @@ export default async function Image({
   params: Promise<{ ward: string }>;
 }) {
   const { ward } = await params;
-  const idx = findWardIndex(ward);
   const logoSrc = await logoDataUri();
+  const w = (await getToronto2026()).wards.find(
+    (candidate) => candidate.number === parseInt(ward, 10),
+  );
 
-  if (idx === -1) {
+  if (!w) {
     return new ImageResponse(
       <ElectionOGImage
         title="Toronto 2026 Election"
@@ -30,15 +32,14 @@ export default async function Image({
     );
   }
 
-  const w = (await getWards())[idx];
   const subtitle =
     w.count === 0
-      ? `No candidates registered yet for councillor in Ward ${Number(w.n)}.`
-      : `${w.count} candidate${w.count === 1 ? "" : "s"} registered to run for councillor in Ward ${Number(w.n)}.`;
+      ? `No candidates registered yet for councillor in Ward ${w.number}.`
+      : `${w.count} candidate${w.count === 1 ? "" : "s"} registered to run for councillor in Ward ${w.number}.`;
 
   return new ImageResponse(
     <ElectionOGImage
-      kicker={`TORONTO 2026 ELECTION · WARD ${Number(w.n)}`}
+      kicker={`TORONTO 2026 ELECTION · WARD ${w.number}`}
       title={w.name}
       subtitle={subtitle}
       activeWard={w.n}

@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title: "Get Involved — Toronto 2026 Election",
   description:
     "Toronto votes Monday, October 26. Pledge to vote, register, volunteer, or donate — the Toronto you know is possible doesn't vote itself in.",
-  alternates: { canonical: "/toronto/elections/get-involved" },
+  alternates: { canonical: "/toronto/vote/get-involved" },
   openGraph: {
     title: "Get Involved — Toronto 2026 Election | Build Canada",
     description:
@@ -143,7 +143,7 @@ export default function GetInvolvedPage() {
           </h2>
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Link
-              href="/toronto/elections/2026"
+              href="/toronto/vote/2026"
               className="group/btn inline-flex items-center gap-3 type-button text-bg border-2 border-bg px-7 py-[calc(1rem-2px)] transition-colors hover:bg-bg hover:text-accent"
             >
               Explore the candidates

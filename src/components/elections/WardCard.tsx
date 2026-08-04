@@ -21,7 +21,7 @@ export function WardCard({
   className,
 }: {
   ward: WardView;
-  /** the election's landing path, e.g. "/hamilton/elections/2026" */
+  /** the election's landing path, e.g. "/hamilton/vote/2026" */
   basePath: string;
   map?: ReactNode;
   /**

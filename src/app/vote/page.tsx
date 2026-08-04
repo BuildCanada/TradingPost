@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   title: "Elections",
   description:
     "Every election Build Canada is tracking — who is running, what they intend to build, and when the polls open.",
-  alternates: { canonical: "/elections" },
+  alternates: { canonical: "/vote" },
   openGraph: {
     title: "Elections — Build Canada",
     description:

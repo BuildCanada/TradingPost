@@ -52,19 +52,35 @@ const nextConfig: NextConfig = {
         destination: "/state-of-the-nation/:path*",
         permanent: true,
       },
-      // Election coverage moved to one shape for every region,
-      // /<city>/elections/<year>, matching Toronto's. Brampton shipped under
-      // /elections/<city>/<year> first; its pages and shared pledge links are
-      // already out in the world, so both it and everything beneath it
-      // redirect.
+      // Election coverage lives under /vote: the index at /vote, and each
+      // region at /<city>/vote/<year>. Two earlier shapes are still out in the
+      // world — Toronto's /toronto/elections/2026 (indexed, and the target of
+      // shared pledge links) and Brampton's /elections/brampton/2026 — so both
+      // redirect. Each points straight at its final destination; none of these
+      // chain through another redirect.
+      {
+        source: "/elections",
+        destination: "/vote",
+        permanent: true,
+      },
       {
         source: "/elections/brampton/2026",
-        destination: "/brampton/elections/2026",
+        destination: "/brampton/vote/2026",
         permanent: true,
       },
       {
         source: "/elections/brampton/2026/:path*",
-        destination: "/brampton/elections/2026/:path*",
+        destination: "/brampton/vote/2026/:path*",
+        permanent: true,
+      },
+      {
+        source: "/:city(toronto|brampton|hamilton|ottawa)/elections",
+        destination: "/:city/vote",
+        permanent: true,
+      },
+      {
+        source: "/:city(toronto|brampton|hamilton|ottawa)/elections/:path*",
+        destination: "/:city/vote/:path*",
         permanent: true,
       },
     ];

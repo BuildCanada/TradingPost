@@ -1,4 +1,4 @@
-// /elections — the index of elections Build Canada is tracking.
+// /vote — the index of elections Build Canada is tracking.
 //
 // The roster comes from the York Factory elections list; "active" means the
 // vote hasn't happened yet. Each election is linked to its coverage on this

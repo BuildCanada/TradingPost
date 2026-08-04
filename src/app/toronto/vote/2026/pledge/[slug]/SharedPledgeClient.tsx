@@ -63,7 +63,7 @@ export default function SharedPledgeClient({ name }: { name: string }) {
               Toronto votes Monday, October 26
             </p>
             <Link
-              href="/toronto/elections/2026/pledge"
+              href="/toronto/vote/2026/pledge"
               className="group/btn inline-flex items-center gap-3 type-button text-bg bg-accent px-6 py-3.5 transition-colors hover:bg-auburn-700"
             >
               Pledge to vote too
@@ -92,7 +92,7 @@ export default function SharedPledgeClient({ name }: { name: string }) {
         {/* ── Overlaid footer ────────────────────────────────── */}
         <div className="pointer-events-none absolute bottom-0 inset-x-0 flex flex-wrap items-center justify-between gap-4 p-6 md:px-10 md:py-8">
           <Link
-            href="/toronto/elections/2026"
+            href="/toronto/vote/2026"
             className="pointer-events-auto group/btn inline-flex items-center gap-3 type-button text-dark border-2 border-dark px-6 py-3.5 transition-colors hover:bg-dark hover:text-bg"
           >
             <ArrowLeft className="size-4 shrink-0 transition-transform group-hover/btn:-translate-x-0.5" />

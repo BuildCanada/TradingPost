@@ -60,7 +60,7 @@ export default function PledgeClient({
         {/* ── Overlaid footer ────────────────────────────────── */}
         <div className="pointer-events-none absolute bottom-0 inset-x-0 flex flex-wrap items-center justify-between gap-4 p-6 md:px-10 md:py-8">
           <Link
-            href="/toronto/elections/2026"
+            href="/toronto/vote/2026"
             className="pointer-events-auto group/btn inline-flex items-center gap-2 type-button text-dark hover:text-accent"
           >
             Explore the Candidates

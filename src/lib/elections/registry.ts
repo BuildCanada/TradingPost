@@ -3,13 +3,13 @@
 //
 // York Factory knows about elections; only this file knows we have pages for
 // them. Adding a region means adding an entry here plus its route folder —
-// the pledge flow, the shared landing/ward pages, the /elections index and the
+// the pledge flow, the shared landing/ward pages, the /vote index and the
 // API proxy all read from this.
 //
-// Every coverage region uses the same route shape, `/<city>/elections/<year>`,
-// with `/wards/:n` and `/pledge` beneath it. Page *copy* is not here: it lives
-// beside each region's route (see its content.ts) and is passed into the
-// shared components, so this stays small enough to import from client code.
+// Every coverage region uses the same route shape, `/<city>/vote/<year>`, with
+// `/wards/:n` and `/pledge` beneath it. Page *copy* is not here: it lives
+// beside each region's route and is passed into the shared components, so this
+// stays small enough to import from client code.
 //
 // Residency for pledging is decided upstream, per jurisdiction
 // (york_factory Election::PledgeEligibility), so nothing here gates it.
@@ -71,8 +71,8 @@ const TORONTO_2026: SupportedElection = {
   cityLabel: "Toronto",
   regionLabel: "City of Toronto",
   eyebrow: "Municipal Election · City of Toronto",
-  basePath: "/toronto/elections/2026",
-  pledgePath: "/toronto/elections/2026/pledge",
+  basePath: "/toronto/vote/2026",
+  pledgePath: "/toronto/vote/2026/pledge",
   electionDateIso: "2026-10-26",
   voteDayLabel: "Monday, October 26",
   electionDayLabel: "Mon, Oct 26",
@@ -91,8 +91,8 @@ const BRAMPTON_2026: SupportedElection = {
   cityLabel: "Brampton",
   regionLabel: "City of Brampton",
   eyebrow: "Municipal Election · City of Brampton",
-  basePath: "/brampton/elections/2026",
-  pledgePath: "/brampton/elections/2026/pledge",
+  basePath: "/brampton/vote/2026",
+  pledgePath: "/brampton/vote/2026/pledge",
   electionDateIso: "2026-10-26",
   voteDayLabel: "Monday, October 26",
   electionDayLabel: "Mon, Oct 26",
@@ -108,8 +108,8 @@ const HAMILTON_2026: SupportedElection = {
   cityLabel: "Hamilton",
   regionLabel: "City of Hamilton",
   eyebrow: "Municipal Election · City of Hamilton",
-  basePath: "/hamilton/elections/2026",
-  pledgePath: "/hamilton/elections/2026/pledge",
+  basePath: "/hamilton/vote/2026",
+  pledgePath: "/hamilton/vote/2026/pledge",
   electionDateIso: "2026-10-26",
   voteDayLabel: "Monday, October 26",
   electionDayLabel: "Mon, Oct 26",
@@ -124,8 +124,8 @@ const OTTAWA_2026: SupportedElection = {
   cityLabel: "Ottawa",
   regionLabel: "City of Ottawa",
   eyebrow: "Municipal Election · City of Ottawa",
-  basePath: "/ottawa/elections/2026",
-  pledgePath: "/ottawa/elections/2026/pledge",
+  basePath: "/ottawa/vote/2026",
+  pledgePath: "/ottawa/vote/2026/pledge",
   electionDateIso: "2026-10-26",
   voteDayLabel: "Monday, October 26",
   electionDayLabel: "Mon, Oct 26",

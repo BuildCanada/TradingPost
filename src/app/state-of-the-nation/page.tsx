@@ -1,3 +1,4 @@
+import "@buildcanada/charts/styles.css";
 import type { Metadata } from "next";
 import { getSiteConfig } from "@/lib/api";
 import { getEconomicSeries } from "@/lib/api/economy";

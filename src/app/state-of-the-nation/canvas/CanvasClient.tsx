@@ -7,11 +7,21 @@ import type { EconomySeriesResponse } from "@/lib/api/economy";
 import { SECTIONS, MEASURE_SLUGS, indicatorHeading } from "../indicators";
 import type { OverlaySeries, OverlayMode } from "./overlay-types";
 
+const CHART_LOADING = () => (
+  <div className="h-[480px] animate-pulse border border-border-light bg-dark/5" />
+);
+
+// Split by mode so the default (indexed) path never pulls chart.js: indexed
+// renders on @buildcanada/charts, and only raw values — which need one y-axis
+// per unit, something Grapher can't express — still loads chart.js.
+const OverlayIndexedChart = dynamic(() => import("./OverlayIndexedChart"), {
+  ssr: false,
+  loading: CHART_LOADING,
+});
+
 const OverlayChart = dynamic(() => import("./OverlayChart"), {
   ssr: false,
-  loading: () => (
-    <div className="h-[480px] animate-pulse border border-border-light bg-dark/5" />
-  ),
+  loading: CHART_LOADING,
 });
 
 // auburn-600, lake-600, pine-600 from the brand palette.
@@ -189,7 +199,11 @@ export default function CanvasClient() {
       {/* Chart is the primary content — it comes first. */}
       <div>
         {loadedSeries.length > 0 ? (
-          <OverlayChart series={loadedSeries} mode={mode} />
+          mode === "indexed" ? (
+            <OverlayIndexedChart series={loadedSeries} />
+          ) : (
+            <OverlayChart series={loadedSeries} />
+          )
         ) : (
           <div className="flex h-[480px] items-center justify-center border border-border-light">
             <p className="type-body text-dark/60">

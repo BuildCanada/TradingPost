@@ -1,3 +1,4 @@
+import "@buildcanada/charts/styles.css";
 import type { Metadata } from "next";
 import { getSiteConfig } from "@/lib/api";
 import { getEconomicSeries } from "@/lib/api/economy";
@@ -33,10 +34,10 @@ export const metadata: Metadata = {
 const GRAY = "#6f6a63";
 const BD = "#CDC4BD";
 
-// A chart card: meta row, chart title + chart, and the source attribution
-// the data licences require. Cards tile 2×2 on desktop within their section,
-// ruled by the design's warm hairlines; `wide` cards span both columns
-// (the headline chart).
+// A chart card: chart title + chart, and the source attribution the data
+// licences require. Each card is its own bordered panel so the charts read as
+// distinct objects rather than cells in a ruled grid; they tile 2-up on
+// desktop within their section.
 function IndicatorCard({
   indicator,
   wide,
@@ -46,9 +47,7 @@ function IndicatorCard({
 }) {
   return (
     <section
-      className={`flex flex-col border-[#CDC4BD] border-b px-[clamp(24px,5vw,88px)] pb-[clamp(32px,4vw,56px)] ${wide
-        ? "pt-[clamp(20px,2.5vw,32px)] lg:col-span-2"
-        : "pt-[clamp(32px,4vw,56px)] lg:[&:nth-child(odd):not(:last-child)]:border-r"
+      className={`flex flex-col border-2 border-dark bg-bg p-[clamp(20px,2.5vw,32px)] ${wide ? "lg:col-span-2" : ""
         }`}
     >
       <StateChart spec={indicator.spec} title={indicator.title} wide={wide} />
@@ -116,43 +115,41 @@ export default async function StateOfTheNationPage() {
         <div className="mb-4 type-label uppercase tracking-[0.16em] text-auburn-800">
           State of the Nation · 2026
         </div>
-        <h1 className="m-0 font-display font-medium text-[clamp(2.4rem,4.6vw,3.8rem)] leading-[0.99] tracking-[-0.03em] text-balance">
+        <h1 className="m-0 font-display font-bold text-[clamp(2.4rem,4.6vw,3.8rem)] leading-[0.99] tracking-[-0.03em] text-balance">
           State of the Nation
         </h1>
         <p className="mt-3 font-display text-[clamp(1.05rem,1.9vw,1.45rem)] leading-snug text-dark/70 text-balance">
-          We are not yet the most prosperous country on earth. But we could be.
+          Canada should be the most prosperous country on earth. Here&rsquo;s
+          the current state of play.
         </p>
       </header>
 
       <div id="indicators">
-        {sections.map((section) => {
-          // Wide cards render full-width above the 2×2 grid, outside it so
-          // the grid's odd/even column rules stay aligned.
-          const wideIndicators = section.indicators.filter((i) => i.wide);
-          const gridIndicators = section.indicators.filter((i) => !i.wide);
-          return (
-            <section key={section.id} id={section.id}>
-              <div
-                className="px-[clamp(24px,5vw,88px)] pt-[clamp(24px,3vw,40px)] pb-[clamp(12px,1.5vw,20px)]"
-                style={{ borderBottom: `1px solid ${BD}` }}
-              >
-                <h2 className="m-0 font-display font-medium text-[clamp(1.7rem,2.6vw,2.3rem)] leading-[1.02] tracking-[-0.02em]">
-                  {section.title}
-                </h2>
-              </div>
-              {wideIndicators.map((indicator) => (
-                <IndicatorCard key={indicator.n} indicator={indicator} wide />
+        {sections.map((section) => (
+          <section key={section.id} id={section.id}>
+            <div
+              className="px-[clamp(24px,5vw,88px)] pt-[clamp(24px,3vw,40px)] pb-[clamp(12px,1.5vw,20px)]"
+              style={{ borderBottom: `1px solid ${BD}` }}
+            >
+              <h2 className="m-0 font-display font-semibold text-[clamp(1.7rem,2.6vw,2.3rem)] leading-[1.02] tracking-[-0.02em]">
+                {section.title}
+              </h2>
+            </div>
+            {/* Cards carry their own borders now, so the page padding and the
+                spacing between panels live on the grid rather than on each
+                card. `wide` indicators still span both columns if any are
+                ever reinstated. */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-[clamp(16px,2vw,28px)] px-[clamp(24px,5vw,88px)] py-[clamp(24px,3vw,40px)]">
+              {section.indicators.map((indicator) => (
+                <IndicatorCard
+                  key={indicator.n}
+                  indicator={indicator}
+                  wide={indicator.wide}
+                />
               ))}
-              {gridIndicators.length > 0 && (
-                <div className="grid grid-cols-1 lg:grid-cols-2">
-                  {gridIndicators.map((indicator) => (
-                    <IndicatorCard key={indicator.n} indicator={indicator} />
-                  ))}
-                </div>
-              )}
-            </section>
-          );
-        })}
+            </div>
+          </section>
+        ))}
       </div>
 
       <section className="px-[clamp(24px,5vw,88px)] py-[clamp(48px,6vw,80px)] text-center">

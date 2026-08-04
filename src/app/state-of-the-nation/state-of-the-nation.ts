@@ -290,7 +290,6 @@ const INDICATORS: SotnIndicator[] = [
     n: "01",
     title: "GDP per capita",
     verdict: "lag",
-    wide: true,
     headline: "Living standards have gone sideways since 2022.",
     body: "Real output per person, in chained 2017 dollars — the clearest single measure of whether living standards are rising. StatCan's quarterly series runs within about two months of the present, and it shows a country producing no more per person than it did four years ago.",
     build: (get) => {

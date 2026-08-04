@@ -119,7 +119,8 @@ export default async function StateOfTheNationPage() {
           State of the Nation
         </h1>
         <p className="mt-3 font-display text-[clamp(1.05rem,1.9vw,1.45rem)] leading-snug text-dark/70 text-balance">
-          Canada should be the most prosperous country on earth. Here's the current state of play.
+          Canada should be the most prosperous country on earth. Here&rsquo;s
+          the current state of play.
         </p>
       </header>
 

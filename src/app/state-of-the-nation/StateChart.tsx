@@ -55,9 +55,6 @@ export type LineSpec = {
 
 export type ChartSpec = LineSpec;
 
-// Warm grey for secondary mono text — the design's own value, no site token.
-const GRAY = "#6f6a63";
-
 const SERIES_COLORS: Record<SeriesColor, string> = {
   au: "var(--color-auburn-800)",
   ink: "var(--color-dark)",
@@ -81,14 +78,11 @@ export default function StateChart({
       {/* The plain-language title leads, large and bold; the descriptive
           unit line sits under it as smaller subtext. */}
       {title && (
-        <div className="font-display font-medium text-[clamp(1.4rem,2.4vw,1.9rem)] leading-[1.12] tracking-[-0.01em] text-dark text-balance">
+        <div className="font-display font-bold text-[clamp(1.4rem,2.4vw,1.9rem)] leading-[1.12] tracking-[-0.01em] text-dark text-balance">
           {title}
         </div>
       )}
-      <div
-        className="mb-4 mt-1 text-[clamp(0.82rem,1.15vw,0.95rem)] leading-snug"
-        style={{ color: GRAY }}
-      >
+      <div className="mb-4 mt-1 font-medium text-[clamp(0.82rem,1.15vw,0.95rem)] leading-snug text-dark/70">
         {spec.unit}
       </div>
       {spec.legend && (
@@ -104,8 +98,8 @@ export default function StateChart({
                 }}
               />
               <span
-                className="type-label-sm uppercase"
-                style={{ letterSpacing: "0.08em", color: GRAY }}
+                className="type-label-sm font-semibold uppercase text-dark/80"
+                style={{ letterSpacing: "0.08em" }}
               >
                 {lg.label}
               </span>

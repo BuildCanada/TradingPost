@@ -117,6 +117,28 @@ html {
   100% { transform: rotate(0deg); }
 }
 
+/* ─── Multi-step form transitions ─── */
+
+/* Each field in a step rises into place as it fades in. Staggered by an
+   inline animation-delay from the field's index. `forwards` plus the
+   reduced-motion override above means these still end up visible when
+   animation is disabled. */
+@keyframes stepFieldIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.step-field {
+  opacity: 0;
+  animation: stepFieldIn 340ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
 .accordion-expand {
   display: grid;
   grid-template-rows: 1fr;

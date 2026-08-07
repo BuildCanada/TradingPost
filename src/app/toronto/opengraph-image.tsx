@@ -3,7 +3,7 @@ import {
   ElectionOGImage,
   OG_SIZE,
   logoDataUri,
-} from "./elections/2026/election-og";
+} from "./vote/2026/election-og";
 
 export const alt = "Build Canada Toronto";
 export const size = OG_SIZE;

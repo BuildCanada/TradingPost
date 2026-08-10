@@ -31,6 +31,7 @@ function formatDate(dateStr: string | null | undefined, fallback?: string): stri
   const d = new Date(dateStr || fallback || '');
   if (isNaN(d.getTime())) return '';
   return d.toLocaleDateString("en-CA", {
+    timeZone: "America/Toronto",
     year: "numeric",
     month: "short",
     day: "numeric",

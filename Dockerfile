@@ -26,7 +26,17 @@ ENV TRACKER_API_BASE=$TRACKER_API_BASE
 ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 ENV NEXT_PUBLIC_POSTHOG_TOKEN=$NEXT_PUBLIC_POSTHOG_TOKEN
 
-RUN pnpm run build
+# PostHog source map upload configuration. The project ID is not sensitive and
+# can be passed as a build argument. Pass POSTHOG_API_KEY as a BuildKit secret
+# so it is not persisted in the image history or build cache.
+ARG POSTHOG_PROJECT_ID
+ENV POSTHOG_PROJECT_ID=$POSTHOG_PROJECT_ID
+
+RUN --mount=type=secret,id=POSTHOG_API_KEY \
+    if [ -f /run/secrets/POSTHOG_API_KEY ]; then \
+      export POSTHOG_API_KEY="$(cat /run/secrets/POSTHOG_API_KEY)"; \
+    fi; \
+    pnpm run build
 
 FROM base AS runner
 WORKDIR /app

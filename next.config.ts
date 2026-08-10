@@ -1,3 +1,4 @@
+import { withPostHogConfig } from "@posthog/nextjs-config";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -164,4 +165,16 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+const posthogApiKey = process.env.POSTHOG_API_KEY;
+const posthogProjectId = process.env.POSTHOG_PROJECT_ID;
+
+export default withPostHogConfig(nextConfig, {
+  personalApiKey: posthogApiKey ?? "",
+  projectId: posthogProjectId,
+  sourcemaps: {
+    // Keep builds working in local development and deployments where source
+    // map upload credentials have not been configured yet.
+    enabled: Boolean(posthogApiKey && posthogProjectId),
+    deleteAfterUpload: true,
+  },
+});

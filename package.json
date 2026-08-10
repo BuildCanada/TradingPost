@@ -19,6 +19,7 @@
     "@buildcanada/colours": "^0.3.3",
     "@buildcanada/components": "^0.3.5",
     "@cloudflare/stream-react": "^1.9.3",
+    "@posthog/nextjs-config": "^1.9.68",
     "@radix-ui/react-checkbox": "^1.3.3",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-select": "^2.2.5",

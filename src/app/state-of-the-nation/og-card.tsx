@@ -1,4 +1,5 @@
 import type { EconomySeriesResponse } from "@/lib/api/economy";
+import { formatEditorialMonth } from "@/lib/date-format";
 import { CANADA_COLOR } from "./indicators";
 import { formatValue } from "./units";
 
@@ -78,14 +79,8 @@ function endDot(x: number, y: number, fill: string): string {
 // Monthly points carry an ISO first-of-month date; annual points only a year.
 function timeLabel(point: { year: number; date?: string }): string {
   if (point.date) {
-    const parsed = new Date(point.date);
-    if (!Number.isNaN(parsed.getTime())) {
-      return new Intl.DateTimeFormat("en-CA", {
-        month: "short",
-        year: "numeric",
-        timeZone: "UTC",
-      }).format(parsed);
-    }
+    const formatted = formatEditorialMonth(point.date);
+    if (formatted) return formatted;
   }
   return String(Math.floor(point.year));
 }

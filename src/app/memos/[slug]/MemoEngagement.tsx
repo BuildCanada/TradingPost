@@ -5,6 +5,7 @@ import { Dialog } from "@base-ui/react/dialog";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { formatEditorialLongDate } from "@/lib/date-format";
 
 type Endorser = { name: string; created_at: string };
 type Critique = { id: number; name: string; body: string; created_at: string };
@@ -47,16 +48,7 @@ async function postJson(
 }
 
 function formatDate(iso: string) {
-  try {
-    return new Date(iso).toLocaleDateString("en-CA", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-      timeZone: "UTC",
-    });
-  } catch {
-    return "";
-  }
+  return formatEditorialLongDate(iso);
 }
 
 function splitFirstSentence(text: string): { first: string; rest: string } {

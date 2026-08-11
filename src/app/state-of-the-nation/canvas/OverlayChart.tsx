@@ -12,6 +12,7 @@ import {
 } from "chart.js";
 import { axisLabel, formatValue } from "../units";
 import type { OverlaySeries } from "./overlay-types";
+import { formatEditorialMonth } from "@/lib/date-format";
 
 // Raw-value overlay: one y-axis per feed, because feeds carry different units
 // (a rate against a dollar figure against a count). This is the one canvas
@@ -29,14 +30,8 @@ ChartJS.register(
   Legend,
 );
 
-const MONTH_FORMAT = new Intl.DateTimeFormat("en-CA", {
-  month: "short",
-  year: "numeric",
-  timeZone: "UTC",
-});
-
 function formatMonth(isoDate: string): string {
-  return MONTH_FORMAT.format(new Date(isoDate));
+  return formatEditorialMonth(isoDate);
 }
 
 export default function OverlayChart({ series }: { series: OverlaySeries[] }) {

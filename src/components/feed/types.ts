@@ -1,3 +1,5 @@
+import { formatEditorialDate } from "@/lib/date-format";
+
 export interface FeedItem {
   id: string;
   type: string;
@@ -47,9 +49,5 @@ export function isIGVideo(item: FeedItem): boolean {
 }
 
 export function formatFeedDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  });
+  return formatEditorialDate(dateStr);
 }

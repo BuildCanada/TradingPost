@@ -17,5 +17,6 @@ export const NAV_LINKS: NavLink[] = [
 export const TORONTO_NAV_LINKS: NavLink[] = [
   { label: "Canada", href: "/" },
   { label: "Memos", href: "/toronto/memos" },
+  { label: "Vote 2026", href: "/toronto/vote/2026" },
   { label: "About", href: "/toronto/about" },
 ];

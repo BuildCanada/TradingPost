@@ -34,6 +34,15 @@ export type SurveyQuestion = {
   id: string;
   type: SurveyQuestionType;
   label: string;
+  /**
+   * Background a voter needs before they can answer: what the city is already
+   * doing, what the trade-off is, which powers Toronto actually holds. A
+   * paragraph, not a hint — several of these questions are unanswerable
+   * without it.
+   *
+   * Distinct from `help`, which is guidance about the field itself.
+   */
+  context?: string;
   /** Shown under the label, for context or a caveat. */
   help?: string;
   topic?: string;

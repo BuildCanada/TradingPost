@@ -16,10 +16,11 @@ import { forwardedHubspotContext } from "@/lib/hubspot-context";
 //
 // `election` is checked against the registry before it reaches the API, so a
 // client can't aim this at an arbitrary slug. The answers themselves are
-// passed through untouched: the question set lives in the survey page's
-// surveyData.ts and is meant to change without a deploy on either side, so
-// validating question ids here would just reintroduce the coupling. York
-// Factory applies structural limits (count, key and value length).
+// passed through untouched: the question set is York Factory's, served from
+// there and rendered by the survey page, so validating question ids in this
+// proxy would only add a third copy of them to keep in step. York Factory
+// applies structural limits (count, key and value length) and owns the
+// question ids on both sides of the round trip.
 
 const SLUG_PATTERN = /^[a-z0-9-]{1,100}$/;
 const REGION_PATTERN = /^[a-z0-9-]{1,50}$/;

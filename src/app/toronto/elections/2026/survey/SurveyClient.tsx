@@ -6,13 +6,8 @@ import { ArrowRight } from "lucide-react";
 
 import { Select } from "@/components/ui/select";
 
-import {
-  SURVEY_META,
-  SURVEY_STEPS,
-  SURVEY_STEP_COUNT,
-  YES_NO,
-  type SurveyQuestion,
-} from "./surveyData";
+import type { Survey, SurveyQuestion } from "@/lib/elections/survey";
+
 import { submitSurvey } from "./submitSurvey";
 
 export type SurveyAnswers = Record<string, string>;
@@ -25,6 +20,19 @@ const FIELD_CLASS =
 const CHOICE_CLASS =
   "flex cursor-pointer items-center gap-3 border border-border-light bg-white px-4 py-3.5 text-[17px] transition-colors hover:border-dark has-checked:border-dark";
 const RADIO_CLASS = "size-[17px] m-0 accent-accent";
+
+/** Copy the CMS doesn't have to supply. Only the fallbacks live here — the
+ *  survey's own meta wins whenever it sets a field. */
+const META_FALLBACK = {
+  title: "Toronto priorities survey",
+  intro: "",
+  submitLabel: "Submit survey",
+  thankYou: {
+    title: "Thank you. Your answers are in.",
+    body: "We read every response.",
+    restartLabel: "Start again",
+  },
+} as const;
 
 /** Entrance delay for the nth element in a step, capped so a long step's last
  *  field doesn't sit blank waiting its turn. */
@@ -52,7 +60,7 @@ function errorFor(question: SurveyQuestion, value: string): string | null {
   return null;
 }
 
-export default function SurveyClient() {
+export default function SurveyClient({ survey }: { survey: Survey }) {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<SurveyAnswers>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -60,8 +68,15 @@ export default function SurveyClient() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
 
-  const isLastStep = step === SURVEY_STEP_COUNT - 1;
-  const currentStep = SURVEY_STEPS[step];
+  // Everything about the shape of the form comes from the fetched survey, so a
+  // question added in the CMS shows up here with no change to this component.
+  const steps = survey.steps;
+  const stepCount = steps.length;
+  const meta = survey.meta;
+  const thankYou = { ...META_FALLBACK.thankYou, ...(meta.thankYou ?? {}) };
+
+  const isLastStep = step === stepCount - 1;
+  const currentStep = steps[step];
 
   const set = (id: string, value: string) => {
     setAnswers((prev) => ({ ...prev, [id]: value }));
@@ -90,7 +105,7 @@ export default function SurveyClient() {
 
   const next = () => {
     if (!validateStep()) return;
-    setStep((s) => Math.min(SURVEY_STEP_COUNT - 1, s + 1));
+    setStep((s) => Math.min(stepCount - 1, s + 1));
     scrollTop();
   };
 
@@ -106,7 +121,7 @@ export default function SurveyClient() {
     setSubmitting(true);
     setSubmitError(null);
     try {
-      await submitSurvey(answers);
+      await submitSurvey(survey, answers);
       setDone(true);
       scrollTop();
     } catch {
@@ -134,10 +149,10 @@ export default function SurveyClient() {
 
         <div className="px-6 pt-8 md:px-10">
           <h1 className="mb-3 font-sans font-medium leading-[1.03] tracking-[-0.02em] text-[clamp(2rem,5vw,2.875rem)] text-balance">
-            {SURVEY_META.title}
+            {meta.title ?? META_FALLBACK.title}
           </h1>
           <p className="type-lead text-text-secondary text-pretty">
-            {SURVEY_META.intro}
+            {meta.intro ?? META_FALLBACK.intro}
           </p>
         </div>
 
@@ -145,10 +160,10 @@ export default function SurveyClient() {
           <div className="animate-fade-in border-t border-border-light px-6 pt-14 pb-16 md:px-10">
             <div className="mb-7 h-0.5 w-10 bg-accent" />
             <h2 className="mb-4 font-sans font-medium leading-[1.05] tracking-[-0.015em] text-[clamp(1.75rem,4vw,2.375rem)] text-balance">
-              {SURVEY_META.thankYou.title}
+              {thankYou.title}
             </h2>
             <p className="type-lead mb-8 text-text-secondary text-pretty">
-              {SURVEY_META.thankYou.body}
+              {thankYou.body}
             </p>
             <div className="flex flex-wrap items-center gap-4">
               <button
@@ -156,7 +171,7 @@ export default function SurveyClient() {
                 onClick={restart}
                 className="type-button cursor-pointer border border-border-light px-7 py-4 transition-colors hover:bg-linen-200"
               >
-                {SURVEY_META.thankYou.restartLabel}
+                {thankYou.restartLabel}
               </button>
               <Link
                 href="/toronto/elections/2026"
@@ -172,20 +187,20 @@ export default function SurveyClient() {
             {/* ── Progress ───────────────────────────────────── */}
             <div className="flex items-center gap-4 px-6 pt-7 md:px-10">
               <span className="type-label text-dark">
-                Step {step + 1} of {SURVEY_STEP_COUNT}
+                Step {step + 1} of {stepCount}
               </span>
               <div
                 className="h-0.5 flex-1 bg-border-light"
                 role="progressbar"
                 aria-valuenow={step + 1}
                 aria-valuemin={1}
-                aria-valuemax={SURVEY_STEP_COUNT}
+                aria-valuemax={stepCount}
                 aria-label="Survey progress"
               >
                 <div
                   className="h-0.5 bg-accent transition-[width] duration-300"
                   style={{
-                    width: `${((step + 1) / SURVEY_STEP_COUNT) * 100}%`,
+                    width: `${((step + 1) / stepCount) * 100}%`,
                   }}
                 />
               </div>
@@ -261,7 +276,7 @@ export default function SurveyClient() {
                     {isLastStep
                       ? submitting
                         ? "Sending…"
-                        : SURVEY_META.submitLabel
+                        : meta.submitLabel ?? META_FALLBACK.submitLabel
                       : "Next"}
                   </button>
                 </div>
@@ -292,6 +307,10 @@ function Question({
 }) {
   // Choice groups get a <legend>; single inputs get a real <label for>.
   const isGroup = question.type === "radio" || question.type === "yesno";
+
+  // Omitted entirely for free-text questions, so every choice renderer below
+  // reads it through this rather than asserting it exists.
+  const options = question.options ?? [];
 
   const labelNode = (
     <>
@@ -346,14 +365,14 @@ function Question({
           name={question.id}
           value={value}
           onValueChange={onChange}
-          options={question.options}
+          options={options}
           placeholder={question.placeholder}
           invalid={Boolean(error)}
           className="max-w-[420px]"
         />
       ) : question.type === "radio" ? (
         <div className="grid gap-2">
-          {question.options.map((option) => (
+          {options.map((option) => (
             <label key={option.value} className={CHOICE_CLASS}>
               <input
                 type="radio"
@@ -368,9 +387,10 @@ function Question({
           ))}
         </div>
       ) : (
-        /* yesno */
+        /* yesno — the API sends the Yes/No pair like any other options list,
+           so results group by values this component never invents. */
         <div className="flex gap-2">
-          {YES_NO.map((option) => (
+          {options.map((option) => (
             <label
               key={option.value}
               className={`${CHOICE_CLASS} type-button max-w-[160px] flex-1 justify-center`}

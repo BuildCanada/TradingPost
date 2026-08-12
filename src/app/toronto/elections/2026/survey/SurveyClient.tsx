@@ -312,104 +312,145 @@ function Question({
   // reads it through this rather than asserting it exists.
   const options = question.options ?? [];
 
+  // The question reads as a heading — one step down from the step title's 26px
+  // — rather than as a form label, because several of these are a sentence long
+  // and carry a context paragraph underneath.
+  const LABEL_CLASS =
+    "font-sans text-[19px] font-medium leading-[1.3] tracking-[-0.01em] text-dark text-pretty";
+
   const labelNode = (
     <>
       {question.label}
-      {question.required ? "*" : <span className="normal-case"> (optional)</span>}
+      {question.required ? (
+        <span className="text-accent">*</span>
+      ) : (
+        <span className="type-body-sm font-normal text-text-muted">
+          {" "}
+          (optional)
+        </span>
+      )}
     </>
   );
 
+  // `help` sits under the context paragraph, so tie both to the field by
+  // reference rather than trusting proximity alone.
+  const contextId = `${question.id}-context`;
+  const helpId = `${question.id}-help`;
+  const describedBy =
+    [question.context && contextId, question.help && helpId]
+      .filter(Boolean)
+      .join(" ") || undefined;
+
   return (
-    <fieldset className="step-field grid gap-2.5 border-0 p-0 m-0" style={style}>
+    <fieldset
+      className="step-field grid gap-3 border-0 p-0 m-0"
+      style={style}
+      aria-describedby={isGroup ? describedBy : undefined}
+    >
       {isGroup ? (
-        <legend className="type-label text-text-secondary p-0">
-          {labelNode}
-        </legend>
+        <legend className={`${LABEL_CLASS} p-0`}>{labelNode}</legend>
       ) : (
-        <label
-          htmlFor={question.id}
-          className="type-label text-text-secondary"
-        >
+        <label htmlFor={question.id} className={LABEL_CLASS}>
           {labelNode}
         </label>
       )}
 
-      {question.help && (
-        <p className="type-caption text-text-muted">{question.help}</p>
+      {/* The briefing a voter needs before they can answer: directly under the
+          question, with a rule down its left edge so it reads as background
+          rather than as part of the ask. */}
+      {question.context && (
+        <p
+          id={contextId}
+          className="type-body-sm max-w-[62ch] border-l-2 border-border-light pl-4 text-text-secondary text-pretty"
+        >
+          {question.context}
+        </p>
       )}
 
-      {question.type === "text" || question.type === "email" ? (
-        <input
-          id={question.id}
-          name={question.id}
-          type={question.type === "email" ? "email" : "text"}
-          autoComplete={autoCompleteFor(question.id)}
-          value={value}
-          placeholder={question.placeholder}
-          onChange={(e) => onChange(e.target.value)}
-          className={`${FIELD_CLASS} ${question.id === "postal_code" ? "max-w-[240px]" : "max-w-[420px]"}`}
-        />
-      ) : question.type === "textarea" ? (
-        <textarea
-          id={question.id}
-          name={question.id}
-          rows={question.rows ?? 4}
-          value={value}
-          placeholder={question.placeholder}
-          onChange={(e) => onChange(e.target.value)}
-          className={FIELD_CLASS}
-        />
-      ) : question.type === "select" ? (
-        <Select
-          id={question.id}
-          name={question.id}
-          value={value}
-          onValueChange={onChange}
-          options={options}
-          placeholder={question.placeholder}
-          invalid={Boolean(error)}
-          className="max-w-[420px]"
-        />
-      ) : question.type === "radio" ? (
-        <div className="grid gap-2">
-          {options.map((option) => (
-            <label key={option.value} className={CHOICE_CLASS}>
-              <input
-                type="radio"
-                name={question.id}
-                value={option.value}
-                checked={value === option.value}
-                onChange={() => onChange(option.value)}
-                className={RADIO_CLASS}
-              />
-              {option.label}
-            </label>
-          ))}
-        </div>
-      ) : (
-        /* yesno — the API sends the Yes/No pair like any other options list,
-           so results group by values this component never invents. */
-        <div className="flex gap-2">
-          {options.map((option) => (
-            <label
-              key={option.value}
-              className={`${CHOICE_CLASS} type-button max-w-[160px] flex-1 justify-center`}
-            >
-              <input
-                type="radio"
-                name={question.id}
-                value={option.value}
-                checked={value === option.value}
-                onChange={() => onChange(option.value)}
-                className="size-4 m-0 accent-accent"
-              />
-              {option.label}
-            </label>
-          ))}
-        </div>
-      )}
+      {/* The field and its own guidance, grouped so the choices sit tighter to
+          each other than to the briefing above. */}
+      <div className="grid content-start gap-2.5">
+        {question.help && (
+          <p id={helpId} className="type-caption text-text-muted">
+            {question.help}
+          </p>
+        )}
 
-      {error && <p className="type-label-sm text-accent">{error}</p>}
+        {question.type === "text" || question.type === "email" ? (
+          <input
+            id={question.id}
+            name={question.id}
+            type={question.type === "email" ? "email" : "text"}
+            autoComplete={autoCompleteFor(question.id)}
+            aria-describedby={describedBy}
+            value={value}
+            placeholder={question.placeholder}
+            onChange={(e) => onChange(e.target.value)}
+            className={`${FIELD_CLASS} ${question.id === "postal_code" ? "max-w-[240px]" : "max-w-[420px]"}`}
+          />
+        ) : question.type === "textarea" ? (
+          <textarea
+            id={question.id}
+            name={question.id}
+            rows={question.rows ?? 4}
+            aria-describedby={describedBy}
+            value={value}
+            placeholder={question.placeholder}
+            onChange={(e) => onChange(e.target.value)}
+            className={FIELD_CLASS}
+          />
+        ) : question.type === "select" ? (
+          <Select
+            id={question.id}
+            name={question.id}
+            value={value}
+            onValueChange={onChange}
+            options={options}
+            placeholder={question.placeholder}
+            invalid={Boolean(error)}
+            className="max-w-[420px]"
+          />
+        ) : question.type === "radio" ? (
+          <div className="grid gap-2">
+            {options.map((option) => (
+              <label key={option.value} className={CHOICE_CLASS}>
+                <input
+                  type="radio"
+                  name={question.id}
+                  value={option.value}
+                  checked={value === option.value}
+                  onChange={() => onChange(option.value)}
+                  className={RADIO_CLASS}
+                />
+                {option.label}
+              </label>
+            ))}
+          </div>
+        ) : (
+          /* yesno — the API sends the Yes/No pair like any other options list,
+             so results group by values this component never invents. */
+          <div className="flex gap-2">
+            {options.map((option) => (
+              <label
+                key={option.value}
+                className={`${CHOICE_CLASS} type-button max-w-[160px] flex-1 justify-center`}
+              >
+                <input
+                  type="radio"
+                  name={question.id}
+                  value={option.value}
+                  checked={value === option.value}
+                  onChange={() => onChange(option.value)}
+                  className="size-4 m-0 accent-accent"
+                />
+                {option.label}
+              </label>
+            ))}
+          </div>
+        )}
+
+        {error && <p className="type-label-sm text-accent">{error}</p>}
+      </div>
     </fieldset>
   );
 }

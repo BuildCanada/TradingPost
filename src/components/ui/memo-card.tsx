@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { formatEditorialDate } from "@/lib/date-format";
 
 export interface Memo {
   id: string;
@@ -28,13 +29,7 @@ export function formatCategory(category: string | null | undefined): string {
 }
 
 function formatDate(dateStr: string | null | undefined, fallback?: string): string {
-  const d = new Date(dateStr || fallback || '');
-  if (isNaN(d.getTime())) return '';
-  return d.toLocaleDateString("en-CA", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  return formatEditorialDate(dateStr || fallback);
 }
 
 interface CardCTAProps {

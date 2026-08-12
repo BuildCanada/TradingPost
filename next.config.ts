@@ -1,3 +1,4 @@
+import { withPostHogConfig } from "@posthog/nextjs-config";
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
@@ -50,6 +51,37 @@ const nextConfig: NextConfig = {
       {
         source: "/prosperity-dashboard/:path*",
         destination: "/state-of-the-nation/:path*",
+        permanent: true,
+      },
+      // Election coverage lives under /vote: the index at /vote, and each
+      // region at /<city>/vote/<year>. Two earlier shapes are still out in the
+      // world — Toronto's /toronto/elections/2026 (indexed, and the target of
+      // shared pledge links) and Brampton's /elections/brampton/2026 — so both
+      // redirect. Each points straight at its final destination; none of these
+      // chain through another redirect.
+      {
+        source: "/elections",
+        destination: "/vote",
+        permanent: true,
+      },
+      {
+        source: "/elections/brampton/2026",
+        destination: "/brampton/vote/2026",
+        permanent: true,
+      },
+      {
+        source: "/elections/brampton/2026/:path*",
+        destination: "/brampton/vote/2026/:path*",
+        permanent: true,
+      },
+      {
+        source: "/:city(toronto|brampton|hamilton|ottawa)/elections",
+        destination: "/:city/vote",
+        permanent: true,
+      },
+      {
+        source: "/:city(toronto|brampton|hamilton|ottawa)/elections/:path*",
+        destination: "/:city/vote/:path*",
         permanent: true,
       },
     ];
@@ -133,4 +165,16 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+const posthogApiKey = process.env.POSTHOG_API_KEY;
+const posthogProjectId = process.env.POSTHOG_PROJECT_ID;
+
+export default withPostHogConfig(nextConfig, {
+  personalApiKey: posthogApiKey ?? "",
+  projectId: posthogProjectId,
+  sourcemaps: {
+    // Keep builds working in local development and deployments where source
+    // map upload credentials have not been configured yet.
+    enabled: Boolean(posthogApiKey && posthogProjectId),
+    deleteAfterUpload: true,
+  },
+});

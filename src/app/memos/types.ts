@@ -1,3 +1,5 @@
+import { formatEditorialDate } from "@/lib/date-format";
+
 export interface MemoItem {
   id: string;
   title: string;
@@ -19,12 +21,7 @@ export interface MemoItem {
 }
 
 export function formatDate(dateStr: string | null, fallback: string) {
-  const d = new Date(dateStr || fallback);
-  return d.toLocaleDateString("en-CA", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  return formatEditorialDate(dateStr || fallback);
 }
 
 export function shortenName(name: string): string {

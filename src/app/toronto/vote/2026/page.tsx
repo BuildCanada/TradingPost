@@ -2,12 +2,7 @@ import type { Metadata } from "next";
 import { ElectionLanding } from "@/components/elections/ElectionLanding";
 import { WardMap, WardMapDefs } from "@/components/elections/WardMap";
 import { WARD_GEO } from "./wardGeo";
-import {
-  ELECTION,
-  FRONT_RUNNER_NOTE,
-  MAYORAL_FRONT_RUNNER_KEYS,
-  getToronto2026,
-} from "./data";
+import { ELECTION, getToronto2026 } from "./data";
 
 export const metadata: Metadata = {
   title: "Toronto 2026 Election",
@@ -48,8 +43,6 @@ export default async function Toronto2026ElectionPage() {
         ),
         wardsBlurb:
           "Twenty-five wards, twenty-five council races. Select a ward to see the candidates running to represent it.",
-        frontRunnerKeys: MAYORAL_FRONT_RUNNER_KEYS,
-        frontRunnerNote: FRONT_RUNNER_NOTE,
         closingHeadline: (
           <>The Toronto you know is possible doesn&rsquo;t vote itself in.</>
         ),

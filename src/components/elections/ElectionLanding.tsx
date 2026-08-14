@@ -21,8 +21,8 @@ import type {
    The structure is fixed — hero, countdowns, the mayoral field, the ward
    finder, the closing pledge — and each region supplies its own copy plus,
    where it has one, its ward locator map. Sections a region can't fill drop
-   out rather than render empty: no front-runner keys means no front-runner
-   band, no advance-vote date in the registry means no advance-vote counter. */
+   out rather than render empty: no advance-vote date in the registry means
+   no advance-vote counter. */
 
 export type LandingContent = {
   heroTitle: ReactNode;
@@ -33,14 +33,6 @@ export type LandingContent = {
   closingBlurb: ReactNode;
   /** the fine print about where the roster comes from */
   sourceNote: ReactNode;
-  /**
-   * Mayoral candidates given the prominent front-runner treatment, by
-   * `nameKey` (full name, not last name — Toronto's field has both an Olivia
-   * and a Braeden Chow). Omit where we aren't calling a front runner.
-   */
-  frontRunnerKeys?: string[];
-  /** the caption under the front-runner heading; required when keys are set */
-  frontRunnerNote?: ReactNode;
 };
 
 export function ElectionLanding({
@@ -58,10 +50,6 @@ export function ElectionLanding({
   /** this region's locator map for a ward, when it has ward geometry */
   renderWardMap?: (ward: WardView) => ReactNode;
 }) {
-  const keys = new Set(content.frontRunnerKeys ?? []);
-  const frontRunners = view.mayoral.filter((c) => keys.has(c.key));
-  const field = view.mayoral.filter((c) => !keys.has(c.key));
-
   // Pre-rendered here rather than inside the lookup, because the locator map
   // is server-side geometry the client component can't build.
   const wardCards: Record<number, ReactNode> = {};
@@ -103,31 +91,8 @@ export function ElectionLanding({
             </h2>
           </div>
 
-          {frontRunners.length > 0 && (
-            <>
-              <div className="px-6 md:px-14 pb-6 border-t border-border-light pt-8">
-                <p className="type-label text-accent mb-2.5">Front runners</p>
-                <p className="font-serif text-[1.05rem] leading-[1.45] text-dark/80 max-w-[52ch]">
-                  {content.frontRunnerNote}
-                </p>
-              </div>
-              <div className="grid sm:grid-cols-2 gap-px bg-border-light border-y-2 border-dark">
-                {frontRunners.map((cand) => (
-                  <FrontRunnerCard
-                    key={cand.key}
-                    candidate={cand}
-                    election={election.slug}
-                  />
-                ))}
-              </div>
-              <p className="px-6 md:px-14 pt-8 pb-6 type-label text-text-secondary !tracking-[0.08em]">
-                The rest of the field
-              </p>
-            </>
-          )}
-
           <div className="grid grid-cols-[repeat(auto-fill,minmax(272px,1fr))] border-t border-l border-border-light">
-            {field.map((cand) => (
+            {view.mayoral.map((cand) => (
               <MayoralCard
                 key={cand.key}
                 candidate={cand}
@@ -326,42 +291,6 @@ function KeyDates({ election }: { election: SupportedElection }) {
 }
 
 // ── Candidate cards ────────────────────────────────────────────────────────
-
-function FrontRunnerCard({
-  candidate,
-  election,
-}: {
-  candidate: CandidateView;
-  election: string;
-}) {
-  return (
-    <div className="bg-bg-alt flex items-center gap-6 sm:gap-7 px-6 md:px-14 py-9">
-      <div className="relative flex-none size-[clamp(104px,11vw,148px)] bg-dark overflow-hidden flex items-center justify-center font-sans font-medium text-[clamp(2rem,3vw,2.6rem)] tracking-[-0.03em] text-bg">
-        {candidate.image ? (
-          <Image
-            src={candidate.image}
-            alt={candidate.name}
-            fill
-            sizes="148px"
-            className="object-cover object-center"
-            priority
-          />
-        ) : (
-          candidate.initials
-        )}
-      </div>
-      <div className="min-w-0 flex flex-col gap-3">
-        <div className="flex items-center gap-3 flex-wrap">
-          <h3 className="font-sans font-medium text-[clamp(1.6rem,2.6vw,2.15rem)] tracking-[-0.03em] leading-[1.05]">
-            {candidate.name}
-          </h3>
-          {candidate.tag === "Incumbent" && <IncumbentBadge />}
-        </div>
-        <SiteLink candidate={candidate} election={election} race="mayor" />
-      </div>
-    </div>
-  );
-}
 
 function MayoralCard({
   candidate,

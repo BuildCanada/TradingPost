@@ -36,17 +36,6 @@ export { initialsFor, nameKey };
 
 export const ELECTION = getElection("toronto-2026");
 
-/**
- * Mayoral candidates given the prominent front-runner treatment, keyed by
- * `nameKey` (full name, not last name — the field has both an Olivia and a
- * Braeden Chow). Hand-maintained: update as the race develops.
- */
-export const MAYORAL_FRONT_RUNNER_KEYS = ["brad bradford", "olivia chow"];
-
-/** Caption under the front-runner heading — edit to match the current race. */
-export const FRONT_RUNNER_NOTE =
-  "The incumbent mayor and the leading declared challenger.";
-
 /** Zero-padded ward numbers ("01".."25") for static route generation. */
 export const WARD_NUMBERS: string[] = WARD_SHAPES.map((w) => w.n);
 

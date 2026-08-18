@@ -72,10 +72,16 @@ export default async function TorontoMemoDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  let memo;
-  try {
-    memo = await fetchMemo(slug, { publication: PUBLICATION });
-  } catch {
+
+  // The memo and the list backing "related memos" don't depend on each other,
+  // so they go out together rather than one after the other. Related memos are
+  // decorative — if that list fails the memo still renders.
+  const [memo, allMemos] = await Promise.all([
+    fetchMemo(slug, { publication: PUBLICATION }).catch(() => null),
+    fetchMemos({ publication: PUBLICATION }).catch(() => []),
+  ]);
+
+  if (!memo) {
     notFound();
   }
 
@@ -129,7 +135,6 @@ export default async function TorontoMemoDetailPage({
     )
   );
 
-  const allMemos = await fetchMemos({ publication: PUBLICATION });
   const sameCategory = allMemos.filter(
     (m) => m.slug !== memo.slug && memo.category && m.category === memo.category,
   );

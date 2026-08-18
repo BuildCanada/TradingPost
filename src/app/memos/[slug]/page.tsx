@@ -80,10 +80,16 @@ export default async function MemoDetailPage({
   // engagement UI's signed-in / postal-code-ready states.
   const viewer = await getCurrentUser();
 
-  let memo;
-  try {
-    memo = await fetchMemo(slug);
-  } catch {
+  // The memo and the list backing "related memos" don't depend on each other,
+  // so they go out together rather than one after the other. Both must start
+  // after primeAdminPreviewToken, which seeds the token apiFetch reads.
+  // Related memos are decorative — if that list fails the memo still renders.
+  const [memo, allMemos] = await Promise.all([
+    fetchMemo(slug).catch(() => null),
+    fetchMemos().catch(() => []),
+  ]);
+
+  if (!memo) {
     notFound();
   }
 
@@ -142,7 +148,6 @@ export default async function MemoDetailPage({
     generateBreadcrumbSchema(`/memos/${memo.slug}`, memo.title, configData.siteUrl)
   );
 
-  const allMemos = await fetchMemos();
   const sameCategory = allMemos.filter(
     (m) => m.slug !== memo.slug && memo.category && m.category === memo.category,
   );

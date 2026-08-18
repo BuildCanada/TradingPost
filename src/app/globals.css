@@ -32,6 +32,43 @@ html {
   animation: fadeInUp 0.5s ease-out forwards;
 }
 
+/* ─── Loading placeholders ─── */
+
+/* A light band sweeping left→right, in the spirit of the reveal animations
+   below — quieter than a pulsing opacity blink, and it reads as "typesetting
+   in progress" rather than "widget buffering". */
+@keyframes skeletonSweep {
+  from { background-position: 150% 0; }
+  to { background-position: -150% 0; }
+}
+
+/* Placeholder for a line of body text — light grey from the charcoal ramp,
+   one step lighter than --color-border-light so placeholders stay quieter
+   than the rules and frames around them. */
+.skeleton-bar {
+  background-color: var(--color-charcoal-200);
+  background-image: linear-gradient(
+    90deg,
+    transparent 20%,
+    var(--color-charcoal-100) 50%,
+    transparent 80%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: skeletonSweep 2s ease-in-out infinite;
+}
+
+/* Heavier weight, for headings and other display type. */
+.skeleton-bar-strong {
+  background-color: var(--color-charcoal-300);
+}
+
+/* Staggers the sweep down a stack so it travels through the block instead of
+   every line flashing in unison. */
+.skeleton-delay-1 { animation-delay: 0.15s; }
+.skeleton-delay-2 { animation-delay: 0.3s; }
+.skeleton-delay-3 { animation-delay: 0.45s; }
+
 /* Draw stroke forward (dashoffset 1 → 0) */
 @keyframes drawIn {
   from { stroke-dashoffset: 1; }

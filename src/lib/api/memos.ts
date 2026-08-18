@@ -69,29 +69,37 @@ export async function fetchMemos(params?: {
 
   type MemoRow = YFMemo & { key_messages?: unknown[] };
 
-  const all: MemoRow[] = [];
-  let page = 1;
+  const fetchPage = (page: number) =>
+    apiFetch<YFPaginatedResponse<MemoRow>>("/memos", {
+      params: { ...queryParams, page: String(page) },
+      revalidate: 60,
+    });
 
-  while (true) {
-    queryParams.page = String(page);
-    const res = await apiFetch<YFPaginatedResponse<MemoRow>>(
-      "/memos",
-      { params: queryParams, revalidate: 60 }
-    );
-    all.push(...res.data);
-    if (page >= res.pagination.pages) break;
-    page++;
-  }
+  // Author titles don't depend on the memo pages, so this goes out alongside
+  // them rather than waiting for pagination to finish. Failing to resolve
+  // titles isn't fatal — memos still render without them.
+  const teamPromise = apiFetch<YFListResponse<YFTeamMember>>("/team", {
+    revalidate: 3600,
+  }).catch(() => null);
+
+  // Page 1 tells us how many pages there are; the rest are then fetched
+  // concurrently instead of one round trip at a time.
+  const first = await fetchPage(1);
+  const rest = await Promise.all(
+    Array.from({ length: Math.max(0, first.pagination.pages - 1) }, (_, i) =>
+      fetchPage(i + 2),
+    ),
+  );
+
+  const all: MemoRow[] = [first, ...rest].flatMap((res) => res.data);
 
   const authorTitles = new Map<string, string | null>();
-  try {
-    const team = await apiFetch<YFListResponse<YFTeamMember>>("/team", {
-      revalidate: 3600,
-    });
+  const team = await teamPromise;
+  if (team) {
     for (const t of team.data) {
       authorTitles.set(t.slug, t.title ?? null);
     }
-  } catch {}
+  }
 
   return all.map((m) => mapMemo(m, authorTitles));
 }

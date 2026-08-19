@@ -1,6 +1,12 @@
 import { withPostHogConfig } from "@posthog/nextjs-config";
 import type { NextConfig } from "next";
 
+// Where the /progress out-of-home ad URL sends people. GA4 reads utm_* off the
+// landing URL and files the visit under this campaign in its acquisition
+// reports; change the values here and both /progress rules follow.
+const OOH_DESTINATION =
+  "/?utm_source=ooh&utm_medium=offline&utm_campaign=progress";
+
 const nextConfig: NextConfig = {
   async headers() {
     return [
@@ -52,6 +58,25 @@ const nextConfig: NextConfig = {
         source: "/prosperity-dashboard/:path*",
         destination: "/state-of-the-nation/:path*",
         permanent: true,
+      },
+      // /progress is the vanity URL printed on an out-of-home ad — not a page.
+      // It carries campaign parameters to the homepage so GA4 attributes the
+      // visit to the ad; without them a bare redirect to / is invisible,
+      // indistinguishable from organic homepage traffic. Trailing slash
+      // included because skipTrailingSlashRedirect is on, so "/progress/"
+      // won't normalize itself.
+      //
+      // Temporary on purpose: a 308 would sit in a visitor's browser and skip
+      // the server on later visits, so repeat scans would go uncounted.
+      {
+        source: "/progress",
+        destination: OOH_DESTINATION,
+        permanent: false,
+      },
+      {
+        source: "/progress/",
+        destination: OOH_DESTINATION,
+        permanent: false,
       },
       // Election coverage lives under /vote: the index at /vote, and Toronto's
       // pages at /toronto/vote/<year>. Two earlier shapes are still out in the

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import type { WardView } from "@/lib/elections/election-data";
 import type { WardLookupResponse } from "@/lib/elections/ward-lookup";
 
@@ -9,6 +9,22 @@ type State =
   | { status: "loading" }
   | { status: "done"; result: WardLookupResponse }
   | { status: "failed" };
+
+/** A complete postal code, however the visitor spaced or cased it. */
+const POSTAL_CODE = /^([A-Za-z]\d[A-Za-z])[\s-]*(\d[A-Za-z]\d)$/;
+
+function normalize(typed: string): string | null {
+  const match = typed.trim().match(POSTAL_CODE);
+  return match ? `${match[1]} ${match[2]}`.toUpperCase() : null;
+}
+
+/**
+ * Answers already fetched this session, keyed by normalized postal code. A
+ * lookup is a pure function of the code, so correcting a typo back to a code
+ * already tried — or re-submitting the same one — should cost nothing. Module
+ * scope so it survives the section unmounting.
+ */
+const cache = new Map<string, WardLookupResponse>();
 
 /**
  * Postal code → ward lookup for the wards section. The result is a best guess
@@ -32,12 +48,19 @@ export default function WardLookup({
 }) {
   const [postalCode, setPostalCode] = useState("");
   const [state, setState] = useState<State>({ status: "idle" });
+  /** Which lookup is current, so a slow earlier reply can't overwrite a later one. */
+  const latest = useRef(0);
 
-  const handleSubmit = async (event: React.FormEvent) => {
-    event.preventDefault();
-    const typed = postalCode.trim();
+  const lookup = useCallback(async (typed: string) => {
     if (!typed) return;
 
+    const cached = cache.get(normalize(typed) ?? typed);
+    if (cached) {
+      setState({ status: "done", result: cached });
+      return;
+    }
+
+    const request = ++latest.current;
     setState({ status: "loading" });
     try {
       // Sent exactly as typed — the API tolerates any spacing and casing, and
@@ -46,11 +69,30 @@ export default function WardLookup({
         `/api/elections/ward-lookup?postal_code=${encodeURIComponent(typed)}`,
       );
       if (!res.ok) throw new Error(`ward-lookup ${res.status}`);
-      setState({ status: "done", result: await res.json() });
+      const result: WardLookupResponse = await res.json();
+      cache.set(normalize(typed) ?? typed, result);
+      if (request === latest.current) setState({ status: "done", result });
     } catch (error) {
       console.error("[ward-lookup]", error);
-      setState({ status: "failed" });
+      if (request === latest.current) setState({ status: "failed" });
     }
+  }, []);
+
+  // Look up as soon as the field holds a complete postal code, so the answer is
+  // usually on screen before the visitor reaches the button. Only complete
+  // codes fire — half-typed input would just spend requests on
+  // malformed_postal_code — and a short delay keeps a fast typist correcting the
+  // last character from sending two.
+  const complete = normalize(postalCode);
+  useEffect(() => {
+    if (!complete) return;
+    const timer = setTimeout(() => lookup(complete), 200);
+    return () => clearTimeout(timer);
+  }, [complete, lookup]);
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    lookup(postalCode.trim());
   };
 
   return (

@@ -45,6 +45,13 @@ export type SupportedElection = {
   electionDayLabel: string;
   /** e.g. "10:00 a.m. – 8:00 p.m." */
   pollHoursLabel: string;
+  /**
+   * Nomination day, "YYYY-MM-DD". Overrides York Factory's
+   * `nomination_close_date` wherever we show it — set this when the city has
+   * published a date the upstream record hasn't caught up to yet, and drop it
+   * again once upstream agrees.
+   */
+  nominationCloseIso?: string;
   /** first day of advance voting; omitted until the city publishes it */
   advanceVote?: ElectionKeyDate;
   /** deadline to apply to vote by mail; omitted until published */
@@ -63,6 +70,13 @@ export type SupportedElection = {
    * number would match our roster and show a confidently wrong ward.
    */
   wardLookup: boolean;
+  /**
+   * Whether this region's coverage is switched off. The config stays here so
+   * the routes keep type-checking and the pages can be turned back on in one
+   * line, but a hidden election is dropped from the /vote index and its URLs
+   * redirect there (see next.config.ts). Only Toronto is live right now.
+   */
+  hidden?: boolean;
 };
 
 const TORONTO_2026: SupportedElection = {
@@ -79,6 +93,7 @@ const TORONTO_2026: SupportedElection = {
   pollHoursLabel: "10:00 a.m. – 8:00 p.m.",
   // Per the City Clerk's 2026 election calendar:
   // https://www.toronto.ca/city-government/elections/key-dates/
+  nominationCloseIso: "2026-08-21",
   advanceVote: { iso: "2026-10-06", label: "Oct 6 – 11" },
   mailIn: { iso: "2026-09-24", label: "Thu, Sept 24" },
   themeClass: "theme-election",
@@ -100,6 +115,7 @@ const BRAMPTON_2026: SupportedElection = {
   // Brampton hasn't published its advance-vote or vote-by-mail dates yet;
   // those countdowns stay off the page rather than guess at them.
   wardLookup: false,
+  hidden: true,
 };
 
 const HAMILTON_2026: SupportedElection = {
@@ -116,6 +132,7 @@ const HAMILTON_2026: SupportedElection = {
   pollHoursLabel: "10:00 a.m. – 8:00 p.m.",
   // As with Brampton — not yet published by the city.
   wardLookup: false,
+  hidden: true,
 };
 
 const OTTAWA_2026: SupportedElection = {
@@ -132,6 +149,7 @@ const OTTAWA_2026: SupportedElection = {
   pollHoursLabel: "10:00 a.m. – 8:00 p.m.",
   // As with Brampton and Hamilton — not yet published by the city.
   wardLookup: false,
+  hidden: true,
 };
 
 export const SUPPORTED_ELECTIONS: Record<string, SupportedElection> = {

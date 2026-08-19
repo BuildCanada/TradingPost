@@ -14,6 +14,7 @@
 import { WARD_SHAPES } from "./wardGeo";
 import {
   getElectionView,
+  getNominationCloseLabel,
   getWardDetail,
   initialsFor,
   nameKey,
@@ -92,7 +93,7 @@ function fallbackView(): ElectionView {
     name: "Toronto 2026 General Municipal Election",
     electionDateIso: ELECTION.electionDateIso,
     electionDateLabel: "Mon, Oct 26, 2026",
-    nominationCloseLabel: null,
+    nominationCloseLabel: getNominationCloseLabel(ELECTION.slug, null),
     daysUntil: 0,
     mayoral: byLastName(MAYORAL_CANDIDATES).map(toView),
     wards: WARD_ROSTER.map((ward) => ({

@@ -96,6 +96,12 @@ async function describe(summary: ApiElectionSummary): Promise<ActiveElection> {
   };
 }
 
+/** Whether we've switched this election's coverage off — hidden regions are
+ *  left off this index entirely, not just unlinked. */
+function isHidden(slug: string): boolean {
+  return SUPPORTED_ELECTIONS[slug]?.hidden === true;
+}
+
 /**
  * Every election whose vote hasn't happened yet, soonest first. Empty when
  * the API is unreachable — the page renders a fallback in that case.
@@ -104,6 +110,7 @@ export async function getActiveElections(
   now: Date = new Date(),
 ): Promise<ActiveElection[]> {
   const summaries = (await fetchElections())
+    .filter((e) => !isHidden(e.slug))
     .filter((e) => differenceInCalendarDays(parseDateOnly(e.election_date), now) >= 0)
     .sort((a, b) => a.election_date.localeCompare(b.election_date));
 

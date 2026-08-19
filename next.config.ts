@@ -53,8 +53,8 @@ const nextConfig: NextConfig = {
         destination: "/state-of-the-nation/:path*",
         permanent: true,
       },
-      // Election coverage lives under /vote: the index at /vote, and each
-      // region at /<city>/vote/<year>. Two earlier shapes are still out in the
+      // Election coverage lives under /vote: the index at /vote, and Toronto's
+      // pages at /toronto/vote/<year>. Two earlier shapes are still out in the
       // world — Toronto's /toronto/elections/2026 (indexed, and the target of
       // shared pledge links) and Brampton's /elections/brampton/2026 — so both
       // redirect. Each points straight at its final destination; none of these
@@ -64,24 +64,63 @@ const nextConfig: NextConfig = {
         destination: "/vote",
         permanent: true,
       },
+      // Only Toronto's coverage is live. Brampton, Hamilton and Ottawa are
+      // built but switched off (registry `hidden`), so every URL under them —
+      // including the old /elections shapes — lands on the /vote index rather
+      // than a page we aren't standing behind. These come first so they win
+      // over the Toronto-shaped rules below; none of them chain.
       {
-        source: "/elections/brampton/2026",
-        destination: "/brampton/vote/2026",
-        permanent: true,
+        source: "/:city(brampton|hamilton|ottawa)/vote/:path*",
+        destination: "/vote",
+        permanent: false,
+      },
+      {
+        source: "/:city(brampton|hamilton|ottawa)/vote",
+        destination: "/vote",
+        permanent: false,
+      },
+      {
+        source: "/:city(brampton|hamilton|ottawa)/elections/:path*",
+        destination: "/vote",
+        permanent: false,
+      },
+      {
+        source: "/:city(brampton|hamilton|ottawa)/elections",
+        destination: "/vote",
+        permanent: false,
       },
       {
         source: "/elections/brampton/2026/:path*",
-        destination: "/brampton/vote/2026/:path*",
+        destination: "/vote",
+        permanent: false,
+      },
+      {
+        source: "/elections/brampton/2026",
+        destination: "/vote",
+        permanent: false,
+      },
+      // Toronto's get-involved page is switched off. It stays in the repo but
+      // sends people to the election landing instead. The legacy /elections
+      // shape gets its own rule so it lands there directly rather than
+      // chaining through the generic /toronto/elections/:path* rule below.
+      {
+        source: "/toronto/vote/get-involved",
+        destination: "/toronto/vote/2026",
+        permanent: false,
+      },
+      {
+        source: "/toronto/elections/get-involved",
+        destination: "/toronto/vote/2026",
+        permanent: false,
+      },
+      {
+        source: "/toronto/elections",
+        destination: "/toronto/vote",
         permanent: true,
       },
       {
-        source: "/:city(toronto|brampton|hamilton|ottawa)/elections",
-        destination: "/:city/vote",
-        permanent: true,
-      },
-      {
-        source: "/:city(toronto|brampton|hamilton|ottawa)/elections/:path*",
-        destination: "/:city/vote/:path*",
+        source: "/toronto/elections/:path*",
+        destination: "/toronto/vote/:path*",
         permanent: true,
       },
     ];

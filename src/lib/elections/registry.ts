@@ -63,6 +63,13 @@ export type SupportedElection = {
    * number would match our roster and show a confidently wrong ward.
    */
   wardLookup: boolean;
+  /**
+   * Whether this region's coverage is switched off. The config stays here so
+   * the routes keep type-checking and the pages can be turned back on in one
+   * line, but a hidden election is dropped from the /vote index and its URLs
+   * redirect there (see next.config.ts). Only Toronto is live right now.
+   */
+  hidden?: boolean;
 };
 
 const TORONTO_2026: SupportedElection = {
@@ -100,6 +107,7 @@ const BRAMPTON_2026: SupportedElection = {
   // Brampton hasn't published its advance-vote or vote-by-mail dates yet;
   // those countdowns stay off the page rather than guess at them.
   wardLookup: false,
+  hidden: true,
 };
 
 const HAMILTON_2026: SupportedElection = {
@@ -116,6 +124,7 @@ const HAMILTON_2026: SupportedElection = {
   pollHoursLabel: "10:00 a.m. – 8:00 p.m.",
   // As with Brampton — not yet published by the city.
   wardLookup: false,
+  hidden: true,
 };
 
 const OTTAWA_2026: SupportedElection = {
@@ -132,6 +141,7 @@ const OTTAWA_2026: SupportedElection = {
   pollHoursLabel: "10:00 a.m. – 8:00 p.m.",
   // As with Brampton and Hamilton — not yet published by the city.
   wardLookup: false,
+  hidden: true,
 };
 
 export const SUPPORTED_ELECTIONS: Record<string, SupportedElection> = {

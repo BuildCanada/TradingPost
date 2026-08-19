@@ -45,6 +45,13 @@ export type SupportedElection = {
   electionDayLabel: string;
   /** e.g. "10:00 a.m. – 8:00 p.m." */
   pollHoursLabel: string;
+  /**
+   * Nomination day, "YYYY-MM-DD". Overrides York Factory's
+   * `nomination_close_date` wherever we show it — set this when the city has
+   * published a date the upstream record hasn't caught up to yet, and drop it
+   * again once upstream agrees.
+   */
+  nominationCloseIso?: string;
   /** first day of advance voting; omitted until the city publishes it */
   advanceVote?: ElectionKeyDate;
   /** deadline to apply to vote by mail; omitted until published */
@@ -86,6 +93,7 @@ const TORONTO_2026: SupportedElection = {
   pollHoursLabel: "10:00 a.m. – 8:00 p.m.",
   // Per the City Clerk's 2026 election calendar:
   // https://www.toronto.ca/city-government/elections/key-dates/
+  nominationCloseIso: "2026-08-21",
   advanceVote: { iso: "2026-10-06", label: "Oct 6 – 11" },
   mailIn: { iso: "2026-09-24", label: "Thu, Sept 24" },
   themeClass: "theme-election",

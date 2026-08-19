@@ -10,6 +10,7 @@ import {
   fetchElections,
   type ApiElectionSummary,
 } from "@/lib/api/elections";
+import { getNominationCloseLabel } from "@/lib/elections/election-data";
 import { SUPPORTED_ELECTIONS } from "@/lib/elections/registry";
 
 export type ActiveElection = {
@@ -54,12 +55,6 @@ const LONG_DATE = new Intl.DateTimeFormat("en-CA", {
   year: "numeric",
 });
 
-const SHORT_DATE = new Intl.DateTimeFormat("en-CA", {
-  month: "short",
-  day: "numeric",
-  year: "numeric",
-});
-
 /** "municipal" → "Municipal Election"; falls back to a generic label. */
 function kindLabel(kind: string): string {
   if (!kind) return "Election";
@@ -79,9 +74,10 @@ async function describe(summary: ApiElectionSummary): Promise<ActiveElection> {
     jurisdictionName: summary.jurisdiction.name,
     electionDateIso: summary.election_date,
     electionDateLabel: LONG_DATE.format(parseDateOnly(summary.election_date)),
-    nominationCloseLabel: summary.nomination_close_date
-      ? SHORT_DATE.format(parseDateOnly(summary.nomination_close_date))
-      : null,
+    nominationCloseLabel: getNominationCloseLabel(
+      summary.slug,
+      summary.nomination_close_date,
+    ),
     daysUntil: daysUntil(summary.election_date),
     // The registry is the list of elections we have pages for; anything else
     // York Factory knows about is listed here without a link.

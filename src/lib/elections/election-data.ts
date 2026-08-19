@@ -21,6 +21,7 @@
 
 import { fetchElection, type ApiCandidate, type ApiRace } from "@/lib/api/elections";
 import { daysUntil, parseDateOnly } from "./dates";
+import { SUPPORTED_ELECTIONS } from "./registry";
 
 export { daysUntil, parseDateOnly };
 
@@ -95,6 +96,23 @@ const SHORT_DATE = new Intl.DateTimeFormat("en-CA", {
   day: "numeric",
   year: "numeric",
 });
+
+/**
+ * The nomination-close date to show, as "Aug 21, 2026". A registry
+ * `nominationCloseIso` wins over the API's date — we hardcode a date when the
+ * city has published one York Factory hasn't caught up to — so this is the one
+ * place the two sources are reconciled. Null when neither has a date.
+ *
+ * Looked up by exact slug, not `getElection`, so an unrecognised slug gets no
+ * date rather than quietly inheriting Toronto's.
+ */
+export function getNominationCloseLabel(
+  slug: string,
+  apiIso: string | null,
+): string | null {
+  const iso = SUPPORTED_ELECTIONS[slug]?.nominationCloseIso ?? apiIso;
+  return iso ? SHORT_DATE.format(parseDateOnly(iso)) : null;
+}
 
 // ── Views ──────────────────────────────────────────────────────────────────
 
@@ -360,9 +378,10 @@ export async function getElectionView(
     name: election.name,
     electionDateIso: election.election_date,
     electionDateLabel: LONG_DATE.format(parseDateOnly(election.election_date)),
-    nominationCloseLabel: election.nomination_close_date
-      ? SHORT_DATE.format(parseDateOnly(election.nomination_close_date))
-      : null,
+    nominationCloseLabel: getNominationCloseLabel(
+      slug,
+      election.nomination_close_date,
+    ),
     daysUntil: daysUntil(election.election_date),
     mayoral,
     wards,

@@ -9,6 +9,7 @@ import { Toaster } from "sonner";
 import { SubscribeModal } from "@/components/subscribe";
 import { IdentifyUser } from "@/components/auth/IdentifyUser";
 import { HubspotTracking } from "@/components/HubspotTracking";
+import { XPixel } from "@/components/XPixel";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
@@ -77,6 +78,7 @@ export default function RootLayout({
         <SubscribeModal />
         <IdentifyUser />
         <HubspotTracking />
+        <XPixel />
       </body>
     </html>
   );

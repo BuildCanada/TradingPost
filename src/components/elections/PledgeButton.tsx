@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { hubspotPageContext } from "@/lib/hubspot-context";
 import { pledgeSharePath } from "@/lib/elections/pledge-share";
 import { DEFAULT_ELECTION_SLUG, getElection } from "@/lib/elections/registry";
+import { trackXEvent } from "@/components/XPixel";
 
 /* "Pledge to vote" CTA — opens the same modal treatment as the navbar
    Subscribe button. Submitting records the pledge (via /api/elections/pledge
@@ -108,6 +109,7 @@ export function PledgeButton({
       }
 
       posthog.capture("pledged_to_vote", { source, election: config.slug });
+      trackXEvent("pledgedToVote", email);
       // keep the button disabled while we navigate to the shared page;
       // prefer the server's record (canonical name + unguessable token)
       router.push(pledgeSharePath(config, data.name || name, data.shareToken));

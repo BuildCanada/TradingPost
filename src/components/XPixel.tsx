@@ -18,6 +18,19 @@ import { Suspense, useEffect, useRef } from "react";
 
 const X_PIXEL_ID = "re2t6";
 
+/* Conversion events configured in the X Ads UI, keyed by what they mean here.
+   Reported with twq('event', <event id>, {...}); the call queues if uwt.js
+   hasn't loaded yet, and is a no-op in dev where the tag never loads. */
+const X_EVENTS = {
+  pledgedToVote: "tw-re2t6-rekr4",
+} as const;
+
+/** Report an X conversion. `email` is optional and used by X for identity
+    matching — uwt.js hashes it before it leaves the browser. */
+export function trackXEvent(event: keyof typeof X_EVENTS, email?: string) {
+  window.twq?.("event", X_EVENTS[event], { email_address: email ?? null });
+}
+
 declare global {
   interface Window {
     twq?: (...args: unknown[]) => void;

@@ -10,6 +10,7 @@ import { SubscribeModal } from "@/components/subscribe";
 import { IdentifyUser } from "@/components/auth/IdentifyUser";
 import { HubspotTracking } from "@/components/HubspotTracking";
 import { XPixel } from "@/components/XPixel";
+import { MetaPixel } from "@/components/MetaPixel";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
@@ -79,6 +80,7 @@ export default function RootLayout({
         <IdentifyUser />
         <HubspotTracking />
         <XPixel />
+        <MetaPixel />
       </body>
     </html>
   );

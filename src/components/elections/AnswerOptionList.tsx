@@ -25,6 +25,7 @@ export function AnswerOptionList({
   colors,
   marks = [],
   markColor,
+  showCounts = true,
 }: {
   options: string[];
   /** parallel to `options`; a null entry simply has no expansion */
@@ -36,6 +37,12 @@ export function AnswerOptionList({
   marks?: OptionMark[];
   /** badge and count colour; defaults to each option's own chart colour */
   markColor?: string;
+  /**
+   * The count column. Off where the chart beside the list already direct-labels
+   * every option with its count, which would otherwise print each number twice
+   * a centimetre apart.
+   */
+  showCounts?: boolean;
 }) {
   const marked = new Set(marks.map((mark) => mark.index));
 
@@ -76,14 +83,16 @@ export function AnswerOptionList({
               ))}
             </span>
 
-            <span
-              className="flex-none font-sans text-[1rem] font-medium tabular-nums"
-              style={marked.has(i) ? { color: tone } : undefined}
-            >
-              <span className={marked.has(i) ? "" : "text-text-muted"}>
-                {counts[i]}
+            {showCounts && (
+              <span
+                className="flex-none font-sans text-[1rem] font-medium tabular-nums"
+                style={marked.has(i) ? { color: tone } : undefined}
+              >
+                <span className={marked.has(i) ? "" : "text-text-muted"}>
+                  {counts[i]}
+                </span>
               </span>
-            </span>
+            )}
           </li>
         );
       })}

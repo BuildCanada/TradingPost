@@ -4,6 +4,7 @@ import { resolveFonts } from './fonts'
 import { MUTED, palette } from './palette'
 import { TOKENS } from './theme'
 import { useMeasure } from './useMeasure'
+import { wrapText } from './wrap'
 import type { ThemeName } from './types'
 
 export interface OptionBarProps {
@@ -27,6 +28,13 @@ export interface OptionBarProps {
   /* ---- layers ---- */
   /** Counts printed inside each segment, where the segment is wide enough. */
   showCounts?: boolean
+  /**
+   * Option names printed under the band, one per segment — the bar's answer to
+   * the dial's goal labels, so a bar can carry its own key instead of
+   * borrowing one from a list beside it. A segment too narrow for its name is
+   * left to the list.
+   */
+  showLabels?: boolean
 
   /* ---- chrome ---- */
   colors?: string[]
@@ -52,6 +60,7 @@ export function OptionBar({
   height = 34,
   responsive = false,
   showCounts = true,
+  showLabels = false,
   colors: colorsProp,
   theme = 'light',
   fontFamily,
@@ -78,9 +87,23 @@ export function OptionBar({
 
   const aria = label ?? options.map((o, i) => `${o} ${counts[i]}`).join(', ')
 
+  // The label lines wrap into their own segment's width, which is the only
+  // room they have; a name that will not fit two lines there is dropped.
+  const labelLines = showLabels
+    ? segments.map(({ w }, i) => (w < 34 ? [] : wrapText(options[i], Math.max(6, Math.floor(w / 5.6)), 2)))
+    : []
+  const labelRows = labelLines.reduce((n, lines) => Math.max(n, lines.length), 0)
+  const labelBlock = labelRows > 0 ? 6 + labelRows * 13 : 0
+
   return (
     <div ref={ref} className={className} style={{ width: responsive ? '100%' : width, maxWidth: '100%' }}>
-      <svg width={width} height={height} style={{ display: 'block' }} role="img" aria-label={aria}>
+      <svg
+        width={width}
+        height={height + labelBlock}
+        style={{ display: 'block', overflow: 'visible' }}
+        role="img"
+        aria-label={aria}
+      >
         {segments.map(({ i, x: sx, w, count, color }) => (
           <g key={i}>
             {/* A 1px bite out of each segment keeps the joins visible without a stroke. */}
@@ -99,6 +122,20 @@ export function OptionBar({
                 {count}
               </text>
             )}
+            {labelLines[i]?.map((line, li) => (
+              <text
+                key={`label-${li}`}
+                x={sx + w / 2}
+                y={height + 6 + 10 + li * 13}
+                textAnchor="middle"
+                fontFamily={fonts.display}
+                fontSize={11.5}
+                fontWeight={500}
+                fill={color === MUTED ? tokens.inkFaint : tokens.ink}
+              >
+                {line}
+              </text>
+            ))}
           </g>
         ))}
       </svg>

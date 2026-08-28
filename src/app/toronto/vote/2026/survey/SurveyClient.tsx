@@ -1,14 +1,20 @@
 "use client";
 
-import { useState, type CSSProperties } from "react";
+import { useMemo, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 import { Select } from "@/components/ui/select";
 
+import {
+  alignToCandidates,
+  wardKeyFromRegion,
+} from "@/lib/elections/alignment";
+import { candidateResponsesForWard } from "@/lib/elections/candidate-responses.fixture";
 import type { Survey, SurveyQuestion } from "@/lib/elections/survey";
 
-import { submitSurvey } from "./submitSurvey";
+import AlignmentResults from "./AlignmentResults";
+import { submitSurvey, type SurveySubmission } from "./submitSurvey";
 
 export type SurveyAnswers = Record<string, string>;
 
@@ -60,13 +66,22 @@ function errorFor(question: SurveyQuestion, value: string): string | null {
   return null;
 }
 
-export default function SurveyClient({ survey }: { survey: Survey }) {
+export default function SurveyClient({
+  survey,
+  wardNames = {},
+}: {
+  survey: Survey;
+  /** {"09": "Davenport"} — passed in from the server so the ward geometry,
+   *  which is a large generated file, stays out of this bundle. */
+  wardNames?: Record<string, string>;
+}) {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<SurveyAnswers>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
+  const [submission, setSubmission] = useState<SurveySubmission | null>(null);
 
   // Everything about the shape of the form comes from the fetched survey, so a
   // question added in the CMS shows up here with no change to this component.
@@ -77,6 +92,31 @@ export default function SurveyClient({ survey }: { survey: Survey }) {
 
   const isLastStep = step === stepCount - 1;
   const currentStep = steps[step];
+
+  /* The comparison against the ward's candidates. Keyed on the ward the API
+     actually recorded rather than one re-derived here, so the results a
+     respondent reads are the results filed under their response.
+
+     Null whenever there is nothing honest to show: no ward resolved from the
+     postal code, or a ward whose candidates have not answered the
+     questionnaire — which is most wards for most of the campaign. */
+  const comparison = useMemo(() => {
+    const ward = wardKeyFromRegion(
+      submission?.derivedRegion ?? submission?.region,
+    );
+    if (!ward) return null;
+
+    const responses = candidateResponsesForWard(ward);
+    if (responses.length === 0) return null;
+
+    const name = wardNames[ward];
+    return {
+      alignment: alignToCandidates(survey, answers, responses),
+      wardLabel: name
+        ? `Ward ${parseInt(ward, 10)} — ${name}`
+        : `Ward ${parseInt(ward, 10)}`,
+    };
+  }, [submission, survey, answers, wardNames]);
 
   const set = (id: string, value: string) => {
     setAnswers((prev) => ({ ...prev, [id]: value }));
@@ -121,7 +161,7 @@ export default function SurveyClient({ survey }: { survey: Survey }) {
     setSubmitting(true);
     setSubmitError(null);
     try {
-      await submitSurvey(survey, answers);
+      setSubmission(await submitSurvey(survey, answers));
       setDone(true);
       scrollTop();
     } catch {
@@ -138,6 +178,7 @@ export default function SurveyClient({ survey }: { survey: Survey }) {
     setSubmitError(null);
     setStep(0);
     setDone(false);
+    setSubmission(null);
     scrollTop();
   };
 
@@ -157,6 +198,7 @@ export default function SurveyClient({ survey }: { survey: Survey }) {
         </div>
 
         {done ? (
+          <>
           <div className="animate-fade-in border-t border-border-light px-6 pt-14 pb-16 md:px-10">
             <div className="mb-7 h-0.5 w-10 bg-accent" />
             <h2 className="mb-4 font-sans font-medium leading-[1.05] tracking-[-0.015em] text-[clamp(1.75rem,4vw,2.375rem)] text-balance">
@@ -174,7 +216,7 @@ export default function SurveyClient({ survey }: { survey: Survey }) {
                 {thankYou.restartLabel}
               </button>
               <Link
-                href="/toronto/elections/2026"
+                href="/toronto/vote/2026"
                 className="group/btn type-button inline-flex items-center gap-2 text-dark hover:text-accent"
               >
                 Explore the candidates
@@ -182,6 +224,18 @@ export default function SurveyClient({ survey }: { survey: Survey }) {
               </Link>
             </div>
           </div>
+          {comparison && (
+            <div className="animate-fade-in">
+              <AlignmentResults
+                alignment={comparison.alignment}
+                wardLabel={comparison.wardLabel}
+                /* The three candidates behind this are invented. Drop the flag
+                   when the data is real, not before. */
+                isSampleData
+              />
+            </div>
+          )}
+          </>
         ) : (
           <>
             {/* ── Progress ───────────────────────────────────── */}
@@ -427,25 +481,51 @@ function Question({
             ))}
           </div>
         ) : (
-          /* yesno — the API sends the Yes/No pair like any other options list,
-             so results group by values this component never invents. */
-          <div className="flex gap-2">
-            {options.map((option) => (
-              <label
-                key={option.value}
-                className={`${CHOICE_CLASS} type-button max-w-[160px] flex-1 justify-center`}
-              >
-                <input
-                  type="radio"
-                  name={question.id}
-                  value={option.value}
-                  checked={value === option.value}
-                  onChange={() => onChange(option.value)}
-                  className="size-4 m-0 accent-accent"
-                />
-                {option.label}
-              </label>
-            ))}
+          /* yesno — a segmented control rather than two wide boxes. The answer
+             is one word, so the control is sized to its words and the pair
+             shares one border, reading as a single unit.
+
+             Deliberately not `type-button`: that utility is uppercase mono at
+             0.14em tracking, which is right on a button and unreadable on a
+             one-word answer. These use the same serif face and size as the
+             radio choices above, so the two question types look related.
+
+             The Yes/No pair still comes from the API like any other options
+             list, so results group by values this component never invents.
+
+             The radio is visually hidden and the whole segment is the target —
+             `has-checked:` styles the label from the input's own state, so this
+             stays a real radio group for keyboard and screen-reader users, with
+             the focus ring surfaced by `has-focus-visible:`. Hover is scoped to
+             unchecked segments so it can't repaint the selected one.
+
+             The rule and the space above it separate the ask from the answer.
+             Several of these questions run a sentence long and carry a context
+             paragraph, so without a break the control reads as one more line of
+             that text. The rule's width matches the context paragraph's measure,
+             so it aligns with the column above rather than running the full
+             width of the card. */
+          <div className="mt-3 max-w-[62ch] border-t border-border-light pt-5">
+            <div className="flex w-fit border border-border-light bg-white">
+              {options.map((option, i) => (
+                <label
+                  key={option.value}
+                  className={`cursor-pointer px-7 py-2.5 text-[17px] transition-colors ${
+                    i > 0 ? "border-l border-border-light" : ""
+                  } not-has-checked:hover:bg-linen-100 has-checked:bg-dark has-checked:text-bg has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-dark`}
+                >
+                  <input
+                    type="radio"
+                    name={question.id}
+                    value={option.value}
+                    checked={value === option.value}
+                    onChange={() => onChange(option.value)}
+                    className="sr-only"
+                  />
+                  {option.label}
+                </label>
+              ))}
+            </div>
           </div>
         )}
 

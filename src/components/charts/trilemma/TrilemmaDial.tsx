@@ -67,6 +67,13 @@ export interface TrilemmaDialProps {
   colorBy?: 'corner' | 'single'
   color?: string
   cornerColors?: Triple<string>
+  /**
+   * Colours for the direct-labelled values, where they should not follow the
+   * wedges. A caller that mutes two of three wedges to pick out one answer
+   * still needs all three numbers readable, and a muted neutral is a fill
+   * colour, not a text colour.
+   */
+  valueColors?: Triple<string>
   theme?: ThemeName
   /**
    * The paper this dial sits on. Defaults to the chart theme's own, which is
@@ -133,6 +140,7 @@ export function TrilemmaDial(props: TrilemmaDialProps) {
     colorBy = 'corner',
     color,
     cornerColors: cornerColorsProp,
+    valueColors,
     theme = 'light',
     paper,
     fontFamily,
@@ -446,7 +454,7 @@ export function TrilemmaDial(props: TrilemmaDialProps) {
                       textAnchor={anchor}
                       fontFamily={fonts.label}
                       fontSize={12}
-                      fill={cornerColors[i]}
+                      fill={valueColors?.[i] ?? cornerColors[i]}
                       style={{ fontVariantNumeric: 'tabular-nums' }}
                     >
                       {valueFormat(v[i])}

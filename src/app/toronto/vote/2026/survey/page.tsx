@@ -8,7 +8,20 @@ import {
   type Survey,
 } from "@/lib/elections/survey";
 
+import { WARD_SHAPES } from "../wardGeo";
+
 import SurveyClient from "./SurveyClient";
+
+/**
+ * Ward number → name, for labelling the candidate comparison after submission.
+ *
+ * Built here rather than imported by SurveyClient because wardGeo.ts is a large
+ * generated file of SVG boundary paths; importing it from a client component
+ * would ship all of that to the browser to render the word "Davenport".
+ */
+const WARD_NAMES: Record<string, string> = Object.fromEntries(
+  WARD_SHAPES.map((ward) => [ward.n, ward.name]),
+);
 
 // The questions come from York Factory, so this page is only as available as
 // that API — mitigated by the five-minute ISR cache in fetchSurvey, which keeps
@@ -34,7 +47,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: `${title} — Toronto 2026`,
     description,
-    alternates: { canonical: "/toronto/elections/2026/survey" },
+    alternates: { canonical: "/toronto/vote/2026/survey" },
     openGraph: {
       title: `${title} — Toronto 2026 | Build Canada`,
       description,
@@ -47,5 +60,5 @@ export default async function SurveyPage() {
   const survey = await loadSurvey();
   if (!survey || survey.steps.length === 0) notFound();
 
-  return <SurveyClient survey={survey} />;
+  return <SurveyClient survey={survey} wardNames={WARD_NAMES} />;
 }

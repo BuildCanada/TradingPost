@@ -3,7 +3,9 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import CountdownDays from "./CountdownDays";
+import { CandidateSurveyAnswers } from "./CandidateSurveyAnswers";
 import { IncumbentBadge, SiteLink } from "./ElectionLanding";
+import type { CandidateAnswers } from "@/lib/elections/candidate-answers";
 import { daysUntil } from "@/lib/elections/dates";
 import type { SupportedElection } from "@/lib/elections/registry";
 import type {
@@ -27,6 +29,7 @@ export function WardDetail({
   nominationCloseLabel,
   wardMapDefs,
   wardMap,
+  surveyAnswers,
 }: {
   election: SupportedElection;
   data: WardDetailData;
@@ -36,6 +39,12 @@ export function WardDetail({
   wardMapDefs?: ReactNode;
   /** this region's locator map for this ward, when it has ward geometry */
   wardMap?: ReactNode;
+  /**
+   * Published questionnaire answers for this ward's candidates, keyed by
+   * `nameKey`. A candidate with no entry simply shows no answers — for most of
+   * the campaign that is most of them.
+   */
+  surveyAnswers?: Record<string, CandidateAnswers>;
 }) {
   const { ward, wards, councilRaces, trusteeRaces } = data;
   const idx = wards.findIndex((w) => w.number === ward.number);
@@ -139,6 +148,7 @@ export function WardDetail({
                     election={election.slug}
                     ward={ward.n}
                     wardName={ward.name}
+                    answers={surveyAnswers?.[cand.key]}
                   />
                 ))
               )}
@@ -257,19 +267,23 @@ function CouncilCandidate({
   race = "councillor",
   ward,
   wardName,
+  answers,
 }: {
   candidate: CandidateView;
   election: string;
   race?: "councillor" | "trustee";
   ward: string;
   wardName: string;
+  /** their questionnaire answers, when they have answered it */
+  answers?: CandidateAnswers;
 }) {
   return (
     <div
-      className={`flex gap-5 sm:gap-7 items-center px-6 md:px-14 py-7 border-t border-border-light ${
+      className={`px-6 md:px-14 py-7 border-t border-border-light ${
         candidate.withdrawn ? "opacity-55" : ""
       }`}
     >
+      <div className="flex gap-5 sm:gap-7 items-center">
       <div className="flex-none size-16 bg-dark relative overflow-hidden flex items-center justify-center font-sans font-medium text-[1.35rem] tracking-[-0.02em] text-bg">
         {candidate.image ? (
           <Image
@@ -314,6 +328,14 @@ function CouncilCandidate({
           wardName={wardName}
         />
       </div>
+      </div>
+
+      {answers && (
+        <CandidateSurveyAnswers
+          answers={answers}
+          candidateName={candidate.name}
+        />
+      )}
     </div>
   );
 }

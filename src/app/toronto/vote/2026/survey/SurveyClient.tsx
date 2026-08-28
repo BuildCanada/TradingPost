@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
@@ -10,7 +10,8 @@ import {
   alignToCandidates,
   wardKeyFromRegion,
 } from "@/lib/elections/alignment";
-import { candidateResponsesForWard } from "@/lib/elections/candidate-responses.fixture";
+import type { CandidateSurveyResponse } from "@/lib/elections/alignment";
+import { DEFAULT_ELECTION_SLUG } from "@/lib/elections/registry";
 import type { Survey, SurveyQuestion } from "@/lib/elections/survey";
 
 import AlignmentResults from "./AlignmentResults";
@@ -100,14 +101,44 @@ export default function SurveyClient({
      Null whenever there is nothing honest to show: no ward resolved from the
      postal code, or a ward whose candidates have not answered the
      questionnaire — which is most wards for most of the campaign. */
-  const comparison = useMemo(() => {
-    const ward = wardKeyFromRegion(
-      submission?.derivedRegion ?? submission?.region,
-    );
-    if (!ward) return null;
+  const ward = wardKeyFromRegion(
+    submission?.derivedRegion ?? submission?.region,
+  );
 
-    const responses = candidateResponsesForWard(ward);
-    if (responses.length === 0) return null;
+  /* The ward's published candidate answers, fetched once the API has told us
+     which ward the response was filed under. Not loaded with the page: the
+     ward is not known until then, and pre-loading all 25 would ship every
+     ward's answers to every visitor to use one ward's worth. */
+  const [responses, setResponses] = useState<CandidateSurveyResponse[] | null>(
+    null,
+  );
+
+  useEffect(() => {
+    if (!ward) return;
+    let cancelled = false;
+
+    fetch(
+      `/api/elections/candidate-responses?election=${encodeURIComponent(
+        DEFAULT_ELECTION_SLUG,
+      )}&ward=${encodeURIComponent(ward)}`,
+    )
+      .then((res) => (res.ok ? res.json() : { data: [] }))
+      .then((body) => {
+        if (!cancelled) setResponses(body.data ?? []);
+      })
+      // A comparison we could not load is simply not shown; the respondent
+      // still has their own answers and the thank-you.
+      .catch(() => {
+        if (!cancelled) setResponses([]);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [ward]);
+
+  const comparison = useMemo(() => {
+    if (!ward || !responses || responses.length === 0) return null;
 
     const name = wardNames[ward];
     return {
@@ -116,7 +147,7 @@ export default function SurveyClient({
         ? `Ward ${parseInt(ward, 10)} — ${name}`
         : `Ward ${parseInt(ward, 10)}`,
     };
-  }, [submission, survey, answers, wardNames]);
+  }, [ward, responses, survey, answers, wardNames]);
 
   const set = (id: string, value: string) => {
     setAnswers((prev) => ({ ...prev, [id]: value }));
@@ -231,7 +262,6 @@ export default function SurveyClient({
                 wardLabel={comparison.wardLabel}
                 /* The three candidates behind this are invented. Drop the flag
                    when the data is real, not before. */
-                isSampleData
               />
             </div>
           )}

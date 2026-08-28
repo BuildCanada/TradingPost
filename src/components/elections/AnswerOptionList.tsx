@@ -1,0 +1,92 @@
+import { WedgeGlyph } from "@/components/charts/trilemma";
+
+/* The options a question offered, as a list beside its chart.
+ *
+ * Shared by the ward pages and the survey's alignment view so the two cannot
+ * drift: an answer only means something read against the alternatives, and
+ * both places have to put them in the same order, with the same counts, and
+ * with the same glyph tying each row to its slice of the chart.
+ *
+ * The glyph is the chart's own wedge for that option, which is what lets the
+ * list be read straight onto the dial or bar without a legend.
+ */
+
+export type OptionMark = {
+  /** which option this marks */
+  index: number;
+  /** e.g. "Their answer", "Your answer" */
+  label: string;
+};
+
+export function AnswerOptionList({
+  options,
+  details,
+  counts,
+  colors,
+  marks = [],
+  markColor,
+}: {
+  options: string[];
+  /** parallel to `options`; a null entry simply has no expansion */
+  details?: (string | null)[];
+  counts: number[];
+  /** parallel to `options` — the chart's fill for each, muted where unchosen */
+  colors: string[];
+  /** badges pinned to particular options */
+  marks?: OptionMark[];
+  /** badge and count colour; defaults to each option's own chart colour */
+  markColor?: string;
+}) {
+  const marked = new Set(marks.map((mark) => mark.index));
+
+  return (
+    <ul className="grid gap-1.5 list-none m-0 p-0">
+      {options.map((option, i) => {
+        const tone = markColor ?? colors[i];
+        const own = marks.filter((mark) => mark.index === i);
+
+        return (
+          <li
+            key={option}
+            className={`flex items-start gap-2.5 ${
+              marked.has(i) ? "" : "opacity-55"
+            }`}
+          >
+            <span className="mt-1 flex-none">
+              <WedgeGlyph index={i} count={options.length} color={colors[i]} />
+            </span>
+
+            <span
+              className={`flex-1 font-serif text-[1rem] leading-[1.35] text-pretty ${
+                marked.has(i) ? "text-dark" : "text-text-secondary"
+              }`}
+            >
+              {option}
+              {details?.[i] && (
+                <span className="text-text-secondary">: {details[i]}</span>
+              )}
+              {own.map((mark) => (
+                <span
+                  key={mark.label}
+                  className="type-label-sm !text-[10px] !tracking-[0.12em] ml-2 whitespace-nowrap border px-1.5 py-0.5 align-[2px]"
+                  style={{ color: tone, borderColor: tone }}
+                >
+                  {mark.label}
+                </span>
+              ))}
+            </span>
+
+            <span
+              className="flex-none font-sans text-[1rem] font-medium tabular-nums"
+              style={marked.has(i) ? { color: tone } : undefined}
+            >
+              <span className={marked.has(i) ? "" : "text-text-muted"}>
+                {counts[i]}
+              </span>
+            </span>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}

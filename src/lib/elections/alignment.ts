@@ -36,6 +36,25 @@ const NON_POLICY_QUESTIONS = new Set(["volunteer", "updates"]);
 /** Question types with a fixed option list, so two answers can be compared. */
 const CHOICE_TYPES = new Set(["yesno", "radio", "select"]);
 
+/**
+ * True when a question's options are a yes/no scale — "Yes", "Yes, with
+ * conditions", "No" — rather than distinct alternatives.
+ *
+ * It decides which chart the answer gets, and the two are not interchangeable.
+ * A dial puts three options at 120° from each other, which says they are
+ * competing choices of equal standing; a yes-scale is ordered, and drawing it
+ * that way loses the order and invents a three-way contest. Those get a bar,
+ * where "mostly yes with a bloc of noes" is the shape you actually see.
+ *
+ * Matched on the labels because that is where the distinction lives: the
+ * questionnaire types both kinds as `radio` with three options, so nothing in
+ * the schema separates them.
+ */
+export function isYesNoScale(labels: string[]): boolean {
+  if (labels.length < 2) return false;
+  return labels.every((label) => /^(yes|no)\b/i.test(label.trim()));
+}
+
 /** One candidate's answers to a questionnaire, as York Factory stores them. */
 export type CandidateSurveyResponse = {
   candidateName: string;
@@ -68,6 +87,12 @@ export type CandidateCell = {
   /** the option's label, or the raw transcription when it matched no option */
   answer?: string;
   explanation?: string;
+  /**
+   * Index into `QuestionRow.options`, or null when there is nothing to point
+   * at — an unanswered question, or prose that matched no option. Charts key
+   * off this rather than off the label, so a reworded option still lines up.
+   */
+  choice: number | null;
 };
 
 export type QuestionRow = {
@@ -77,6 +102,18 @@ export type QuestionRow = {
   stepTitle: string;
   /** the respondent's own answer, as a label */
   yourAnswer: string;
+  /** the option labels exactly as they were offered, in order */
+  options: string[];
+  /** each option's expansion, where it has one; parallel to `options` */
+  details: (string | null)[];
+  /** the respondent's own pick, as an index into `options` */
+  yourChoice: number | null;
+  /**
+   * How many of this ward's candidates picked each option. `unclear` and
+   * `unanswered` are in no bucket, so this sums to the number of candidates
+   * who gave a usable answer rather than to the size of the field.
+   */
+  counts: number[];
   cells: CandidateCell[];
 };
 
@@ -171,9 +208,14 @@ export function alignToCandidates(
     if (!yourValue) continue;
 
     const options = question.options ?? [];
+    const indexOf = (value: string) =>
+      options.findIndex((option) => option.value === value);
     const labelFor = (value: string) =>
       options.find((option) => option.value === value)?.label;
     const yourAnswer = labelFor(yourValue) ?? yourValue;
+    const yourIndex = indexOf(yourValue);
+
+    const counts = options.map(() => 0);
 
     const cells = responses.map((response): CandidateCell => {
       const tally = tallies.get(response.candidateName)!;
@@ -186,6 +228,7 @@ export function alignToCandidates(
           candidateName: response.candidateName,
           verdict: "unanswered",
           explanation,
+          choice: null,
         };
       }
 
@@ -199,6 +242,7 @@ export function alignToCandidates(
           verdict: "unclear",
           answer: raw,
           explanation,
+          choice: null,
         };
       }
 
@@ -207,11 +251,15 @@ export function alignToCandidates(
       else tally.differed += 1;
       tally.compared += 1;
 
+      const choice = indexOf(raw);
+      counts[choice] += 1;
+
       return {
         candidateName: response.candidateName,
         verdict: agrees ? "agree" : "differ",
         answer: label,
         explanation,
+        choice,
       };
     });
 
@@ -223,6 +271,10 @@ export function alignToCandidates(
       stepId,
       stepTitle,
       yourAnswer,
+      options: options.map((option) => option.label),
+      details: options.map((option) => option.detail ?? null),
+      yourChoice: yourIndex === -1 ? null : yourIndex,
+      counts,
       cells,
     });
   }

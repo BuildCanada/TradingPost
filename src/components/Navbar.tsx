@@ -82,7 +82,7 @@ export default function Navbar() {
       )}
 
       {/* Desktop links */}
-      <div className="hidden md:flex items-stretch">
+      <div className="hidden md:flex items-stretch border-r border-border">
         {navLinks.map((link) =>
           link.external ? (
             <a

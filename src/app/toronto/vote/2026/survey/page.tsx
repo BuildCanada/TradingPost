@@ -42,7 +42,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const title = survey?.meta.title ?? "Toronto Priorities Survey";
   const description =
     survey?.meta.intro ??
-    "Tell us what matters most in your ward ahead of Toronto's October 26, 2026 municipal election.";
+    "Answer thirty questions on what Toronto should do next, and see which candidates on your ballot agree with you.";
 
   return {
     title: `${title} — Toronto 2026`,

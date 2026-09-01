@@ -14,7 +14,10 @@ import type { CandidateSurveyResponse } from "@/lib/elections/alignment";
 import { DEFAULT_ELECTION_SLUG } from "@/lib/elections/registry";
 import type { Survey, SurveyQuestion } from "@/lib/elections/survey";
 
-import AlignmentResults from "./AlignmentResults";
+import AlignmentResults, {
+  type RaceComparison,
+  type SurveyRosterCandidate,
+} from "./AlignmentResults";
 import { submitSurvey, type SurveySubmission } from "./submitSurvey";
 
 export type SurveyAnswers = Record<string, string>;
@@ -67,6 +70,54 @@ function errorFor(question: SurveyQuestion, value: string): string | null {
   return null;
 }
 
+/* ── Developer fill ───────────────────────────────────────────
+ *
+ * TEMPORARY. Delete this block, the button that calls it, and nothing else
+ * when the results pages stop needing to be looked at.
+ *
+ * Reaching the comparison view by hand means answering thirty-odd questions,
+ * and every change to that view has to be checked against a filled-in survey.
+ * The button answers the whole questionnaire at random and drops the caller on
+ * the last step, so submitting is one more click.
+ *
+ * Gated on the build, not on a flag: `process.env.NODE_ENV` is inlined at
+ * build time, so in a production bundle the condition is `false` and the
+ * button and this function are dropped entirely.
+ */
+const DEV_TOOLS = process.env.NODE_ENV !== "production";
+
+/** A Toronto postal code that resolves to a ward, so the comparison renders. */
+const DEV_POSTAL = "M6H 1A1";
+
+function devFill(survey: Survey): SurveyAnswers {
+  const filled: SurveyAnswers = {};
+
+  for (const step of survey.steps) {
+    for (const question of step.questions) {
+      if (question.id === "postal_code") {
+        filled[question.id] = DEV_POSTAL;
+        continue;
+      }
+      if (question.options?.length) {
+        // Random rather than always the first: a survey answered entirely down
+        // the left-hand side agrees with nobody in a way that looks like a bug
+        // in the alignment rather than what it is.
+        const option =
+          question.options[Math.floor(Math.random() * question.options.length)];
+        filled[question.id] = option.value;
+        continue;
+      }
+      if (question.type === "email") {
+        filled[question.id] = "dev@example.com";
+        continue;
+      }
+      filled[question.id] = "Developer fill";
+    }
+  }
+
+  return filled;
+}
+
 export default function SurveyClient({
   survey,
   wardNames = {},
@@ -112,6 +163,17 @@ export default function SurveyClient({
   const [responses, setResponses] = useState<CandidateSurveyResponse[] | null>(
     null,
   );
+  /* Everyone on the ward's ballot, which arrives with the answers. The
+     comparison gives a column to every candidate, not only the ones who wrote
+     back: that a candidate said nothing is as much a part of the comparison as
+     what the others said. */
+  const [roster, setRoster] = useState<SurveyRosterCandidate[]>([]);
+  /* The mayoral field, which is on no ward and so arrives beside the ward's:
+     a voter marks two ballots, and the comparison answers for both. */
+  const [mayoral, setMayoral] = useState<{
+    data: CandidateSurveyResponse[];
+    roster: SurveyRosterCandidate[];
+  }>({ data: [], roster: [] });
 
   useEffect(() => {
     if (!ward) return;
@@ -122,14 +184,23 @@ export default function SurveyClient({
         DEFAULT_ELECTION_SLUG,
       )}&ward=${encodeURIComponent(ward)}`,
     )
-      .then((res) => (res.ok ? res.json() : { data: [] }))
+      .then((res) => (res.ok ? res.json() : { data: [], roster: [] }))
       .then((body) => {
-        if (!cancelled) setResponses(body.data ?? []);
+        if (cancelled) return;
+        setResponses(body.data ?? []);
+        setRoster(body.roster ?? []);
+        setMayoral({
+          data: body.mayoral?.data ?? [],
+          roster: body.mayoral?.roster ?? [],
+        });
       })
       // A comparison we could not load is simply not shown; the respondent
       // still has their own answers and the thank-you.
       .catch(() => {
-        if (!cancelled) setResponses([]);
+        if (cancelled) return;
+        setResponses([]);
+        setRoster([]);
+        setMayoral({ data: [], roster: [] });
       });
 
     return () => {
@@ -137,17 +208,39 @@ export default function SurveyClient({
     };
   }, [ward]);
 
+  /* One comparison per ballot, in the order a voter marks them. A race with
+     no published answers is simply left out rather than printed empty. */
   const comparison = useMemo(() => {
-    if (!ward || !responses || responses.length === 0) return null;
+    if (!ward || !responses) return null;
+    if (responses.length === 0 && mayoral.data.length === 0) return null;
 
     const name = wardNames[ward];
-    return {
-      alignment: alignToCandidates(survey, answers, responses),
-      wardLabel: name
-        ? `Ward ${parseInt(ward, 10)} — ${name}`
-        : `Ward ${parseInt(ward, 10)}`,
-    };
-  }, [ward, responses, survey, answers, wardNames]);
+    const wardLabel = name
+      ? `Ward ${parseInt(ward, 10)} — ${name}`
+      : `Ward ${parseInt(ward, 10)}`;
+
+    const races: RaceComparison[] = [];
+    if (mayoral.data.length > 0) {
+      races.push({
+        key: "mayor",
+        label: "For mayor",
+        alignment: alignToCandidates(survey, answers, mayoral.data),
+        responses: mayoral.data,
+        roster: mayoral.roster,
+      });
+    }
+    if (responses.length > 0) {
+      races.push({
+        key: "council",
+        label: wardLabel,
+        alignment: alignToCandidates(survey, answers, responses),
+        responses,
+        roster,
+      });
+    }
+
+    return { races, wardLabel };
+  }, [ward, responses, roster, mayoral, survey, answers, wardNames]);
 
   const set = (id: string, value: string) => {
     setAnswers((prev) => ({ ...prev, [id]: value }));
@@ -213,9 +306,40 @@ export default function SurveyClient({
     scrollTop();
   };
 
+  /** Answer everything and jump to the end. Development builds only. */
+  const fillForDev = () => {
+    setAnswers(devFill(survey));
+    setErrors({});
+    setSubmitError(null);
+    setStep(stepCount - 1);
+    scrollTop();
+  };
+
   return (
-    <div className="theme-election bg-bg text-dark min-h-screen px-5 py-8 pb-20">
-      <div className="mx-auto w-full max-w-[760px] border-2 border-dark bg-bg">
+    <div className="theme-election bg-bg text-dark min-h-screen px-5 py-8 pb-20 2xl:px-8">
+      {/* TEMPORARY developer affordance — see `devFill`. Dashed and labelled
+          so it cannot be mistaken for part of the survey, and compiled out of
+          production builds entirely. */}
+      {DEV_TOOLS && !done && (
+        <button
+          type="button"
+          onClick={fillForDev}
+          className="type-label-sm fixed bottom-4 right-4 z-50 cursor-pointer border border-dashed border-dark bg-bg px-3 py-2 text-dark transition-colors hover:bg-linen-200"
+        >
+          Dev: fill survey
+        </button>
+      )}
+      {/* The form is a column of questions and stays at a reading measure; the
+          results are two comparison grids — a question a row, a candidate a
+          column, and a mayoral field of fifty-odd. Held to the form's width
+          they were strips a couple of columns wide with everything else behind
+          a sideways drag, so the card opens up to the window once there is
+          something to show in it. */}
+      <div
+        className={`mx-auto w-full overflow-x-clip border-2 border-dark bg-bg transition-[max-width] duration-500 ${
+          done ? "max-w-[1720px]" : "max-w-[760px]"
+        }`}
+      >
         {/* ── Masthead ───────────────────────────────────────── */}
 
 
@@ -258,10 +382,10 @@ export default function SurveyClient({
           {comparison && (
             <div className="animate-fade-in">
               <AlignmentResults
-                alignment={comparison.alignment}
+                races={comparison.races}
                 wardLabel={comparison.wardLabel}
-                /* The three candidates behind this are invented. Drop the flag
-                   when the data is real, not before. */
+                survey={survey}
+                answers={answers}
               />
             </div>
           )}

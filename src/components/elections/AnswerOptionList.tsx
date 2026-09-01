@@ -25,7 +25,9 @@ export function AnswerOptionList({
   colors,
   marks = [],
   markColor,
+  names,
   showCounts = true,
+  valueFormat = String,
 }: {
   options: string[];
   /** parallel to `options`; a null entry simply has no expansion */
@@ -35,6 +37,12 @@ export function AnswerOptionList({
   colors: string[];
   /** badges pinned to particular options */
   marks?: OptionMark[];
+  /**
+   * Who picked each option, parallel to `options` — the comparison view lists
+   * the ward's candidates under the option they chose, which is the whole
+   * point of that page and the one thing a chart of shares cannot say.
+   */
+  names?: string[][];
   /** badge and count colour; defaults to each option's own chart colour */
   markColor?: string;
   /**
@@ -43,6 +51,12 @@ export function AnswerOptionList({
    * a centimetre apart.
    */
   showCounts?: boolean;
+  /**
+   * How a count reads. Defaults to the number itself; pass `percentOf(total)`
+   * to match a chart beside the list that prints shares — the same quantity
+   * printed two ways a centimetre apart is worse than either.
+   */
+  valueFormat?: (n: number) => string;
 }) {
   const marked = new Set(marks.map((mark) => mark.index));
 
@@ -53,12 +67,16 @@ export function AnswerOptionList({
         const own = marks.filter((mark) => mark.index === i);
 
         return (
-          <li
-            key={option}
-            className={`flex items-start gap-2.5 ${
-              marked.has(i) ? "" : "opacity-55"
-            }`}
-          >
+          /* An option nobody's badge is on still has to be readable: knowing
+             what a candidate turned down is half of knowing what they picked.
+             The distinction is carried by the type colour alone — charcoal
+             against the chosen option's near-black — rather than by a colour
+             AND a blanket opacity on top of it, which compounded into text
+             around a third of the contrast of the line above it. */
+          <li key={option} className="flex items-start gap-2.5">
+            {/* The chart's own wedge for this option, muted where unchosen —
+                which is where the fade now lives, on the swatch rather than on
+                the words. */}
             <span className="mt-1 flex-none">
               <WedgeGlyph index={i} count={options.length} color={colors[i]} />
             </span>
@@ -81,6 +99,11 @@ export function AnswerOptionList({
                   {mark.label}
                 </span>
               ))}
+              {names?.[i]?.length ? (
+                <span className="type-caption mt-0.5 block text-text-secondary">
+                  {names[i].join(", ")}
+                </span>
+              ) : null}
             </span>
 
             {showCounts && (
@@ -88,8 +111,10 @@ export function AnswerOptionList({
                 className="flex-none font-sans text-[1rem] font-medium tabular-nums"
                 style={marked.has(i) ? { color: tone } : undefined}
               >
-                <span className={marked.has(i) ? "" : "text-text-muted"}>
-                  {counts[i]}
+                {/* Charcoal rather than the faintest token: an unchosen
+                    option's share is the comparison, not a footnote to it. */}
+                <span className={marked.has(i) ? "" : "text-text-secondary"}>
+                  {valueFormat(counts[i])}
                 </span>
               </span>
             )}

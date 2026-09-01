@@ -18,6 +18,7 @@
 import { comparableQuestions, isYesNoScale } from "./alignment";
 import type { CandidateSurveyResponse } from "./alignment";
 import { nameKey } from "./election-data";
+import { lastName } from "./names";
 import type { Survey } from "./survey";
 
 export type CandidateAnswer = {
@@ -151,4 +152,211 @@ export function byCandidateKey(
   entries: CandidateAnswers[],
 ): Record<string, CandidateAnswers> {
   return Object.fromEntries(entries.map((entry) => [entry.key, entry]));
+}
+
+/* ------------------------------------------------------------------ */
+/* Question-first                                                      */
+/* ------------------------------------------------------------------ */
+
+/** One candidate's cell in a question's row; `answer` is null where they
+ *  answered the questionnaire but skipped this question. */
+export type AnswerCell = {
+  /** `nameKey(candidateName)` — matches a roster `CandidateView.key` */
+  key: string;
+  candidateName: string;
+  /** false where they never returned the questionnaire at all — which is a
+   *  different fact from answering it and skipping this question, and the two
+   *  print differently */
+  responded: boolean;
+  answer: CandidateAnswer | null;
+};
+
+/** One question, with every candidate's answer to it side by side. */
+export type ComparedQuestion = {
+  questionId: string;
+  question: string;
+  options: string[];
+  details: (string | null)[];
+  /** the whole field's split, the same figure every candidate's card used */
+  counts: number[];
+  ordinal: boolean;
+  /** one per candidate, in the order the candidates were handed in */
+  cells: AnswerCell[];
+};
+
+export type ComparedGroup = {
+  stepId: string;
+  stepTitle: string;
+  questions: ComparedQuestion[];
+};
+
+/**
+ * Pivots a ward's candidates into one row per question.
+ *
+ * The candidate-first shape (`candidateAnswers`) answers "what does this
+ * candidate think", and a ward page asked it once per candidate: the same
+ * thirty-odd questions, the same option wording, the same charts, repeated in
+ * full for everyone on the ballot. That is the right shape for one card and
+ * the wrong shape for a page — it ran to tens of thousands of pixels, and the
+ * one thing a voter is there to do, hold two candidates against each other on
+ * a question, meant scrolling between two cards a screen or more apart.
+ *
+ * Same data, read across instead of down. Questions keep the order and the
+ * grouping the questionnaire gave them, taken from the first candidate who
+ * answered each — a candidate who skipped a question simply has an empty cell
+ * in that row, which is itself worth seeing.
+ *
+ * The columns come from `roster` where one is given, which is how the whole
+ * ballot gets into the grid rather than only the part of it that wrote back.
+ * A candidate who never returned the questionnaire is a column of "did not
+ * respond", and that is the single most useful thing the page can tell a voter
+ * about them. Without a roster the columns are the entries themselves.
+ */
+export function comparedQuestions(
+  entries: CandidateAnswers[],
+  roster?: { key: string; name: string }[],
+  shape?: ComparedGroup[],
+): ComparedGroup[] {
+  const groups: ComparedGroup[] = [];
+  const byStep = new Map<string, ComparedGroup>();
+  const byQuestion = new Map<string, ComparedQuestion>();
+
+  const responded = new Set(entries.map((entry) => entry.key));
+  const columns = (
+    roster ??
+    entries.map((entry) => ({ key: entry.key, name: entry.candidateName }))
+  ).map((candidate) => ({
+    key: candidate.key,
+    candidateName: candidate.name,
+    responded: responded.has(candidate.key),
+  }));
+
+  for (const entry of entries) {
+    for (const group of entry.groups) {
+      let compared = byStep.get(group.stepId);
+      if (!compared) {
+        compared = {
+          stepId: group.stepId,
+          stepTitle: group.stepTitle,
+          questions: [],
+        };
+        byStep.set(group.stepId, compared);
+        groups.push(compared);
+      }
+
+      for (const answer of group.answers) {
+        let question = byQuestion.get(answer.questionId);
+        if (!question) {
+          question = {
+            questionId: answer.questionId,
+            question: answer.question,
+            options: answer.options,
+            details: answer.details,
+            counts: answer.counts,
+            ordinal: answer.ordinal,
+            cells: columns.map((column) => ({ ...column, answer: null })),
+          };
+          byQuestion.set(answer.questionId, question);
+          compared.questions.push(question);
+        }
+
+        const cell = question.cells.find((c) => c.key === entry.key);
+        if (cell) cell.answer = answer;
+      }
+    }
+  }
+
+  /* Nobody in this ward wrote back, so the questions have nowhere to come
+     from: they are read off the returned questionnaires, and there are none.
+     The questionnaire itself supplies them instead, and every cell is a "did
+     not respond" — which is the whole point of the page in a ward like that.
+     Silence from a whole field is a finding, and it reads as one only when a
+     reader can see the thirty questions nobody answered. */
+  if (groups.length === 0 && shape) {
+    return shape.map((group) => ({
+      ...group,
+      questions: group.questions.map((question) => ({
+        ...question,
+        cells: columns.map((column) => ({ ...column, answer: null })),
+      })),
+    }));
+  }
+
+  return groups;
+}
+
+/**
+ * The columns of a survey grid, in the order they should print.
+ *
+ * Answered first, then the rest, each half by surname. The clerk's order is a
+ * filing order and reads as noise in a grid: it puts the one candidate who
+ * answered thirty questions somewhere in the middle of eleven columns of "did
+ * not respond", so the columns worth reading are the ones a reader has to go
+ * looking for. Sorting by name alone would do the same. Alphabetical within
+ * each half because a reader checking on one candidate needs somewhere to look
+ * them up.
+ *
+ * Withdrawn candidates are dropped: they cannot be voted for, so a column of
+ * theirs is a column of a ballot line that does not exist, and in a grid this
+ * wide every column costs the reader a drag.
+ */
+export function surveyRoster<
+  T extends { key: string; name: string; withdrawn?: boolean },
+>(
+  candidates: T[],
+  answers?: Record<string, CandidateAnswers>,
+): (T & { answers?: CandidateAnswers })[] {
+  return candidates
+    .filter((candidate) => !candidate.withdrawn)
+    .map((candidate) => ({ ...candidate, answers: answers?.[candidate.key] }))
+    .sort((a, b) => {
+      if (!!a.answers !== !!b.answers) return a.answers ? -1 : 1;
+      return (
+        lastName(a.name).localeCompare(lastName(b.name)) ||
+        a.name.localeCompare(b.name)
+      );
+    });
+}
+
+/**
+ * Every comparable question in the questionnaire, with the whole field's split
+ * on each and no candidate attached — the shape of the grid, for a ward whose
+ * candidates have all stayed quiet.
+ *
+ * The counts come from every response in the election, exactly as they do on a
+ * candidate's own answers: what the rest of the field said is the one thing a
+ * ward of non-respondents can still tell a reader.
+ */
+export function questionnaireShape(
+  survey: Survey,
+  responses: CandidateSurveyResponse[],
+): ComparedGroup[] {
+  const groups: ComparedGroup[] = [];
+
+  for (const { question, stepId, stepTitle } of comparableQuestions(survey)) {
+    const options = question.options ?? [];
+    const counts = options.map(() => 0);
+    for (const response of responses) {
+      const raw = (response.answers[question.id] ?? "").trim();
+      if (!raw) continue;
+      const index = options.findIndex((option) => option.value === raw);
+      if (index !== -1) counts[index] += 1;
+    }
+
+    const compared: ComparedQuestion = {
+      questionId: question.id,
+      question: question.label,
+      options: options.map((option) => option.label),
+      details: options.map((option) => option.detail ?? null),
+      counts,
+      ordinal: isYesNoScale(options.map((option) => option.label)),
+      cells: [],
+    };
+
+    const last = groups.at(-1);
+    if (last?.stepId === stepId) last.questions.push(compared);
+    else groups.push({ stepId, stepTitle, questions: [compared] });
+  }
+
+  return groups;
 }

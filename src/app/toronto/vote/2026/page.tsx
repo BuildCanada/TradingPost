@@ -24,6 +24,7 @@ export default async function Toronto2026ElectionPage() {
     <ElectionLanding
       election={ELECTION}
       view={view}
+      mayorSurveyPath={`${ELECTION.basePath}/mayor`}
       wardMapDefs={<WardMapDefs geo={WARD_GEO} />}
       renderWardMap={(ward) => (
         <WardMap

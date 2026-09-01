@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Suspense, type ReactNode } from "react";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import CountdownDays from "./CountdownDays";
@@ -6,7 +7,6 @@ import { CandidateSiteLink } from "./CandidateSiteLink";
 import { PledgeButton } from "./PledgeButton";
 import { ResidencyModal } from "./ResidencyModal";
 import { WardCard } from "./WardCard";
-import WardLookup from "./WardLookup";
 import { daysUntil, yearOf } from "@/lib/elections/dates";
 import type { SupportedElection } from "@/lib/elections/registry";
 import type {
@@ -41,29 +41,20 @@ export function ElectionLanding({
   content,
   wardMapDefs,
   renderWardMap,
+  mayorSurveyPath,
 }: {
   election: SupportedElection;
   view: ElectionView;
   content: LandingContent;
+  /** where the mayoral field's questionnaire grid lives, for the regions that
+   *  have run one — the cards say who is running, that page says what they
+   *  said */
+  mayorSurveyPath?: string;
   /** rendered once, so per-ward maps can reference shared geometry */
   wardMapDefs?: ReactNode;
   /** this region's locator map for a ward, when it has ward geometry */
   renderWardMap?: (ward: WardView) => ReactNode;
 }) {
-  // Pre-rendered here rather than inside the lookup, because the locator map
-  // is server-side geometry the client component can't build.
-  const wardCards: Record<number, ReactNode> = {};
-  for (const ward of view.wards) {
-    wardCards[ward.number] = (
-      <WardCard
-        ward={ward}
-        basePath={election.basePath}
-        map={renderWardMap?.(ward)}
-        className="border border-border-light max-w-[300px]"
-      />
-    );
-  }
-
   return (
     <div className={`${election.themeClass ?? ""} bg-bg text-dark`}>
       <Suspense fallback={null}>
@@ -85,10 +76,19 @@ export function ElectionLanding({
 
         {/* ── Candidates for mayor ─────────────────────────────── */}
         <section id="candidates" className="border-b-2 border-dark scroll-mt-24">
-          <div className="px-6 pt-12 pb-8 md:px-14">
+          <div className="px-6 pt-12 pb-8 md:px-14 flex justify-between items-end gap-6 flex-wrap">
             <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(2rem,3.5vw,2.75rem)]">
               Candidates for Mayor
             </h2>
+            {mayorSurveyPath && (
+              <Link
+                href={mayorSurveyPath}
+                className="group/answers type-label-sm text-accent hover:underline inline-flex items-center gap-1.5 pb-1.5"
+              >
+                How they answered our questionnaire
+                <ArrowRight className="size-3.5 transition-transform group-hover/answers:translate-x-0.5" />
+              </Link>
+            )}
           </div>
 
           <div className="grid grid-cols-[repeat(auto-fill,minmax(272px,1fr))] border-t border-l border-border-light">
@@ -110,16 +110,9 @@ export function ElectionLanding({
               <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(2rem,3.5vw,2.75rem)] mb-2.5">
                 Find your ward
               </h2>
-              <p className="font-serif text-[1.1rem] leading-[1.45] max-w-[52ch] text-dark/80 mb-8">
+              <p className="font-serif text-[1.1rem] leading-[1.45] max-w-[52ch] text-dark/80">
                 {content.wardsBlurb}
               </p>
-              {election.wardLookup && (
-                <WardLookup
-                  wards={view.wards}
-                  cards={wardCards}
-                  cityLabel={election.cityLabel}
-                />
-              )}
             </div>
             <p className="type-label text-text-secondary pb-1.5 !tracking-[0.08em]">
               {view.wards.length} wards

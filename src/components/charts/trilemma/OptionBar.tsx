@@ -29,6 +29,11 @@ export interface OptionBarProps {
   /** Counts printed inside each segment, where the segment is wide enough. */
   showCounts?: boolean
   /**
+   * How a count reads inside its segment. Defaults to the number itself; pass
+   * `percentOf(total)` to print shares, as the dial does.
+   */
+  valueFormat?: (n: number) => string
+  /**
    * Option names printed under the band, one per segment — the bar's answer to
    * the dial's goal labels, so a bar can carry its own key instead of
    * borrowing one from a list beside it. A segment too narrow for its name is
@@ -60,6 +65,7 @@ export function OptionBar({
   height = 34,
   responsive = false,
   showCounts = true,
+  valueFormat = String,
   showLabels = false,
   colors: colorsProp,
   theme = 'light',
@@ -85,7 +91,7 @@ export function OptionBar({
     return { i, x: (before / total) * width, w: (c / total) * width, count: c, color: colors[i] }
   })
 
-  const aria = label ?? options.map((o, i) => `${o} ${counts[i]}`).join(', ')
+  const aria = label ?? options.map((o, i) => `${o} ${valueFormat(counts[i])}`).join(', ')
 
   // The label lines wrap into their own segment's width, which is the only
   // room they have; a name that will not fit two lines there is dropped.
@@ -108,7 +114,7 @@ export function OptionBar({
           <g key={i}>
             {/* A 1px bite out of each segment keeps the joins visible without a stroke. */}
             <rect x={sx} y={0} width={Math.max(0, w - 1)} height={height} fill={color} />
-            {showCounts && w > 22 && (
+            {showCounts && w > 26 && (
               <text
                 x={sx + w / 2}
                 y={height / 2}
@@ -119,7 +125,7 @@ export function OptionBar({
                 fill={color === MUTED ? tokens.inkSoft : tokens.bg}
                 style={{ fontVariantNumeric: 'tabular-nums' }}
               >
-                {count}
+                {valueFormat(count)}
               </text>
             )}
             {labelLines[i]?.map((line, li) => (

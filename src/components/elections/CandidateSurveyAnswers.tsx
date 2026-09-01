@@ -2,17 +2,10 @@
 
 import { ChevronDown } from "lucide-react";
 
-import {
-  MUTED,
-  OptionBar,
-  TOKENS,
-  TrilemmaDial,
-  layoutDial,
-  palette,
-  type AxisConfig,
-  type Triple,
-} from "@/components/charts/trilemma";
+import { WedgeGlyph, percentOf } from "@/components/charts/trilemma";
+import { AnswerChart, optionColors, sharedRadius } from "./AnswerChart";
 import { AnswerOptionList } from "./AnswerOptionList";
+import { firstName, lastName, possessive } from "@/lib/elections/names";
 import {
   Collapsible,
   CollapsibleContent,
@@ -43,8 +36,14 @@ import type {
  *   that reaches the rim always means the same thing. Per-question scales
  *   would make every answer look unanimous.
  *
- *   The chart is the answer, so it is the biggest thing in the row and it
- *   carries its own key: the question sits above it as the row's heading, and
+ *   The answer itself is written out under the question, before the chart:
+ *   what they picked, in the words they were offered, with that option's wedge
+ *   glyph beside it. The chart is what the field did — reading a single
+ *   candidate's answer off it means hunting the coloured third and then its
+ *   rim label, which is a step too many between a question and its answer.
+ *
+ *   The chart stays the biggest thing in the row all the same, and it carries
+ *   its own key: the question sits above it as the row's heading, and
  *   each wedge is direct-labelled with the option's name and the number of
  *   candidates who picked it. A shape with the meaning parked in a column
  *   beside it is a decoration; a shape that names its own thirds is the answer.
@@ -73,7 +72,7 @@ export function CandidateSurveyAnswers({
   answers: CandidateAnswers;
   candidateName: string;
 }) {
-  const radius = sharedRadius(answers);
+  const radius = sharedRadius(answers.groups.flatMap((group) => group.answers));
 
   return (
     <Collapsible defaultOpen className="mt-5 border-t border-border-light pt-4">
@@ -98,9 +97,10 @@ export function CandidateSurveyAnswers({
                 {group.stepTitle}
               </h4>
 
-              {/* The section rule already opens the block, so the first
-                  answer's own hairline would only stack under it. */}
-              <div className="grid gap-4 [&>div:first-child]:border-t-0 [&>div:first-child]:pt-0">
+              {/* Two answers to a row where there is width for it: stacked
+                  chart-over-options, each answer is a tall narrow block, and
+                  one per row left a column of white space beside every dial. */}
+              <div className="grid gap-4 lg:grid-cols-2">
                 {group.answers.map((answer) => (
                   <Answer
                     key={answer.questionId}
@@ -119,76 +119,6 @@ export function CandidateSurveyAnswers({
   );
 }
 
-/* Big enough for the option names to sit around the rim at a readable size,
- * and to stay the loudest thing in the row. The bar matches its width so the
- * two chart forms line up down a card of mixed questions. */
-const CHART_SIZE = 360;
-
-/**
- * How long an option name can be and still go around the rim.
- *
- * Most of the questionnaire names its options in a word or two — "Permission",
- * "Regulator and enabler" — and those belong on the chart. A handful put a
- * whole sentence in the label instead ("Decrease after inflation, with some
- * responsibilities and funding transferred to civilian services"), and there
- * is no size of dial that reads with three of those around it. Shortening
- * them here is not an option: these are the words the candidate was answering.
- * So those questions keep the older form — counts inside the wedges, wording
- * in the list — and the glyph beside each option is what ties the two.
- */
-const RIM_LABEL_MAX = 40;
-
-const isDial = (answer: CandidateAnswer) =>
-  answer.options.length === 3 && !answer.ordinal;
-
-const hasRimLabels = (answer: CandidateAnswer) =>
-  isDial(answer) &&
-  answer.options.every((option) => option.length <= RIM_LABEL_MAX);
-
-const dialAxes = (answer: CandidateAnswer) =>
-  answer.options.map((option, i) => ({
-    key: String(i),
-    label: option,
-  })) as unknown as Triple<AxisConfig>;
-
-/**
- * One outer radius for every dial on the card — the smallest any of them can
- * manage with its own option names around the rim.
- *
- * Without this each dial sizes itself to its own labels, so a question with
- * short options draws a bigger circle, and the shared value scale the whole
- * card rests on quietly stops being true: the same count would reach further
- * on one question than on another. The dials that cannot carry rim labels are
- * held to the same radius, so their circles still measure the same.
- */
-function sharedRadius(answers: CandidateAnswers): number | undefined {
-  const dials = answers.groups
-    .flatMap((group) => group.answers)
-    .filter(isDial);
-  if (dials.length === 0) return undefined;
-
-  // The labelled dials set the radius, being the constrained ones. A card
-  // whose every dial is a sentence-labelled question has none, and then the
-  // unlabelled fit is the only one there is.
-  const rim = dials.filter(hasRimLabels);
-  const labelled = rim.length > 0;
-
-  return Math.min(
-    ...(labelled ? rim : dials).map(
-      (answer) =>
-        layoutDial({
-          width: CHART_SIZE,
-          height: CHART_SIZE,
-          padding: 4,
-          axes: dialAxes(answer),
-          showGoalLabels: labelled,
-          showValues: labelled,
-          hasLabel: false,
-        }).R,
-    ),
-  );
-}
-
 function Answer({
   answer,
   candidateName,
@@ -201,101 +131,83 @@ function Answer({
   /** the card's shared outer radius, from `sharedRadius` */
   radius?: number;
 }) {
-  const full = palette(answer.options.length);
-  // Their option keeps its colour; the rest recede. A candidate whose answer
-  // matched no option highlights nothing, so the whole chart goes neutral —
-  // the field's shape still shows, but none of it is claimed as theirs.
-  const colors = answer.options.map((_, i) =>
-    i === answer.choice ? full[i] : MUTED,
-  );
+  const { full, colors } = optionColors(answer.options.length, answer.choice);
   // Candidates whose answer landed in a bucket — not the whole field, since a
   // transcribed answer is in none of them.
   const counted = answer.counts.reduce((a, b) => a + b, 0);
-  const dial = isDial(answer);
-  const rim = hasRimLabels(answer);
-  // Every option's count has to be readable, including the ones drawn in the
-  // unchosen neutral — which is a fill, far too pale to set type in.
-  const valueColors = answer.options.map((_, i) =>
-    i === answer.choice ? full[i] : TOKENS.light.inkFaint,
-  );
+  // Shares of the field, not head counts: the reader has no idea whether nine
+  // is most of the ward or a corner of it, and every chart on the card is
+  // scaled against the same field, so the same denominator is already implied
+  // by the geometry.
+  const share = percentOf(fieldSize);
 
   return (
-    <div className="grid gap-5 border-t border-border-light pt-5">
+    /* Boxed, and a full-height column rather than a content-height block.
+       Two answers share a row, and a hairline above each was enough to
+       separate a single column but not a grid: with a neighbour alongside,
+       a rule at the top of both reads as one line under the pair, and where
+       one answer runs longer than the other there was nothing to say which
+       question the leftover text belonged to. A box closes each one.
+
+       Stretched to the row, with the chart pushed to the bottom, every answer
+       frames the same way — which is what makes any one of them croppable on
+       its own. */
+    <div className="flex h-full flex-col gap-5 border border-border-light p-5">
       {/* The question, above the chart rather than beside it: the chart is
           wider now, and a heading in its own column would have made the row a
           pair of narrow strips. */}
-      <h5 className="font-sans text-[1.15rem] font-medium leading-[1.3] tracking-[-0.015em] text-dark text-pretty max-w-[54ch]">
-        {answer.question}
-      </h5>
+      <div className="grid gap-2">
+        <h5 className="font-sans text-[1.15rem] font-medium leading-[1.3] tracking-[-0.015em] text-dark text-pretty max-w-[54ch]">
+          {answer.question}
+        </h5>
 
-      <div className="grid gap-6 sm:grid-cols-[360px_minmax(0,1fr)] sm:gap-9 sm:items-center">
-        {/* The chart's own accessible name would be the dial's generic
-            fallback, which names neither the question nor the candidate.
-            Naming the group instead makes the svg inside presentational, so it
-            is announced once and in the terms a reader needs. */}
-        <div
-          className="flex justify-center sm:justify-start"
-          role="img"
-          aria-label={
-            counted > 0
-              ? `${answer.question} — ${answer.options
-                .map((option, i) => `${option} ${answer.counts[i]}`)
-                .join(", ")}; ${candidateName} chose ${answer.answer}`
-              : undefined
-          }
-        >
-          {counted > 0 &&
-            (dial ? (
-              <TrilemmaDial
-                axes={dialAxes(answer)}
-                values={answer.counts as unknown as Triple<number>}
-                domain={[0, Math.max(1, fieldSize)]}
-                width={CHART_SIZE}
-                /* The box closes up around the circle and whatever labels it
-                   carries, rather than staying the square the width implies —
-                   at a forced radius that square is mostly empty air, and on a
-                   phone, where the svg scales to the column, the air scales
-                   with it. The circle is the same size either way. */
-                height={
-                  radius === undefined
-                    ? undefined
-                    : rim
-                      ? 2 * radius + 118
-                      : 2 * radius + 40
-                }
-                radiusOverride={radius}
-                padding={4}
-                innerRadius={0.14}
-                /* The options around the rim and their counts under them: the
-                   chart says what each third is and how many went there,
-                   without the reader crossing to the list to find out. */
-                showGoalLabels={rim}
-                valueMode={rim ? "outside" : "inside"}
-                /* One quiet ring at half the field, so a wedge's reach can be
-                   read as a share rather than only against its neighbours. */
-                showRings
-                ringStep={0.5}
-                cornerColors={colors as Triple<string>}
-                valueColors={valueColors as Triple<string>}
-                interactive={false}
-                paper="var(--color-bg)"
-              />
-            ) : (
-              <OptionBar
-                options={answer.options}
-                counts={answer.counts}
-                colors={colors}
-                width={CHART_SIZE}
-                height={34}
-                showLabels
-              />
-            ))}
-        </div>
+        {/* What they said, in words, directly under the question and ahead of
+            the chart. The chart shows where the field went and which third is
+            theirs, but reading it means finding the coloured wedge and then
+            its rim label — a step between the question and its answer. This
+            says it outright; the chart then answers "and who else?".
 
+            The glyph is the chart's own wedge for that option, so the eye can
+            carry the colour from this line down onto the dial. */}
+        <p className="flex items-baseline gap-2.5">
+          {answer.choice !== null && (
+            <span className="flex-none self-start mt-[5px]">
+              <WedgeGlyph
+                index={answer.choice}
+                count={answer.options.length}
+                color={full[answer.choice]}
+              />
+            </span>
+          )}
+          <span className="font-sans text-[1.05rem] font-medium leading-[1.35] text-dark text-pretty">
+            {answer.verbatim && <>&ldquo;</>}
+            {answer.answer}
+            {answer.verbatim && (
+              <>
+                &rdquo;
+                <span className="type-caption text-text-muted">
+                  {" "}
+                  &mdash; {possessive(firstName(candidateName))} wording, not
+                  one of the options
+                </span>
+              </>
+            )}
+          </span>
+        </p>
+      </div>
+
+      {/* Options then chart, stacked rather than side by side — at half a
+          card's width the two columns were a pair of strips too narrow for
+          either. The chart goes last because it is the slowest thing to read:
+          the question, the answer in words, and the alternatives it was chosen
+          from are the whole story for most readers, and the field's shape is
+          what you stay for. Ending the row on it also puts every dial on a
+          consistent line above the next question's heading. */}
+      <div className="flex flex-1 flex-col gap-3.5">
         <div>
           {/* The options as they were offered, so the answer is read against
-              the alternatives rather than on its own. Counts stay on the
-              chart, which direct-labels every one of them. */}
+              the alternatives rather than on its own. Shares stay on the
+              chart below, which direct-labels every one of them. */}
           <AnswerOptionList
             options={answer.options}
             details={answer.details}
@@ -305,26 +217,22 @@ function Answer({
             marks={
               answer.choice === null
                 ? []
-                : [{ index: answer.choice, label: "Their answer" }]
+                : [
+                  {
+                    index: answer.choice,
+                    // Named rather than "their answer": on a page of stacked
+                    // candidate cards the pronoun only means something if you
+                    // still know whose card you are on.
+                    label: `${possessive(candidateName)} response`,
+                  },
+                ]
             }
           />
-
-          {/* An answer that matched no option is quoted, so it reads as the
-              candidate's words rather than as a choice they were offered. */}
-          {answer.verbatim && (
-            <p className="type-body-sm text-dark text-pretty mt-3">
-              &ldquo;{answer.answer}&rdquo;
-              <span className="type-caption text-text-muted">
-                {" "}
-                — {candidateName}&rsquo;s wording, not one of the options
-              </span>
-            </p>
-          )}
 
           {answer.explanation && (
             <div className="border-l-2 border-border-light pl-3 mt-3.5">
               <h6 className="type-label-sm text-text-muted mb-1">
-                Candidate&rsquo;s note
+                {possessive(firstName(candidateName))} note
               </h6>
               <p className="font-serif italic text-[1rem] leading-[1.45] text-text-secondary text-pretty">
                 {answer.explanation}
@@ -332,7 +240,56 @@ function Answer({
             </div>
           )}
         </div>
+
+        <AnswerChart
+          shape={answer}
+          counts={answer.counts}
+          choice={answer.choice}
+          fieldSize={fieldSize}
+          radius={radius}
+          ariaLabel={`${answer.question} — ${answer.options
+            .map((option, i) => `${option} ${share(answer.counts[i])}`)
+            .join(", ")}; ${candidateName} chose ${answer.answer}`}
+        />
+
+        {/* Whose chart this is, said under it. On a card of thirty-odd
+            boxed answers — and in a screenshot of any one of them, cropped
+            away from the card's header — the dial otherwise arrives with no
+            owner: three coloured thirds and no statement of what the coloured
+            one belongs to. */}
+        {counted > 0 && (
+          <p className="font-sans text-[0.95rem] font-medium leading-[1.3] tracking-[-0.005em] text-center text-dark text-pretty">
+            {possessive(lastName(candidateName))} responses vs all other
+            candidates
+          </p>
+        )}
+
       </div>
     </div>
+  );
+}
+
+/**
+ * What every chart on the page is counting, said once at the foot of it.
+ *
+ * This used to sit under each chart, where it was true but relentless: a ward
+ * page carries a dozen candidates at thirty-odd answers each, so the same four
+ * lines were set several hundred times, and a note repeated that often stops
+ * being read at all. It is a property of the whole questionnaire — the same
+ * field, the same denominator, on every chart — so it belongs where a source
+ * note belongs, at the bottom, once.
+ */
+export function SurveyChartNote({ candidateCount }: { candidateCount: number }) {
+  return (
+    <p className="type-caption text-text-muted text-pretty max-w-[78ch]">
+      <span className="text-text-secondary">Reading the charts.</span> Each
+      third of a dial is one of the options, reaching further the more of this
+      ward&rsquo;s candidates picked it; on the segmented bars each band is one
+      option, as wide as the share that picked it. Counts are out of the{" "}
+      {candidateCount} candidates in this ward who returned the
+      questionnaire, not the whole ballot. A candidate who answered in their
+      own words rather than picking an option is counted on no option, and is
+      named under the question instead.
+    </p>
   );
 }

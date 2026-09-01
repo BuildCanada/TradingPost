@@ -3,9 +3,18 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import CountdownDays from "./CountdownDays";
-import { CandidateSurveyAnswers } from "./CandidateSurveyAnswers";
+import { SurveyChartNote } from "./CandidateSurveyAnswers";
+import { SurveyGrid } from "./SurveyGrid";
+import { SurveyCta } from "./SurveyCta";
 import { IncumbentBadge, SiteLink } from "./ElectionLanding";
-import type { CandidateAnswers } from "@/lib/elections/candidate-answers";
+import {
+  comparedQuestions,
+  surveyRoster,
+} from "@/lib/elections/candidate-answers";
+import type {
+  CandidateAnswers,
+  ComparedGroup,
+} from "@/lib/elections/candidate-answers";
 import { daysUntil } from "@/lib/elections/dates";
 import type { SupportedElection } from "@/lib/elections/registry";
 import type {
@@ -30,6 +39,7 @@ export function WardDetail({
   wardMapDefs,
   wardMap,
   surveyAnswers,
+  surveyShape,
 }: {
   election: SupportedElection;
   data: WardDetailData;
@@ -45,6 +55,13 @@ export function WardDetail({
    * the campaign that is most of them.
    */
   surveyAnswers?: Record<string, CandidateAnswers>;
+  /**
+   * The questionnaire's questions with nobody's answers on them, used where a
+   * ward's whole field stayed quiet — there are no returned questionnaires to
+   * read the questions off, and a ward of non-respondents still deserves to
+   * show which questions they did not answer.
+   */
+  surveyShape?: ComparedGroup[];
 }) {
   const { ward, wards, councilRaces, trusteeRaces } = data;
   const idx = wards.findIndex((w) => w.number === ward.number);
@@ -52,8 +69,26 @@ export function WardDetail({
   const next = wards[(idx + 1) % wards.length];
 
   // With one council race the heading would only repeat the page title, so the
-  // candidates run straight down — which is how Toronto's page has always read.
+  // grid runs straight under it — which is how Toronto's page has always read.
   const showRaceHeadings = councilRaces.length > 1;
+
+  /* The whole council ballot, and the part of it that wrote back.
+
+     The questionnaire grid is the ward's candidate list now — there is no
+     separate roster of cards above it to agree or disagree with. So its
+     columns are every candidate still standing, and one we never heard from is
+     a column that says exactly that, which is more use to a voter than a name
+     quietly left out of the comparison.
+
+     Withdrawn candidates are the exception, and are dropped: they cannot be
+     voted for, so a column of theirs is a column of a ballot line that does
+     not exist, and in a grid this wide every column costs the reader a drag. */
+  const councilCandidates = councilRaces
+    .flatMap((race) => race.candidates)
+    .filter((candidate) => !candidate.withdrawn);
+  const respondents = councilCandidates.filter(
+    (candidate) => surveyAnswers?.[candidate.key],
+  );
 
   return (
     <div className={`${election.themeClass ?? ""} bg-bg text-dark`}>
@@ -117,49 +152,55 @@ export function WardDetail({
           </div>
         </section>
 
-        {/* ── Council candidates ─────────────────────────────── */}
-        <section>
-          <div className="px-6 md:px-14 pt-11 pb-2">
-            <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.75rem,3vw,2.5rem)]">
-              Candidates
-            </h2>
+        {/* ── Questionnaire ──────────────────────────────────── */}
+        <section id="questionnaire">
+          <div className="px-6 md:px-14 pt-11 pb-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-12">
+            <div>
+              <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.75rem,3vw,2.5rem)] max-w-[24ch] text-balance">
+                Know Your Candidates
+              </h2>
+              <p className="mt-5 font-serif text-[1.08rem] leading-[1.5] text-dark/85 max-w-[64ch] text-pretty">
+                {councilCandidates.length === 0
+                  ? "No one has registered in this ward yet."
+                  : respondents.length === 0
+                    ? "Nobody in this ward has answered yet. These are the questions we asked."
+                    : `${respondents.length} of ${councilCandidates.length} candidates answered our questionnaire. Open a question to see every option and what the rest of the city said.`}
+              </p>
+            </div>
+
+            <SurveyCta href={`${election.basePath}/survey`} />
           </div>
 
-          {councilRaces.length === 0 && (
+          {councilCandidates.length === 0 ? (
             <EmptyRace
               wardName={ward.name}
               nominationCloseLabel={nominationCloseLabel}
             />
+          ) : (
+            councilRaces.map((race) => (
+              <RaceQuestionnaire
+                key={race.id}
+                race={race}
+                surveyAnswers={surveyAnswers}
+                surveyShape={surveyShape}
+                showHeading={showRaceHeadings}
+                election={election.slug}
+                ward={ward.n}
+                wardName={ward.name}
+              />
+            ))
           )}
 
-          {councilRaces.map((race) => (
-            <div key={race.id}>
-              {showRaceHeadings && <RaceHeading race={race} />}
-              {race.candidates.length === 0 ? (
-                <EmptyRace
-                  wardName={ward.name}
-                  nominationCloseLabel={nominationCloseLabel}
-                />
-              ) : (
-                race.candidates.map((cand) => (
-                  <CouncilCandidate
-                    key={cand.key}
-                    candidate={cand}
-                    election={election.slug}
-                    ward={ward.n}
-                    wardName={ward.name}
-                    answers={surveyAnswers?.[cand.key]}
-                  />
-                ))
-              )}
-            </div>
-          ))}
-
-          <p className="px-6 md:px-14 py-4 type-label-sm text-text-muted border-t border-border-light">
-            Registered candidates from the City Clerk&rsquo;s list. The field is
-            not final until nominations close
-            {nominationCloseLabel ? ` on ${nominationCloseLabel}` : ""}.
-          </p>
+          <div className="px-6 md:px-14 py-4 border-t border-border-light grid gap-2.5">
+            {respondents.length > 0 && (
+              <SurveyChartNote candidateCount={respondents.length} />
+            )}
+            <p className="type-label-sm text-text-muted">
+              Registered candidates from the City Clerk&rsquo;s list, less
+              anyone who has withdrawn. The field is not final until nominations
+              close{nominationCloseLabel ? ` on ${nominationCloseLabel}` : ""}.
+            </p>
+          </div>
         </section>
 
         {/* ── School board races ─────────────────────────────── */}
@@ -225,6 +266,76 @@ export function WardDetail({
   );
 }
 
+/**
+ * One race's questionnaire: every candidate on it as a column, whether or not
+ * they answered us.
+ *
+ * A grid per race rather than one for the ward, because a ward can elect more
+ * than one councillor — Brampton's wards elect a city and a regional
+ * councillor — and two rival fields merged into one set of columns would
+ * compare candidates who are not running against each other.
+ *
+ * A race nobody answered has no questions to draw, since the questions come
+ * from the returned questionnaires. That case still names the candidates: they
+ * are on the ballot, and the page is now the only place that says so.
+ */
+function RaceQuestionnaire({
+  race,
+  surveyAnswers,
+  surveyShape,
+  showHeading,
+  election,
+  ward,
+  wardName,
+}: {
+  race: RaceView;
+  surveyAnswers?: Record<string, CandidateAnswers>;
+  surveyShape?: ComparedGroup[];
+  showHeading: boolean;
+  /** York Factory election slug, for the outbound-link tracking */
+  election: string;
+  ward: string;
+  wardName: string;
+}) {
+  const roster = surveyRoster(race.candidates, surveyAnswers);
+  const groups = comparedQuestions(
+    roster.flatMap((candidate) =>
+      candidate.answers ? [candidate.answers] : [],
+    ),
+    roster,
+    surveyShape,
+  );
+
+  return (
+    <div>
+      {showHeading && <RaceHeading race={race} />}
+      <div className="px-6 md:px-14 pb-10">
+        {groups.length > 0 ? (
+          <SurveyGrid
+            groups={groups}
+            candidates={roster}
+            election={election}
+            race="councillor"
+            ward={ward}
+            wardName={wardName}
+          />
+        ) : (
+          /* Only two ways to get here now: nobody has filed for the seat, or
+             the questionnaire itself could not be fetched. Either way there is
+             no grid to draw, and the candidates are still worth naming. */
+          <p className="font-serif text-[1.05rem] leading-[1.5] text-dark/80 max-w-[62ch] text-pretty">
+            {roster.length === 0
+              ? "No one has filed for this seat yet."
+              : `On the ballot, and yet to respond to us: ${roster
+                  .map((candidate) => candidate.name)
+                  .join(", ")}.`}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function RaceHeading({ race }: { race: RaceView }) {
   return (
     <div className="px-6 md:px-14 pt-8 pb-3 border-t border-border-light flex justify-between items-end gap-5 flex-wrap">
@@ -261,21 +372,20 @@ function EmptyRace({
   );
 }
 
+/* A candidate card, which only the school-board races use now: the council
+   ballot is the questionnaire grid, and trustees have no questionnaire. */
 function CouncilCandidate({
   candidate,
   election,
   race = "councillor",
   ward,
   wardName,
-  answers,
 }: {
   candidate: CandidateView;
   election: string;
   race?: "councillor" | "trustee";
   ward: string;
   wardName: string;
-  /** their questionnaire answers, when they have answered it */
-  answers?: CandidateAnswers;
 }) {
   return (
     <div
@@ -284,58 +394,51 @@ function CouncilCandidate({
       }`}
     >
       <div className="flex gap-5 sm:gap-7 items-center">
-      <div className="flex-none size-16 bg-dark relative overflow-hidden flex items-center justify-center font-sans font-medium text-[1.35rem] tracking-[-0.02em] text-bg">
-        {candidate.image ? (
-          <Image
-            src={candidate.image}
-            alt={candidate.name}
-            fill
-            sizes="64px"
-            className="object-cover object-center"
-          />
-        ) : (
-          candidate.initials
-        )}
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-baseline gap-3.5 flex-wrap mb-2">
-          <h3
-            className={`font-sans font-medium text-[1.5rem] tracking-[-0.02em] leading-[1.1] ${
-              candidate.withdrawn ? "line-through decoration-1" : ""
-            }`}
-          >
-            {candidate.name}
-          </h3>
-          {candidate.tag === "Incumbent" && <IncumbentBadge />}
-          {candidate.withdrawn && (
-            <span className="type-label-sm !text-[10px] !tracking-[0.12em] px-2 py-1 border border-border-light text-text-secondary">
-              Withdrawn
-            </span>
+        <div className="flex-none size-16 bg-dark relative overflow-hidden flex items-center justify-center font-sans font-medium text-[1.35rem] tracking-[-0.02em] text-bg">
+          {candidate.image ? (
+            <Image
+              src={candidate.image}
+              alt={candidate.name}
+              fill
+              sizes="64px"
+              className="object-cover object-center"
+            />
+          ) : (
+            candidate.initials
           )}
         </div>
-        {candidate.bio && (
-          <p className="font-serif text-[1.08rem] leading-[1.45] text-dark/80 max-w-[64ch]">
-            {candidate.bio}
-          </p>
-        )}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-baseline gap-3.5 flex-wrap">
+            <h3
+              className={`font-sans font-medium text-[1.5rem] tracking-[-0.02em] leading-[1.1] ${
+                candidate.withdrawn ? "line-through decoration-1" : ""
+              }`}
+            >
+              {candidate.name}
+            </h3>
+            {candidate.tag === "Incumbent" && <IncumbentBadge />}
+            {candidate.withdrawn && (
+              <span className="type-label-sm !text-[10px] !tracking-[0.12em] px-2 py-1 border border-border-light text-text-secondary">
+                Withdrawn
+              </span>
+            )}
+          </div>
+          {candidate.bio && (
+            <p className="font-serif text-[1.08rem] leading-[1.45] text-dark/80 max-w-[64ch] mt-2">
+              {candidate.bio}
+            </p>
+          )}
+        </div>
+        <div className="hidden sm:block flex-none">
+          <SiteLink
+            candidate={candidate}
+            election={election}
+            race={race}
+            ward={ward}
+            wardName={wardName}
+          />
+        </div>
       </div>
-      <div className="hidden sm:block flex-none">
-        <SiteLink
-          candidate={candidate}
-          election={election}
-          race={race}
-          ward={ward}
-          wardName={wardName}
-        />
-      </div>
-      </div>
-
-      {answers && (
-        <CandidateSurveyAnswers
-          answers={answers}
-          candidateName={candidate.name}
-        />
-      )}
     </div>
   );
 }

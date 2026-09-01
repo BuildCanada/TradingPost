@@ -1,8 +1,16 @@
 "use client";
 
 import { useMemo } from "react";
+import { ChevronDown } from "lucide-react";
+
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 import { SurveyGrid } from "@/components/elections/SurveyGrid";
+import { AgreementChart } from "./AgreementChart";
 import {
   byCandidateKey,
   candidateAnswers,
@@ -13,7 +21,7 @@ import {
 import { DEFAULT_ELECTION_SLUG } from "@/lib/elections/registry";
 import type { CandidateSurveyResponse } from "@/lib/elections/alignment";
 import type { Survey } from "@/lib/elections/survey";
-import type { Alignment, CandidateScore } from "@/lib/elections/alignment";
+import type { Alignment } from "@/lib/elections/alignment";
 
 /* Alignment between one resident's answers and their ward's candidates.
  *
@@ -65,14 +73,11 @@ export type RaceComparison = {
 
 export default function AlignmentResults({
   races,
-  wardLabel,
   survey,
   answers,
 }: {
   /** in ballot order — mayor first, then the ward */
   races: RaceComparison[];
-  /** e.g. "Ward 9 — Davenport"; the ward is a postal-code guess, not a fact */
-  wardLabel: string;
   survey: Survey;
   /** the reader's own answers, by question id */
   answers: Record<string, string>;
@@ -82,28 +87,14 @@ export default function AlignmentResults({
   );
   if (shown.length === 0) return null;
 
+  /* No heading of its own. Once the answers are in, the page is this
+     comparison and nothing else, so the card's masthead says so — a second
+     title under the first was two announcements of one thing, with an accent
+     rule and a rule-off between them. What the masthead carries now used to
+     live here: see `SurveyClient`. */
   return (
-    <section className="min-w-0 border-t border-border-light px-6 pt-14 pb-16 md:px-10">
-      <div className="mb-7 h-0.5 w-10 bg-accent" />
-      <h2 className="mb-3 font-sans font-medium leading-[1.05] tracking-[-0.015em] text-[clamp(1.5rem,3.5vw,2rem)] text-balance">
-        How your answers compare
-      </h2>
-      {/* Two ballots, so two comparisons. A voter marks a councillor and a
-          mayor separately, and a page that answered only for the ward would be
-          answering the smaller half of the question they came with. */}
-      <p className="type-body-sm mb-2 text-text-secondary text-pretty">
-        You vote twice: once for your councillor, once for mayor. Candidates in
-        both races answered the same questions you just did.
-      </p>
-      {/* The ward comes from a postal-code lookup, whose stored point is the
-          centroid of a delivery area — a code on a ward line can resolve to the
-          neighbour. Said plainly rather than presented as settled. */}
-      <p className="type-caption mb-10 text-text-muted text-pretty">
-        We placed you in {wardLabel} from your postal code. That is a best
-        guess, not a certainty, for codes that straddle a ward boundary.
-      </p>
-
-      <div className="grid min-w-0 gap-14">
+    <section className="min-w-0 px-6 pt-10 pb-14 md:px-10">
+      <div className="grid min-w-0 gap-10">
         {shown.map((race) => (
           <RaceBlock
             key={race.key}
@@ -183,67 +174,41 @@ function RaceBlock({
     };
   }, [survey, answers, race.responses, race.roster]);
 
+  /* Both races open to begin with. A reader who has just answered thirty
+     questions is owed the answer to them, not two closed doors — the fold is
+     here so they can put one ballot away while they read the other, which is
+     a different thing from making them ask for either. */
   return (
-    <div className="min-w-0">
-      <h3 className="border-t-2 border-dark pt-3 mb-4 font-sans font-medium leading-[1.15] tracking-[-0.025em] text-[clamp(1.3rem,2vw,1.6rem)] text-dark">
-        {race.label}
-      </h3>
-
-      <p className="type-label-sm mb-3 text-text-muted">Closest to you</p>
-      <ol className="mb-10 grid gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
-        {race.alignment.scores.map((score, i) => (
-          <li key={score.candidateName}>
-            <ScoreRow rank={i + 1} score={score} />
-          </li>
-        ))}
-      </ol>
-
-      <SurveyGrid
-        groups={grid.groups}
-        candidates={grid.candidates}
-        election={DEFAULT_ELECTION_SLUG}
-        race={race.key === "mayor" ? "mayor" : "councillor"}
-        wardName={race.label}
-        yourKey={grid.yourKey}
-      />
-    </div>
-  );
-}
-
-/* ── One candidate, one line: how close, out of how many ─────── */
-
-function ScoreRow({ rank, score }: { rank: number; score: CandidateScore }) {
-  const percent = score.share === null ? null : Math.round(score.share * 100);
-
-  return (
-    <div className="grid h-full gap-2 border border-border-light px-4 py-3.5">
-      <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-        <span className="type-label-sm tabular-nums text-text-muted">
-          {rank}
+    <Collapsible defaultOpen className="min-w-0">
+      <CollapsibleTrigger className="group/race flex w-full items-baseline gap-3 border-t-2 border-dark pt-3 pb-4 text-left transition-colors">
+        <h3 className="flex-1 font-sans font-medium leading-[1.15] tracking-[-0.025em] text-[clamp(1.3rem,2vw,1.6rem)] text-dark transition-colors group-hover/race:text-accent">
+          {race.label}
+        </h3>
+        {/* What is behind the fold, so a closed race still says whether it
+            is worth opening. */}
+        <span className="type-label-sm flex-none text-text-muted">
+          {race.alignment.scores.length} answered
         </span>
-        <h4 className="flex-1 font-sans text-[1.05rem] font-medium tracking-[-0.01em] text-dark">
-          {score.candidateName}
-        </h4>
-        <span className="font-sans text-[1.05rem] font-medium tabular-nums text-dark">
-          {percent === null ? "—" : `${percent}%`}
-        </span>
-      </div>
+        <ChevronDown
+          className="size-4 flex-none text-text-muted transition-[transform,color] group-hover/race:text-accent group-data-[panel-open]:rotate-180"
+          aria-hidden="true"
+        />
+      </CollapsibleTrigger>
 
-      {/* Decorative: the share and the count are both direct-labelled, so the
-          bar repeats what the text already says. */}
-      <div className="h-1.5 w-full bg-charcoal-200" aria-hidden="true">
-        {percent !== null && percent > 0 && (
-          <div className="h-1.5 bg-pine-600" style={{ width: `${percent}%` }} />
-        )}
-      </div>
+      <CollapsibleContent>
+        <div className="mb-8">
+          <AgreementChart alignment={race.alignment} />
+        </div>
 
-      <p className="type-caption text-text-secondary">
-        {score.compared === 0
-          ? "No answers we could compare yet"
-          : `Agrees on ${score.agreed} of ${score.compared} questions you both answered`}
-        {score.unclear > 0 && ` · ${score.unclear} unclear`}
-        {score.unanswered > 0 && ` · ${score.unanswered} unanswered`}
-      </p>
-    </div>
+        <SurveyGrid
+          groups={grid.groups}
+          candidates={grid.candidates}
+          election={DEFAULT_ELECTION_SLUG}
+          race={race.key === "mayor" ? "mayor" : "councillor"}
+          wardName={race.label}
+          yourKey={grid.yourKey}
+        />
+      </CollapsibleContent>
+    </Collapsible>
   );
 }

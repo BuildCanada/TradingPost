@@ -33,15 +33,13 @@ const RADIO_CLASS = "size-[17px] m-0 accent-accent";
 
 /** Copy the CMS doesn't have to supply. Only the fallbacks live here — the
  *  survey's own meta wins whenever it sets a field. */
+/* Used only when York Factory sends none of its own — the live title, intro
+   and thank-you are CMS copy, and this is what shows if they are missing. */
 const META_FALLBACK = {
   title: "Toronto priorities survey",
-  intro: "",
+  intro:
+    "Thirty questions on what the next council should do. Answer them and see which candidates on your ballot agree with you.",
   submitLabel: "Submit survey",
-  thankYou: {
-    title: "Thank you. Your answers are in.",
-    body: "We read every response.",
-    restartLabel: "Start again",
-  },
 } as const;
 
 /** Entrance delay for the nth element in a step, capped so a long step's last
@@ -140,7 +138,6 @@ export default function SurveyClient({
   const steps = survey.steps;
   const stepCount = steps.length;
   const meta = survey.meta;
-  const thankYou = { ...META_FALLBACK.thankYou, ...(meta.thankYou ?? {}) };
 
   const isLastStep = step === stepCount - 1;
   const currentStep = steps[step];
@@ -296,16 +293,6 @@ export default function SurveyClient({
     }
   };
 
-  const restart = () => {
-    setAnswers({});
-    setErrors({});
-    setSubmitError(null);
-    setStep(0);
-    setDone(false);
-    setSubmission(null);
-    scrollTop();
-  };
-
   /** Answer everything and jump to the end. Development builds only. */
   const fillForDev = () => {
     setAnswers(devFill(survey));
@@ -336,64 +323,82 @@ export default function SurveyClient({
           a sideways drag, so the card opens up to the window once there is
           something to show in it. */}
       <div
-        className={`mx-auto w-full overflow-x-clip border-2 border-dark bg-bg transition-[max-width] duration-500 ${
-          done ? "max-w-[1720px]" : "max-w-[760px]"
-        }`}
+        className={`mx-auto w-full overflow-x-clip border-2 border-dark bg-bg transition-[max-width] duration-500 ${done ? "max-w-[1720px]" : "max-w-[760px]"
+          }`}
       >
         {/* ── Masthead ───────────────────────────────────────── */}
+        {/* Its own band, ruled off from what follows. It had no bottom padding
+            at all: the title sat on top of the progress bar, and the only
+            thing between them was whatever top padding the next block
+            happened to carry. The intro keeps a reading measure of its own —
+            once the card widens to hold the results, a line of intro type set
+            across seventeen hundred pixels is a line nobody finishes. */}
+        <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-5 border-b border-border-light px-6 pt-10 pb-8 md:px-10 md:pt-12 md:pb-9">
+          {/* One masthead, saying whichever of the two things the page is
+              currently for. Before the answers are in it introduces the
+              survey; after, it is the heading of the comparison — which used
+              to announce itself a second time, with its own accent rule, in a
+              band directly under this one. */}
+          <div>
+            <h1 className="mb-3.5 font-sans font-medium leading-[1.03] tracking-[-0.02em] text-[clamp(2rem,5vw,2.875rem)] max-w-[18ch] text-balance">
+              {done && comparison
+                ? "How your answers compare"
+                : META_FALLBACK.title}
+            </h1>
+            {done && comparison ? (
+              <>
+                {/* Two ballots, so two comparisons. A voter marks a councillor
+                    and a mayor separately, and a page that answered only for
+                    the ward would answer the smaller half of the question they
+                    came with. */}
+                <p className="type-lead max-w-[54ch] text-text-secondary text-pretty">
+                  You vote twice: once for your councillor, once for mayor.
+                  Candidates in both races answered the questions you just did.
+                </p>
+                {/* The ward is a postal-code lookup, whose stored point is the
+                    centroid of a delivery area — a code on a ward line can
+                    resolve to the neighbour. Said plainly rather than
+                    presented as settled. */}
+                <p className="type-caption mt-3 max-w-[54ch] text-text-muted text-pretty">
+                  We placed you in {comparison.wardLabel} from your postal code.
+                  That is a best guess, not a certainty, for codes that straddle
+                  a ward boundary.
+                </p>
+              </>
+            ) : (
+              <p className="type-lead max-w-[54ch] text-text-secondary text-pretty">
+                {META_FALLBACK.intro}
+              </p>
+            )}
+          </div>
 
-
-        <div className="px-6 pt-8 md:px-10">
-          <h1 className="mb-3 font-sans font-medium leading-[1.03] tracking-[-0.02em] text-[clamp(2rem,5vw,2.875rem)] text-balance">
-            {meta.title ?? META_FALLBACK.title}
-          </h1>
-          <p className="type-lead text-text-secondary text-pretty">
-            {meta.intro ?? META_FALLBACK.intro}
-          </p>
+          {/* The way out, in the masthead where a reader looks for it rather
+              than at the bottom of a page they have to finish first. */}
+          <Link
+            href="/toronto/vote/2026"
+            className="group/btn type-button inline-flex flex-none items-center gap-2 pb-1 text-dark hover:text-accent"
+          >
+            Explore the candidates
+            <ArrowRight className="size-3.5 transition-transform group-hover/btn:translate-x-0.5" />
+          </Link>
         </div>
 
         {done ? (
           <>
-          <div className="animate-fade-in border-t border-border-light px-6 pt-14 pb-16 md:px-10">
-            <div className="mb-7 h-0.5 w-10 bg-accent" />
-            <h2 className="mb-4 font-sans font-medium leading-[1.05] tracking-[-0.015em] text-[clamp(1.75rem,4vw,2.375rem)] text-balance">
-              {thankYou.title}
-            </h2>
-            <p className="type-lead mb-8 text-text-secondary text-pretty">
-              {thankYou.body}
-            </p>
-            <div className="flex flex-wrap items-center gap-4">
-              <button
-                type="button"
-                onClick={restart}
-                className="type-button cursor-pointer border border-border-light px-7 py-4 transition-colors hover:bg-linen-200"
-              >
-                {thankYou.restartLabel}
-              </button>
-              <Link
-                href="/toronto/vote/2026"
-                className="group/btn type-button inline-flex items-center gap-2 text-dark hover:text-accent"
-              >
-                Explore the candidates
-                <ArrowRight className="size-3.5 transition-transform group-hover/btn:translate-x-0.5" />
-              </Link>
-            </div>
-          </div>
-          {comparison && (
-            <div className="animate-fade-in">
-              <AlignmentResults
-                races={comparison.races}
-                wardLabel={comparison.wardLabel}
-                survey={survey}
-                answers={answers}
-              />
-            </div>
-          )}
+            {comparison && (
+              <div className="animate-fade-in">
+                <AlignmentResults
+                  races={comparison.races}
+                  survey={survey}
+                  answers={answers}
+                />
+              </div>
+            )}
           </>
         ) : (
           <>
             {/* ── Progress ───────────────────────────────────── */}
-            <div className="flex items-center gap-4 px-6 pt-7 md:px-10">
+            <div className="flex items-center gap-4 px-6 pt-8 md:px-10">
               <span className="type-label text-dark">
                 Step {step + 1} of {stepCount}
               </span>
@@ -664,9 +669,8 @@ function Question({
               {options.map((option, i) => (
                 <label
                   key={option.value}
-                  className={`cursor-pointer px-7 py-2.5 text-[17px] transition-colors ${
-                    i > 0 ? "border-l border-border-light" : ""
-                  } not-has-checked:hover:bg-linen-100 has-checked:bg-dark has-checked:text-bg has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-dark`}
+                  className={`cursor-pointer px-7 py-2.5 text-[17px] transition-colors ${i > 0 ? "border-l border-border-light" : ""
+                    } not-has-checked:hover:bg-linen-100 has-checked:bg-dark has-checked:text-bg has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-dark`}
                 >
                   <input
                     type="radio"

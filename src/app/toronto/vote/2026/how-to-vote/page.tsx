@@ -10,12 +10,15 @@ import {
   BALLOT_RACES,
   ELIGIBILITY,
   ID_GOTCHAS,
-  VOTING_STEPS,
+  getVotingSteps,
 } from "../voter-guide";
 
-/* Static, revalidated daily. Nothing here counts down, so it needs nothing
-   like the hourly revalidate the key-dates page uses. */
-export const revalidate = 86400;
+/* Hourly, matching the key-dates page. Nothing here counts down, but the
+   "pick how you want to vote" step changes as the mail-in, advance-voting and
+   online-registration deadlines pass — and two of those land at 4:30 p.m. and
+   7 p.m., so a daily revalidate would leave the wrong copy up for most of a
+   day. */
+export const revalidate = 3600;
 
 const CANONICAL = "/toronto/vote/2026/how-to-vote";
 const DESCRIPTION =
@@ -43,7 +46,7 @@ const FAQS: { question: string; answer: string }[] = [
   {
     question: "How do I vote in Toronto?",
     answer:
-      "Check that you are eligible, look yourself up on the City's MyVote portal to confirm you are on the voters' list and find your voting place, choose whether to vote on election day, during advance voting, or by mail, then bring one piece of ID showing your name and Toronto address. Toronto's 2026 election is Monday, October 26.",
+      "Check that you are eligible, look yourself up on the City's MyVote portal to confirm you are on the voters' list and find your voting place, choose whether to vote on election day, during advance voting, by mail, or by proxy, then bring one piece of ID showing your name and Toronto address. Toronto's 2026 election is Monday, October 26.",
   },
   {
     question: "Am I registered to vote in Toronto?",
@@ -53,7 +56,7 @@ const FAQS: { question: string; answer: string }[] = [
   {
     question: "What ID do I need to vote in Toronto?",
     answer:
-      "One document showing your name and your qualifying Toronto address. Photo ID is not required — a utility bill, bank statement, lease, pay stub or property tax assessment all qualify on their own. Your voter information card is not accepted as identification, so bring something else as well.",
+      "One document showing your name and your qualifying Toronto address. Photo ID is not required — a utility bill, bank statement, lease, pay stub or property tax assessment all qualify on their own. A passport does not work, because it shows no address, and your voter information card is not accepted as identification either, so bring something from the City's list.",
   },
   {
     question: "Can I vote in Toronto if I rent?",
@@ -64,6 +67,11 @@ const FAQS: { question: string; answer: string }[] = [
     question: "Can I vote in Toronto if I am not a Canadian citizen?",
     answer:
       "No. Ontario municipal elections require voters to be Canadian citizens, regardless of how long they have lived in Toronto or whether they pay property tax here.",
+  },
+  {
+    question: "Can someone else vote for me in Toronto?",
+    answer:
+      "Yes, by proxy. You appoint another eligible Toronto voter, and the appointment form has to be certified by the City Clerk — from September 1 up to 4:30 p.m. on election day, though on election day itself only at Toronto City Hall. A person can normally act as proxy for one voter, or for more if they are immediate family.",
   },
   {
     question: "Where do I vote in Toronto?",
@@ -84,6 +92,7 @@ const FAQS: { question: string; answer: string }[] = [
 
 export default function HowToVotePage() {
   const { siteUrl } = getSiteConfig();
+  const votingSteps = getVotingSteps();
 
   const jsonLd = buildGraph(
     generateFAQPageSchema(FAQS),
@@ -142,7 +151,7 @@ export default function HowToVotePage() {
             </p>
           </div>
           <ol className="border-t border-border-light">
-            {VOTING_STEPS.map((step, i) => (
+            {votingSteps.map((step, i) => (
               <li
                 key={step.title}
                 className="grid md:grid-cols-[6rem_1fr] gap-y-3 px-6 py-10 md:px-14 border-b border-border-light last:border-b-0"

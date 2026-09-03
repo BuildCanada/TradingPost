@@ -11,8 +11,14 @@
 //   https://www.toronto.ca/city-government/elections/voter-information/identification/
 //   https://www.toronto.ca/city-government/elections/voter-information/voters-list/
 //   https://www.toronto.ca/city-government/elections/voter-information/mail-in-voting/
+//   https://www.toronto.ca/city-government/elections/voter-information/voting-options/
 
-import { MYVOTE_URL, SOURCE_URLS } from "./key-dates";
+import {
+  ELECTION_DAY,
+  MYVOTE_URL,
+  SOURCE_URLS,
+  VOTING_PERIODS,
+} from "./key-dates";
 
 /** Every condition a voter has to meet — all of them, not any of them. */
 export const ELIGIBILITY: { requirement: string; detail: string }[] = [
@@ -45,7 +51,7 @@ export const ACCEPTED_ID: { category: string; examples: string }[] = [
   {
     category: "Government ID",
     examples:
-      "An Ontario driver's licence or photo card, or any document issued by the government of Canada, Ontario, or a municipality.",
+      "An Ontario driver's licence or photo card, or another document issued by the government of Canada, Ontario, or an Ontario municipality — as long as it shows your Toronto address.",
   },
   {
     category: "Where you bank",
@@ -70,11 +76,13 @@ export const ACCEPTED_ID: { category: string; examples: string }[] = [
   {
     category: "Other",
     examples:
-      "Court-issued documents, or Band Council documents issued in Ontario.",
+      "A government benefit statement — Employment Insurance, Old Age Security or CPP — court-issued documents, or Band Council documents issued in Ontario.",
   },
 ];
 
-/** The two rules people most often get wrong, worth stating outright. */
+/** The rules people most often get wrong, worth stating outright. Each of
+ *  these is a documented reason voters get turned away, so the page leads with
+ *  them rather than with the list of accepted documents. */
 export const ID_GOTCHAS: { claim: string; truth: string }[] = [
   {
     claim: "You need photo ID",
@@ -85,6 +93,11 @@ export const ID_GOTCHAS: { claim: string; truth: string }[] = [
     claim: "Your voter information card is your ID",
     truth:
       "It isn't. The card tells you where to vote, but it is not accepted as identification. Bring something from the list as well.",
+  },
+  {
+    claim: "My passport will do",
+    truth:
+      "It won't. A passport carries no address, and the City lists it as not acceptable. Every accepted document has to show your qualifying Toronto address.",
   },
   {
     claim: "A photo of a document on your phone works",
@@ -102,51 +115,151 @@ export type VotingStep = {
   action?: { label: string; href: string; external: boolean };
 };
 
+/* ── Where we are in the calendar ─────────────────────────────────────────
+   The steps used to be a static array, which meant the page kept telling
+   readers to apply for a mail-in package after applications had closed, and
+   to register online after the online deadline had passed. The instants come
+   from ./key-dates rather than being retyped, so the phase boundaries can't
+   drift away from the calendar the rest of the site counts down to. */
+
+const instant = (iso: string) => new Date(iso).getTime();
+
+const period = (id: (typeof VOTING_PERIODS)[number]["id"]) => {
+  const found = VOTING_PERIODS.find((p) => p.id === id);
+  if (!found) throw new Error(`key-dates is missing the "${id}" period`);
+  return found;
+};
+
+/** Sept 24, 4:30 p.m. — last moment to request a mail-in package. */
+const MAIL_APPLY_CLOSES = instant(period("mail-in-apply").closesAt);
+/** Oct 6, 10 a.m. — advance voting places open. */
+const ADVANCE_OPENS = instant(period("advance").opensAt!);
+/** Oct 11, 7 p.m. — advance voting closes, and the same instant is the
+ *  deadline to check or update the voters' list online. */
+const ONLINE_REGISTRATION_CLOSES = instant(period("advance").closesAt);
+/** Oct 26, 8 p.m. — polls close. */
+const POLLS_CLOSE = instant(ELECTION_DAY.closesAt);
+
+type Phase =
+  | "before-mail-deadline"
+  | "mail-closed"
+  | "advance-open"
+  | "election-day-only"
+  | "over";
+
+function phaseAt(now: number): Phase {
+  if (now > POLLS_CLOSE) return "over";
+  if (now > ONLINE_REGISTRATION_CLOSES) return "election-day-only";
+  if (now >= ADVANCE_OPENS) return "advance-open";
+  if (now > MAIL_APPLY_CLOSES) return "mail-closed";
+  return "before-mail-deadline";
+}
+
+/** Step 2 — the voters' list. Only the closing sentence moves. */
+function registrationBody(phase: Phase): string {
+  const lead =
+    "MyVote is the City's own portal. Enter your address and it tells you whether you're registered, which ward you're in, and where your voting place is.";
+
+  if (phase === "before-mail-deadline" || phase === "mail-closed" || phase === "advance-open") {
+    return `${lead} If you're missing or your details are out of date, you fix it there. Registering online closes October 11 at 7 p.m.`;
+  }
+  if (phase === "election-day-only") {
+    return `${lead} Online updates closed on October 11 — but you can still add your name to the voters' list in person at your voting place on election day.`;
+  }
+  return `${lead} Online updates for the 2026 election closed on October 11, 2026.`;
+}
+
+/** Step 3 — the ways to vote. Toronto has four, not three: election day,
+ *  advance voting, mail-in, and appointing a proxy. Two of them have
+ *  deadlines, which is why this can't be a fixed sentence. */
+function waysToVoteBody(phase: Phase): string {
+  switch (phase) {
+    case "before-mail-deadline":
+      return "Four ways, and you only use one: in person on election day, in person during advance voting from October 6 to 11, by mail, or by appointing someone you trust as your proxy. Voting by mail is the one with the earliest deadline — applications opened September 1 and close September 24 at 4:30 p.m.";
+    case "mail-closed":
+      return "Mail-in applications closed on September 24, so three ways are left: in person on election day, in person during advance voting from October 6 to 11, or by appointing someone you trust as your proxy. If you already have a mail-in package, Toronto Elections must receive it by noon on October 14 — received, not postmarked.";
+    case "advance-open":
+      return "Advance voting is running now, through October 11, and election day is October 26 — either one works, and you only vote once. You can also still appoint a proxy. Mail-in applications closed on September 24; if you already have a package it must arrive by noon on October 14.";
+    case "election-day-only":
+      return "Advance voting and mail-in applications have closed. Election day is October 26, 10 a.m. to 8 p.m., at the voting place assigned to your address. If you can't get there yourself, you can still appoint an eligible voter as your proxy — the form is certified by the City Clerk up to 4:30 p.m. on election day, and on election day itself only at Toronto City Hall.";
+    case "over":
+      return "Voting in the 2026 election has closed. Election day was October 26, 2026.";
+  }
+}
+
+/** Step 3's action points at the City page that covers proxy voting, curbside
+ *  voting and the assist terminals — the options a reader who can't simply
+ *  walk in on election day needs. Before the mail deadline the useful link is
+ *  still the mail-in page, which MyVote applications run through. */
+function waysToVoteAction(phase: Phase): VotingStep["action"] {
+  if (phase === "over") return undefined;
+  if (phase === "before-mail-deadline") {
+    return {
+      label: "Apply to vote by mail",
+      href: SOURCE_URLS.mailIn,
+      external: true,
+    };
+  }
+  return {
+    label: "Proxy voting and accessibility options",
+    href: SOURCE_URLS.votingOptions,
+    external: true,
+  };
+}
+
 /** The process in order. Written as an actual sequence, because "how to vote"
- *  is a procedural query and the answer is a procedure. */
-export const VOTING_STEPS: VotingStep[] = [
-  {
-    title: "Check that you can vote",
-    body:
-      "You need to be a Canadian citizen, 18 or older on election day, and either living in Toronto or renting or owning property here. All four conditions have to be true, not just one.",
-    action: {
-      label: "Read the City's eligibility rules",
-      href: SOURCE_URLS.city,
-      external: true,
+ *  is a procedural query and the answer is a procedure.
+ *
+ *  Takes `now` so the page renders the phase it is actually in; the default
+ *  makes it usable as a plain call. The page it feeds revalidates hourly,
+ *  because two of the boundaries above land at 4:30 p.m. and 7 p.m. and a
+ *  daily revalidate would leave the wrong copy up for most of a day. */
+export function getVotingSteps(now: Date = new Date()): VotingStep[] {
+  const phase = phaseAt(now.getTime());
+
+  return [
+    {
+      title: "Check that you can vote",
+      body:
+        "You need to be a Canadian citizen, 18 or older on election day, either living in Toronto or renting or owning property here, and not prohibited from voting under any law. All four conditions have to be true, not just one.",
+      action: {
+        label: "Read the City's eligibility rules",
+        href: SOURCE_URLS.city,
+        external: true,
+      },
     },
-  },
-  {
-    title: "Look yourself up on the voters' list",
-    body:
-      "MyVote is the City's own portal. Enter your address and it tells you whether you're registered, which ward you're in, and where your voting place is. If you're missing or your details are out of date, you fix it there. Registering online closes October 11 at 7 p.m.",
-    action: { label: "Open MyVote", href: MYVOTE_URL, external: true },
-  },
-  {
-    title: "Pick how you want to vote",
-    body:
-      "Three options, and you only use one: in person on election day, in person during advance voting from October 6 to 11, or by mail. Voting by mail is the only one with an application deadline, and it has already started.",
-  },
-  {
-    title: "Sort out your ID before you go",
-    body:
-      "Bring one document showing your name and your Toronto address. Photo ID is not required. Your voter information card does not count as ID, which is the single most common reason people get turned away.",
-    action: {
-      label: "See what ID is accepted",
-      href: SOURCE_URLS.identification,
-      external: true,
+    {
+      title: "Look yourself up on the voters' list",
+      body: registrationBody(phase),
+      action: { label: "Open MyVote", href: MYVOTE_URL, external: true },
     },
-  },
-  {
-    title: "Vote — and know who you're voting for",
-    body:
-      "Your ballot has three choices: mayor, the councillor for your ward, and a school board trustee. The council race is the one that decides what actually gets built on your street, and it is usually the one nobody has read about.",
-    action: {
-      label: "See the candidates in your ward",
-      href: "/toronto/vote/2026#wards",
-      external: false,
+    {
+      title: "Pick how you want to vote",
+      body: waysToVoteBody(phase),
+      action: waysToVoteAction(phase),
     },
-  },
-];
+    {
+      title: "Sort out your ID before you go",
+      body:
+        "Bring one document showing your name and your Toronto address. Photo ID is not required, and a passport doesn't work because it has no address on it. Your voter information card does not count as ID either, which is the single most common reason people get turned away.",
+      action: {
+        label: "See what ID is accepted",
+        href: SOURCE_URLS.identification,
+        external: true,
+      },
+    },
+    {
+      title: "Vote — and know who you're voting for",
+      body:
+        "Your ballot has three choices: mayor, the councillor for your ward, and a school board trustee. The council race is the one that decides what actually gets built on your street, and it is usually the one nobody has read about.",
+      action: {
+        label: "See the candidates in your ward",
+        href: "/toronto/vote/2026#wards",
+        external: false,
+      },
+    },
+  ];
+}
 
 /** What a single voter actually chooses. Not to be confused with the 26 mayor
  *  and council races running across the city — one voter votes in one of them. */

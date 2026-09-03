@@ -43,6 +43,11 @@ const ID_URL =
   "https://www.toronto.ca/city-government/elections/voter-information/identification/";
 const KEY_DATES_URL =
   "https://www.toronto.ca/city-government/elections/key-dates/";
+/** Proxy voting, curbside voting, Voter Assist Terminals and the language
+ *  services all live on one City page. Linked from the "how to vote" steps,
+ *  which is the only place we mention voting by proxy. */
+const VOTING_OPTIONS_URL =
+  "https://www.toronto.ca/city-government/elections/voter-information/voting-options/";
 
 /** MyVote is the City's own voter portal — where you check or update your
  *  registration and request a mail-in package. The primary action on this page
@@ -56,6 +61,7 @@ export const SOURCE_URLS = {
   votersList: VOTERS_LIST_URL,
   identification: ID_URL,
   keyDates: KEY_DATES_URL,
+  votingOptions: VOTING_OPTIONS_URL,
 };
 
 /** A voting period with a live countdown. Copy is spelled out per state rather

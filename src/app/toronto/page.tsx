@@ -72,7 +72,7 @@ function CountdownSection() {
           the two columns start and end on the page's own content edges. */}
       <div className="max-w-[1080px] mx-auto flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between lg:gap-16">
         <div>
-          <p className="type-label text-auburn-200">{ELECTION.eyebrow}</p>
+          <p className="type-label text-auburn-200">2026 Municipal Election</p>
           <h2 className="type-h2 mt-4">
             Toronto votes {ELECTION.voteDayLabel}.
           </h2>

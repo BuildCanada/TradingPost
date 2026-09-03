@@ -4,19 +4,27 @@ import Link from "next/link";
 import { fetchMemos } from "@/lib/api";
 import SectionLabel from "@/components/SectionLabel";
 import { LinkButton } from "@/components/ui/link-button";
-import { SubscribeButton } from "@/components/ui/subscribe-button";
 import { SectionHeader } from "@/components/ui/section-header";
 import PickCard from "@/components/PickCard";
 import LiveCountdown from "@/components/elections/LiveCountdown";
 import { breakdown, msUntil, periodTiming } from "@/lib/elections/dates";
+import { isDaylight } from "@/lib/daylight";
 import { ELECTION } from "./vote/2026/data";
+import { WARD_GEO, WARD_SHAPES } from "./vote/2026/wardGeo";
 import { ELECTION_DAY } from "./vote/2026/key-dates";
 import { SURVEY_PATH } from "./vote/survey-questions/path";
 import { STAGE_ONE } from "./vote/survey-questions/questions";
-import { HeroEmailCapture } from "./HeroEmailCapture";
+import { EmailCapture } from "./EmailCapture";
+import { HeroSurface } from "./HeroSurface";
 
 /** Where questions about the Toronto project go. */
 const CONTACT_EMAIL = "hi@buildcanada.com";
+
+/* Half-hourly, so the hero photograph follows Toronto's actual daylight (see
+   ./HeroSurface) without the page going dynamic and giving up its CDN cache.
+   Worst case the skyline is half an hour behind the sky outside, which is
+   inside the blue-hour window the night photograph was shot in anyway. */
+export const revalidate = 1800;
 
 export const metadata: Metadata = {
   title: "Build Canada - Toronto",
@@ -38,40 +46,13 @@ export const metadata: Metadata = {
 };
 
 function HeroSection() {
-  return (
-    <section className="relative border-b border-border-light w-full overflow-hidden">
-      <Image
-        src="/assets/images/toronto/hero.jpg"
-        alt="The Toronto skyline lit up at blue hour, with the CN Tower in red, seen across Lake Ontario"
-        fill
-        priority
-        sizes="100vw"
-        className="object-cover object-center"
-      />
-      {/* Scrim: dark frame, light copy — but weighted to the centre, because
-          the fully lit skyline is a bright, busy band exactly where the centred
-          type sits. The sky above and water below need almost none of it. */}
-      <div
-        aria-hidden
-        className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/55 to-black/40"
-      />
-      {/* Content sits in normal flow rather than absolutely positioned, so the
-          hero grows to fit the copy instead of clipping it at a fixed aspect. */}
-      <div className="relative flex min-h-[85svh] md:min-h-[860px] flex-col justify-center px-5 py-16 md:py-20">
-        <div className="w-full max-w-[1080px] mx-auto text-center">
-          <h1 className="type-display text-linen-100">
-            Vote for the Toronto
-            <br />
-            <span className="text-auburn-200">you know is possible.</span>
-          </h1>
-          <p className="type-lead text-linen-100/90 max-w-[560px] mx-auto mt-6">
-            Coverage of the October 26 election and bold ideas for the city for the future.
-          </p>
-          <HeroEmailCapture />
-        </div>
-      </div>
-    </section>
-  );
+  /* Toronto's daylight, not the reader's. This is a photograph of this city,
+     so it should match what the sky over it looks like — someone opening the
+     page from Vancouver at 5 p.m. their time is looking at Toronto at 8 p.m.
+     Decided here on the server so there is one image on the critical path and
+     nothing swaps under the reader after hydration; HeroSurface takes it as
+     the starting point and the corner toggle can override it. */
+  return <HeroSurface initialMode={isDaylight(new Date()) ? "day" : "night"} />;
 }
 
 /**
@@ -126,6 +107,33 @@ function CountdownSection() {
 }
 
 /**
+ * Toronto's 25 wards. The same geometry the tracker's locator maps are drawn
+ * from — rendered once here as the whole city, so the card shows you the thing
+ * you are about to go and search rather than describing it.
+ */
+function WardOutlineMap() {
+  return (
+    <svg
+      viewBox={WARD_GEO.viewBox}
+      role="img"
+      aria-label={`The 25 wards of the ${WARD_GEO.regionLabel}`}
+      className="w-full h-auto"
+    >
+      {WARD_SHAPES.map((w) => (
+        <path
+          key={w.n}
+          d={w.d}
+          className="fill-accent/10 stroke-accent/40 transition-colors duration-200 group-hover/card:fill-accent/20 group-hover/card:stroke-accent/70"
+          strokeWidth={0.5}
+          strokeLinejoin="round"
+          vectorEffect="non-scaling-stroke"
+        />
+      ))}
+    </svg>
+  );
+}
+
+/**
  * Shared chrome for the two election cards. The whole card is the link, but it
  * still ends in a full-width button rather than a quiet label: these go to
  * other pages, and that should be unmistakable rather than inferred.
@@ -152,11 +160,13 @@ function ElectionCard({
   return (
     <Link
       href={href}
-      className={`group/card flex flex-col justify-between transition-colors ${className}`}
+      className={`group/card flex flex-col justify-between transition-colors focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-accent ${className}`}
     >
       <div className="px-6 md:px-10 pt-10 md:pt-14 pb-8">
         <span className={`type-label ${eyebrowClassName}`}>{eyebrow}</span>
-        <h2 className="type-h2 mt-4">{title}</h2>
+        <h2 className="type-h2 mt-4 transition-colors group-hover/card:text-accent">
+          {title}
+        </h2>
         {children}
       </div>
       <div className="px-6 md:px-10 pb-8 md:pb-10">
@@ -164,7 +174,7 @@ function ElectionCard({
             interactive elements is invalid. It is styled as the call to action
             and the whole card is the hit area. */}
         <div
-          className={`w-full flex items-center justify-center gap-3 px-6 py-4 md:py-5 type-label !tracking-[0.12em] border transition-colors ${buttonClassName}`}
+          className={`w-full flex items-center justify-center gap-3 px-6 py-4 md:py-5 type-label !tracking-[0.12em] border transition-colors duration-200 ${buttonClassName}`}
         >
           {cta}
           <svg
@@ -173,7 +183,7 @@ function ElectionCard({
             viewBox="0 0 16 16"
             fill="none"
             aria-hidden
-            className="shrink-0 transition-transform group-hover/card:translate-x-1"
+            className="shrink-0 transition-transform duration-200 group-hover/card:translate-x-1.5"
           >
             <path
               d="M3 8h10M9 4l4 4-4 4"
@@ -205,30 +215,16 @@ function ElectionCardsSection() {
           eyebrow="2026 Election"
           title="Explore the candidates"
           cta="Go to the candidate tracker"
-          className="bg-bg text-dark hover:bg-bg-alt border-b cards:border-b-0 cards:border-r border-border-light"
+          className="bg-bg text-dark border-b cards:border-b-0 cards:border-r border-border-light"
           eyebrowClassName="text-accent"
           buttonClassName="bg-dark text-linen-100 border-dark group-hover/card:bg-accent group-hover/card:border-accent"
         >
           <p className="type-body-sm text-dark/70 mt-4">
-            Everyone running for mayor and in all 25 wards &mdash; who they
-            are, what they say they will build, and where to find them.
-            Straight from the City Clerk&rsquo;s official list, refreshed
-            daily.
+            One race for mayor, and one in every ward. Find yours.
           </p>
-          <ul className="mt-7 divide-y divide-border-light border-t border-border-light">
-            {[
-              ["Mayor", "The full field, with bios and campaign sites"],
-              ["25 wards", "Every council race, with a ward locator map"],
-              ["Key dates", "Advance voting, vote-by-mail, election day"],
-            ].map(([label, body]) => (
-              <li key={label} className="py-4">
-                <span className="type-label-sm text-accent">{label}</span>
-                <p className="font-serif text-[0.9375rem] leading-[1.45] text-dark/80 mt-1.5">
-                  {body}
-                </p>
-              </li>
-            ))}
-          </ul>
+          <div className="mt-8">
+            <WardOutlineMap />
+          </div>
         </ElectionCard>
 
         <ElectionCard
@@ -236,7 +232,7 @@ function ElectionCardsSection() {
           eyebrow="Candidate survey"
           title="Take our candidate survey"
           cta="Read the survey questions"
-          className="bg-bg-alt text-dark hover:bg-bg"
+          className="bg-bg-alt text-dark"
           eyebrowClassName="text-accent"
           buttonClassName="bg-dark text-linen-100 border-dark group-hover/card:bg-accent group-hover/card:border-accent"
         >
@@ -377,7 +373,7 @@ function PolicyIdeasSection({
 function ReachOutSection() {
   return (
     <section className="border-b border-border-light px-5 py-12 md:py-20">
-      <div className="max-w-[1080px] mx-auto grid grid-cols-1 md:grid-cols-2 md:gap-x-12 items-start">
+      <div className="max-w-[1080px] mx-auto grid grid-cols-1 md:grid-cols-2 md:gap-x-12 md:items-center">
         <div>
           <SectionLabel as="h2">Reach out</SectionLabel>
           <p className="type-body text-dark/80 mt-6">
@@ -387,46 +383,14 @@ function ReachOutSection() {
             who we are and who funds us &mdash; ask us directly.
           </p>
         </div>
-        <div className="mt-8 md:mt-0">
-          <ul className="divide-y divide-border-light border-y border-border-light">
-            {[
-              {
-                label: "Anyone",
-                body: "Questions, corrections, or a tip on a race we are missing.",
-              },
-              {
-                label: "Candidates",
-                body: "Ask about the survey, or send us a correction to your entry.",
-              },
-              {
-                label: "Volunteers",
-                body: "Tell us what you want to work on and we will find you something.",
-              },
-            ].map((row) => (
-              <li key={row.label} className="py-4">
-                <span className="type-label-sm text-accent">{row.label}</span>
-                <p className="font-serif text-[1rem] leading-[1.45] text-dark/80 mt-1.5">
-                  {row.body}
-                </p>
-              </li>
-            ))}
-          </ul>
-          <div className="mt-8 flex flex-col sm:flex-row gap-3">
-            <LinkButton
-              href={`mailto:${CONTACT_EMAIL}`}
-              variant="primary"
-              className="justify-center px-6 py-4 md:py-5 !tracking-[0.12em]"
-            >
-              Email {CONTACT_EMAIL}
-            </LinkButton>
-            <LinkButton
-              href="/toronto/vote/get-involved"
-              variant="secondary"
-              className="justify-center px-6 py-4 md:py-5 !tracking-[0.12em]"
-            >
-              Get involved
-            </LinkButton>
-          </div>
+        <div className="mt-8 md:mt-0 md:justify-self-end">
+          <LinkButton
+            href={`mailto:${CONTACT_EMAIL}`}
+            variant="primary"
+            className="w-full sm:w-auto justify-center px-6 py-4 md:py-5 !tracking-[0.12em]"
+          >
+            Email {CONTACT_EMAIL}
+          </LinkButton>
         </div>
       </div>
     </section>
@@ -435,17 +399,27 @@ function ReachOutSection() {
 
 function SubscribeCTA() {
   return (
-    <section className="px-5 py-16 md:py-24 bg-bg">
-      <div className="max-w-[760px] mx-auto text-center">
-        <SectionLabel as="h2">Be first to know what&rsquo;s possible</SectionLabel>
-        <p className="type-body mt-4 mb-8 text-dark/80">
-          Get new memos, updates from our team, and ideas to help Toronto grow.
+    <section className="bg-linen-200 px-5 py-16 md:py-24">
+      <div className="max-w-[680px] mx-auto text-center">
+        <h2 className="type-display-sm text-dark mt-5">
+          Toronto changes fast.
+          <br />
+          <span className="text-accent">Keep up with it.</span>
+        </h2>
+        <p className="type-lead text-dark/75 mt-5">
+          One email a week: new memos, our election coverage as it lands, and
+          new ideas for Canada&rsquo;s largest city.
         </p>
-        <div className="flex justify-center">
-          <SubscribeButton variant="accent" source="inline">
-            Subscribe
-          </SubscribeButton>
-        </div>
+        <EmailCapture
+          id="digest-email"
+          source="footer"
+          buttonLabel="Subscribe"
+          tone="light"
+          className="mt-9 max-w-[520px] mx-auto"
+        />
+        <p className="type-label-sm text-dark/50 mt-5">
+          Over 10,000 subscribers &middot; No spam, unsubscribe anytime
+        </p>
       </div>
     </section>
   );

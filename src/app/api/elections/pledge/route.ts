@@ -7,6 +7,7 @@ import {
   isSupportedElection,
 } from "@/lib/elections/registry";
 import { forwardedHubspotContext } from "@/lib/hubspot-context";
+import { normalizePostalCode } from "@/lib/elections/postal-code";
 
 // "Pledge to vote" submissions — same low-friction pattern as /api/subscribe.
 // Forwards {email, name, region, postal_code} to York Factory, which signs the
@@ -19,17 +20,6 @@ import { forwardedHubspotContext } from "@/lib/hubspot-context";
 // defaults to the election's jurisdiction ("toronto", "brampton", …).
 
 const REGION_PATTERN = /^[a-z0-9-]{1,50}$/;
-const POSTAL_PATTERN = /^[A-Za-z]\d[A-Za-z] ?\d[A-Za-z]\d$/;
-
-// "M5V1A1" / "m5v 1a1" → "M5V 1A1"; anything malformed is dropped rather
-// than stored dirty
-function normalizePostalCode(raw: unknown): string | undefined {
-  if (typeof raw !== "string" || !POSTAL_PATTERN.test(raw.trim())) {
-    return undefined;
-  }
-  const compact = raw.trim().toUpperCase().replace(" ", "");
-  return `${compact.slice(0, 3)} ${compact.slice(3)}`;
-}
 
 export async function POST(req: NextRequest) {
   try {

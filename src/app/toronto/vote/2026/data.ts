@@ -37,6 +37,9 @@ export { initialsFor, nameKey };
 
 export const ELECTION = getElection("toronto-2026");
 
+/** The York Factory slug, for the shared routes that special-case this region. */
+export const TORONTO_2026_SLUG = ELECTION.slug;
+
 /** Zero-padded ward numbers ("01".."25") for static route generation. */
 export const WARD_NUMBERS: string[] = WARD_SHAPES.map((w) => w.n);
 

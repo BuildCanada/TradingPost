@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import posthog from "posthog-js";
 import { Button } from "@/components/ui/button";
 import { hubspotPageContext } from "@/lib/hubspot-context";
@@ -8,17 +8,30 @@ import { useSubscribeStore } from "../store";
 
 interface SubscribeFormProps {
   source: "inline" | "navbar" | "exit-intent" | "footer";
+  /* Pre-filled when another surface already collected the address. */
+  initialEmail?: string;
   onSuccess?: () => void;
 }
 
-export function SubscribeForm({ source, onSuccess }: SubscribeFormProps) {
+export function SubscribeForm({
+  source,
+  initialEmail,
+  onSuccess,
+}: SubscribeFormProps) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(initialEmail ?? "");
   const [postalCode, setPostalCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const setSubscribed = useSubscribeStore((s) => s.setSubscribed);
+
+  // The modal unmounts between openings, so the initial state above usually
+  // suffices; this covers the case where it stays mounted and the prefill
+  // arrives after the first render. Never clears what the user has typed.
+  useEffect(() => {
+    if (initialEmail) setEmail(initialEmail);
+  }, [initialEmail]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();

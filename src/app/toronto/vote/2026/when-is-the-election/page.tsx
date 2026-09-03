@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ArrowRight, ArrowUpRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import LiveCountdown from "@/components/elections/LiveCountdown";
 import { PledgeButton } from "@/components/elections/PledgeButton";
 import { getSiteConfig } from "@/lib/api";
@@ -14,7 +14,9 @@ import {
   ELECTION,
   ELECTION_DAY,
   FULL_CALENDAR,
+  HOW_TO_VOTE_PATH,
   KEY_DATES_PATH,
+  MYVOTE_URL,
   SOURCE_URLS,
   VOTING_PERIODS,
   type VotingPeriod,
@@ -166,8 +168,27 @@ export default function WhenIsTheTorontoElectionPage() {
                 open: ELECTION_DAY.openLabel,
                 closed: ELECTION_DAY.closedLabel,
               }}
-              size="lg"
+              size="2xl"
             />
+
+            {/* The page's primary action. MyVote is where registration
+                actually happens, so it gets the solid blue treatment and
+                everything else on the page stays subordinate to it. */}
+            <div className="mt-10 flex flex-wrap items-center gap-x-7 gap-y-4">
+              <Button
+                as="external-link"
+                variant="auburn"
+                href={MYVOTE_URL}
+                className="px-7 py-4.5"
+              >
+                Check or register to vote
+              </Button>
+              <p className="font-serif text-[1rem] leading-[1.4] text-text-secondary max-w-[30ch]">
+                Registering online closes{" "}
+                <span className="text-accent">Oct 11, 7 p.m.</span> &mdash;
+                after that, sign up in person at the polls.
+              </p>
+            </div>
           </div>
         </section>
 
@@ -388,17 +409,25 @@ export default function WhenIsTheTorontoElectionPage() {
               Knowing the date is the easy part.
             </h2>
             <p className="font-serif text-[1.1rem] leading-[1.5] max-w-[46ch] mb-7">
-              There are 26 races on your ballot and most of them get no
-              coverage at all. We track every one.
+              Twenty-six mayor and council races are on the line across the
+              city, and most of them get no coverage at all. We track every
+              one.
             </p>
-            <ul className="flex flex-col gap-3.5">
-              <CtaLink href={ELECTION.basePath}>
+            <div className="flex flex-wrap gap-3">
+              <Button as="link" variant="ghost" href={HOW_TO_VOTE_PATH}>
+                How to vote
+              </Button>
+              <Button as="link" variant="ghost" href={ELECTION.basePath}>
                 See who is running for mayor
-              </CtaLink>
-              <CtaLink href={`${ELECTION.basePath}#wards`}>
-                Find your ward and its council race
-              </CtaLink>
-            </ul>
+              </Button>
+              <Button
+                as="link"
+                variant="ghost"
+                href={`${ELECTION.basePath}#wards`}
+              >
+                Find your ward
+              </Button>
+            </div>
           </div>
           <div className="px-6 py-12 md:px-14 md:py-14 border-t-2 md:border-t-0 md:border-l border-border-light bg-bg-alt flex flex-col justify-center">
             <p className="type-label text-accent mb-3.5">Ready to vote?</p>
@@ -484,15 +513,19 @@ function PeriodCard({
       <p className="mt-4 font-serif text-[1rem] leading-[1.5] text-text-secondary flex-1">
         {period.blurb}
       </p>
-      <a
-        href={period.href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="group/link mt-6 inline-flex items-center gap-1.5 type-label-sm !tracking-[0.1em] text-dark hover:text-accent transition-colors self-start"
-      >
-        {period.hrefLabel}
-        <ArrowUpRight className="size-3.5 shrink-0 transition-transform group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5" />
-      </a>
+      {/* Solid while the period is actually open, outlined otherwise — so the
+          one thing a reader can act on today is the one that draws the eye. */}
+      <div className="mt-7 self-start">
+        <Button
+          as="external-link"
+          variant={
+            timing.state === "open" && period.opensAt ? "auburn" : "ghost"
+          }
+          href={period.href}
+        >
+          {period.hrefLabel}
+        </Button>
+      </div>
     </div>
   );
 }
@@ -520,25 +553,5 @@ function HowToVote({
         {children}
       </div>
     </div>
-  );
-}
-
-function CtaLink({
-  href,
-  children,
-}: {
-  href: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <li>
-      <Link
-        href={href}
-        className="group/cta inline-flex items-center gap-2.5 font-serif text-[1.1rem] leading-[1.4] text-dark hover:text-accent transition-colors"
-      >
-        {children}
-        <ArrowRight className="size-3.5 shrink-0 transition-transform group-hover/cta:translate-x-0.5" />
-      </Link>
-    </li>
   );
 }

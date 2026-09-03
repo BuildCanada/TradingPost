@@ -87,11 +87,13 @@ export function Button(props: ButtonProps) {
   const classes = cn(baseStyles, variants[variant], className);
 
   if (props.as === "external-link") {
+    // A new tab only makes sense for a page. mailto:/tel: hand off to another
+    // app, and target="_blank" on those strands an empty tab behind them.
+    const opensTab = /^https?:/.test(props.href);
     return (
       <a
         href={props.href}
-        target="_blank"
-        rel="noopener noreferrer"
+        {...(opensTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}
         className={classes}
       >
         {children}

@@ -11,7 +11,7 @@ import { getAllBillsFromDB } from "@/app/bills/server/get-all-bills-from-db";
 import { buildAbsoluteUrl } from "@/app/bills/utils/basePath";
 import { SECTIONS as ECONOMIC_SECTIONS } from "@/app/state-of-the-nation/indicators";
 import { WARD_NUMBERS } from "@/app/toronto/vote/2026/data";
-import { KEY_DATES_PATH } from "@/app/toronto/vote/2026/key-dates";
+import { HOW_TO_VOTE_PATH, KEY_DATES_PATH } from "@/app/toronto/vote/2026/key-dates";
 
 function toValidDate(value?: Date | string): Date | undefined {
   if (!value) return undefined;
@@ -57,6 +57,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${baseUrl}${KEY_DATES_PATH}`,
       lastModified: new Date(),
       changeFrequency: "daily",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}${HOW_TO_VOTE_PATH}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
       priority: 0.8,
     },
     {

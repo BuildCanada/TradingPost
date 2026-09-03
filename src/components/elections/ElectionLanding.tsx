@@ -34,9 +34,11 @@ export type LandingContent = {
   closingBlurb: ReactNode;
   /** the fine print about where the roster comes from */
   sourceNote: ReactNode;
-  /** this region's "all key dates" page, when it has one. Unset drops the link
-   *  rather than rendering a dead one — only Toronto has the page so far. */
-  keyDatesHref?: string;
+  /** This region's supporting guide pages, listed under the poll-hours line.
+   *  Unset or empty drops the block rather than rendering dead links — only
+   *  Toronto has these pages so far. A list rather than one href per page, so
+   *  adding the next guide doesn't mean another prop. */
+  guideLinks?: { label: string; href: string }[];
 };
 
 export function ElectionLanding({
@@ -85,7 +87,7 @@ export function ElectionLanding({
         </section>
 
         {/* ── Countdown + how to vote ──────────────────────────── */}
-        <KeyDates election={election} keyDatesHref={content.keyDatesHref} />
+        <KeyDates election={election} guideLinks={content.guideLinks} />
 
         {/* ── Candidates for mayor ─────────────────────────────── */}
         <section id="candidates" className="border-b-2 border-dark scroll-mt-24">
@@ -204,10 +206,10 @@ export function ElectionLanding({
  */
 function KeyDates({
   election,
-  keyDatesHref,
+  guideLinks,
 }: {
   election: SupportedElection;
-  keyDatesHref?: string;
+  guideLinks?: { label: string; href: string }[];
 }) {
   const { advanceVote, mailIn } = election;
   const hasMiddle = Boolean(advanceVote || mailIn);
@@ -299,14 +301,19 @@ function KeyDates({
           </span>
           , {election.pollHoursLabel}.
         </p>
-        {keyDatesHref && (
-          <Link
-            href={keyDatesHref}
-            className="group/dates mt-4 inline-flex items-center gap-1.5 type-label-sm !tracking-[0.1em] text-dark hover:text-accent transition-colors self-start"
-          >
-            See all key dates
-            <ArrowRight className="size-3 shrink-0 transition-transform group-hover/dates:translate-x-0.5" />
-          </Link>
+        {guideLinks && guideLinks.length > 0 && (
+          <div className="mt-4 flex flex-col items-start gap-2">
+            {guideLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="group/dates inline-flex items-center gap-1.5 type-label-sm !tracking-[0.1em] text-dark hover:text-accent transition-colors"
+              >
+                {link.label}
+                <ArrowRight className="size-3 shrink-0 transition-transform group-hover/dates:translate-x-0.5" />
+              </Link>
+            ))}
+          </div>
         )}
       </div>
     </section>

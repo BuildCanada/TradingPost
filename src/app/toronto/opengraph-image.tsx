@@ -14,7 +14,7 @@ export default async function Image() {
     <ElectionOGImage
       kicker="A BUILD CANADA PUBLICATION"
       title="Build the Toronto you know is possible."
-      subtitle="Memos and ideas for Canada's largest city."
+      subtitle="Complete 2026 election coverage, and bold ideas for a better city."
       logoSrc={await logoDataUri()}
       footerRight="BUILDCANADA.COM/TORONTO"
     />,

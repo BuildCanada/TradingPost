@@ -32,6 +32,7 @@ function at(iso: string, time: string): string {
 }
 
 export const KEY_DATES_PATH = "/toronto/vote/2026/when-is-the-election";
+export const HOW_TO_VOTE_PATH = "/toronto/vote/2026/how-to-vote";
 
 const CITY_ELECTIONS_URL = "https://www.toronto.ca/city-government/elections/";
 const MAIL_IN_URL =
@@ -43,8 +44,14 @@ const ID_URL =
 const KEY_DATES_URL =
   "https://www.toronto.ca/city-government/elections/key-dates/";
 
+/** MyVote is the City's own voter portal — where you check or update your
+ *  registration and request a mail-in package. The primary action on this page
+ *  points here rather than at a toronto.ca explainer. */
+export const MYVOTE_URL = "https://myvote.toronto.ca/home";
+
 export const SOURCE_URLS = {
   city: CITY_ELECTIONS_URL,
+  myVote: MYVOTE_URL,
   mailIn: MAIL_IN_URL,
   votersList: VOTERS_LIST_URL,
   identification: ID_URL,

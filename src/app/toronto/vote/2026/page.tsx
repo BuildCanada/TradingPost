@@ -3,7 +3,7 @@ import { ElectionLanding } from "@/components/elections/ElectionLanding";
 import { WardMap, WardMapDefs } from "@/components/elections/WardMap";
 import { WARD_GEO } from "./wardGeo";
 import { ELECTION, getToronto2026 } from "./data";
-import { KEY_DATES_PATH } from "./key-dates";
+import { HOW_TO_VOTE_PATH, KEY_DATES_PATH } from "./key-dates";
 
 export const metadata: Metadata = {
   title: "Toronto 2026 Election",
@@ -53,7 +53,10 @@ export default async function Toronto2026ElectionPage() {
             with you.
           </>
         ),
-        keyDatesHref: KEY_DATES_PATH,
+        guideLinks: [
+          { label: "See all key dates", href: KEY_DATES_PATH },
+          { label: "How to vote in Toronto", href: HOW_TO_VOTE_PATH },
+        ],
         sourceNote:
           "Candidates come from the City Clerk's official registered-candidate list and refresh daily. The field is not final until nominations close.",
       }}

@@ -4,10 +4,10 @@ import { useEffect, useState, type FormEvent } from "react";
 import posthog from "posthog-js";
 import { Button } from "@/components/ui/button";
 import { hubspotPageContext } from "@/lib/hubspot-context";
-import { useSubscribeStore } from "../store";
+import { useSubscribeStore, type SubscribeSource } from "../store";
 
 interface SubscribeFormProps {
-  source: "inline" | "navbar" | "exit-intent" | "footer";
+  source: SubscribeSource;
   /* Pre-filled when another surface already collected the address. */
   initialEmail?: string;
   onSuccess?: () => void;

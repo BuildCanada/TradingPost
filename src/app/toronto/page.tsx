@@ -12,10 +12,10 @@ import { isDaylight } from "@/lib/daylight";
 import { ELECTION } from "./vote/2026/data";
 import { WARD_GEO, WARD_SHAPES } from "./vote/2026/wardGeo";
 import { ELECTION_DAY } from "./vote/2026/key-dates";
-import { SURVEY_PATH } from "./vote/survey-questions/path";
 import { STAGE_ONE } from "./vote/survey-questions/questions";
 import { EmailCapture } from "./EmailCapture";
 import { HeroSurface } from "./HeroSurface";
+import { SubscribeCardTrigger } from "./SubscribeCardTrigger";
 
 /** Where questions about the Toronto project go. */
 const CONTACT_EMAIL = "hi@buildcanada.com";
@@ -133,22 +133,29 @@ function WardOutlineMap() {
   );
 }
 
-/**
- * Shared chrome for the two election cards. The whole card is the link, but it
- * still ends in a full-width button rather than a quiet label: these go to
- * other pages, and that should be unmistakable rather than inferred.
- */
-function ElectionCard({
-  href,
-  eyebrow,
-  title,
-  cta,
-  className,
-  eyebrowClassName,
-  buttonClassName,
-  children,
-}: {
-  href: string;
+/* The arrow that trails every card's call to action. */
+function CardArrow() {
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      aria-hidden
+      className="shrink-0 transition-transform duration-200 group-hover/card:translate-x-1.5"
+    >
+      <path
+        d="M3 8h10M9 4l4 4-4 4"
+        stroke="currentColor"
+        strokeWidth="1.75"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+type ElectionCardCommon = {
   eyebrow: string;
   title: string;
   cta: string;
@@ -156,46 +163,86 @@ function ElectionCard({
   eyebrowClassName: string;
   buttonClassName: string;
   children: React.ReactNode;
-}) {
+};
+
+/* A card either navigates or opens the subscribe modal under its own promise
+   — never both, hence the exclusive pair rather than two optional props. */
+type ElectionCardProps = ElectionCardCommon &
+  (
+    | { href: string; modalHeadline?: never }
+    | { href?: never; modalHeadline: string }
+  );
+
+/**
+ * Shared chrome for the two election cards. The whole card is the hit area,
+ * but it still ends in a full-width button rather than a quiet label: these
+ * lead somewhere, and that should be unmistakable rather than inferred.
+ *
+ * Navigating cards are a single anchor. The card whose action is a modal
+ * cannot be — see SubscribeCardTrigger — so it becomes a plain container with
+ * a real button at its foot, stretched over the card. Both end up with one
+ * hit area and one accessible name.
+ */
+function ElectionCard(props: ElectionCardProps) {
+  /* Narrowed off `props` rather than destructured: pulling `href` and
+     `modalHeadline` out as locals loses the link between them, and the
+     exclusive union stops discriminating. */
+  const {
+    eyebrow,
+    title,
+    cta,
+    className,
+    eyebrowClassName,
+    buttonClassName,
+    children,
+  } = props;
+  const shellClass = `group/card relative flex flex-col justify-between transition-colors ${className}`;
+  const ctaClass = `w-full flex items-center justify-center gap-3 px-6 py-4 md:py-5 type-label !tracking-[0.12em] border transition-colors duration-200 ${buttonClassName}`;
+
+  const head = (
+    <div className="px-6 md:px-10 pt-10 md:pt-14 pb-8">
+      <span className={`type-label ${eyebrowClassName}`}>{eyebrow}</span>
+      <h2 className="type-h2 mt-4 transition-colors group-hover/card:text-accent">
+        {title}
+      </h2>
+      {children}
+    </div>
+  );
+
+  if (props.href !== undefined) {
+    return (
+      <Link
+        href={props.href}
+        className={`${shellClass} focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-accent`}
+      >
+        {head}
+        <div className="px-6 md:px-10 pb-8 md:pb-10">
+          {/* A div, not a button: this sits inside the card's anchor, and
+              nesting interactive elements is invalid. It is styled as the
+              call to action and the whole card is the hit area. */}
+          <div className={ctaClass}>
+            {cta}
+            <CardArrow />
+          </div>
+        </div>
+      </Link>
+    );
+  }
+
   return (
-    <Link
-      href={href}
-      className={`group/card flex flex-col justify-between transition-colors focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-accent ${className}`}
-    >
-      <div className="px-6 md:px-10 pt-10 md:pt-14 pb-8">
-        <span className={`type-label ${eyebrowClassName}`}>{eyebrow}</span>
-        <h2 className="type-h2 mt-4 transition-colors group-hover/card:text-accent">
-          {title}
-        </h2>
-        {children}
-      </div>
+    <div className={shellClass}>
+      {head}
       <div className="px-6 md:px-10 pb-8 md:pb-10">
-        {/* A div, not a button: this sits inside the card's anchor, and nesting
-            interactive elements is invalid. It is styled as the call to action
-            and the whole card is the hit area. */}
-        <div
-          className={`w-full flex items-center justify-center gap-3 px-6 py-4 md:py-5 type-label !tracking-[0.12em] border transition-colors duration-200 ${buttonClassName}`}
+        <SubscribeCardTrigger
+          className={ctaClass}
+          headline={props.modalHeadline}
+          source="survey-interest"
         >
           {cta}
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 16 16"
-            fill="none"
-            aria-hidden
-            className="shrink-0 transition-transform duration-200 group-hover/card:translate-x-1.5"
-          >
-            <path
-              d="M3 8h10M9 4l4 4-4 4"
-              stroke="currentColor"
-              strokeWidth="1.75"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
+          <CardArrow />
+        </SubscribeCardTrigger>
       </div>
-    </Link>
+    </div>
   );
 }
 
@@ -228,10 +275,14 @@ function ElectionCardsSection() {
         </ElectionCard>
 
         <ElectionCard
-          href={SURVEY_PATH}
+          /* Points at the signup rather than the survey page for now: the
+             questions are written but the results aren't live, so the card
+             sells being told when they are. Swap this back to
+             href={SURVEY_PATH} at launch. */
+          modalHeadline="Be the first to know when we launch"
           eyebrow="Candidate survey"
           title="Take our candidate survey"
-          cta="Read the survey questions"
+          cta="Compare your view to the candidates"
           className="bg-bg-alt text-dark"
           eyebrowClassName="text-accent"
           buttonClassName="bg-dark text-linen-100 border-dark group-hover/card:bg-accent group-hover/card:border-accent"

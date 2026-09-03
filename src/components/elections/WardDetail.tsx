@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import CountdownDays from "./CountdownDays";
 import { SurveyChartNote } from "./CandidateSurveyAnswers";
-import { SurveyGrid } from "./SurveyGrid";
+import { CandidateName, SurveyGrid } from "./SurveyGrid";
 import { SurveyCta } from "./SurveyCta";
 import { IncumbentBadge, SiteLink } from "./ElectionLanding";
 import {
@@ -297,12 +297,27 @@ function RaceQuestionnaire({
   ward: string;
   wardName: string;
 }) {
-  const roster = surveyRoster(race.candidates, surveyAnswers);
+  /* Two lists, not one set of columns. Everyone on the ballot used to get a
+     column, which put a ward's dozen registered candidates across the grid and
+     filled eleven of them with "Did not respond" — thirty rows deep, that is
+     three hundred cells of nothing, and the two or three columns worth reading
+     were somewhere behind a sideways drag. So the grid is the candidates who
+     answered, and the rest are named under it, where a reader can still see
+     who is on their ballot and go to their site. */
+  const roster = surveyRoster(
+    race.candidates.map((candidate) => ({
+      ...candidate,
+      // "" for most of the ballot; the grid only draws the row when something
+      // in it is non-empty, so pass through rather than filtering here.
+      bio: candidate.bio || undefined,
+    })),
+    surveyAnswers,
+  );
+  const answered = roster.filter((candidate) => candidate.answers);
+  const silent = roster.filter((candidate) => !candidate.answers);
   const groups = comparedQuestions(
-    roster.flatMap((candidate) =>
-      candidate.answers ? [candidate.answers] : [],
-    ),
-    roster,
+    answered.map((candidate) => candidate.answers!),
+    answered,
     surveyShape,
   );
 
@@ -311,14 +326,37 @@ function RaceQuestionnaire({
       {showHeading && <RaceHeading race={race} />}
       <div className="px-6 md:px-14 pb-10">
         {groups.length > 0 ? (
-          <SurveyGrid
-            groups={groups}
-            candidates={roster}
-            election={election}
-            race="councillor"
-            ward={ward}
-            wardName={wardName}
-          />
+          <>
+            <SurveyGrid
+              groups={groups}
+              candidates={answered}
+              election={election}
+              race="councillor"
+              ward={ward}
+              wardName={wardName}
+            />
+
+            {silent.length > 0 && (
+              <div className="mt-7 border-t border-border-light pt-4">
+                <p className="type-label-sm mb-3 text-text-muted">
+                  Also on the ballot, yet to answer our questionnaire
+                </p>
+                <ul className="flex list-none flex-wrap gap-x-6 gap-y-2 m-0 p-0">
+                  {silent.map((candidate) => (
+                    <li key={candidate.key}>
+                      <CandidateName
+                        candidate={candidate}
+                        election={election}
+                        race="councillor"
+                        ward={ward}
+                        wardName={wardName}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </>
         ) : (
           /* Only two ways to get here now: nobody has filed for the seat, or
              the questionnaire itself could not be fetched. Either way there is

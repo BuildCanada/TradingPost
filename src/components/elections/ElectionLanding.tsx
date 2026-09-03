@@ -5,6 +5,7 @@ import { ArrowRight, ArrowUpRight } from "lucide-react";
 import CountdownDays from "./CountdownDays";
 import { CandidateSiteLink } from "./CandidateSiteLink";
 import { PledgeButton } from "./PledgeButton";
+import { SurveyCta } from "./SurveyCta";
 import { ResidencyModal } from "./ResidencyModal";
 import { WardCard } from "./WardCard";
 import { daysUntil, yearOf } from "@/lib/elections/dates";
@@ -42,6 +43,7 @@ export function ElectionLanding({
   wardMapDefs,
   renderWardMap,
   mayorSurveyPath,
+  surveyPath,
 }: {
   election: SupportedElection;
   view: ElectionView;
@@ -50,6 +52,12 @@ export function ElectionLanding({
    *  have run one — the cards say who is running, that page says what they
    *  said */
   mayorSurveyPath?: string;
+  /** the voter survey, where the region runs one. It takes the closing call to
+   *  action from the pledge: a pledge is a name on a list, where the survey
+   *  hands the reader their own ballot back with the candidates ranked against
+   *  it — a better thing to ask of someone who has just read the field, and a
+   *  better first step towards voting than a promise to. */
+  surveyPath?: string;
   /** rendered once, so per-ward maps can reference shared geometry */
   wardMapDefs?: ReactNode;
   /** this region's locator map for a ward, when it has ward geometry */
@@ -72,7 +80,7 @@ export function ElectionLanding({
         </section>
 
         {/* ── Countdown + how to vote ──────────────────────────── */}
-        <KeyDates election={election} />
+        <KeyDates election={election} surveyPath={surveyPath} />
 
         {/* ── Candidates for mayor ─────────────────────────────── */}
         <section id="candidates" className="border-b-2 border-dark scroll-mt-24">
@@ -164,17 +172,31 @@ export function ElectionLanding({
           <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.035em] text-[clamp(2rem,5vw,3.75rem)] max-w-[22ch] text-balance mb-6">
             {content.closingHeadline}
           </h2>
-          <p className="mb-10 font-serif text-[1.15rem] leading-[1.5] text-dark/75 max-w-[46ch]">
-            {content.closingBlurb}
-          </p>
-          <PledgeButton
-            election={election.slug}
-            source="election-landing"
-            className="group/btn inline-flex items-center gap-3 type-button text-bg bg-accent px-7 py-4 transition-colors hover:bg-accent-hover cursor-pointer"
-          >
-            Pledge to vote
-            <ArrowRight className="size-4 shrink-0 transition-transform group-hover/btn:translate-x-0.5" />
-          </PledgeButton>
+          {/* The survey card itself rather than a button in its colours, so
+              the ask looks the same wherever a reader meets it — here, and
+              beside every questionnaire on the site. It carries its own body
+              copy, which is why the section's blurb only prints where there is
+              no card to replace it. */}
+          {surveyPath ? (
+            <SurveyCta
+              href={surveyPath}
+              className="w-full max-w-[560px] text-left"
+            />
+          ) : (
+            <>
+              <p className="mb-10 font-serif text-[1.15rem] leading-[1.5] text-dark/75 max-w-[46ch]">
+                {content.closingBlurb}
+              </p>
+              <PledgeButton
+                election={election.slug}
+                source="election-landing"
+                className="group/btn inline-flex items-center gap-3 type-button text-bg bg-accent px-7 py-4 transition-colors hover:bg-accent-hover cursor-pointer"
+              >
+                Pledge to vote
+                <ArrowRight className="size-4 shrink-0 transition-transform group-hover/btn:translate-x-0.5" />
+              </PledgeButton>
+            </>
+          )}
           <p className="mt-14 pt-5 border-t border-dark/15 type-label-sm text-text-muted !tracking-[0.06em] max-w-[60ch]">
             {content.sourceNote}
           </p>
@@ -191,7 +213,15 @@ export function ElectionLanding({
  * pledge CTA. Regions that haven't published their advance-vote or mail-in
  * dates get a two-column band instead of three, rather than empty cells.
  */
-function KeyDates({ election }: { election: SupportedElection }) {
+function KeyDates({
+  election,
+  surveyPath,
+}: {
+  election: SupportedElection;
+  /** where the region's voter survey lives; the panel falls back to the pledge
+   *  where there is none */
+  surveyPath?: string;
+}) {
   const { advanceVote, mailIn } = election;
   const hasMiddle = Boolean(advanceVote || mailIn);
 
@@ -258,19 +288,25 @@ function KeyDates({ election }: { election: SupportedElection }) {
       )}
 
       <div className="px-6 py-12 md:px-14 md:py-14 border-t-2 md:border-t-0 md:border-l border-border-light bg-bg-alt flex flex-col justify-center">
-        <p className="type-label text-accent mb-3.5">Ready to vote?</p>
-        <p className="font-serif text-[1.15rem] leading-[1.45] max-w-[34ch] mb-6">
-          Put your name on the record. Pledging takes ten seconds — and it&rsquo;s
-          the first step to showing up on election day.
-        </p>
-        <PledgeButton
-          election={election.slug}
-          source="election-ready-to-vote"
-          className="group/btn self-start inline-flex items-center gap-3 type-button text-bg bg-dark px-5 py-4 transition-colors hover:bg-black cursor-pointer"
-        >
-          Pledge to vote
-          <ArrowRight className="size-3.5 shrink-0 transition-transform group-hover/btn:translate-x-0.5" />
-        </PledgeButton>
+        {surveyPath ? (
+          <SurveyCta href={surveyPath} className="w-full" />
+        ) : (
+          <>
+            <p className="type-label text-accent mb-3.5">Ready to vote?</p>
+            <p className="font-serif text-[1.15rem] leading-[1.45] max-w-[34ch] mb-6">
+              Put your name on the record. Pledging takes ten seconds — and
+              it&rsquo;s the first step to showing up on election day.
+            </p>
+            <PledgeButton
+              election={election.slug}
+              source="election-ready-to-vote"
+              className="group/btn self-start inline-flex items-center gap-3 type-button text-bg bg-dark px-5 py-4 transition-colors hover:bg-black cursor-pointer"
+            >
+              Pledge to vote
+              <ArrowRight className="size-3.5 shrink-0 transition-transform group-hover/btn:translate-x-0.5" />
+            </PledgeButton>
+          </>
+        )}
         <p className="mt-7 pt-5 border-t border-border-light font-serif text-[1.05rem] leading-[1.4]">
           Polls open{" "}
           <span className="text-accent">

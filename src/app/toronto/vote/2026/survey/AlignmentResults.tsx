@@ -1,7 +1,9 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { ChevronDown } from "lucide-react";
+
+import { Select } from "@/components/ui/select";
 
 import {
   Collapsible,
@@ -19,9 +21,11 @@ import {
   surveyRoster,
 } from "@/lib/elections/candidate-answers";
 import { DEFAULT_ELECTION_SLUG } from "@/lib/elections/registry";
+import { nameKey } from "@/lib/elections/election-data";
+import { lastName } from "@/lib/elections/names";
 import type { CandidateSurveyResponse } from "@/lib/elections/alignment";
 import type { Survey } from "@/lib/elections/survey";
-import type { Alignment } from "@/lib/elections/alignment";
+import type { Alignment, CandidateScore } from "@/lib/elections/alignment";
 
 /* Alignment between one resident's answers and their ward's candidates.
  *
@@ -57,6 +61,50 @@ export type SurveyRosterCandidate = {
    because that is exactly what it is to the grid — a respondent with answers,
    pivoted by the same code as everyone else's. */
 const YOU = "You";
+
+/* How the candidates are ordered, in both the cards and the grid's columns.
+ *
+ * Agreement first by default: the reader has just answered thirty questions,
+ * and "who is closest to me" is the question that brought them here. The rest
+ * are the orders a reader actually asks for next — the opposite end of the
+ * same list, someone they already have a name for, and who put the most on
+ * the record. */
+const SORTS = [
+  { value: "agreement", label: "Most in common with you" },
+  { value: "disagreement", label: "Least in common with you" },
+  { value: "answered", label: "Most questions answered" },
+  { value: "name", label: "Name (A–Z)" },
+] as const;
+
+type Sort = (typeof SORTS)[number]["value"];
+
+function sortScores(scores: CandidateScore[], sort: Sort): CandidateScore[] {
+  const byName = (a: CandidateScore, b: CandidateScore) =>
+    lastName(a.candidateName).localeCompare(lastName(b.candidateName)) ||
+    a.candidateName.localeCompare(b.candidateName);
+
+  /* A candidate with nothing comparable has no share to rank on — a null is
+     not a zero, and sorting it as one would put "we cannot say" among the
+     people who disagree with you. They go last either way. */
+  const share = (score: CandidateScore) => score.share ?? -1;
+
+  return [...scores].sort((a, b) => {
+    switch (sort) {
+      case "agreement":
+        return share(b) - share(a) || byName(a, b);
+      case "disagreement":
+        return (
+          (a.share === null ? 1 : 0) - (b.share === null ? 1 : 0) ||
+          share(a) - share(b) ||
+          byName(a, b)
+        );
+      case "answered":
+        return b.compared - a.compared || share(b) - share(a) || byName(a, b);
+      case "name":
+        return byName(a, b);
+    }
+  });
+}
 
 /** One ballot a voter marks: the race, its candidates, and how the reader
  *  lines up with them. */
@@ -129,6 +177,12 @@ function RaceBlock({
   survey: Survey;
   answers: Record<string, string>;
 }) {
+  const [sort, setSort] = useState<Sort>("agreement");
+  const scores = useMemo(
+    () => sortScores(race.alignment.scores, sort),
+    [race.alignment.scores, sort],
+  );
+
   /* The grid's columns and rows: the reader first, then the field.
      `candidateAnswers` does the pivoting for both — the reader is passed
      through it as a response of their own, so their column is built by the
@@ -158,9 +212,22 @@ function RaceBlock({
       },
     ]);
 
+    /* The columns follow whatever order the cards are in, so the two halves
+       of a race read the same way round. The reader stays first: their column
+       is the one every other column is being compared against, and a sort is
+       about the candidates. */
+    const rank = new Map(
+      scores.map((score, i) => [nameKey(score.candidateName), i]),
+    );
     const candidates = [
       ...(you ? [{ key: you.key, name: YOU }] : []),
-      ...field.map(({ key, name, website }) => ({ key, name, website })),
+      ...[...field]
+        .sort(
+          (a, b) =>
+            (rank.get(a.key) ?? Number.MAX_SAFE_INTEGER) -
+            (rank.get(b.key) ?? Number.MAX_SAFE_INTEGER),
+        )
+        .map(({ key, name, website }) => ({ key, name, website })),
     ];
 
     return {
@@ -172,7 +239,7 @@ function RaceBlock({
         questionnaireShape(survey, race.responses),
       ),
     };
-  }, [survey, answers, race.responses, race.roster]);
+  }, [survey, answers, race.responses, race.roster, scores]);
 
   /* Both races open to begin with. A reader who has just answered thirty
      questions is owed the answer to them, not two closed doors — the fold is
@@ -196,8 +263,24 @@ function RaceBlock({
       </CollapsibleTrigger>
 
       <CollapsibleContent>
+        <div className="mb-4 flex flex-wrap items-center gap-3">
+          <label
+            htmlFor={`sort-${race.key}`}
+            className="type-label-sm text-text-muted"
+          >
+            Order by
+          </label>
+          <Select
+            id={`sort-${race.key}`}
+            value={sort}
+            onValueChange={(value) => setSort(value as Sort)}
+            options={SORTS.map((option) => ({ ...option }))}
+            className="max-w-[280px]"
+          />
+        </div>
+
         <div className="mb-8">
-          <AgreementChart alignment={race.alignment} />
+          <AgreementChart alignment={race.alignment} scores={scores} />
         </div>
 
         <SurveyGrid

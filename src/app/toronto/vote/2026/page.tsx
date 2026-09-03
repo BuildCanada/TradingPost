@@ -25,6 +25,7 @@ export default async function Toronto2026ElectionPage() {
       election={ELECTION}
       view={view}
       mayorSurveyPath={`${ELECTION.basePath}/mayor`}
+      surveyPath={`${ELECTION.basePath}/survey`}
       wardMapDefs={<WardMapDefs geo={WARD_GEO} />}
       renderWardMap={(ward) => (
         <WardMap
@@ -49,8 +50,8 @@ export default async function Toronto2026ElectionPage() {
         ),
         closingBlurb: (
           <>
-            Toronto votes Monday, October 26. Add your name — then bring someone
-            with you.
+            Toronto votes Monday, October 26. Answer the questions we put to the
+            candidates and see which of them line up with you.
           </>
         ),
         sourceNote:

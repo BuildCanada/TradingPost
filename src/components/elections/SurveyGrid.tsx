@@ -68,6 +68,9 @@ export type GridCandidate = {
   key: string;
   name: string;
   website?: string;
+  /** a line about who they are, where we have one — hand-maintained, and for
+   *  most of a ballot we do not */
+  bio?: string;
 };
 
 export function SurveyGrid({
@@ -200,20 +203,26 @@ export function SurveyGrid({
             links the heads carry. */}
         <ul className="grid list-none gap-2 border-b-2 border-dark pb-4 m-0 p-0 md:hidden">
           {candidates.map((candidate) => (
-            <li
-              key={candidate.key}
-              className="flex items-baseline justify-between gap-3"
-            >
-              <CandidateName
-                candidate={candidate}
-                election={election}
-                race={race}
-                ward={ward}
-                wardName={wardName}
-              />
-              <span className="type-caption flex-none text-text-muted">
-                {responded.has(candidate.key) ? "Answered" : "Did not respond"}
+            <li key={candidate.key} className="grid gap-0.5">
+              <span className="flex items-baseline justify-between gap-3">
+                <CandidateName
+                  candidate={candidate}
+                  election={election}
+                  race={race}
+                  ward={ward}
+                  wardName={wardName}
+                />
+                <span className="type-caption flex-none text-text-muted">
+                  {responded.has(candidate.key) ? "Answered" : "Did not respond"}
+                </span>
               </span>
+              {/* The bio row's job on a phone, where there are no columns to
+                  put a row across. */}
+              {candidate.bio && (
+                <span className="font-serif text-[0.95rem] leading-[1.4] text-text-secondary text-pretty">
+                  {candidate.bio}
+                </span>
+              )}
             </li>
           ))}
         </ul>
@@ -249,6 +258,34 @@ export function SurveyGrid({
             </span>
           ))}
         </div>
+
+        {/* Who they are, in their own column, once.
+
+            A row rather than a section of its own or a line inside the head:
+            under the column is where a bio belongs — it is about that
+            candidate and nothing else — and the head is a sticky bar whose
+            height every section title is measured against, so a sentence in it
+            would push the whole grid down for as long as the page is open.
+
+            The row appears only where somebody has a bio, and cells for the
+            candidates without one are left blank rather than filled with a
+            dash: we have nothing to say about them, which is not the same as
+            them having nothing to say. */}
+        {candidates.some((candidate) => candidate.bio) && (
+          <div className="hidden gap-x-4 border-b border-border-light py-3 md:grid md:[grid-template-columns:var(--cols)]">
+            <span className="type-label-sm bg-bg text-text-muted md:sticky md:left-0 md:z-[1] md:-mr-4 md:h-full md:pr-4">
+              About
+            </span>
+            {candidates.map((candidate) => (
+              <span
+                key={candidate.key}
+                className="font-serif text-[0.95rem] leading-[1.4] text-text-secondary text-pretty"
+              >
+                {candidate.bio}
+              </span>
+            ))}
+          </div>
+        )}
 
         {groups.map((group) => (
           <section key={group.stepId} className="mt-10 first:mt-3 last:mb-0">
@@ -299,10 +336,10 @@ export function SurveyGrid({
  * saying so. The arrow is the whole tell that a name is a link, so it only
  * appears where there is somewhere to go.
  *
- * Shared by the column heads and the roster a phone gets instead of them, so
- * the two cannot drift apart.
+ * Shared by the column heads, the roster a phone gets instead of them, and the
+ * list of candidates who never wrote back, so the three cannot drift apart.
  */
-function CandidateName({
+export function CandidateName({
   candidate,
   election,
   race,
@@ -378,8 +415,17 @@ function QuestionRow({
             Full height and a step out into the column gap, because the cover
             has to be the size of what it covers: sized to its own text, the
             pinned cell let the taller answers beside it slide past above and
-            below the question, and the 1rem gutter let a sliver through. */}
-        <span className="flex w-full items-start gap-2 bg-bg pr-4 md:sticky md:left-0 md:z-[1] md:-mr-4 md:h-full">
+            below the question, and the 1rem gutter let a sliver through.
+
+            Stacked on a phone it pins to the top instead, under the site's
+            nav, and holds there for as long as its own answers run. A row is
+            one question and a dozen replies to it; scrolled a screen into
+            them, a reader was reading answers to a question that had left the
+            screen — the same failure the left-hand pin fixes on a desktop,
+            turned ninety degrees. It lets go at the end of its row, because
+            sticky only holds within its own box, so the next question takes
+            over rather than stacking up behind it. */}
+        <span className="sticky top-[4.75rem] z-[2] flex w-full items-start gap-2 bg-bg py-1.5 pr-4 md:left-0 md:top-auto md:z-[1] md:-mr-4 md:h-full md:py-0">
           <ChevronDown
             className="mt-[3px] size-3.5 flex-none text-text-muted transition-[transform,color] group-hover:text-accent group-data-[panel-open]:rotate-180"
             aria-hidden="true"

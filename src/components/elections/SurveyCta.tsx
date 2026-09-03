@@ -9,23 +9,43 @@ import { ArrowRight } from "lucide-react";
  * stands. A reader who has just read a column of answers is the likeliest
  * person on the site to have an opinion about them.
  *
- * Stacked under the heading on a phone, since a column beside a column of
- * answers is not something a narrow screen has room for.
+ * Loud on purpose. It was a bordered card in the page's own colours, at the
+ * page's own type size, which is the shape of a footnote: beside a heading set
+ * at three times its weight it read as something already dealt with. So on a
+ * desktop it takes the accent as a fill and the heading as a size — the only
+ * solid block of colour on the page, and the only thing on it that is not
+ * either a question or an answer. On a phone it keeps the same colours at a
+ * smaller size, stacked under the heading, where there is no room for a second
+ * column and nothing to compete with anyway.
  */
-export function SurveyCta({ href }: { href: string }) {
+export function SurveyCta({
+  href,
+  className = "lg:min-w-[380px] lg:max-w-[440px]",
+}: {
+  href: string;
+  /** width and placement, which differ by slot — beside a heading on the
+   *  candidate pages, filling a panel or centred on the landing page */
+  className?: string;
+}) {
   return (
     <Link
       href={href}
-      className="group/cta grid content-start gap-2.5 border border-border-light p-5 transition-colors hover:border-dark lg:max-w-[320px]"
+      className={`group/cta block border-2 border-dark bg-accent p-6 text-bg transition-colors hover:bg-dark lg:p-8 ${className}`}
     >
-      <p className="type-label text-accent">Voter survey</p>
-      <p className="font-sans font-medium leading-[1.2] tracking-[-0.02em] text-[1.35rem] text-dark text-balance">
+      <p className="type-label text-bg/70">Voter survey</p>
+
+      <p className="mt-3 font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[1.75rem] lg:text-[2.125rem] text-balance">
         Where do you stand?
       </p>
-      <p className="font-serif text-[1rem] leading-[1.45] text-dark/80 text-pretty">
-        Answer the same questions and see which candidates line up with you.
+
+      <p className="mt-3 font-serif text-[1.05rem] leading-[1.4] text-bg/85 text-pretty">
+        Answer the same questions we put to the candidates and see who lines up
+        with you.
       </p>
-      <span className="type-label-sm inline-flex items-center gap-1.5 text-accent group-hover/cta:underline">
+
+      {/* A button rather than a link with an arrow: the card is the control,
+          and this is what says so at a glance. */}
+      <span className="type-button mt-5 inline-flex items-center gap-2 bg-bg px-5 py-3 text-dark">
         Take the survey
         <ArrowRight className="size-3.5 transition-transform group-hover/cta:translate-x-0.5" />
       </span>

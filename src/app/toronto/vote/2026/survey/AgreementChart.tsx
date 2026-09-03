@@ -4,7 +4,12 @@ import { useState, type CSSProperties } from "react";
 
 import { palette } from "@/components/charts/trilemma";
 import { lastName } from "@/lib/elections/names";
-import type { Alignment, QuestionRow, Verdict } from "@/lib/elections/alignment";
+import type {
+  Alignment,
+  CandidateScore,
+  QuestionRow,
+  Verdict,
+} from "@/lib/elections/alignment";
 
 /* One card per candidate, one square per question.
  *
@@ -85,15 +90,20 @@ type Hover = { candidate: string; index: number } | null;
 
 export function AgreementChart({
   alignment,
+  scores,
   yourName = "You",
 }: {
   alignment: Alignment;
+  /** the candidates in the order they should print; defaults to the
+   *  alignment's own ranking, which is by agreement */
+  scores?: CandidateScore[];
   /** how the reader is named in the comparison line under a card */
   yourName?: string;
 }) {
   const [hover, setHover] = useState<Hover>(null);
-  const { rows, scores } = alignment;
-  if (rows.length === 0 || scores.length === 0) return null;
+  const { rows } = alignment;
+  const ordered = scores ?? alignment.scores;
+  if (rows.length === 0 || ordered.length === 0) return null;
 
   return (
     <div>
@@ -112,7 +122,7 @@ export function AgreementChart({
           right and bottom rule and the container closes the top and left, so
           an unfilled last row simply stops. */}
       <div className="grid border-t border-l border-border-light sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
-        {scores.map((score) => (
+        {ordered.map((score) => (
           <CandidateCard
             key={score.candidateName}
             name={score.candidateName}

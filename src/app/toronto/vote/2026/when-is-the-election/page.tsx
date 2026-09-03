@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import LiveCountdown from "@/components/elections/LiveCountdown";
@@ -9,6 +10,7 @@ import { generateBreadcrumbSchema } from "@/lib/schemas/generators/breadcrumb";
 import { generateFAQPageSchema } from "@/lib/schemas/generators/faq-page";
 import { generateVotingEventSchema } from "@/lib/schemas/generators/event";
 import { breakdown, msUntil, periodTiming } from "@/lib/elections/dates";
+import { getToronto2026 } from "../data";
 import {
   ALL_PERIODS,
   ELECTION,
@@ -21,6 +23,15 @@ import {
   VOTING_PERIODS,
   type VotingPeriod,
 } from "../key-dates";
+
+/* Internal destinations this page points at. Written once here rather than
+   inlined at each call site: this page is the top of the funnel for the
+   "when is the election" queries, and every one of those readers still has to
+   find out who is on their ballot. */
+const LANDING_PATH = ELECTION.basePath;
+const MAYOR_PATH = `${LANDING_PATH}#candidates`;
+const WARDS_PATH = `${LANDING_PATH}#wards`;
+const wardPath = (token: string) => `${LANDING_PATH}/wards/${token}`;
 
 /* Statically rendered and revalidated hourly. The day counts baked into the
    HTML are therefore at most an hour stale, which is what crawlers and no-JS
@@ -54,12 +65,22 @@ export const metadata: Metadata = {
 
    Eligibility, ID and same-day registration are summarised from the City
    Clerk's own pages (linked in every answer); we are restating their rules,
-   not making our own. */
-const FAQS: { question: string; answer: string }[] = [
+   not making our own.
+
+   `cta` renders as a link under the answer but is deliberately *not* folded
+   into the JSON-LD answer text — a schema answer that reads "click here" is
+   worse than one that doesn't, and Google strips the markup anyway. It exists
+   so a reader who came for a date leaves with somewhere to go next. */
+const FAQS: {
+  question: string;
+  answer: string;
+  cta?: { label: string; href: string };
+}[] = [
   {
     question: "When is the Toronto election?",
     answer:
       "Toronto's 2026 municipal election is Monday, October 26, 2026. Voting places are open from 10 a.m. to 8 p.m. Toronto voters elect a mayor, 25 city councillors and school board trustees on that day.",
+    cta: { label: "See every race on the 2026 ballot", href: LANDING_PATH },
   },
   {
     question: "When can I vote early in Toronto?",
@@ -80,6 +101,7 @@ const FAQS: { question: string; answer: string }[] = [
     question: "Who can vote in the Toronto municipal election?",
     answer:
       "To vote you must be a Canadian citizen, at least 18 years old, and either a resident of Toronto or a non-resident who owns or rents property in Toronto (or whose spouse does) — and not prohibited from voting under any law.",
+    cta: { label: "The full step-by-step guide to voting", href: HOW_TO_VOTE_PATH },
   },
   {
     question: "Do I need to register before I can vote?",
@@ -95,10 +117,26 @@ const FAQS: { question: string; answer: string }[] = [
     question: "Who is running for mayor and in my ward?",
     answer:
       "Build Canada tracks every race in the 2026 Toronto election — the candidates for mayor and all 25 council wards, with their platforms and campaign sites. Look up your ward by postal code on our Toronto 2026 election page.",
+    cta: { label: "Look up your ward and see its candidates", href: WARDS_PATH },
   },
 ];
 
-export default function WhenIsTheTorontoElectionPage() {
+export default async function WhenIsTheTorontoElectionPage() {
+  // The roster, for the ballot section's live counts and its 25 ward links.
+  // Same source the landing and ward pages read, so the counts here can't
+  // disagree with the pages they link to; it falls back to the local roster
+  // when York Factory is unreachable, so this never blocks the dates.
+  const view = await getToronto2026();
+  const mayoralCount = view.mayoral.filter((c) => !c.withdrawn).length;
+  /* `view.raceCount` and `view.candidateCount` span *every* race, trustees
+     included — 55 and counting. The "mayor and council" figure this page
+     quotes is the narrower one, so derive it: one city-wide mayoral race plus
+     one council race per ward. Summing `ward.count` is safe in Toronto
+     because each ward elects its own councillor; in Brampton one race covers
+     two wards and this would double-count. */
+  const mayorAndCouncilRaces = view.wards.length + 1;
+  const councilCandidateCount = view.wards.reduce((n, w) => n + w.count, 0);
+
   // One instant for the whole render, so every card agrees. Absolute time is
   // all this page needs: the countdowns show elapsed *duration* (to match the
   // hours/minutes/seconds beside them), not calendar days, so there is no
@@ -189,6 +227,26 @@ export default function WhenIsTheTorontoElectionPage() {
                 after that, sign up in person at the polls.
               </p>
             </div>
+
+            {/* Deliberately text, not buttons: MyVote above stays the only
+                solid CTA in the hero, but a reader who already knows the date
+                — most of the traffic this page gets — needs a way onward to
+                the races without scrolling the whole calendar. */}
+            <p className="mt-7 font-serif text-[1.05rem] leading-[1.6] max-w-[56ch] text-text-secondary">
+              Already know the date? Skip ahead to{" "}
+              <InlineLink href={MAYOR_PATH}>
+                the {mayoralCount} candidates for mayor
+              </InlineLink>
+              , find{" "}
+              <InlineLink href={WARDS_PATH}>
+                the council race in your ward
+              </InlineLink>
+              , or read{" "}
+              <InlineLink href={HOW_TO_VOTE_PATH}>
+                how to vote step by step
+              </InlineLink>
+              .
+            </p>
           </div>
         </section>
 
@@ -217,6 +275,92 @@ export default function WhenIsTheTorontoElectionPage() {
                   .join(" ")}
               />
             ))}
+          </div>
+        </section>
+
+        {/* ── Who's on the ballot ──────────────────────────────── */}
+        {/* The dates are the query; the ballot is the reason the query was
+            worth answering. This sits above the calendar table on purpose —
+            a reader who bounces after the countdown should still have passed
+            a link to the races. */}
+        <section id="ballot" className="border-b-2 border-dark scroll-mt-24">
+          <div className="px-6 pt-12 pb-8 md:px-14">
+            <p className="type-label text-accent mb-3.5">Before you go</p>
+            <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.9rem,3.2vw,2.5rem)] mb-2.5">
+              Who&rsquo;s on your ballot
+            </h2>
+            <p className="font-serif text-[1.1rem] leading-[1.5] max-w-[58ch] text-text-secondary">
+              You get three votes on {ELECTION.voteDayLabel}: mayor, the
+              councillor for your ward, and a school board trustee. We track
+              all {mayorAndCouncilRaces} mayor and council races, and the
+              trustee races alongside them &mdash; {view.candidateCount}{" "}
+              candidates in all.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 border-t border-border-light">
+            <div className={`px-6 py-11 ${cellPadding(0, 2)}`}>
+              <h3 className="font-sans font-medium text-[1.2rem] leading-[1.25] tracking-[-0.02em] mb-2.5">
+                The race for mayor
+              </h3>
+              <p className="font-serif text-[1.05rem] leading-[1.5] text-text-secondary mb-6 max-w-[46ch]">
+                {mayoralCount} candidates are registered city-wide, and every
+                Toronto voter votes in this one. Photos, platforms and campaign
+                sites for each.
+              </p>
+              <Button as="link" variant="auburn" href={MAYOR_PATH}>
+                See the {mayoralCount} candidates for mayor
+              </Button>
+            </div>
+            <div
+              className={`px-6 py-11 ${cellPadding(1, 2)} border-t md:border-t-0 md:border-l border-border-light`}
+            >
+              <h3 className="font-sans font-medium text-[1.2rem] leading-[1.25] tracking-[-0.02em] mb-2.5">
+                Your council race
+              </h3>
+              <p className="font-serif text-[1.05rem] leading-[1.5] text-text-secondary mb-6 max-w-[46ch]">
+                The vote that decides what gets built on your street, and the
+                one nobody covers. {councilCandidateCount} candidates are
+                running across the {view.wards.length} wards &mdash; enter a
+                postal code and we&rsquo;ll show you yours.
+              </p>
+              <Button as="link" variant="ghost" href={WARDS_PATH}>
+                Find your ward by postal code
+              </Button>
+            </div>
+          </div>
+
+          {/* All 25 wards, by name. Crawlable, descriptive anchor text, and
+              faster than the postal-code lookup for anyone who already knows
+              which ward they live in. */}
+          <div className="px-6 md:px-14 pt-11 pb-12 border-t border-border-light">
+            <h3 className="type-label text-text-secondary !tracking-[0.08em] mb-5">
+              Or go straight to a ward
+            </h3>
+            <ul className="grid gap-x-8 gap-y-0 sm:grid-cols-2 lg:grid-cols-3">
+              {view.wards.map((ward) => (
+                <li key={ward.n} className="border-b border-border-light">
+                  <Link
+                    href={wardPath(ward.n)}
+                    className="group/ward flex items-baseline gap-3 py-3 transition-colors hover:text-accent"
+                  >
+                    <span className="type-label-sm text-accent !tracking-[0.08em] tabular-nums shrink-0">
+                      {ward.number}
+                    </span>
+                    <span className="font-serif text-[1.05rem] leading-[1.35] flex-1">
+                      {ward.name}
+                    </span>
+                    <span className="type-label-sm text-text-secondary !tracking-[0.06em] shrink-0 tabular-nums">
+                      {ward.count}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-5 font-serif text-[0.95rem] leading-[1.5] text-text-secondary">
+              The number on the right is how many candidates are registered
+              for that ward&rsquo;s council seat.
+            </p>
           </div>
         </section>
 
@@ -366,6 +510,11 @@ export default function WhenIsTheTorontoElectionPage() {
                 <p className="font-serif text-[1.05rem] leading-[1.5] text-text-secondary">
                   {faq.answer}
                 </p>
+                {faq.cta && (
+                  <p className="mt-2.5">
+                    <InlineLink href={faq.cta.href}>{faq.cta.label}</InlineLink>
+                  </p>
+                )}
               </div>
             ))}
           </div>
@@ -409,23 +558,24 @@ export default function WhenIsTheTorontoElectionPage() {
               Knowing the date is the easy part.
             </h2>
             <p className="font-serif text-[1.1rem] leading-[1.5] max-w-[46ch] mb-7">
-              Twenty-six mayor and council races are on the line across the
-              city, and most of them get no coverage at all. We track every
-              one.
+              {mayorAndCouncilRaces} mayor and council races are on the line
+              across the city, and most of them get no coverage at all. We
+              track every one, plus the trustee races &mdash;{" "}
+              {view.candidateCount} candidates, with platforms and campaign
+              sites.
             </p>
             <div className="flex flex-wrap gap-3">
+              <Button as="link" variant="auburn" href={MAYOR_PATH}>
+                See the candidates for mayor
+              </Button>
+              <Button as="link" variant="ghost" href={WARDS_PATH}>
+                Find your ward
+              </Button>
+              <Button as="link" variant="ghost" href="#ballot">
+                Browse all {view.wards.length} wards
+              </Button>
               <Button as="link" variant="ghost" href={HOW_TO_VOTE_PATH}>
                 How to vote
-              </Button>
-              <Button as="link" variant="ghost" href={ELECTION.basePath}>
-                See who is running for mayor
-              </Button>
-              <Button
-                as="link"
-                variant="ghost"
-                href={`${ELECTION.basePath}#wards`}
-              >
-                Find your ward
               </Button>
             </div>
           </div>
@@ -447,6 +597,27 @@ export default function WhenIsTheTorontoElectionPage() {
         </section>
       </div>
     </div>
+  );
+}
+
+/* An internal link inside a paragraph. Underlined rather than buttoned, so
+   the prose keeps reading as prose and the solid CTAs stay distinguishable
+   from it. Next's Link, not an anchor, so these prefetch like the rest of the
+   site's navigation. */
+function InlineLink({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      className="text-dark underline decoration-border-light decoration-1 underline-offset-[3px] transition-colors hover:text-accent hover:decoration-accent"
+    >
+      {children}
+    </Link>
   );
 }
 

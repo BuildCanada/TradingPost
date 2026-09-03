@@ -10,6 +10,8 @@ import { getBillsFromCivicsProject } from "@/app/bills/server/get-all-bills-from
 import { getAllBillsFromDB } from "@/app/bills/server/get-all-bills-from-db";
 import { buildAbsoluteUrl } from "@/app/bills/utils/basePath";
 import { SECTIONS as ECONOMIC_SECTIONS } from "@/app/state-of-the-nation/indicators";
+import { WARD_NUMBERS } from "@/app/toronto/vote/2026/data";
+import { KEY_DATES_PATH } from "@/app/toronto/vote/2026/key-dates";
 
 function toValidDate(value?: Date | string): Date | undefined {
   if (!value) return undefined;
@@ -43,7 +45,49 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${baseUrl}/privacy-notice`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
   ];
 
-  const staticUrls = new Set(staticPages.map((p) => p.url));
+  // The /toronto/vote tree, which had never been listed. The dates page is the
+  // most time-sensitive thing on the site during a campaign, hence "daily".
+  //
+  // Deliberately absent: /toronto (a redirect, already in redirectedPaths
+  // below), /toronto/vote/get-involved (redirected in next.config.ts), and
+  // /toronto/vote/survey-questions (noindex on the page and disallowed in
+  // robots.ts — listing it would contradict both).
+  const torontoElectionPages: MetadataRoute.Sitemap = [
+    {
+      url: `${baseUrl}${KEY_DATES_PATH}`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/vote`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/toronto/vote/2026`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/toronto/vote/2026/pledge`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.6,
+    },
+    ...WARD_NUMBERS.map((n) => ({
+      url: `${baseUrl}/toronto/vote/2026/wards/${n}`,
+      lastModified: new Date(),
+      changeFrequency: "daily" as const,
+      priority: 0.7,
+    })),
+  ];
+
+  const staticUrls = new Set(
+    [...staticPages, ...torontoElectionPages].map((p) => p.url),
+  );
   const redirectedPaths = new Set(["/great-canadian-builders", "/toronto"]);
   const projectPages: MetadataRoute.Sitemap = PROJECTS
     .map((t) => {
@@ -158,6 +202,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   return [
     ...staticPages,
+    ...torontoElectionPages,
     ...projectPages,
     ...ministryPages,
     ...commitmentPages,

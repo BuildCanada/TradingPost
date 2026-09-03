@@ -14,4 +14,5 @@ export { generateArticleSchema } from "./generators/article";
 export { generateReviewSchema } from "./generators/review";
 export { generateFAQPageSchema } from "./generators/faq-page";
 export { generateBreadcrumbSchema } from "./generators/breadcrumb";
+export { generateVotingEventSchema } from "./generators/event";
 export { stripNulls, buildSameAs, parseJSON, toISO8601, toAbsoluteUrl } from "./utils";

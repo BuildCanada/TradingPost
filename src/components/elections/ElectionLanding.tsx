@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Suspense, type ReactNode } from "react";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import CountdownDays from "./CountdownDays";
@@ -33,6 +34,9 @@ export type LandingContent = {
   closingBlurb: ReactNode;
   /** the fine print about where the roster comes from */
   sourceNote: ReactNode;
+  /** this region's "all key dates" page, when it has one. Unset drops the link
+   *  rather than rendering a dead one — only Toronto has the page so far. */
+  keyDatesHref?: string;
 };
 
 export function ElectionLanding({
@@ -81,7 +85,7 @@ export function ElectionLanding({
         </section>
 
         {/* ── Countdown + how to vote ──────────────────────────── */}
-        <KeyDates election={election} />
+        <KeyDates election={election} keyDatesHref={content.keyDatesHref} />
 
         {/* ── Candidates for mayor ─────────────────────────────── */}
         <section id="candidates" className="border-b-2 border-dark scroll-mt-24">
@@ -198,7 +202,13 @@ export function ElectionLanding({
  * pledge CTA. Regions that haven't published their advance-vote or mail-in
  * dates get a two-column band instead of three, rather than empty cells.
  */
-function KeyDates({ election }: { election: SupportedElection }) {
+function KeyDates({
+  election,
+  keyDatesHref,
+}: {
+  election: SupportedElection;
+  keyDatesHref?: string;
+}) {
   const { advanceVote, mailIn } = election;
   const hasMiddle = Boolean(advanceVote || mailIn);
 
@@ -257,6 +267,10 @@ function KeyDates({ election }: { election: SupportedElection }) {
                 </span>
               </div>
               <p className="mt-2.5 font-serif text-[1rem] leading-[1.4] text-accent">
+                {/* Also spelled out, with the rest of Toronto's calendar, in
+                    src/app/toronto/vote/2026/key-dates.ts. This component is
+                    shared by four cities and can't import a Toronto route
+                    module, so the cutoff is written twice — change both. */}
                 {mailIn.label}, 4:30&nbsp;p.m.
               </p>
             </div>
@@ -285,6 +299,15 @@ function KeyDates({ election }: { election: SupportedElection }) {
           </span>
           , {election.pollHoursLabel}.
         </p>
+        {keyDatesHref && (
+          <Link
+            href={keyDatesHref}
+            className="group/dates mt-4 inline-flex items-center gap-1.5 type-label-sm !tracking-[0.1em] text-dark hover:text-accent transition-colors self-start"
+          >
+            See all key dates
+            <ArrowRight className="size-3 shrink-0 transition-transform group-hover/dates:translate-x-0.5" />
+          </Link>
+        )}
       </div>
     </section>
   );

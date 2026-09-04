@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { Suspense, type ReactNode } from "react";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import CountdownDays from "./CountdownDays";
@@ -33,6 +34,11 @@ export type LandingContent = {
   closingBlurb: ReactNode;
   /** the fine print about where the roster comes from */
   sourceNote: ReactNode;
+  /** This region's supporting guide pages, listed under the poll-hours line.
+   *  Unset or empty drops the block rather than rendering dead links — only
+   *  Toronto has these pages so far. A list rather than one href per page, so
+   *  adding the next guide doesn't mean another prop. */
+  guideLinks?: { label: string; href: string }[];
 };
 
 export function ElectionLanding({
@@ -81,7 +87,7 @@ export function ElectionLanding({
         </section>
 
         {/* ── Countdown + how to vote ──────────────────────────── */}
-        <KeyDates election={election} />
+        <KeyDates election={election} guideLinks={content.guideLinks} />
 
         {/* ── Candidates for mayor ─────────────────────────────── */}
         <section id="candidates" className="border-b-2 border-dark scroll-mt-24">
@@ -198,7 +204,13 @@ export function ElectionLanding({
  * pledge CTA. Regions that haven't published their advance-vote or mail-in
  * dates get a two-column band instead of three, rather than empty cells.
  */
-function KeyDates({ election }: { election: SupportedElection }) {
+function KeyDates({
+  election,
+  guideLinks,
+}: {
+  election: SupportedElection;
+  guideLinks?: { label: string; href: string }[];
+}) {
   const { advanceVote, mailIn } = election;
   const hasMiddle = Boolean(advanceVote || mailIn);
 
@@ -257,6 +269,10 @@ function KeyDates({ election }: { election: SupportedElection }) {
                 </span>
               </div>
               <p className="mt-2.5 font-serif text-[1rem] leading-[1.4] text-accent">
+                {/* Also spelled out, with the rest of Toronto's calendar, in
+                    src/app/toronto/vote/2026/key-dates.ts. This component is
+                    shared by four cities and can't import a Toronto route
+                    module, so the cutoff is written twice — change both. */}
                 {mailIn.label}, 4:30&nbsp;p.m.
               </p>
             </div>
@@ -285,6 +301,20 @@ function KeyDates({ election }: { election: SupportedElection }) {
           </span>
           , {election.pollHoursLabel}.
         </p>
+        {guideLinks && guideLinks.length > 0 && (
+          <div className="mt-4 flex flex-col items-start gap-2">
+            {guideLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className="group/dates inline-flex items-center gap-1.5 type-label-sm !tracking-[0.1em] text-dark hover:text-accent transition-colors"
+              >
+                {link.label}
+                <ArrowRight className="size-3 shrink-0 transition-transform group-hover/dates:translate-x-0.5" />
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

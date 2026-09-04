@@ -9,6 +9,8 @@ export function SubscribeModal() {
   const isOpen = useSubscribeStore((s) => s.isOpen);
   const subscribed = useSubscribeStore((s) => s.subscribed);
   const triggerSource = useSubscribeStore((s) => s.triggerSource);
+  const prefillEmail = useSubscribeStore((s) => s.prefillEmail);
+  const headline = useSubscribeStore((s) => s.headline);
   const closeModal = useSubscribeStore((s) => s.closeModal);
   const setDismissed = useSubscribeStore((s) => s.setDismissed);
 
@@ -25,17 +27,19 @@ export function SubscribeModal() {
         <Dialog.Backdrop className="fixed inset-0 bg-black/50 z-[60]" />
         <Dialog.Popup className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-linen-100 border border-charcoal-300 w-[90vw] max-w-md z-[60]" style={{ padding: "clamp(1.5rem, 4vw, 2.5rem)" }}>
           <Dialog.Title className="type-title" style={{ marginBottom: "clamp(0.375rem, 1.5vw, 0.75rem)" }}>
-            {subscribed ? "You're in." : "Build Canada"}
+            {subscribed
+              ? "You're in."
+              : (headline ?? "Subscribe to our weekly digest")}
           </Dialog.Title>
           <div style={{ marginBottom: "clamp(1rem, 3vw, 1.5rem)" }}>
             {subscribed ? (
               <Dialog.Description className="type-body text-charcoal-600">
-                Thanks for subscribing.
+                The weekly digest is on its way.
               </Dialog.Description>
             ) : (
               <>
                 <Dialog.Description className="type-body" style={{ marginBottom: "clamp(0.375rem, 1.5vw, 0.75rem)" }}>
-                  We believe Canada should be the most prosperous country in the world 🏗️🇨🇦
+                  One email a week: new memos, the ideas behind them, and what we&rsquo;re working on 🏗️🇨🇦
                 </Dialog.Description>
                 <p className="type-label font-bold text-charcoal-600">
                   Over 10,000 subscribers
@@ -48,6 +52,7 @@ export function SubscribeModal() {
           ) : (
             <SubscribeForm
               source={triggerSource ?? "navbar"}
+              initialEmail={prefillEmail ?? undefined}
               onSuccess={handleClose}
             />
           )}

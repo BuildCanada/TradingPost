@@ -4,6 +4,10 @@ const ROUTE_LABELS: Record<string, string> = {
   projects: "Projects",
   content: "Content",
   "state-of-the-nation": "State of the Nation",
+  toronto: "Toronto",
+  vote: "Vote",
+  wards: "Wards",
+  "2026": "Toronto 2026 Election",
 };
 
 export function generateBreadcrumbSchema(

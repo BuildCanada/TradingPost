@@ -1,19 +1,24 @@
 "use client";
 
-import { useSubscribeStore } from "@/components/subscribe/store";
+import {
+  useSubscribeStore,
+  type SubscribeSource,
+} from "@/components/subscribe/store";
 import { Button } from "@/components/ui/button";
 
 const variantMap = {
   primary: "charcoal",
   accent: "auburn",
   secondary: "ghost",
+  light: "linen",
+  "light-ghost": "linen-ghost",
 } as const;
 
 interface SubscribeButtonProps {
   children: React.ReactNode;
-  variant?: "primary" | "accent" | "secondary";
+  variant?: "primary" | "accent" | "secondary" | "light" | "light-ghost";
   className?: string;
-  source?: "navbar" | "exit-intent" | "footer" | "inline";
+  source?: SubscribeSource;
 }
 
 export function SubscribeButton({

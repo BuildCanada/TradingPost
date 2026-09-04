@@ -66,6 +66,21 @@ export type LandingContent = {
    *  Toronto has these pages so far. A list rather than one href per page, so
    *  adding the next guide doesn't mean another prop. */
   guideLinks?: { label: string; href: string }[];
+  /** The tools and readings this region has published on top of the roster —
+   *  the questionnaire read across the field, the reader's own alignment, the
+   *  ward pages. Unset drops the section, which is what every region but
+   *  Toronto does today. */
+  explore?: ExploreItem[];
+};
+
+/** One card in the explore grid. `meta` is the small figure under the title —
+ *  a count, a date, whatever makes the card worth clicking. */
+export type ExploreItem = {
+  eyebrow: string;
+  title: ReactNode;
+  blurb: ReactNode;
+  href: string;
+  meta?: ReactNode;
 };
 
 export function ElectionLanding({
@@ -75,6 +90,7 @@ export function ElectionLanding({
   wardMapDefs,
   renderWardMap,
   mayorSurveyPath,
+  mayorRosterPath,
   surveyPath,
   electionDay,
 }: {
@@ -88,6 +104,11 @@ export function ElectionLanding({
    *  have run one — the cards say who is running, that page says what they
    *  said */
   mayorSurveyPath?: string;
+  /** the full mayoral roster, for a region whose field is too long to print
+   *  here. Set it and this section keeps its heading and hands the list off;
+   *  leave it unset and the section prints every candidate, which is the right
+   *  answer for a field of eight and the wrong one for a field of fifty. */
+  mayorRosterPath?: string;
   /** the voter survey, where the region runs one. It takes the closing call to
    *  action from the pledge: a pledge is a name on a list, where the survey
    *  hands the reader their own ballot back with the candidates ranked against
@@ -105,61 +126,101 @@ export function ElectionLanding({
         <ResidencyModal election={election.slug} />
       </Suspense>
       <div className="mx-[10px] my-[10px] border border-border-light bg-bg overflow-x-clip">
-        {/* ── Hero ─────────────────────────────────────────────── */}
-        <section className="px-6 py-14 md:px-14 md:py-16 border-b-2 border-dark">
-          <h1 className="font-sans font-medium leading-[0.98] tracking-[-0.04em] text-[clamp(3rem,7vw,5.75rem)] max-w-[15ch] text-balance mb-7">
-            {content.heroTitle}
-          </h1>
-          <p className="font-serif text-[clamp(1.15rem,1.6vw,1.4rem)] leading-[1.5] max-w-[62ch]">
-            {content.heroBlurb}
-          </p>
-        </section>
+        {/* ── Hero: the election, and the clock on it ─────────── */}
+        <Hero election={election} content={content} electionDay={electionDay} />
 
-        {/* ── Countdown + how to vote ──────────────────────────── */}
-        <KeyDates
-          election={election}
-          surveyPath={surveyPath}
-          guideLinks={content.guideLinks}
-          electionDay={electionDay}
-        />
+        {/* ── Explore: what we've published on top of the roster ─ */}
+        {content.explore && content.explore.length > 0 && (
+          <ExploreSection items={content.explore} />
+        )}
 
         {/* ── Candidates for mayor ─────────────────────────────── */}
-        <section id="candidates" className="border-b-2 border-dark scroll-mt-24">
-          <div className="px-6 pt-12 pb-8 md:px-14 flex justify-between items-end gap-6 flex-wrap">
-            <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(2rem,3.5vw,2.75rem)]">
-              Candidates for Mayor
-            </h2>
-            {mayorSurveyPath && (
-              <Link
-                href={mayorSurveyPath}
-                className="group/answers type-label-sm text-accent hover:underline inline-flex items-center gap-1.5 pb-1.5"
-              >
-                How they answered our questionnaire
-                <ArrowRight className="size-3.5 transition-transform group-hover/answers:translate-x-0.5" />
-              </Link>
+        {/* Where a region has a roster page, this is a signpost rather than a
+            list: Toronto's mayoral field is fifty-three people, and printing
+            it here spent half the city's front page on a list whose reader
+            either wants one name or wants all of them — and is better served,
+            either way, by the page that holds the whole thing. Regions with no
+            roster page still print their field, which is the right answer for
+            the ones running a race of eight. */}
+        <section
+          id="candidates"
+          className="border-b-2 border-dark scroll-mt-24"
+        >
+          <div className="px-6 pt-10 pb-6 md:px-14 flex justify-between items-end gap-6 flex-wrap">
+            <div>
+              <p className="type-label text-accent mb-3">Mayor</p>
+              <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.85rem,3vw,2.4rem)] mb-2">
+                Candidates for Mayor
+              </h2>
+              {mayorRosterPath && (
+                <p className="font-serif text-[1.05rem] leading-[1.45] max-w-[52ch] text-dark/80">
+                  Every voter in the city votes in this race.{" "}
+                  {view.mayoral.length} candidates have registered for it.
+                </p>
+              )}
+            </div>
+            {mayorRosterPath ? (
+              <p className="type-label text-text-secondary pb-1.5 !tracking-[0.08em]">
+                {view.mayoral.length} candidates
+              </p>
+            ) : (
+              mayorSurveyPath && (
+                <Link
+                  href={mayorSurveyPath}
+                  className="group/answers type-label-sm text-accent hover:underline inline-flex items-center gap-1.5 pb-1.5"
+                >
+                  How they answered our questionnaire
+                  <ArrowRight className="size-3.5 transition-transform group-hover/answers:translate-x-0.5" />
+                </Link>
+              )
             )}
           </div>
 
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(272px,1fr))] border-t border-l border-border-light">
-            {view.mayoral.map((cand) => (
-              <MayoralCard
-                key={cand.key}
-                candidate={cand}
-                election={election.slug}
-              />
-            ))}
-          </div>
+          {mayorRosterPath ? (
+            <div className="border-t border-border-light grid md:grid-cols-2">
+              <Link
+                href={mayorRosterPath}
+                className="group/roster px-6 md:px-14 py-6 flex items-center justify-between gap-4 transition-colors hover:bg-bg-alt"
+              >
+                <span className="font-sans font-medium text-[1.15rem] tracking-[-0.015em]">
+                  Every candidate for mayor
+                </span>
+                <ArrowRight className="size-4 flex-none text-text-secondary transition-transform group-hover/roster:translate-x-0.5" />
+              </Link>
+              {mayorSurveyPath && (
+                <Link
+                  href={mayorSurveyPath}
+                  className="group/answers px-6 md:px-14 py-6 flex items-center justify-between gap-4 border-t md:border-t-0 md:border-l border-border-light transition-colors hover:bg-bg-alt"
+                >
+                  <span className="font-sans font-medium text-[1.15rem] tracking-[-0.015em]">
+                    How they answered our questionnaire
+                  </span>
+                  <ArrowRight className="size-4 flex-none text-text-secondary transition-transform group-hover/answers:translate-x-0.5" />
+                </Link>
+              )}
+            </div>
+          ) : (
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(272px,1fr))] border-t border-l border-border-light">
+              {view.mayoral.map((cand) => (
+                <MayoralCard
+                  key={cand.key}
+                  candidate={cand}
+                  election={election.slug}
+                />
+              ))}
+            </div>
+          )}
         </section>
 
         {/* ── Wards ────────────────────────────────────────────── */}
         <section id="wards" className="border-b-2 border-dark scroll-mt-24">
-          <div className="px-6 pt-12 pb-8 md:px-14 flex justify-between items-end gap-6 flex-wrap">
+          <div className="px-6 pt-10 pb-6 md:px-14 flex justify-between items-end gap-6 flex-wrap">
             <div>
-              <p className="type-label text-accent mb-3.5">City Council</p>
-              <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(2rem,3.5vw,2.75rem)] mb-2.5">
+              <p className="type-label text-accent mb-3">City Council</p>
+              <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.85rem,3vw,2.4rem)] mb-2">
                 Find your ward
               </h2>
-              <p className="font-serif text-[1.1rem] leading-[1.45] max-w-[52ch] text-dark/80">
+              <p className="font-serif text-[1.05rem] leading-[1.45] max-w-[52ch] text-dark/80">
                 {content.wardsBlurb}
               </p>
             </div>
@@ -185,14 +246,14 @@ export function ElectionLanding({
         {/* ── Also city-wide (French-language school boards) ────── */}
         {view.atLargeRaces.length > 0 && (
           <section className="border-b-2 border-dark">
-            <div className="px-6 pt-12 pb-8 md:px-14">
-              <p className="type-label text-accent mb-3.5">
+            <div className="px-6 pt-10 pb-6 md:px-14">
+              <p className="type-label text-accent mb-3">
                 Also on every ballot
               </p>
-              <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(2rem,3.5vw,2.75rem)] mb-2.5">
+              <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.85rem,3vw,2.4rem)] mb-2">
                 City-wide races
               </h2>
-              <p className="font-serif text-[1.1rem] leading-[1.45] max-w-[52ch] text-dark/80">
+              <p className="font-serif text-[1.05rem] leading-[1.45] max-w-[52ch] text-dark/80">
                 These seats are elected across the whole city, so every voter
                 sees them regardless of ward.
               </p>
@@ -209,8 +270,8 @@ export function ElectionLanding({
         )}
 
         {/* ── Closing CTA ──────────────────────────────────────── */}
-        <section className="bg-bg text-dark px-6 py-20 md:px-14 md:py-28 text-center flex flex-col items-center">
-          <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.035em] text-[clamp(2rem,5vw,3.75rem)] max-w-[22ch] text-balance mb-6">
+        <section className="bg-bg text-dark px-6 py-14 md:px-14 md:py-16 text-center flex flex-col items-center">
+          <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.035em] text-[clamp(1.9rem,4vw,3rem)] max-w-[22ch] text-balance mb-6">
             {content.closingHeadline}
           </h2>
           {/* The survey card itself rather than a button in its colours, so
@@ -238,7 +299,7 @@ export function ElectionLanding({
               </PledgeButton>
             </>
           )}
-          <p className="mt-14 pt-5 border-t border-dark/15 type-label-sm text-text-muted !tracking-[0.06em] max-w-[60ch]">
+          <p className="mt-10 pt-5 border-t border-dark/15 type-label-sm text-text-muted !tracking-[0.06em] max-w-[60ch]">
             {content.sourceNote}
           </p>
         </section>
@@ -303,7 +364,7 @@ function DateCounter({
         <CountdownDays
           initialDays={daysUntil(targetIso)}
           targetIso={targetIso}
-          className="font-sans font-medium leading-[0.95] tracking-[-0.03em] text-[clamp(2.5rem,5vw,3.5rem)] tabular-nums"
+          className="font-sans font-medium leading-[0.95] tracking-[-0.03em] text-[clamp(2.1rem,4vw,2.75rem)] tabular-nums"
         />
         <span className="type-label-sm !tracking-[0.14em] text-text-secondary">
           days
@@ -317,165 +378,223 @@ function DateCounter({
 }
 
 /**
- * Election-day countdown, the advance-vote and vote-by-mail counters, and the
- * survey (or, where a region runs none, the pledge).
+ * The top of the page: what the election is, and how long is left of it.
  *
- * Two rows rather than one. The headline countdown takes the full width of the
- * band, because a live days:hrs:min:sec timer is eleven glyphs plus four unit
- * labels and cannot share a third of the row with anything — squeezed into a
- * column it either clamps down to the size of the secondary counters, losing
- * the hierarchy that made it the headline, or overruns its gutter. Its own row
- * also puts the date and the guide links beside the number they describe,
- * rather than across the band in the CTA cell where they used to sit.
+ * Hero and countdown used to be two stacked bands, which meant the headline
+ * and the number that gives it its urgency were separated by a rule and never
+ * read as one statement. They're one block now — eyebrow, headline, blurb,
+ * then the live timer under a hairline inside the same section — so the first
+ * screen answers "which election" and "how long do I have" together.
  *
- * The second row is the supporting calendar: one cell per published date, then
- * the survey. Regions that haven't published their advance-vote or mail-in
- * dates drop those cells rather than render empty ones, and the survey takes
- * the row on its own.
+ * The supporting calendar drops out of the headline and becomes the strip
+ * along the bottom: the advance-vote and mail-in counters at a fraction of the
+ * headline's size, then this region's guide pages. Cells a region can't fill
+ * are dropped rather than rendered empty, so a region with no published
+ * advance date and no guides gets the hero alone and no orphaned rule.
+ *
+ * The survey ask that used to sit in this band is now the explore grid's
+ * alignment card and the closing CTA — asking twice in the first screen was
+ * the old band's problem, not its strength.
  */
-function KeyDates({
+function Hero({
   election,
-  surveyPath,
-  guideLinks,
+  content,
   electionDay,
 }: {
   election: SupportedElection;
-  /** where the region's voter survey lives; the panel falls back to the pledge
-   *  where there is none */
-  surveyPath?: string;
-  /** the region's supporting guide pages, listed beside the headline number */
-  guideLinks?: { label: string; href: string }[];
+  content: LandingContent;
   /** poll hours for election day, where the region has published them */
   electionDay?: ElectionDayPeriod;
 }) {
   const { advanceVote, mailIn } = election;
+  const guideLinks = content.guideLinks ?? [];
   const dateCells = [advanceVote, mailIn].filter(Boolean).length;
+  const hasStrip = dateCells > 0 || guideLinks.length > 0;
+  /* The strip's columns, counted rather than auto-fit: the guides cell holds a
+     stack of links and wants the wider share, the counters are a number and a
+     date apiece. One cell takes the row on its own. */
+  const stripCells = dateCells + (guideLinks.length > 0 ? 1 : 0);
+  const stripCols =
+    stripCells === 3
+      ? "md:grid-cols-[1fr_1fr_1.15fr]"
+      : stripCells === 2
+        ? guideLinks.length > 0
+          ? "md:grid-cols-[1fr_1.15fr]"
+          : "md:grid-cols-2"
+        : "";
 
   return (
     <section className="border-b-2 border-dark">
-      {/* ── Headline: the countdown, and the day it counts to ── */}
-      <div className="px-6 py-12 md:px-14 md:py-14 border-b border-border-light grid gap-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-16">
-        <div>
-          {electionDay ? (
-            // The same live timer the /toronto hero band runs: the server
-            // reads the state and the remaining milliseconds once, and
-            // LiveCountdown ticks forward from there. It carries its own state
-            // label — "Until polls open" before the day, "Left to vote" during
-            // it — so the eyebrow above it names the election, not the count.
-            <>
-              <p className="type-label text-accent mb-5">
-                {yearOf(election.electionDateIso)} Election day
-              </p>
-              <ElectionDayCountdown period={electionDay} />
-            </>
-          ) : (
-            // Regions with no published poll hours get a whole-day count, in
-            // the same three-part shape so the band reads the same either way.
-            <>
-              <p className="type-label text-accent mb-5">Until polls open</p>
-              <p className="flex items-baseline gap-4">
-                <CountdownDays
-                  initialDays={daysUntil(election.electionDateIso)}
-                  targetIso={election.electionDateIso}
-                  className="font-sans font-medium leading-[0.95] tracking-[-0.04em] text-[clamp(4rem,10vw,8rem)] tabular-nums"
-                />
-                <span className="type-label !tracking-[0.14em] text-text-secondary">
-                  days
-                </span>
-              </p>
-            </>
-          )}
-        </div>
+      <div className="px-6 pt-14 pb-12 md:px-14 md:pt-16 md:pb-14">
+        <p className="type-label text-accent mb-6">{election.eyebrow}</p>
+        <h1 className="font-sans font-medium leading-[0.98] tracking-[-0.04em] text-[clamp(3rem,7vw,5.75rem)] max-w-[15ch] text-balance mb-7">
+          {content.heroTitle}
+        </h1>
+        <p className="font-serif text-[clamp(1.15rem,1.6vw,1.4rem)] leading-[1.5] max-w-[62ch]">
+          {content.heroBlurb}
+        </p>
 
-        {/* Shrink-wrapped, so the grid hands the timer every pixel it can use
-            and this block stays as wide as its own longest line rather than
-            taking a fixed share of the row. */}
-        <div className="lg:shrink-0 lg:text-right">
-          <p className="font-serif text-[1.05rem] leading-[1.4] lg:text-[1.15rem]">
+        {/* The clock, under a hairline rather than in a band of its own. The
+            timer takes every pixel the grid can give it — eleven glyphs plus
+            four unit labels don't survive sharing a column — and the poll-hours
+            line shrink-wraps beside it. */}
+        <div className="mt-12 pt-10 border-t border-border-light grid gap-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-16">
+          <div>
+            {electionDay ? (
+              // The same live timer the /toronto hero band runs: the server
+              // reads the state and the remaining milliseconds once, and
+              // LiveCountdown ticks forward from there. It carries its own
+              // state label — "Until polls open" before the day, "Left to
+              // vote" during it — so the eyebrow above it names the election,
+              // not the count.
+              <>
+                <p className="type-label text-accent mb-5">
+                  {yearOf(election.electionDateIso)} Election day
+                </p>
+                <ElectionDayCountdown period={electionDay} />
+              </>
+            ) : (
+              // Regions with no published poll hours get a whole-day count, in
+              // the same three-part shape so the hero reads the same either
+              // way.
+              <>
+                <p className="type-label text-accent mb-5">Until polls open</p>
+                <p className="flex items-baseline gap-4">
+                  <CountdownDays
+                    initialDays={daysUntil(election.electionDateIso)}
+                    targetIso={election.electionDateIso}
+                    className="font-sans font-medium leading-[0.95] tracking-[-0.04em] text-[clamp(4rem,10vw,8rem)] tabular-nums"
+                  />
+                  <span className="type-label !tracking-[0.14em] text-text-secondary">
+                    days
+                  </span>
+                </p>
+              </>
+            )}
+          </div>
+
+          <p className="font-serif text-[1.05rem] leading-[1.4] lg:shrink-0 lg:text-right lg:text-[1.15rem]">
             Polls open{" "}
             <span className="text-accent">
               {election.voteDayLabel},&nbsp;{yearOf(election.electionDateIso)}
             </span>
             , {election.pollHoursLabel}.
           </p>
-          {guideLinks && guideLinks.length > 0 && (
-            <div className="mt-5 flex flex-col items-start gap-2 lg:items-end">
-              {guideLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="group/dates inline-flex items-center gap-1.5 type-label-sm !tracking-[0.1em] text-dark hover:text-accent transition-colors"
-                >
-                  {link.label}
-                  <ArrowRight className="size-3 shrink-0 transition-transform group-hover/dates:translate-x-0.5" />
-                </Link>
-              ))}
-            </div>
-          )}
         </div>
       </div>
 
-      {/* ── Supporting calendar, then the survey ── */}
-      <div
-        className={`grid ${
-          dateCells === 2
-            ? "md:grid-cols-[1fr_1fr_1.3fr]"
-            : dateCells === 1
-              ? "md:grid-cols-[1fr_1.3fr]"
-              : ""
-        }`}
-      >
-        {advanceVote && (
-          <div className="px-6 py-12 md:px-14 md:py-14 flex flex-col justify-center">
-            <DateCounter
-              eyebrow="Until advance polls"
-              targetIso={advanceVote.iso}
-              dateLabel={advanceVote.label}
-            />
-          </div>
-        )}
+      {/* ── The supporting calendar, and this region's guides ── */}
+      {hasStrip && (
+        <div className={`border-t border-border-light grid ${stripCols}`}>
+          {advanceVote && (
+            <div className="px-6 py-8 md:px-14 md:py-9">
+              <DateCounter
+                eyebrow="Until advance polls"
+                targetIso={advanceVote.iso}
+                dateLabel={advanceVote.label}
+              />
+            </div>
+          )}
 
-        {mailIn && (
-          <div className="px-6 py-12 md:px-14 md:py-14 border-t md:border-t-0 md:border-l border-border-light flex flex-col justify-center">
-            <DateCounter
-              eyebrow="To apply to vote by mail"
-              targetIso={mailIn.iso}
-              /* Also spelled out, with the rest of Toronto's calendar, in
-                 src/app/toronto/vote/2026/key-dates.ts. This component is
-                 shared by four cities and can't import a Toronto route
-                 module, so the cutoff is written twice — change both. */
-              dateLabel={<>{mailIn.label}, 4:30&nbsp;p.m.</>}
-            />
-          </div>
-        )}
+          {mailIn && (
+            <div className="px-6 py-8 md:px-14 md:py-9 border-t md:border-t-0 md:border-l border-border-light">
+              <DateCounter
+                eyebrow="To apply to vote by mail"
+                targetIso={mailIn.iso}
+                /* Also spelled out, with the rest of Toronto's calendar, in
+                   src/app/toronto/vote/2026/key-dates.ts. This component is
+                   shared by four cities and can't import a Toronto route
+                   module, so the cutoff is written twice — change both. */
+                dateLabel={<>{mailIn.label}, 4:30&nbsp;p.m.</>}
+              />
+            </div>
+          )}
 
-        <div
-          className={`px-6 py-12 md:px-14 md:py-14 bg-bg-alt flex flex-col justify-center ${
-            dateCells > 0
-              ? "border-t md:border-t-0 md:border-l border-border-light"
-              : ""
-          }`}
-        >
-          {surveyPath ? (
-            <SurveyCta href={surveyPath} className="w-full" />
-          ) : (
-            <>
-              <p className="type-label text-accent mb-3.5">Ready to vote?</p>
-              <p className="font-serif text-[1.15rem] leading-[1.45] max-w-[34ch] mb-6">
-                Put your name on the record. Pledging takes ten seconds — and
-                it&rsquo;s the first step to showing up on election day.
-              </p>
-              <PledgeButton
-                election={election.slug}
-                source="election-ready-to-vote"
-                className="group/btn self-start inline-flex items-center gap-3 type-button text-bg bg-dark px-5 py-4 transition-colors hover:bg-black cursor-pointer"
-              >
-                Pledge to vote
-                <ArrowRight className="size-3.5 shrink-0 transition-transform group-hover/btn:translate-x-0.5" />
-              </PledgeButton>
-            </>
+          {guideLinks.length > 0 && (
+            <div
+              className={`px-6 py-8 md:px-14 md:py-9 bg-bg-alt ${
+                dateCells > 0
+                  ? "border-t md:border-t-0 md:border-l border-border-light"
+                  : ""
+              }`}
+            >
+              <p className="type-label text-accent mb-4">How to vote</p>
+              <div className="flex flex-col items-start gap-2.5">
+                {guideLinks.map((link) => (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="group/dates inline-flex items-center gap-1.5 type-label-sm !tracking-[0.1em] text-dark hover:text-accent transition-colors"
+                  >
+                    {link.label}
+                    <ArrowRight className="size-3 shrink-0 transition-transform group-hover/dates:translate-x-0.5" />
+                  </Link>
+                ))}
+              </div>
+            </div>
           )}
         </div>
+      )}
+    </section>
+  );
+}
+
+// ── Explore grid ───────────────────────────────────────────────────────────
+
+/**
+ * Everything we've made out of the questionnaire, in one grid.
+ *
+ * These pages exist either way — the field's answers issue by issue, the
+ * reader's own alignment, the mayoral grid — but until now the only way to
+ * find them was a link buried beside a section heading, and the alignment
+ * survey was the closing CTA at the bottom of a very long page. The grid puts
+ * them where someone who has just read the countdown can see them.
+ *
+ * Cards over a list, because each one needs a sentence to explain what it
+ * shows; the same border-collapse trick as the ward and mayoral grids, so the
+ * three sections read as one table rather than three treatments.
+ */
+function ExploreSection({ items }: { items: ExploreItem[] }) {
+  return (
+    <section id="explore" className="border-b-2 border-dark scroll-mt-24">
+      <div className="px-6 pt-10 pb-6 md:px-14">
+        <p className="type-label text-accent mb-3">Explore</p>
+        <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.85rem,3vw,2.4rem)] mb-2">
+          The data behind the race
+        </h2>
+        <p className="font-serif text-[1.05rem] leading-[1.45] max-w-[52ch] text-dark/80">
+          We put the same questions to every candidate on the ballot. Here is
+          what came back.
+        </p>
+      </div>
+
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(288px,1fr))] border-t border-l border-border-light">
+        {items.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="group/explore flex flex-col border-b border-r border-border-light px-6 py-6 md:px-8 md:py-7 transition-colors hover:bg-bg-alt"
+          >
+            <p className="type-label-sm !tracking-[0.1em] text-text-secondary mb-3">
+              {item.eyebrow}
+            </p>
+            <h3 className="type-h3 transition-colors group-hover/explore:text-accent">
+              {item.title}
+            </h3>
+            {item.meta && (
+              <p className="mt-2 font-sans font-medium tracking-[-0.02em] text-[1.35rem] leading-none text-accent tabular-nums">
+                {item.meta}
+              </p>
+            )}
+            <p className="mt-3 font-serif text-[1rem] leading-[1.45] text-dark/80">
+              {item.blurb}
+            </p>
+            <span className="mt-auto pt-5 inline-flex items-center gap-1.5 type-label-sm !tracking-[0.1em] text-accent">
+              Open
+              <ArrowRight className="size-3 shrink-0 transition-transform group-hover/explore:translate-x-0.5" />
+            </span>
+          </Link>
+        ))}
       </div>
     </section>
   );
@@ -650,11 +769,11 @@ export function SiteLink({
   ward?: string;
   wardName?: string;
 }) {
-  if (!candidate.website) {
-    return (
-      <span className="type-label-sm text-text-secondary">Profile to come</span>
-    );
-  }
+  /* No site, no line. "Profile to come" was a promise we do not control — a
+     candidate with no web presence may never acquire one — and printed under
+     every third name it read as a column of missing things rather than as the
+     ordinary state of a municipal candidate. The absence says it already. */
+  if (!candidate.website) return null;
   return (
     <CandidateSiteLink
       href={candidate.website}

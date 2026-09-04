@@ -10,6 +10,7 @@ import {
   KEY_DATES_PATH,
   VOTE_BY_MAIL_PATH,
 } from "./key-dates";
+import { SURVEY_PATH } from "../survey-questions/path";
 
 export const metadata: Metadata = {
   title: "Toronto 2026 Election",
@@ -32,6 +33,7 @@ export default async function Toronto2026ElectionPage() {
       election={ELECTION}
       view={view}
       mayorSurveyPath={`${ELECTION.basePath}/mayor`}
+      mayorRosterPath={`${ELECTION.basePath}/mayor/candidates`}
       // Toronto publishes its poll hours, so the band's headline counter is
       // the live timer from the /toronto hero rather than a whole-day count.
       electionDay={ELECTION_DAY}
@@ -64,6 +66,40 @@ export default async function Toronto2026ElectionPage() {
             candidates and see which of them line up with you.
           </>
         ),
+        /* WHAT IS ONLY HERE
+           This grid used to carry six cards, and three of them pointed at
+           things the reader could already see. The alignment survey is the
+           closing call to action at the foot of the page; the mayoral
+           questionnaire is linked from the "Candidates for Mayor" heading it
+           belongs to; and "your ward" was a card whose whole function was to
+           scroll you past itself to the ward grid two hundred pixels below.
+
+           A card earns its place by going somewhere the page does not
+           otherwise go. These three do. Everything else is reachable from the
+           section that owns it, which is where a reader looks for it anyway. */
+        explore: [
+          {
+            eyebrow: "The whole field",
+            title: "Where the candidates stand",
+            blurb:
+              "One chart per question, each carrying every answer we received: where the people running to govern Toronto converge, and where they split.",
+            href: `${ELECTION.basePath}/issues`,
+          },
+          {
+            eyebrow: "Questionnaire",
+            title: "The questions we asked",
+            blurb:
+              "The full question set every candidate received, with the reasoning behind each one.",
+            href: SURVEY_PATH,
+          },
+          {
+            eyebrow: "Turnout",
+            title: "Pledge to vote",
+            blurb:
+              "Put your name on the record and share the stamp. It takes ten seconds, and it is the first step to showing up.",
+            href: ELECTION.pledgePath,
+          },
+        ],
         guideLinks: [
           { label: "See all key dates", href: KEY_DATES_PATH },
           { label: "How to vote in Toronto", href: HOW_TO_VOTE_PATH },

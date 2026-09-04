@@ -1,66 +1,81 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
-import { SurveyGrid } from "@/components/elections/SurveyGrid";
+import { FieldSentiment } from "@/components/elections/FieldSentiment";
 import { SurveyCta } from "@/components/elections/SurveyCta";
-import { SurveyChartNote } from "@/components/elections/CandidateSurveyAnswers";
 import CountdownDays from "@/components/elections/CountdownDays";
+import { fieldSentiment } from "@/lib/elections/field-sentiment";
 import {
-  comparedQuestions,
-  surveyRoster,
-} from "@/lib/elections/candidate-answers";
+  CANDIDATE_QUESTIONNAIRE_SLUG,
+  fetchCandidateResponses,
+} from "@/lib/elections/candidate-responses";
+import { fetchSurvey } from "@/lib/elections/survey";
 import { daysUntil } from "@/lib/elections/dates";
-import { rosterSurvey } from "@/lib/elections/survey-answers";
 import { ELECTION, getToronto2026 } from "../data";
 
-/* The mayoral field's questionnaire, read across.
+/* How the mayoral field answered — question first.
  *
- * The same page as a ward's, for the one race every voter in the city votes
- * in: every candidate for mayor is a column, every question a row, and a
- * candidate who never wrote back says so in every one of them. It lives on its
- * own route rather than on the landing page because the grid is the size of a
- * questionnaire — thirty-odd questions by a field of candidates — and the
- * landing page's job is to point at races, not to hold one.
+ * WHAT THIS PAGE USED TO BE, AND WHY IT CHANGED
+ *   A grid: every question a row, every candidate a column, every candidate on
+ *   the ballot given a column whether they wrote back or not. That shape is
+ *   right for a ward, where a field of four fits across a laptop and an empty
+ *   column is a visible fact about a named person.
+ *
+ *   Toronto's mayoral ballot is fifty-three people. The grid came out 12,558px
+ *   wide — thirteen screens of sideways drag — and forty-four of those columns
+ *   were empty, because nine candidates answered. The reader had to haul past
+ *   forty-four blanks to compare the nine. An empty column stops being a
+ *   finding somewhere around the tenth one; after that it is furniture.
+ *
+ *   So the page turns ninety degrees. The question becomes the object, the
+ *   candidates become the distribution inside it, and nothing scrolls
+ *   sideways. It is the same treatment the city-wide issues page uses, pinned
+ *   to this one ballot line — which also means the two pages can never
+ *   disagree about what the mayoral field said, since they are one component
+ *   reading one dataset.
+ *
+ *   The forty-four who have not answered are not lost: they are on the roster
+ *   page, which groups the field by exactly that line, and this page links to
+ *   it from the hero and names the count in its stats.
  */
 
 export const metadata: Metadata = {
   title: "How the mayoral candidates answered",
   description:
-    "Every candidate for Mayor of Toronto in the October 26, 2026 election, and how they answered our questionnaire — question by question, side by side.",
+    "How the candidates for Mayor of Toronto answered our questionnaire in the October 26, 2026 election — question by question, with the whole mayoral field on each one.",
   alternates: { canonical: `${ELECTION.basePath}/mayor` },
   openGraph: {
     title: "How the mayoral candidates answered — Toronto 2026 Election",
     description:
-      "Every candidate for Mayor of Toronto, and how they answered our questionnaire.",
+      "Every answer the mayoral field gave us, read question by question.",
     type: "website",
   },
 };
 
 export default async function MayorPage() {
-  const view = await getToronto2026();
+  const [view, survey, responses] = await Promise.all([
+    getToronto2026(),
+    fetchSurvey(ELECTION.slug, CANDIDATE_QUESTIONNAIRE_SLUG).catch(() => null),
+    fetchCandidateResponses(ELECTION.slug),
+  ]);
 
-  const roster = surveyRoster(view.mayoral);
-  const { answers, shape } = await rosterSurvey(
-    ELECTION.slug,
-    new Set(roster.map((candidate) => candidate.key)),
-  );
-
-  const candidates = surveyRoster(view.mayoral, answers);
-  const respondents = candidates.filter((candidate) => candidate.answers);
-  const groups = comparedQuestions(
-    respondents.map((candidate) => candidate.answers!),
-    candidates,
-    shape,
-  );
+  /* The whole election's responses, pivoted question-first, then pinned to the
+     mayoral line by the component. Deliberately not pre-filtered here: the
+     splits, the ordering and the two feature cards all come out of the same
+     `race` argument, and doing half the narrowing in the page and half in the
+     component is how the two would drift apart. */
+  const field = survey ? fieldSentiment(survey, responses) : null;
+  const mayoral = (field?.respondents ?? []).filter((r) => r.race === "mayor");
+  const registered = view.mayoral.filter((c) => !c.withdrawn).length;
 
   return (
     <div className={`${ELECTION.themeClass ?? ""} bg-bg text-dark`}>
       <div className="mx-[10px] my-[10px] border border-border-light bg-bg overflow-x-clip">
         {/* ── Breadcrumb ─────────────────────────────────────── */}
-        <div className="px-6 md:px-14 py-5 border-b border-border-light type-label-sm !tracking-[0.1em] flex items-center gap-2.5">
+        <div className="px-6 md:px-14 py-4 border-b border-border-light type-label-sm !tracking-[0.1em] flex items-center gap-2.5">
           <Link
-            href={`${ELECTION.basePath}#candidates`}
+            href={ELECTION.basePath}
             className="text-text-secondary hover:text-accent transition-colors"
           >
             Toronto 2026
@@ -70,118 +85,127 @@ export default async function MayorPage() {
         </div>
 
         {/* ── Hero ───────────────────────────────────────────── */}
-        <section className="px-6 py-12 md:px-14 md:py-14 border-b-2 border-dark">
-          <p className="type-label text-accent mb-5">City of Toronto</p>
-          <h1 className="font-sans font-medium leading-[0.98] tracking-[-0.04em] text-[clamp(2.75rem,6vw,5rem)] max-w-[16ch] text-balance mb-6">
-            Candidates for Mayor
+        <section className="px-6 py-8 md:px-14 md:py-10 border-b-2 border-dark">
+          <p className="type-label text-accent mb-3.5">City of Toronto</p>
+          <h1 className="font-sans font-medium leading-[0.98] tracking-[-0.04em] text-[clamp(2.25rem,4.5vw,3.75rem)] max-w-[17ch] text-balance mb-4">
+            How the mayoral field answered
           </h1>
-          <p className="font-serif text-[1.15rem] leading-[1.5] text-dark/85 max-w-[62ch] text-pretty">
-            The one race every Toronto voter votes in. {candidates.length}{" "}
-            candidates have registered for it.
+          <p className="font-serif text-[1.05rem] leading-[1.5] text-dark/85 max-w-[58ch] text-pretty">
+            {mayoral.length > 0
+              ? `${mayoral.length} of the ${registered} candidates for mayor returned our questionnaire. Their answers, question by question — the mayoral field on each one.`
+              : `No one running for mayor has answered our questionnaire yet. ${registered} candidates have registered for the race.`}
           </p>
+          <Link
+            href={`${ELECTION.basePath}/mayor/candidates`}
+            className="group/roster mt-5 type-label-sm text-accent hover:underline inline-flex items-center gap-1.5"
+          >
+            Every candidate for mayor
+            <ArrowRight className="size-3.5 transition-transform group-hover/roster:translate-x-0.5" />
+          </Link>
         </section>
 
         {/* ── Key stats ──────────────────────────────────────── */}
-        <section className="grid grid-cols-2 md:grid-cols-3 border-b-2 border-dark">
-          <div className="px-6 py-7 md:px-14 border-r border-b md:border-b-0 border-border-light">
-            <div className="font-sans font-semibold text-[2.75rem] leading-none tracking-[-0.03em] tabular-nums">
-              {candidates.length}
-            </div>
-            <div className="type-label-sm !tracking-[0.1em] text-text-secondary mt-2.5">
-              Candidates registered
-            </div>
-          </div>
-          <div className="px-6 py-7 md:px-14 md:border-r border-b md:border-b-0 border-border-light">
+        <section className="grid grid-cols-2 md:grid-cols-4 border-b-2 border-dark">
+          <Stat value={mayoral.length} label="Answered us" />
+          <Stat value={registered} label="On the ballot" />
+          <Stat value={field?.questions.length ?? 0} label="Policy questions" />
+          <div className="px-6 py-4 md:px-14 border-b md:border-b-0 border-border-light">
             <CountdownDays
               initialDays={daysUntil(ELECTION.electionDateIso)}
               targetIso={ELECTION.electionDateIso}
-              className="font-sans font-semibold text-[2.75rem] leading-none tracking-[-0.03em] tabular-nums"
+              className="font-sans font-semibold text-[2rem] leading-none tracking-[-0.03em] tabular-nums"
             />
-            <div className="type-label-sm !tracking-[0.1em] text-text-secondary mt-2.5">
+            <div className="type-label-sm !tracking-[0.1em] text-text-secondary mt-1.5">
               Days until polls open
             </div>
           </div>
-          <div className="px-6 py-7 md:px-14 col-span-2 md:col-span-1">
-            <div className="flex items-end h-[2.75rem]">
-              <div className="font-sans font-semibold text-[1.75rem] leading-none tracking-[-0.03em]">
-                {ELECTION.electionDayLabel}
-              </div>
-            </div>
-            <div className="type-label-sm !tracking-[0.1em] text-text-secondary mt-2.5">
-              Election day
-            </div>
-          </div>
         </section>
 
-        {/* ── Questionnaire ──────────────────────────────────── */}
-        <section id="questionnaire">
-          <div className="px-6 md:px-14 pt-11 pb-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-12">
-            <div>
-              <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.75rem,3vw,2.5rem)] max-w-[24ch] text-balance">
-                Know Your Candidates
-              </h2>
-              <p className="mt-5 font-serif text-[1.08rem] leading-[1.5] text-dark/85 max-w-[64ch] text-pretty">
-                {candidates.length === 0
-                  ? "No one has registered for mayor yet."
-                  : respondents.length === 0
-                    ? "No one running for mayor has answered yet. These are the questions we asked."
-                    : `${respondents.length} of ${candidates.length} candidates for mayor answered our questionnaire. Open a question to see every option and what the rest of the field said.`}
-              </p>
-            </div>
+        {/* ── The field, question by question ────────────────── */}
+        {field && mayoral.length > 0 ? (
+          <FieldSentiment
+            groups={field.groups}
+            respondents={field.respondents}
+            race="mayor"
+          />
+        ) : (
+          <section className="px-6 md:px-14 py-14 border-b-2 border-dark">
+            <p className="font-serif text-[1.05rem] leading-[1.5] text-dark/80 max-w-[58ch] text-pretty">
+              No answers from the mayoral field have been published yet.
+              Responses appear here as they are reviewed and released.
+            </p>
+          </section>
+        )}
 
-            <SurveyCta href={`${ELECTION.basePath}/survey`} />
-          </div>
-
-          <div className="px-6 md:px-14 pb-10">
-            {groups.length > 0 ? (
-              <SurveyGrid
-                groups={groups}
-                candidates={candidates}
-                election={ELECTION.slug}
-                race="mayor"
-              />
-            ) : (
-              /* Only two ways to get here: nobody has registered, or the
-                 questionnaire itself could not be fetched. Either way there is
-                 no grid to draw, and the candidates are still worth naming. */
-              <p className="font-serif text-[1.05rem] leading-[1.5] text-dark/80 max-w-[62ch] text-pretty">
-                {candidates.length === 0
-                  ? "No one has registered for mayor yet."
-                  : `On the ballot, and yet to respond to us: ${candidates
-                      .map((candidate) => candidate.name)
-                      .join(", ")}.`}
-              </p>
-            )}
-          </div>
-
-          <div className="px-6 md:px-14 py-4 border-t border-border-light grid gap-2.5">
-            {respondents.length > 0 && (
-              <SurveyChartNote candidateCount={respondents.length} />
-            )}
-            <p className="type-label-sm text-text-muted">
-              Registered candidates from the City Clerk&rsquo;s list, less
-              anyone who has withdrawn. The field is not final until nominations
-              close
-              {view.nominationCloseLabel
-                ? ` on ${view.nominationCloseLabel}`
-                : ""}
-              .
+        {/* ── Your turn ──────────────────────────────────────── */}
+        <section className="px-6 md:px-14 py-9 md:py-10 border-t-2 border-dark grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+          <div>
+            <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.6rem,2.6vw,2.1rem)] max-w-[20ch] text-balance">
+              Now answer them yourself
+            </h2>
+            <p className="mt-3.5 font-serif text-[1.05rem] leading-[1.5] text-dark/85 max-w-[56ch] text-pretty">
+              These are the same questions we put to the field. Answer them and
+              see which candidates line up with you.
             </p>
           </div>
+          <SurveyCta href={`${ELECTION.basePath}/survey`} />
         </section>
 
-        {/* ── Back to the wards ──────────────────────────────── */}
-        <section className="border-t border-dark">
+        {/* ── Method ─────────────────────────────────────────── */}
+        <section className="px-6 md:px-14 py-4 border-t border-border-light grid gap-2">
+          <p className="type-label-sm text-text-muted max-w-[80ch] text-pretty">
+            Every bar is the mayoral field that answered, one cell per
+            candidate: filled with the option that candidate picked, hollow
+            where they did not answer that question. Candidates who never
+            returned the questionnaire are not in these counts — they are on the
+            roster. Open a card for the names behind the bars and what each of
+            them wrote, published verbatim.
+          </p>
+          <p className="type-label-sm text-text-muted max-w-[80ch] text-pretty">
+            Registered candidates come from the City Clerk&rsquo;s list, less
+            anyone who has withdrawn. The field is not final until nominations
+            close
+            {view.nominationCloseLabel
+              ? ` on ${view.nominationCloseLabel}`
+              : ""}
+            .
+          </p>
+        </section>
+
+        {/* ── Elsewhere ──────────────────────────────────────── */}
+        <section className="border-t border-dark grid md:grid-cols-2">
+          <Link
+            href={`${ELECTION.basePath}/issues`}
+            className="group px-6 md:px-14 py-6 flex items-center justify-between gap-4 transition-colors hover:bg-linen-50"
+          >
+            <span className="font-sans font-medium text-[1.15rem] tracking-[-0.015em]">
+              The whole field, mayoral and council
+            </span>
+            <ArrowRight className="size-4 flex-none text-text-secondary transition-transform group-hover:translate-x-0.5" />
+          </Link>
           <Link
             href={`${ELECTION.basePath}#wards`}
-            className="group px-6 md:px-14 py-7 flex items-center gap-2.5 transition-colors hover:bg-linen-50"
+            className="group px-6 md:px-14 py-6 flex items-center gap-2.5 border-t md:border-t-0 md:border-l border-border-light transition-colors hover:bg-linen-50"
           >
             <ArrowLeft className="size-3.5 text-text-secondary" />
-            <span className="font-sans font-medium text-[1.25rem] tracking-[-0.015em]">
+            <span className="font-sans font-medium text-[1.15rem] tracking-[-0.015em]">
               Find your ward
             </span>
           </Link>
         </section>
+      </div>
+    </div>
+  );
+}
+
+function Stat({ value, label }: { value: number; label: string }) {
+  return (
+    <div className="px-6 py-4 md:px-14 border-r border-b md:border-b-0 border-border-light">
+      <div className="font-sans font-semibold text-[2rem] leading-none tracking-[-0.03em] tabular-nums">
+        {value}
+      </div>
+      <div className="type-label-sm !tracking-[0.1em] text-text-secondary mt-1.5">
+        {label}
       </div>
     </div>
   );

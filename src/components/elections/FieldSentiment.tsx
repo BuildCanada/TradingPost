@@ -1,10 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { arc as d3arc } from "d3-shape";
 import { ChevronDown } from "lucide-react";
 
-import { WedgeGlyph } from "@/components/charts/trilemma";
 import {
   Collapsible,
   CollapsibleContent,
@@ -31,29 +29,28 @@ import {
  *   the distribution: where the people running to govern Toronto agree, and
  *   where they are split down the middle.
  *
- *   So the candidate stops being a column and becomes a slice. Every question
- *   is a card, and every card is the whole field on that one question.
+ * WHY UNIT BARS, AND NOT A PIE
+ *   This page used to draw each question as a pie, on the reasoning that the
+ *   options are exhaustive and mutually exclusive. True, and still the wrong
+ *   mark at this size. A pie asks the reader to compare angles, which is the
+ *   comparison people are worst at, and — the fatal part on a page of two
+ *   dozen questions — two pies cannot be compared to each other at all. Every
+ *   pie is the same circle whatever its denominator, so a question 26 people
+ *   answered drew exactly as big as one 32 answered.
  *
- * WHY A CARD
- *   A question and its answer distribution are one object, and a card is the
- *   shape that says so: the question, the pie, the options, the denominator,
- *   bounded together. Thirty-odd of them tile into a grid the reader can scan
- *   at whatever width they have — three across on a desktop, one on a phone —
- *   without the page becoming a table nobody can hold in their head.
- *
- * WHY A PIE
- *   These questions are a choice between three or four exhaustive, mutually
- *   exclusive options: every candidate who answered is in exactly one of them,
- *   and the parts are the whole. That is the one distribution a pie is
- *   actually for, and at this size it does the job a bar cannot — a reader
- *   sees "one big slice" or "three even thirds" as a shape, before reading a
- *   word of the labels. Which is the page's entire argument: consensus and
- *   division, visible at a glance, thirty-three times over.
+ *   So: a bar per option, each built out of one cell per candidate, all of
+ *   them on a scale of the whole field. Every bar on the page is in the same
+ *   units, which makes them comparable to each other rather than only to
+ *   themselves — a reader scanning the grid is reading two dozen charts on one
+ *   axis. The cells are countable, which is the honest register for n = 32:
+ *   "twenty of thirty-two" is a fact, where 63% of a circle is a shape. And
+ *   the candidates who skipped a question get a bar of their own rather than
+ *   disappearing into a denominator in the caption, so a thin answer looks
+ *   thin. See UnitRows.
  *
  * COLOUR
- *   Option position, from the brand's designated chart ramps — the first
- *   option is the same colour on all thirty-odd questions, which is what lets
- *   a grid of pies be scanned rather than read.
+ *   Option position, from the brand's chart ramps, with a separate diverging
+ *   assignment for the Yes/No questions — see `optionColors`.
  */
 
 type Order = "topic" | "consensus" | "division";
@@ -68,12 +65,19 @@ const ORDERS: { id: Order; label: string }[] = [
 export function FieldSentiment({
   groups,
   respondents,
+  race,
 }: {
   groups: FieldGroup[];
   respondents: Respondent[];
+  /** Pins the whole page to one ballot line and drops the field control.
+   *  Passed by the mayoral page, which is a race rather than a city: the
+   *  filter would be a two-state toggle whose other state is empty. Left
+   *  unset, the reader chooses, which is what the city-wide page wants. */
+  race?: Race;
 }) {
   const [order, setOrder] = useState<Order>("topic");
-  const [filter, setFilter] = useState<Filter>("all");
+  const [chosen, setChosen] = useState<Filter>("all");
+  const filter: Filter = race ?? chosen;
 
   const questions = useMemo(
     () => groups.flatMap((group) => group.questions),
@@ -91,6 +95,18 @@ export function FieldSentiment({
         question.questionId,
         splitOf(question, forRace(question.picks, filter)),
       );
+    return map;
+  }, [questions, filter]);
+
+  /* The picks behind each question, narrowed the same way the bars are.
+     The panel used to open on `question.picks` — the whole election — while
+     the chart above it drew the filtered field, so a mayoral page whose bars
+     counted nine listed all thirty-two underneath. One filter, applied once,
+     read by both. */
+  const picks = useMemo(() => {
+    const map = new Map<string, FieldPick[]>();
+    for (const question of questions)
+      map.set(question.questionId, forRace(question.picks, filter));
     return map;
   }, [questions, filter]);
 
@@ -126,9 +142,22 @@ export function FieldSentiment({
 
   return (
     <div>
+      {/* ── The two ends, as the page's headline numbers ───────── */}
+      {agreed && divided && agreed !== divided && (
+        <div className="grid md:grid-cols-2 border-b-2 border-dark">
+          <Feature eyebrow="Most agreed on" row={agreed} field={field.length} />
+          <Feature
+            eyebrow="Most divided"
+            row={divided}
+            field={field.length}
+            className="border-t md:border-t-0 md:border-l border-border-light"
+          />
+        </div>
+      )}
+
       {/* ── Controls ───────────────────────────────────────────── */}
-      <div className="border-y-2 border-dark flex flex-wrap items-stretch justify-between">
-        <div className="flex items-center gap-1 px-5 py-3.5">
+      <div className="border-b-2 border-dark flex flex-wrap items-stretch justify-between">
+        <div className="flex items-center gap-1 px-5 py-3">
           <span className="type-label-sm text-text-muted mr-2">Order</span>
           {ORDERS.map(({ id, label }) => (
             <Chip
@@ -140,23 +169,25 @@ export function FieldSentiment({
           ))}
         </div>
 
-        <div className="flex items-center gap-1 px-5 py-3.5 border-t md:border-t-0 md:border-l border-border-light grow md:grow-0">
-          <span className="type-label-sm text-text-muted mr-2">Field</span>
-          {(
-            [
-              ["all", "All"],
-              ["mayor", "Mayoral"],
-              ["councillor", "Council"],
-            ] as const
-          ).map(([id, label]) => (
-            <Chip
-              key={id}
-              active={filter === id}
-              onClick={() => setFilter(id)}
-              label={label}
-            />
-          ))}
-        </div>
+        {!race && (
+          <div className="flex items-center gap-1 px-5 py-3 border-t md:border-t-0 md:border-l border-border-light grow md:grow-0">
+            <span className="type-label-sm text-text-muted mr-2">Field</span>
+            {(
+              [
+                ["all", "All"],
+                ["mayor", "Mayoral"],
+                ["councillor", "Council"],
+              ] as const
+            ).map(([id, label]) => (
+              <Chip
+                key={id}
+                active={filter === id}
+                onClick={() => setChosen(id)}
+                label={label}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       {field.length === 0 ? (
@@ -164,75 +195,73 @@ export function FieldSentiment({
           No one in this part of the field has answered the questionnaire yet.
         </p>
       ) : (
-        <>
-          {/* ── The two ends, as feature cards ─────────────────── */}
-          {agreed && divided && agreed !== divided && (
-            <div className="grid md:grid-cols-2 border-b-2 border-dark">
-              <Feature
-                eyebrow="Most agreed on"
-                row={agreed}
-                field={field.length}
-              />
-              <Feature
-                eyebrow="Most divided"
-                row={divided}
-                field={field.length}
-                className="border-t md:border-t-0 md:border-l border-border-light"
-              />
-            </div>
-          )}
-
-          <section className="pb-12">
-            <div className="px-6 md:px-14 pt-9 pb-6">
-              <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.75rem,3vw,2.4rem)]">
-                {order === "topic"
-                  ? "Issue by issue"
-                  : order === "consensus"
+        <section className="pb-8">
+          {order === "topic" ? (
+            groups.map((group, i) => (
+              <div key={group.stepId}>
+                <SectionRule
+                  title={group.stepTitle}
+                  note={
+                    i === 0
+                      ? "One cell per candidate · open a card for who chose what"
+                      : undefined
+                  }
+                />
+                <CardGrid>
+                  {group.questions.map((question) => (
+                    <Card
+                      key={question.questionId}
+                      question={question}
+                      split={splits.get(question.questionId)!}
+                      picks={picks.get(question.questionId)!}
+                      field={field.length}
+                    />
+                  ))}
+                </CardGrid>
+              </div>
+            ))
+          ) : (
+            <>
+              <SectionRule
+                title={
+                  order === "consensus"
                     ? "From agreement to division"
-                    : "From division to agreement"}
-              </h2>
-              <p className="mt-3 font-serif text-[1.05rem] leading-[1.5] text-dark/80 max-w-[62ch] text-pretty">
-                {order === "topic"
-                  ? "The questionnaire in the order it was asked, so a reader who came for one subject can go straight to it. Open a card to see which candidates chose what."
-                  : "Every question the field answered, ordered by how evenly the candidates split across the options. Open a card to see which candidates chose what."}
-              </p>
-            </div>
-
-            {order === "topic" ? (
-              groups.map((group) => (
-                <div key={group.stepId} className="border-t-2 border-dark">
-                  <h3 className="px-6 md:px-14 pt-6 pb-4 font-sans font-medium leading-[1.15] tracking-[-0.025em] text-[clamp(1.3rem,2vw,1.6rem)]">
-                    {group.stepTitle}
-                  </h3>
-                  <CardGrid>
-                    {group.questions.map((question) => (
-                      <Card
-                        key={question.questionId}
-                        question={question}
-                        split={splits.get(question.questionId)!}
-                        field={field.length}
-                      />
-                    ))}
-                  </CardGrid>
-                </div>
-              ))
-            ) : (
+                    : "From division to agreement"
+                }
+                note={`${ranked.length} questions · one cell per candidate · open a card for who chose what`}
+              />
               <CardGrid>
                 {ranked.map(({ question, split }, rank) => (
                   <Card
                     key={question.questionId}
                     question={question}
                     split={split}
+                    picks={picks.get(question.questionId)!}
                     field={field.length}
                     rank={rank + 1}
                     topic={question.stepTitle}
                   />
                 ))}
               </CardGrid>
-            )}
-          </section>
-        </>
+            </>
+          )}
+        </section>
       )}
+    </div>
+  );
+}
+
+/* A section head that costs one line rather than a screen: the title set on
+   the rule that opens the section, with the optional note pushed to the far
+   end of the same line. Two dozen cards under eight headings is a page that
+   scrolls; the headings should not be why. */
+function SectionRule({ title, note }: { title: string; note?: string }) {
+  return (
+    <div className="mx-6 md:mx-14 mt-6 mb-3 flex flex-wrap items-baseline gap-x-4 gap-y-1">
+      <h2 className="font-sans font-medium leading-none tracking-[-0.02em] text-[1.15rem]">
+        {title}
+      </h2>
+      {note && <p className="type-label-sm text-text-muted">{note}</p>}
     </div>
   );
 }
@@ -268,20 +297,14 @@ function Chip({
  * so the rules between cards are single-weight however the row wraps — the
  * usual trick, and the reason the cards carry no border of their own.
  *
- * FIVE ROW TRACKS PER CARD, AND WHY
- *   Each card spans five of the grid's rows and adopts them with
- *   `grid-rows-subgrid` — question, chart, options, footer, and the answers it
- *   opens into — and the trigger nests a second subgrid to claim the first
- *   four. Every block is therefore sized by the tallest of its kind in the
- *   row, and every card puts its question, its pie, its options and its rule
- *   on the same four lines as its neighbours.
- *
- *   One shared track per block, rather than one for the whole closed card.
- *   With a single track the card had spare height and nowhere honest to put
- *   it: pooled under the options it left a short list floating above its own
- *   rule, and pooled around the chart it set a card's pie lower than the two
- *   beside it. Split four ways there is no pool — each block is exactly as
- *   tall as that row needs, and nothing has to be centred in slack.
+ * FOUR ROW TRACKS PER CARD, AND WHY
+ *   Each card spans four of the grid's rows and adopts them with
+ *   `grid-rows-subgrid` — question, chart, footer, and the answers it opens
+ *   into — and the trigger nests a second subgrid to claim the first three.
+ *   Every block is therefore sized by the tallest of its kind in the row, so
+ *   every card in a row starts its bar on the same line as its neighbours.
+ *   Which is the whole point of a bar that means the same thing on every card:
+ *   aligned, the row can be read across.
  *
  *   The obvious way to bottom-align — stretch the card to the row's height and
  *   push the footer down with `mt-auto` — cannot survive the disclosure. The
@@ -291,13 +314,13 @@ function Chip({
  *   shipped that once and it was the first thing anyone noticed.
  *
  *   Shared tracks have no such coupling. Every closed card is sized by the
- *   first track, so every footer sits on the same line. When one card opens,
- *   it is the second track that grows — for every card in the row at once,
- *   which costs the others nothing but empty space they do not draw — and the
- *   first track never moves. Nothing above the fold shifts. */
+ *   first three tracks, so every footer sits on the same line. When one card
+ *   opens, it is the fourth track that grows — for every card in the row at
+ *   once, which costs the others nothing but empty space they do not draw —
+ *   and the tracks above it never move. Nothing above the fold shifts. */
 function CardGrid({ children }: { children: React.ReactNode }) {
   return (
-    <div className="mx-6 md:mx-14 mb-10 grid grid-cols-1 border-t border-l border-border-light md:grid-cols-2 xl:grid-cols-3">
+    <div className="mx-6 md:mx-14 grid grid-cols-1 border-t border-l border-border-light cards:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
       {children}
     </div>
   );
@@ -307,234 +330,180 @@ function CardGrid({ children }: { children: React.ReactNode }) {
 /* Colour                                                              */
 /* ------------------------------------------------------------------ */
 
-/* Slice colours, by option position.
+/* Option colours, by position, from the brand's designated chart ramps.
  *
- * The brand's four designated chart ramps — lake, copper, pine, steel, the
- * ones colours.css files under "Chart Colours" — rather than the trilemma
- * palette the ward grids use. That palette leads with auburn for a stated
- * reason: a trilemma *mixes* its corners, and the three have to stay
- * distinguishable when blended. A pie blends nothing. It is a categorical
- * split, which is exactly what the chart ramps are for, and auburn is the
- * brand's accent rather than one of them — a pie led by it competes with every
- * eyebrow and link on the page instead of sitting under them.
+ * The set is the one the palette validator passes on this page's own surface
+ * — lake, copper and the lighter pine step, which clear the colour-blind
+ * separation floor as a trio where the darker pine did not: deep green beside
+ * copper is ΔE 3.4 under protanopia, which is to say the same colour. The
+ * fourth is the national brand's auburn, and it is written as a literal rather
+ * than as `--color-auburn-800` on purpose: this page runs under
+ * `.theme-election`, which repaints auburn to Toronto blue, and a fourth
+ * option that arrived as blue would land on top of the first one.
  *
- * Ordered so neighbouring slices contrast: deep blue, then copper, then green,
- * then the desaturated steel, which is the one that can sit beside the blue
- * again on a four-option question without the wrap reading as a repeat.
- *
- * As custom properties rather than hex, so the ramps follow their theme. It is
- * the whole reason this is not a hardcoded palette: under `.theme-election`
- * these resolve against the Toronto-blue overrides, and a pie drawn in raw hex
- * would go on rendering the national palette on a page whose every other
- * element had changed colour.
+ * Everything else is a custom property, so the ramps stay theme-following.
  */
-const SLICE_COLORS = [
+const CATEGORICAL = [
   "var(--color-lake-700)",
   "var(--color-copper-600)",
-  "var(--color-pine-600)",
-  "var(--color-steel-600)",
+  "var(--color-pine-400)",
+  "#932f2f",
 ];
 
-/** An option nobody chose, and the pie's own rim: quiet, and never a fifth
- *  colour a reader might try to read as a category. */
-const EMPTY = "var(--color-charcoal-200)";
+/* The Yes / Yes-with-conditions / No questions are not categories, they are a
+ * scale with two poles — so they get the diverging treatment that shape calls
+ * for: a hue at each end and a neutral in the middle, never a third hue. It
+ * also gives the reader a second thing to scan on. On a page where every
+ * question is blue-and-orange, the direct ones read as a different kind of
+ * question at a glance, which is what they are. */
+const DIVERGING = [
+  "var(--color-lake-700)",
+  "var(--color-charcoal-300)",
+  "var(--color-copper-600)",
+];
+
+/** An option nobody chose, and the hollow cells for candidates who skipped the
+ *  question: quiet, and never a further colour a reader might try to read as a
+ *  category. */
+const EMPTY = "color-mix(in oklab, var(--color-dark) 12%, transparent)";
+
+function optionColors(question: FieldQuestion): string[] {
+  const n = question.options.length;
+  if (question.ordinal && n <= DIVERGING.length)
+    /* A two-option scale takes the poles and skips the neutral. */
+    return n === 2 ? [DIVERGING[0], DIVERGING[2]] : DIVERGING.slice(0, n);
+  return CATEGORICAL.slice(0, Math.max(2, Math.min(n, CATEGORICAL.length)));
+}
+
+/* ------------------------------------------------------------------ */
+/* The bars                                                            */
+/* ------------------------------------------------------------------ */
 
 /**
- * Slice colours for a question with `n` options.
+ * One question's field as a small horizontal bar chart, one bar per option,
+ * and every bar built out of one cell per candidate.
  *
- * Two options take the first and second ramps — the pair furthest apart in
- * hue, so a Yes/No never reads as a gradient.
- */
-function sliceColors(n: number): string[] {
-  return SLICE_COLORS.slice(0, Math.max(2, Math.min(n, SLICE_COLORS.length)));
-}
-
-/* ------------------------------------------------------------------ */
-/* The pie                                                             */
-/* ------------------------------------------------------------------ */
-
-/* One question's field as a pie: a slice per option, in option order, starting
- * at twelve o'clock and running clockwise — the same order and the same hues
- * the legend beside it prints, and the same twelve-o'clock start the wedge
- * glyphs use, so a glyph in the legend points at its own slice.
+ * A ROW PER OPTION, RATHER THAN ONE STACKED LINE
+ *   The single line was one row of thirty-two cells, split into runs by
+ *   option, with the option names printed underneath as a key. It reads the
+ *   shape of a split well and everything else badly. Only the first run starts
+ *   at the left edge, so comparing the second option to the third is comparing
+ *   two floating runs with no shared baseline — the comparison bar charts
+ *   exist to make trivial. And the names sat in a key, which means every
+ *   reading costs a colour lookup: find the swatch, match the hue, come back.
  *
- * Slices are separated by a stroke in the page's own colour rather than by a
- * gap, so a 3% slice is still a visible sliver instead of vanishing between
- * its neighbours. A question nobody answered draws as an empty ring, which
- * says "no data" rather than "no chart".
+ *   Broken into rows, every bar starts at the same left edge on the same
+ *   scale, longest is longest at a glance, and each name sits directly over
+ *   its own bar — so the key disappears, and colour goes back to being what it
+ *   should be here, a second channel rather than the only one.
+ *
+ * THE SCALE IS THE FIELD, ON EVERY ROW AND EVERY CARD
+ *   Each row is `field` cells wide — everyone who returned the questionnaire —
+ *   with the unchosen remainder left as a faint track. So the rows within a
+ *   card share an axis, and so do the cards: a bar half across is sixteen
+ *   candidates on every question on the page, which is what makes a grid of
+ *   two dozen of these scannable rather than merely present.
+ *
+ *   Candidates who skipped the question get a row of their own at the bottom
+ *   rather than a footnote, so a question the field ducked looks ducked.
  */
-function Pie({
+function UnitRows({
   question,
   split,
-  /** the widest it may draw — it fills its column up to this, and no further */
-  maxSize = 216,
+  field,
 }: {
   question: FieldQuestion;
   split: Split;
-  maxSize?: number;
+  /** how many candidates are in the filtered field — the cells in a row */
+  field: number;
 }) {
-  const colors = sliceColors(question.options.length);
-
-  /* Drawn in a fixed 100-unit box and scaled by the column, rather than
-     rendered at a pixel size. A card is between roughly 300 and 640px wide
-     depending on the breakpoint and the window, and a chart pinned to one
-     number is either lost in the wide case or crowded in the narrow one — the
-     fixed 124px left a third of every card empty around it.
-
-     Strokes are the exception: `non-scaling-stroke` holds the separators at a
-     true 1.5px however far the chart is scaled, so a big pie does not get fat
-     white gutters between its slices and a small one does not lose them. */
-  const view = `-50 -50 100 100`;
-  const box = "mx-auto block h-auto w-full";
-
-  if (split.answered === 0) {
-    return (
-      <svg
-        viewBox={view}
-        className={box}
-        style={{ maxWidth: maxSize }}
-        role="img"
-        aria-label="No answers on record"
-      >
-        <circle
-          r={49}
-          fill="none"
-          stroke={EMPTY}
-          strokeWidth={1}
-          strokeDasharray="3 4"
-          vectorEffect="non-scaling-stroke"
-        />
-      </svg>
-    );
-  }
-
-  /* Each slice starts where everything before it ended. A prefix sum rather
-     than a running total, so nothing is mutated while the component renders —
-     the options number three or four, and the repeated sum costs nothing. */
-  const turn = (n: number) => (n / split.answered) * Math.PI * 2;
-  const slices = split.counts.map((count, i) => {
-    const before = split.counts.slice(0, i).reduce((a, b) => a + b, 0);
-    return {
-      i,
-      count,
-      path:
-        d3arc()({
-          innerRadius: 0,
-          outerRadius: 49,
-          startAngle: turn(before),
-          endAngle: turn(before + count),
-        } as never) ?? "",
-    };
-  });
-
-  return (
-    <svg
-      viewBox={view}
-      className={box}
-      style={{ maxWidth: maxSize }}
-      role="img"
-      aria-label={question.options
-        .map(
-          (option, i) => `${option}: ${split.counts[i]} of ${split.answered}`,
-        )
-        .join(", ")}
-    >
-      {slices.map(({ i, path, count }) =>
-        count === 0 ? null : (
-          <path
-            key={i}
-            d={path}
-            fill={colors[i]}
-            stroke="var(--color-bg)"
-            strokeWidth={1.5}
-            vectorEffect="non-scaling-stroke"
-          />
-        ),
-      )}
-      {/* The rim, so a single-option pie still reads as a circle against the
-          page rather than as a shape with no edge. */}
-      <circle
-        r={49}
-        fill="none"
-        stroke={EMPTY}
-        strokeWidth={1}
-        vectorEffect="non-scaling-stroke"
-      />
-    </svg>
-  );
-}
-
-/** The options under a pie, as the questionnaire actually put them.
- *
- *  Each choice was offered as a short name and its full wording — "Permission:
- *  permit substantially more housing as-of-right" — and for a while this
- *  printed only the name. That is the right form for a chart rim, where there
- *  is no room for a sentence, and the wrong form for the card's own key: on
- *  their own, "Permission", "Cost and speed" and "Public delivery" are three
- *  labels a reader has to guess at, and the guess is the whole answer. So the
- *  wording goes back in underneath, where the questionnaire had it, and the
- *  card reads as the question was actually asked.
- *
- *  Spans rather than a list, because this sits inside a disclosure trigger and
- *  a trigger is a button — phrasing content only. */
-function Legend({
-  question,
-  split,
-}: {
-  question: FieldQuestion;
-  split: Split;
-}) {
-  const colors = sliceColors(question.options.length);
+  const colors = optionColors(question);
   const total = Math.max(1, split.answered);
 
+  type Row = {
+    label: string;
+    count: number;
+    /** the option's colour, or null for the row of candidates who skipped it */
+    color: string | null;
+    share: number | null;
+    lead: boolean;
+  };
+
+  const rows: Row[] = question.options.map((option, i) => ({
+    label: option,
+    count: split.counts[i],
+    color: colors[i],
+    share: Math.round((split.counts[i] / total) * 100),
+    lead: split.counts[i] > 0 && i === split.lead,
+  }));
+
+  const skipped = Math.max(0, field - split.answered);
+  if (skipped > 0)
+    rows.push({
+      label: "Did not answer",
+      count: skipped,
+      color: null,
+      /* No share: every other row on the card is a share of the candidates who
+         answered, and this row is the ones who did not. A percentage here
+         would be a percentage of something else printed in the same column. */
+      share: null,
+      lead: false,
+    });
+
   return (
-    <span className="grid content-start gap-3">
-      {question.options.map((option, i) => {
-        const empty = split.counts[i] === 0;
-        return (
-          <span key={i} className="block min-w-0">
-            <span className="flex items-baseline gap-2 min-w-0">
-              <span className="translate-y-[2px] flex-none">
-                <WedgeGlyph
-                  index={i}
-                  count={question.options.length}
-                  color={empty ? EMPTY : colors[i]}
-                  size={12}
-                />
-              </span>
-              <span
-                className={`font-sans font-medium text-[0.95rem] leading-[1.3] tracking-[-0.01em] text-pretty flex-1 min-w-0 ${
-                  empty ? "text-text-muted" : "text-dark"
-                }`}
-              >
-                {option}
-              </span>
-              <span
-                className={`type-label-sm tabular-nums flex-none ${
-                  empty ? "text-text-muted" : "text-dark"
-                }`}
-              >
-                {split.counts[i]}
-                <span className="text-text-muted">
-                  {" "}
-                  {Math.round((split.counts[i] / total) * 100)}%
-                </span>
-              </span>
+    <span className="block">
+      {rows.map((row, i) => (
+        <span key={i} className={`block ${i === 0 ? "" : "mt-2"}`}>
+          <span className="mb-1 flex items-baseline justify-between gap-2.5">
+            <span
+              className={`font-sans leading-[1.25] tracking-[-0.01em] text-pretty ${"text-[0.9rem]"} ${
+                row.lead
+                  ? "font-semibold text-dark"
+                  : row.count === 0 || row.color === null
+                    ? "font-medium text-text-muted"
+                    : "font-medium text-text-secondary"
+              }`}
+            >
+              {row.label}
             </span>
-            {question.details[i] && (
-              /* Indented past the glyph, so the wording reads as belonging to
-                 the option above it rather than as another option. */
-              <span
-                className={`block font-serif text-[0.9rem] leading-[1.35] text-pretty pl-5 mt-0.5 ${
-                  empty ? "text-text-muted" : "text-text-secondary"
-                }`}
-              >
-                {question.details[i]}
+            <span className="type-label-sm flex-none tabular-nums">
+              <span className={row.lead ? "text-dark" : "text-text-secondary"}>
+                {row.count}
               </span>
+              {row.share !== null && (
+                <span className="text-text-muted"> {row.share}%</span>
+              )}
+            </span>
+          </span>
+
+          {/* The cells are decoration: the count and the share are already
+              printed above them as text, so a screen reader that walked the
+              grid would only hear the same row twice. */}
+          <span
+            aria-hidden="true"
+            className="grid gap-px md:gap-[2px]"
+            style={{
+              gridTemplateColumns: `repeat(${field}, minmax(0, 1fr))`,
+            }}
+          >
+            {Array.from({ length: field }, (_, cell) =>
+              cell < row.count ? (
+                <span
+                  key={cell}
+                  className={`h-3 rounded-[1px] ${
+                    row.color === null ? "bg-dark/25" : ""
+                  }`}
+                  style={
+                    row.color === null ? undefined : { background: row.color }
+                  }
+                />
+              ) : (
+                <span key={cell} className="h-3 rounded-[1px] bg-dark/8" />
+              ),
             )}
           </span>
-        );
-      })}
+        </span>
+      ))}
     </span>
   );
 }
@@ -546,12 +515,16 @@ function Legend({
 function Card({
   question,
   split,
+  picks,
   field,
   rank,
   topic,
 }: {
   question: FieldQuestion;
   split: Split;
+  /** the answers behind this card's bars — already narrowed to the field on
+   *  screen, so the panel and the chart can never disagree */
+  picks: FieldPick[];
   field: number;
   /** the position in the ranking, where the cards are ranked rather than grouped */
   rank?: number;
@@ -559,17 +532,19 @@ function Card({
    *  cards are ranked, since a topic section already says it otherwise */
   topic?: string;
 }) {
+  const notes = picks.filter((pick) => pick.note?.trim()).length;
+
   return (
-    <Collapsible className="row-span-5 grid grid-rows-subgrid border-b border-r border-border-light">
-      {/* Claims the first four tracks, so the blocks inside it are laid on the
+    <Collapsible className="row-span-4 grid grid-rows-subgrid border-b border-r border-border-light">
+      {/* Claims the first three tracks, so the blocks inside it are laid on the
           grid's own rows rather than on rows of its own. Horizontal padding
           only: vertical padding here would inset the nested tracks from the
           ones outside it, and the two would stop agreeing about where a row
           begins. Each block carries its own vertical space instead. */}
-      <CollapsibleTrigger className="group row-span-4 grid w-full cursor-pointer grid-rows-subgrid px-5 text-left">
-        <span className="block pt-5">
-          {(rank || topic) && (
-            <span className="mb-2.5 flex items-baseline gap-2">
+      <CollapsibleTrigger className="group row-span-3 grid w-full cursor-pointer grid-rows-subgrid px-4 text-left">
+        <span className="block pt-3.5 pb-3">
+          <span className="mb-2 flex items-baseline justify-between gap-3">
+            <span className="flex min-w-0 items-baseline gap-2">
               {rank && (
                 <span className="type-label-sm tabular-nums text-text-muted">
                   {String(rank).padStart(2, "0")}
@@ -581,52 +556,77 @@ function Card({
                 </span>
               )}
             </span>
-          )}
-          <span className="block font-sans text-[1.02rem] font-medium leading-[1.25] tracking-[-0.015em] text-pretty transition-colors group-hover:text-accent">
+            {split.answered > 0 && (
+              <span className="type-label-sm flex-none text-text-muted">
+                {temperature(split.division)}
+              </span>
+            )}
+          </span>
+          <span className="block font-sans text-[0.97rem] font-medium leading-[1.28] tracking-[-0.015em] text-pretty transition-colors group-hover:text-accent">
             {question.question}
           </span>
         </span>
 
-        {/* The chart, centred in a track as tall as the tallest pie in the
-            row — which, since every card in a row is the same width and a pie
-            is square, is simply as tall as any of them.
+        {/* The chart, on a track of its own, so every card in the row starts
+            its bars on the same line as its neighbours.
 
-            Above the options rather than beside them: set alongside, the pie
-            took a third of the card and left the wording a column too narrow
-            for it — "Decrease after inflation, with some responsibilities
-            transferred" wrapped to four lines next to a chart four lines
-            tall. */}
-        <span className="flex items-center px-2 py-6">
-          <Pie question={question} split={split} />
+            No width cap here. A cap is the wrong instrument: it holds the
+            chart at one size while the card around it keeps growing, so a wide
+            screen buys nothing but a strip of empty card to the right of every
+            bar. The chart fills the card, and the card is kept to a sane width
+            by the column count instead — see CardGrid. */}
+        <span className="block">
+          <UnitRows question={question} split={split} field={field} />
         </span>
 
-        <Legend question={question} split={split} />
-
-        <span className="type-caption mt-4 flex items-center gap-1.5 border-t border-border-light pt-4 pb-4 text-text-muted">
-          <ChevronDown className="size-3 flex-none opacity-45 transition-transform group-data-[state=open]:rotate-180" />
-          {split.answered === 0
-            ? "Nobody has answered this one"
-            : `${split.answered} of ${field} answered`}
-          {split.answered > 0 && (
+        {/* THE FOOTER IS THE INVITATION
+            It used to be a caption — "9 of 9 answered · 8 comments" — set in
+            muted ink beside a chevron, which describes what is behind the card
+            without ever asking the reader to go there. A count is not a call
+            to action, and a card that hides a dozen candidates' own words
+            deserves one: the ask leads, in the accent, and the denominator
+            follows it as the supporting fact it always was. */}
+        <span className="type-caption mt-3 flex flex-wrap items-center gap-x-1.5 border-t border-border-light pt-2.5 pb-3">
+          <ChevronDown className="size-3 flex-none text-text-muted opacity-45 transition-transform group-data-[state=open]:rotate-180" />
+          {split.answered === 0 ? (
+            <span className="text-text-muted">
+              Nobody has answered this one
+            </span>
+          ) : (
             <>
+              <span className="font-medium text-accent group-hover:underline">
+                <span className="group-data-[state=open]:hidden">
+                  {notes > 0
+                    ? `See comments from candidates (${notes})`
+                    : "See who chose what"}
+                </span>
+                <span className="hidden group-data-[state=open]:inline">
+                  Hide
+                </span>
+              </span>
               <span className="text-border-light">·</span>
-              {temperature(split.division)}
+              <span className="text-text-muted">
+                {split.answered} of {field} answered
+              </span>
             </>
           )}
         </span>
       </CollapsibleTrigger>
 
       <CollapsibleContent>
-        <div className="px-5 pt-1 pb-6">
-          <Who question={question} picks={question.picks} />
+        <div className="px-4 pt-1 pb-5">
+          <Who question={question} picks={picks} />
         </div>
       </CollapsibleContent>
     </Collapsible>
   );
 }
 
-/* The two ends of the ranking, given a card each at the top of the page and a
-   bigger pie — same object as the grid's cards, sized to be read first. */
+/* The two ends of the ranking, given the top of the page and a headline number
+   each. Same object as the grid's cards — same bar, same key, same colours —
+   sized so the one thing a reader takes away is legible from across the room,
+   and so a screenshot of this block is a complete statement on its own: the
+   share, what it is a share of, and the field it came out of. */
 function Feature({
   eyebrow,
   row,
@@ -639,24 +639,50 @@ function Feature({
   className?: string;
 }) {
   const { question, split } = row;
+  const lead = split.lead >= 0 ? question.options[split.lead] : null;
+  const share = Math.round(split.leadShare * 100);
 
   return (
-    <div className={`px-6 md:px-14 py-8 ${className}`}>
-      <p className="type-label text-accent mb-3.5">{eyebrow}</p>
-      <p className="font-sans font-medium leading-[1.2] tracking-[-0.02em] text-[clamp(1.15rem,1.8vw,1.45rem)] text-balance mb-6">
-        {question.question}
-      </p>
-      <div>
+    /* THE CLAIM ON THE LEFT, THE EVIDENCE ON THE RIGHT
+       A feature gets half the page, which is far more width than a chart of
+       thirty-two cells should ever take. Stacked down that column — number,
+       then option, then question, then chart — every one of those lines ran
+       out well before the column did, and the block was mostly the empty
+       right-hand half of itself.
+
+       Set as two columns, the width is spent instead of left over: the claim
+       reads as a sentence at a comfortable measure, the chart sits beside it
+       at the same size the grid's cards draw, and the whole thing is shorter
+       than the stack it replaces. Below `lg` there is no width to divide and
+       it stacks, which is the arrangement the cards use anyway. */
+    <div className={`px-6 md:px-14 py-6 ${className}`}>
+      <div className="grid gap-x-10 gap-y-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,26rem)] lg:items-start">
         <div>
-          <Pie question={question} split={split} maxSize={260} />
+          <p className="type-label text-accent mb-3">{eyebrow}</p>
+          <p className="flex items-baseline gap-3">
+            <span className="font-sans font-semibold leading-[0.8] tracking-[-0.045em] tabular-nums text-[clamp(2.5rem,4vw,3.25rem)]">
+              {share}%
+            </span>
+            {lead && (
+              <span className="min-w-0 font-sans font-medium leading-[1.2] tracking-[-0.02em] text-[1.02rem] text-pretty">
+                {lead}
+              </span>
+            )}
+          </p>
+          <p className="mt-3 font-serif text-[1.02rem] leading-[1.4] text-dark/85 max-w-[42ch] text-pretty">
+            {question.question}
+          </p>
         </div>
-        <div className="mt-6">
-          <Legend question={question} split={split} />
-          <p className="type-caption text-text-muted mt-4 pt-3 border-t border-border-light">
+
+        <div>
+          <UnitRows question={question} split={split} field={field} />
+          <p className="type-caption text-text-muted mt-3 pt-2.5 border-t border-border-light">
             {split.answered} of {field} answered
             {split.answered < field
               ? ` · ${field - split.answered} skipped it`
               : ""}
+            {" · "}
+            {temperature(split.division)}
           </p>
         </div>
       </div>
@@ -669,14 +695,20 @@ function Feature({
  *  the same scale — 50% of four options is a much stronger lead than 50% of
  *  two. */
 function temperature(division: number): string {
-  if (division < 0.55) return "Broad agreement";
-  if (division < 0.85) return "Leaning";
+  if (division < 0.45) return "Broad agreement";
+  if (division < 0.8) return "Leaning";
   return "Split";
 }
 
-/** Who picked what, once a card is opened. Surnames, filed under their option —
- *  the candidates are the evidence behind the pie, and a pie with no way to get
- *  to them is a statistic a reader has to take on trust. */
+/** Who picked what, once a card is opened — the full wording each option was
+ *  offered under, the candidates filed beneath it, and what each of them wrote
+ *  about their own answer.
+ *
+ *  That wording used to print under the chart on every card, and it was most
+ *  of the page's height: two dozen cards each carrying three sentences nobody
+ *  had asked for yet. It belongs here, next to the candidates who chose it,
+ *  where a reader wanting to know exactly what "Public delivery" meant is
+ *  already asking. */
 function Who({
   question,
   picks,
@@ -684,7 +716,7 @@ function Who({
   question: FieldQuestion;
   picks: FieldPick[];
 }) {
-  const colors = sliceColors(question.options.length);
+  const colors = optionColors(question);
   const unplaced = picks.filter((pick) => pick.choice === null);
 
   return (
@@ -706,22 +738,37 @@ function Who({
             className="border-t-2 pt-2.5"
             style={{ borderColor: chose.length ? colors[i] : EMPTY }}
           >
-            <p className="type-label-sm text-text-secondary mb-1.5 text-pretty">
+            <p className="type-label-sm text-text-secondary text-pretty">
               {option}
             </p>
+            {question.details[i] && (
+              <p className="font-serif text-[0.9rem] leading-[1.35] text-text-secondary mt-1 text-pretty">
+                {question.details[i]}
+              </p>
+            )}
             {chose.length === 0 ? (
-              <p className="type-caption text-text-muted">Nobody</p>
+              <p className="type-caption text-text-muted mt-1.5">Nobody</p>
             ) : (
-              <ul className="m-0 p-0 list-none grid gap-0.5">
+              <ul className="m-0 mt-1.5 p-0 list-none grid gap-2">
                 {chose.map((pick) => (
-                  <li
-                    key={pick.key}
-                    className="font-serif text-[0.95rem] leading-[1.35] text-dark/85"
-                  >
-                    {pick.name}
-                    <span className="type-caption text-text-muted ml-1.5">
-                      {pick.race === "mayor" ? "Mayor" : `Ward ${pick.ward}`}
+                  <li key={pick.key}>
+                    <span className="block font-sans font-medium text-[0.92rem] leading-[1.3] tracking-[-0.01em]">
+                      {pick.name}
+                      <span className="type-caption text-text-muted ml-1.5 font-normal">
+                        {pick.race === "mayor" ? "Mayor" : `Ward ${pick.ward}`}
+                      </span>
                     </span>
+                    {/* Their own words, verbatim, set against a rule so it is
+                        never mistaken for ours. Most candidates who answered
+                        also wrote something, and the writing is the part that
+                        says why — a chart can show that nine picked the same
+                        option and cannot show that they meant nine different
+                        things by it. */}
+                    {pick.note?.trim() && (
+                      <span className="mt-1 block border-l-2 border-border-light pl-2.5 font-serif text-[0.9rem] leading-[1.4] text-text-secondary text-pretty">
+                        {pick.note.trim()}
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -736,11 +783,15 @@ function Who({
           </p>
           <ul className="m-0 p-0 list-none grid gap-1.5">
             {unplaced.map((pick) => (
-              <li
-                key={pick.key}
-                className="font-serif text-[0.95rem] leading-[1.35] text-dark/85"
-              >
-                {pick.name}: &ldquo;{pick.answer}&rdquo;
+              <li key={pick.key}>
+                <span className="block font-serif text-[0.95rem] leading-[1.35] text-dark/85">
+                  {pick.name}: &ldquo;{pick.answer}&rdquo;
+                </span>
+                {pick.note?.trim() && (
+                  <span className="mt-1 block border-l-2 border-border-light pl-2.5 font-serif text-[0.9rem] leading-[1.4] text-text-secondary text-pretty">
+                    {pick.note.trim()}
+                  </span>
+                )}
               </li>
             ))}
           </ul>

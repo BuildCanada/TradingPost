@@ -10,15 +10,17 @@ import LiveCountdown from "@/components/elections/LiveCountdown";
 import { breakdown, msUntil, periodTiming } from "@/lib/elections/dates";
 import { isDaylight } from "@/lib/daylight";
 import { ELECTION } from "./vote/2026/data";
-import { WARD_GEO, WARD_SHAPES } from "./vote/2026/wardGeo";
-import { ELECTION_DAY } from "./vote/2026/key-dates";
 import { STAGE_ONE } from "./vote/survey-questions/questions";
+import { WARD_GEO, WARD_SHAPES } from "./vote/2026/wardGeo";
+import {
+  ELECTION_DAY,
+  KEY_DATES_PATH,
+  VOTING_PERIODS,
+} from "./vote/2026/key-dates";
 import { EmailCapture } from "./EmailCapture";
+import { WardLookupCard } from "./WardLookupCard";
 import { HeroSurface } from "./HeroSurface";
 import { SubscribeCardTrigger } from "./SubscribeCardTrigger";
-
-/** Where questions about the Toronto project go. */
-const CONTACT_EMAIL = "hi@buildcanada.com";
 
 /* Half-hourly, so the hero photograph follows Toronto's actual daylight (see
    ./HeroSurface) without the page going dynamic and giving up its CDN cache.
@@ -67,10 +69,13 @@ function CountdownSection() {
   const timing = periodTiming(ELECTION_DAY, now);
 
   return (
-    <section className="bg-dark text-linen-100 border-b border-border-light px-5 py-12 md:py-16">
+    <section className="bg-dark text-linen-100 border-b border-border-light px-5 py-10 md:py-16">
       {/* Same px-5 / 1080px rhythm as the hero and the sections below it, so
           the two columns start and end on the page's own content edges. */}
-      <div className="max-w-[1080px] mx-auto flex flex-col gap-10 lg:flex-row lg:items-center lg:justify-between lg:gap-16">
+      {/* flex-col-reverse on mobile puts the timer at the top of the band, so
+          it clears the fold rather than sitting under the heading. Neither
+          column is focusable, so the visual reorder costs nothing. */}
+      <div className="max-w-[1080px] mx-auto flex flex-col-reverse gap-8 lg:flex-row lg:items-center lg:justify-between lg:gap-16">
         <div>
           <p className="type-label text-auburn-200">2026 Municipal Election</p>
           <h2 className="type-h2 mt-4">
@@ -156,27 +161,24 @@ function CardArrow() {
 }
 
 type ElectionCardCommon = {
-  eyebrow: string;
   title: string;
   cta: string;
   className: string;
-  eyebrowClassName: string;
   buttonClassName: string;
   children: React.ReactNode;
 };
 
-/* A card either navigates or opens the subscribe modal under its own promise
-   — never both, hence the exclusive pair rather than two optional props. */
-type ElectionCardProps = ElectionCardCommon &
-  (
-    | { href: string; modalHeadline?: never }
-    | { href?: never; modalHeadline: string }
-  );
+/** A card's foot is either a link or a modal trigger. */
+type ElectionCardAction =
+  | { href: string; modalHeadline?: never }
+  | { href?: never; modalHeadline: string };
+
+type ElectionCardProps = ElectionCardCommon & ElectionCardAction;
 
 /**
- * Shared chrome for the two election cards. The whole card is the hit area,
- * but it still ends in a full-width button rather than a quiet label: these
- * lead somewhere, and that should be unmistakable rather than inferred.
+ * Shared chrome for the election cards. The whole card is the hit area, but it
+ * still ends in a full-width button rather than a quiet label: these lead
+ * somewhere, and that should be unmistakable rather than inferred.
  *
  * Navigating cards are a single anchor. The card whose action is a modal
  * cannot be — see SubscribeCardTrigger — so it becomes a plain container with
@@ -187,22 +189,13 @@ function ElectionCard(props: ElectionCardProps) {
   /* Narrowed off `props` rather than destructured: pulling `href` and
      `modalHeadline` out as locals loses the link between them, and the
      exclusive union stops discriminating. */
-  const {
-    eyebrow,
-    title,
-    cta,
-    className,
-    eyebrowClassName,
-    buttonClassName,
-    children,
-  } = props;
-  const shellClass = `group/card relative flex flex-col justify-between transition-colors ${className}`;
+  const { title, cta, className, buttonClassName, children } = props;
+  const shellClass = `group/card relative flex flex-col justify-between border border-border-light transition-colors ${className}`;
   const ctaClass = `w-full flex items-center justify-center gap-3 px-6 py-4 md:py-5 type-label !tracking-[0.12em] border transition-colors duration-200 ${buttonClassName}`;
 
   const head = (
-    <div className="px-6 md:px-10 pt-10 md:pt-14 pb-8">
-      <span className={`type-label ${eyebrowClassName}`}>{eyebrow}</span>
-      <h2 className="type-h2 mt-4 transition-colors group-hover/card:text-accent">
+    <div className="px-6 md:px-8 pt-8 md:pt-10 pb-6">
+      <h2 className="type-h3 transition-colors group-hover/card:text-accent">
         {title}
       </h2>
       {children}
@@ -213,10 +206,10 @@ function ElectionCard(props: ElectionCardProps) {
     return (
       <Link
         href={props.href}
-        className={`${shellClass} focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-accent`}
+        className={`${shellClass} focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent`}
       >
         {head}
-        <div className="px-6 md:px-10 pb-8 md:pb-10">
+        <div className="px-6 md:px-8 pb-6 md:pb-8">
           {/* A div, not a button: this sits inside the card's anchor, and
               nesting interactive elements is invalid. It is styled as the
               call to action and the whole card is the hit area. */}
@@ -232,7 +225,7 @@ function ElectionCard(props: ElectionCardProps) {
   return (
     <div className={shellClass}>
       {head}
-      <div className="px-6 md:px-10 pb-8 md:pb-10">
+      <div className="px-6 md:px-8 pb-6 md:pb-8">
         <SubscribeCardTrigger
           className={ctaClass}
           headline={props.modalHeadline}
@@ -247,71 +240,121 @@ function ElectionCard(props: ElectionCardProps) {
 }
 
 /**
- * The two entry points into the election coverage. Both cards are filled with
- * the real thing rather than a description of it, and they are pitched light
- * against dark so the pair reads as one composition.
+ * The three entry points into the election coverage, then the ward lookup.
+ * Each card carries a heading, one compact block of the real thing, and its
+ * button — no summary prose, since the heading and the contents already say
+ * what it is.
  */
 function ElectionCardsSection() {
-  const questions = STAGE_ONE.slice(0, 3);
+  // Four topics against Yes/No, to match the four date rows beside it.
+  const questions = STAGE_ONE.slice(0, 4);
+  // Off the shared calendar, so these can't drift from the page they link to.
+  const dates = [...VOTING_PERIODS, ELECTION_DAY];
+
+  const button =
+    "bg-dark text-linen-100 border-dark group-hover/card:bg-accent group-hover/card:border-accent";
+  const rows = "mt-6 divide-y divide-border-light border-t border-border-light";
 
   return (
-    <section className="border-b border-border-light">
-      <div className="grid grid-cols-1 cards:grid-cols-2">
-        <ElectionCard
-          href={ELECTION.basePath}
-          eyebrow="2026 Election"
-          title="Explore the candidates"
-          cta="Go to the candidate tracker"
-          className="bg-bg text-dark border-b cards:border-b-0 cards:border-r border-border-light"
-          eyebrowClassName="text-accent"
-          buttonClassName="bg-dark text-linen-100 border-dark group-hover/card:bg-accent group-hover/card:border-accent"
+    <section className="border-b border-border-light px-5 py-12 md:py-16">
+      <div className="max-w-[1080px] mx-auto">
+        {/* One column, then three — no two-column stage, which left the third
+            card orphaned on a half-empty second row. The cards are spaced
+            rather than seamed, so each carries its own border (see
+            ElectionCard). */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
+          <ElectionCard
+          href={KEY_DATES_PATH}
+          title="Key election dates"
+          cta="See all dates"
+          className="bg-bg-alt text-dark"
+          buttonClassName={button}
         >
-          <p className="type-body-sm text-dark/70 mt-4">
-            One race for mayor, and one in every ward. Find yours.
-          </p>
-          <div className="mt-8">
+          <dl className={rows}>
+            {dates.map((d) => (
+              <div
+                key={d.id}
+                className="py-3 flex items-baseline justify-between gap-4"
+              >
+                <dt className="type-label-sm text-dark/60 min-w-0">
+                  {d.title}
+                </dt>
+                <dd className="font-serif text-[0.9375rem] leading-[1.35] text-dark text-right shrink-0">
+                  {d.dateLabel}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        </ElectionCard>
+
+          <ElectionCard
+          href={ELECTION.basePath}
+          title="Explore the candidates"
+          cta="See all candidates"
+          className="bg-bg text-dark"
+          buttonClassName={button}
+        >
+          <div className="mt-6">
             <WardOutlineMap />
           </div>
         </ElectionCard>
 
-        <ElectionCard
+          <ElectionCard
           /* Points at the signup rather than the survey page for now: the
-             questions are written but the results aren't live, so the card
+             questions are written but the answers aren't in, so the card
              sells being told when they are. Swap this back to
-             href={SURVEY_PATH} at launch. */
-          modalHeadline="Be the first to know when we launch"
-          eyebrow="Candidate survey"
-          title="Take our candidate survey"
-          cta="Compare your view to the candidates"
+             href={SURVEY_PATH} at launch.
+
+             Pitched as the reader's own comparison, not as our research: the
+             questions only matter to a voter because answering them yourself
+             is what sorts the field. This is the one card whose action is a
+             signup rather than a link, so it is also the one that needs a
+             line of copy to say what it does. */
+          modalHeadline="Be first to compare your views with the candidates’"
+          title="Compare your views to the candidates"
+          cta="Be first to compare"
           className="bg-bg-alt text-dark"
-          eyebrowClassName="text-accent"
-          buttonClassName="bg-dark text-linen-100 border-dark group-hover/card:bg-accent group-hover/card:border-accent"
+          buttonClassName={button}
         >
-          <p className="type-body-sm text-dark/70 mt-4">
-            Where every candidate stands on housing, transit, and whether
-            Toronto can still build. Starting with a straight yes or no.
+          <p className="type-body-sm text-dark/70 mt-3">
+            Answer the same questions we put to every candidate, then see who
+            lines up with you.
           </p>
-          <ul className="mt-7 divide-y divide-border-light border-t border-border-light">
+          <ul className="mt-6 divide-y divide-border-light border-t border-border-light">
             {questions.map((q) => (
-              <li key={q.id} className="py-4 flex items-start gap-4">
-                <div className="flex-1 min-w-0">
-                  <span className="type-label-sm text-accent">{q.topic}</span>
-                  <p className="font-serif text-[0.9375rem] leading-[1.45] text-dark/80 mt-1.5 line-clamp-2">
-                    {q.question}
-                  </p>
-                </div>
-                <div aria-hidden className="flex gap-1.5 shrink-0 pt-0.5">
-                  <span className="type-label-sm border border-border-light px-2 py-1 text-dark/50">
+              <li key={q.id} className="py-3 flex items-start gap-4">
+                <span className="flex-1 min-w-0 font-serif text-[0.9375rem] leading-[1.35] text-dark/80 line-clamp-1">
+                  {q.topic}
+                </span>
+                <span aria-hidden className="flex gap-1.5 shrink-0">
+                  <span className="type-label-sm border border-border-light px-2 py-0.5 text-dark/50">
                     Yes
                   </span>
-                  <span className="type-label-sm border border-border-light px-2 py-1 text-dark/50">
+                  <span className="type-label-sm border border-border-light px-2 py-0.5 text-dark/50">
                     No
                   </span>
-                </div>
+                </span>
               </li>
             ))}
           </ul>
         </ElectionCard>
+        </div>
+
+        {/* The ward lookup is deliberately not a card: it is a single field,
+            and boxing it next to cards with real bodies left it mostly empty.
+            A plain rule and one row give it its own footing. */}
+        <div className="mt-10 md:mt-12 pt-10 md:pt-12 border-t border-border-light flex flex-col md:flex-row md:items-center md:justify-between gap-6 md:gap-10">
+          <div className="md:max-w-[30rem]">
+            <h2 className="type-h3">Find your ward</h2>
+            <p className="type-body-sm text-dark/70 mt-2">
+              Enter your postal code to see who&rsquo;s running to represent
+              you.
+            </p>
+          </div>
+          <div className="w-full md:w-auto md:min-w-[22rem]">
+            <WardLookupCard />
+          </div>
+        </div>
       </div>
     </section>
   );
@@ -421,33 +464,6 @@ function PolicyIdeasSection({
  * that a person reads it, so anything that looks like a ticket queue would
  * undercut it.
  */
-function ReachOutSection() {
-  return (
-    <section className="border-b border-border-light px-5 py-12 md:py-20">
-      <div className="max-w-[1080px] mx-auto grid grid-cols-1 md:grid-cols-2 md:gap-x-12 md:items-center">
-        <div>
-          <SectionLabel as="h2">Reach out</SectionLabel>
-          <p className="type-body text-dark/80 mt-6">
-            We publish our questions, our sources and our reasoning, and we
-            would rather answer a hard question than dodge it. If something
-            here looks wrong, incomplete or unfair &mdash; or you want to know
-            who we are and who funds us &mdash; ask us directly.
-          </p>
-        </div>
-        <div className="mt-8 md:mt-0 md:justify-self-end">
-          <LinkButton
-            href={`mailto:${CONTACT_EMAIL}`}
-            variant="primary"
-            className="w-full sm:w-auto justify-center px-6 py-4 md:py-5 !tracking-[0.12em]"
-          >
-            Email {CONTACT_EMAIL}
-          </LinkButton>
-        </div>
-      </div>
-    </section>
-  );
-}
-
 function SubscribeCTA() {
   return (
     <section className="bg-linen-200 px-5 py-16 md:py-24">
@@ -486,7 +502,6 @@ export default async function TorontoHome() {
       <ElectionCardsSection />
       <PolicyIdeasSection memos={memos} />
       <MissionSection />
-      <ReachOutSection />
       <SubscribeCTA />
     </div>
   );

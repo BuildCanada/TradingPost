@@ -140,7 +140,10 @@ export function HeroSurface({ initialMode }: { initialMode: HeroMode }) {
 
       {/* Content sits in normal flow rather than absolutely positioned, so the
           hero grows to fit the copy instead of clipping it at a fixed aspect. */}
-      <div className="relative flex min-h-[85svh] md:min-h-[860px] flex-col justify-center px-5 py-16 md:py-20">
+      {/* 60svh on mobile, not 85: the countdown band below has to clear the
+          fold, and svh is the height with the browser chrome showing, so this
+          is the pessimistic case. Desktop is unchanged. */}
+      <div className="relative flex min-h-[60svh] md:min-h-[860px] flex-col justify-center px-5 py-10 md:py-20">
         <div className="w-full max-w-[1080px] mx-auto text-center">
           <h1
             className={`type-display transition-colors duration-500 ${variant.heading}`}

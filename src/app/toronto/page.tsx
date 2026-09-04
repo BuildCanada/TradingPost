@@ -194,7 +194,11 @@ function ElectionCard(props: ElectionCardProps) {
   const ctaClass = `w-full flex items-center justify-center gap-3 px-6 py-4 md:py-5 type-label !tracking-[0.12em] border transition-colors duration-200 ${buttonClassName}`;
 
   const head = (
-    <div className="px-6 md:px-8 pt-8 md:pt-10 pb-6">
+    /* flex-1 column: the row is sized by its tallest card, and a child that
+       wants the leftover height (the ward map) can take it with flex-1. Cards
+       whose bodies are plain lists are unaffected — they just sit at the top
+       of a taller box, as before. */
+    <div className="flex-1 flex flex-col px-6 md:px-8 pt-8 md:pt-10 pb-6">
       <h2 className="type-h3 transition-colors group-hover/card:text-accent">
         {title}
       </h2>
@@ -264,80 +268,77 @@ function ElectionCardsSection() {
             ElectionCard). */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
           <ElectionCard
-          href={KEY_DATES_PATH}
-          title="Key election dates"
-          cta="See all dates"
-          className="bg-bg-alt text-dark"
-          buttonClassName={button}
-        >
-          <dl className={rows}>
-            {dates.map((d) => (
-              <div
-                key={d.id}
-                className="py-3 flex items-baseline justify-between gap-4"
-              >
-                <dt className="type-label-sm text-dark/60 min-w-0">
-                  {d.title}
-                </dt>
-                <dd className="font-serif text-[0.9375rem] leading-[1.35] text-dark text-right shrink-0">
-                  {d.dateLabel}
-                </dd>
-              </div>
-            ))}
-          </dl>
-        </ElectionCard>
+            href={KEY_DATES_PATH}
+            title="Key election dates"
+            cta="See all dates"
+            className="bg-bg-alt text-dark"
+            buttonClassName={button}
+          >
+            <dl className={rows}>
+              {dates.map((d) => (
+                <div
+                  key={d.id}
+                  className="py-3 flex items-baseline justify-between gap-4"
+                >
+                  <dt className="type-label-sm text-dark/60 min-w-0">
+                    {d.title}
+                  </dt>
+                  <dd className="font-serif text-[0.9375rem] leading-[1.35] text-dark text-right shrink-0">
+                    {d.dateLabel}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </ElectionCard>
 
           <ElectionCard
-          href={ELECTION.basePath}
-          title="Explore the candidates"
-          cta="See all candidates"
-          className="bg-bg text-dark"
-          buttonClassName={button}
-        >
-          <div className="mt-6">
-            <WardOutlineMap />
-          </div>
-        </ElectionCard>
+            href={ELECTION.basePath}
+            title="Explore the candidates"
+            cta="See all candidates"
+            className="bg-bg text-dark"
+            buttonClassName={button}
+          >
+            <div className="mt-6 flex-1 flex items-center">
+              <WardOutlineMap />
+            </div>
+          </ElectionCard>
 
           <ElectionCard
-          /* Points at the signup rather than the survey page for now: the
-             questions are written but the answers aren't in, so the card
-             sells being told when they are. Swap this back to
-             href={SURVEY_PATH} at launch.
+            /* Points at the signup rather than the survey page for now: the
+               questions are written but the answers aren't in, so the card
+               sells being told when they are. Swap this back to
+               href={SURVEY_PATH} at launch.
+  
+               Pitched as the reader's own comparison, not as our research: the
+               questions only matter to a voter because answering them yourself
+               is what sorts the field. This is the one card whose action is a
+               signup rather than a link, so it is also the one that needs a
+               line of copy to say what it does. */
+            modalHeadline="Be first to compare your views with the candidates’"
+            title="Compare your views to the candidates"
+            cta="Compare your views"
+            className="bg-bg-alt text-dark"
+            buttonClassName={button}
+          >
 
-             Pitched as the reader's own comparison, not as our research: the
-             questions only matter to a voter because answering them yourself
-             is what sorts the field. This is the one card whose action is a
-             signup rather than a link, so it is also the one that needs a
-             line of copy to say what it does. */
-          modalHeadline="Be first to compare your views with the candidates’"
-          title="Compare your views to the candidates"
-          cta="Be first to compare"
-          className="bg-bg-alt text-dark"
-          buttonClassName={button}
-        >
-          <p className="type-body-sm text-dark/70 mt-3">
-            Answer the same questions we put to every candidate, then see who
-            lines up with you.
-          </p>
-          <ul className="mt-6 divide-y divide-border-light border-t border-border-light">
-            {questions.map((q) => (
-              <li key={q.id} className="py-3 flex items-start gap-4">
-                <span className="flex-1 min-w-0 font-serif text-[0.9375rem] leading-[1.35] text-dark/80 line-clamp-1">
-                  {q.topic}
-                </span>
-                <span aria-hidden className="flex gap-1.5 shrink-0">
-                  <span className="type-label-sm border border-border-light px-2 py-0.5 text-dark/50">
-                    Yes
+            <ul className="mt-6 divide-y divide-border-light border-t border-border-light">
+              {questions.map((q) => (
+                <li key={q.id} className="py-3 flex items-start gap-4">
+                  <span className="flex-1 min-w-0 font-serif text-[0.9375rem] leading-[1.35] text-dark/80 line-clamp-1">
+                    {q.topic}
                   </span>
-                  <span className="type-label-sm border border-border-light px-2 py-0.5 text-dark/50">
-                    No
+                  <span aria-hidden className="flex gap-1.5 shrink-0">
+                    <span className="type-label-sm border border-border-light px-2 py-0.5 text-dark/50">
+                      Yes
+                    </span>
+                    <span className="type-label-sm border border-border-light px-2 py-0.5 text-dark/50">
+                      No
+                    </span>
                   </span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        </ElectionCard>
+                </li>
+              ))}
+            </ul>
+          </ElectionCard>
         </div>
 
         {/* The ward lookup is deliberately not a card: it is a single field,

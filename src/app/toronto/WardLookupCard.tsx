@@ -1,12 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { WardLookupResponse } from "@/lib/elections/ward-lookup";
 
 type State =
   | { status: "idle" }
   | { status: "loading" }
+  /** Resolved: navigating to the ward's page. Held so the control keeps a
+   *  busy label until the route paints. */
+  | { status: "redirecting"; ward: number }
+  /** Anything that isn't a clean hit — rendered inline. */
   | { status: "done"; result: WardLookupResponse }
   | { status: "failed" };
 
@@ -15,15 +19,20 @@ type State =
  *
  * The shared <WardLookup> is the richer version for the tracker: it needs the
  * live ward roster and a server-rendered locator tile per ward, and it links
- * to an #wards anchor. None of that exists here, so this one resolves to a
- * name and a link into the ward's own page.
+ * to an #wards anchor. None of that exists here, so this one is just the
+ * field and its outcome.
  *
- * The result is a best guess, not a fact — a postal code's stored point is the
- * centroid of its delivery points, so a code straddling a ward line can land
- * in the neighbour. Hence "looks like", and no auto-navigation.
- * See docs/WARD_LOOKUP_API_SPEC.md.
+ * A clean hit navigates straight to the ward's page; everything else is
+ * reported in place.
+ *
+ * NOTE: docs/WARD_LOOKUP_API_SPEC.md asks callers not to auto-navigate,
+ * because a postal code's stored point is the centroid of its delivery points
+ * — a code straddling a ward line can resolve to the neighbour. Redirecting
+ * is a deliberate product decision against that advice, so the ward page is
+ * where someone has to notice a wrong guess.
  */
 export function WardLookupCard() {
+  const router = useRouter();
   const [postalCode, setPostalCode] = useState("");
   const [state, setState] = useState<State>({ status: "idle" });
 
@@ -40,14 +49,25 @@ export function WardLookupCard() {
         `/api/elections/ward-lookup?postal_code=${encodeURIComponent(typed)}`,
       );
       if (!res.ok) throw new Error(`ward-lookup ${res.status}`);
-      setState({ status: "done", result: await res.json() });
+      const result: WardLookupResponse = await res.json();
+
+      // ward_number is null for named school-board wards, which have no route
+      // — those fall through to the inline messages below.
+      const ward = result.reason === "resolved" ? result.ward?.ward_number : null;
+      if (ward) {
+        setState({ status: "redirecting", ward });
+        router.push(`/toronto/vote/2026/wards/${String(ward).padStart(2, "0")}`);
+        return;
+      }
+
+      setState({ status: "done", result });
     } catch (error) {
       console.error("[ward-lookup]", error);
       setState({ status: "failed" });
     }
   };
 
-  const loading = state.status === "loading";
+  const busy = state.status === "loading" || state.status === "redirecting";
 
   return (
     <div>
@@ -68,10 +88,14 @@ export function WardLookupCard() {
           />
           <button
             type="submit"
-            disabled={!postalCode.trim() || loading}
+            disabled={!postalCode.trim() || busy}
             className="flex-1 flex items-center justify-center gap-2 border border-dark bg-dark px-5 py-3 type-label !tracking-[0.12em] text-linen-100 transition-colors hover:bg-accent hover:border-accent disabled:bg-charcoal-300 disabled:border-charcoal-300 disabled:cursor-not-allowed cursor-pointer"
           >
-            {loading ? "Checking…" : "Find my ward"}
+            {state.status === "redirecting"
+              ? `Ward ${state.ward}…`
+              : state.status === "loading"
+                ? "Checking…"
+                : "Find my ward"}
           </button>
         </div>
       </form>
@@ -92,29 +116,10 @@ export function WardLookupCard() {
 
 function Result({ result }: { result: WardLookupResponse }) {
   switch (result.reason) {
-    case "resolved": {
-      // ward_number is null only for named school-board wards; without it
-      // there is no route to send anyone to.
-      const number = result.ward?.ward_number;
-      if (!number) {
-        return <Message>We couldn&rsquo;t match that to a council ward.</Message>;
-      }
-      return (
-        <div>
-          <p className="font-serif text-[0.9375rem] leading-[1.45] text-dark/80">
-            Looks like you&rsquo;re in{" "}
-            <span className="text-accent">Ward {number}</span>
-            {result.ward?.name_en ? `, ${result.ward.name_en}` : ""}.
-          </p>
-          <Link
-            href={`/toronto/vote/2026/wards/${String(number).padStart(2, "0")}`}
-            className="mt-2 inline-block type-label-sm text-accent hover:underline"
-          >
-            See who&rsquo;s running here
-          </Link>
-        </div>
-      );
-    }
+    // Only reached when there is no council ward to route to — a named
+    // school-board ward. A real hit has already navigated.
+    case "resolved":
+      return <Message>We couldn&rsquo;t match that to a council ward.</Message>;
     case "malformed_postal_code":
       return <Message>That doesn&rsquo;t look like a postal code.</Message>;
     case "unknown_postal_code":

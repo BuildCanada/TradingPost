@@ -5,6 +5,7 @@ import { WARD_GEO } from "./wardGeo";
 import { ELECTION, getToronto2026 } from "./data";
 import {
   ADVANCE_VOTING_PATH,
+  ELECTION_DAY,
   HOW_TO_VOTE_PATH,
   KEY_DATES_PATH,
   VOTE_BY_MAIL_PATH,
@@ -31,6 +32,9 @@ export default async function Toronto2026ElectionPage() {
       election={ELECTION}
       view={view}
       mayorSurveyPath={`${ELECTION.basePath}/mayor`}
+      // Toronto publishes its poll hours, so the band's headline counter is
+      // the live timer from the /toronto hero rather than a whole-day count.
+      electionDay={ELECTION_DAY}
       surveyPath={`${ELECTION.basePath}/survey`}
       wardMapDefs={<WardMapDefs geo={WARD_GEO} />}
       renderWardMap={(ward) => (

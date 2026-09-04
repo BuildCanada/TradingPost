@@ -3,12 +3,19 @@ import Link from "next/link";
 import { Suspense, type ReactNode } from "react";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
 import CountdownDays from "./CountdownDays";
+import LiveCountdown from "./LiveCountdown";
 import { CandidateSiteLink } from "./CandidateSiteLink";
 import { PledgeButton } from "./PledgeButton";
 import { SurveyCta } from "./SurveyCta";
 import { ResidencyModal } from "./ResidencyModal";
 import { WardCard } from "./WardCard";
-import { daysUntil, yearOf } from "@/lib/elections/dates";
+import {
+  breakdown,
+  daysUntil,
+  msUntil,
+  periodTiming,
+  yearOf,
+} from "@/lib/elections/dates";
 import type { SupportedElection } from "@/lib/elections/registry";
 import type {
   CandidateView,
@@ -24,6 +31,26 @@ import type {
    where it has one, its ward locator map. Sections a region can't fill drop
    out rather than render empty: no advance-vote date in the registry means
    no advance-vote counter. */
+
+/**
+ * The minute-accurate window for election day, where a region has published
+ * the times its polls open and close. The registry's `electionDateIso` is
+ * date-only, so a region that supplies this gets the same live
+ * days:hours:minutes:seconds timer the /toronto hero uses; a region that
+ * doesn't falls back to the whole-day counter.
+ *
+ * Structurally a subset of Toronto's `VotingPeriod`, so its key-dates module
+ * can pass `ELECTION_DAY` straight through without a mapping layer.
+ */
+export type ElectionDayPeriod = {
+  /** absolute instant polls open, e.g. "2026-10-26T10:00:00-04:00" */
+  opensAt?: string;
+  /** absolute instant polls close */
+  closesAt: string;
+  upcomingLabel: string;
+  openLabel: string;
+  closedLabel: string;
+};
 
 export type LandingContent = {
   heroTitle: ReactNode;
@@ -49,10 +76,14 @@ export function ElectionLanding({
   renderWardMap,
   mayorSurveyPath,
   surveyPath,
+  electionDay,
 }: {
   election: SupportedElection;
   view: ElectionView;
   content: LandingContent;
+  /** poll-open/poll-close instants for election day. Supplied turns the band's
+   *  headline counter into the live timer; omitted keeps the days counter. */
+  electionDay?: ElectionDayPeriod;
   /** where the mayoral field's questionnaire grid lives, for the regions that
    *  have run one — the cards say who is running, that page says what they
    *  said */
@@ -89,6 +120,7 @@ export function ElectionLanding({
           election={election}
           surveyPath={surveyPath}
           guideLinks={content.guideLinks}
+          electionDay={electionDay}
         />
 
         {/* ── Candidates for mayor ─────────────────────────────── */}
@@ -218,132 +250,232 @@ export function ElectionLanding({
 // ── Countdown band ─────────────────────────────────────────────────────────
 
 /**
+ * Seeds LiveCountdown from the server's reading of election day. Split out so
+ * the `targetInstant ?? 0` dance lives in one place, the same way Toronto's
+ * PeriodCountdown wraps it for the key-dates pages.
+ */
+function ElectionDayCountdown({ period }: { period: ElectionDayPeriod }) {
+  const now = new Date();
+  const timing = periodTiming(period, now);
+
+  return (
+    <LiveCountdown
+      opensAt={period.opensAt}
+      closesAt={period.closesAt}
+      initialParts={breakdown(
+        timing.targetInstant ? msUntil(timing.targetInstant, now) : 0,
+      )}
+      initialState={timing.state}
+      labels={{
+        upcoming: period.upcomingLabel,
+        open: period.openLabel,
+        closed: period.closedLabel,
+      }}
+      size="xl"
+    />
+  );
+}
+
+/**
+ * One of the band's secondary counters — advance voting, vote by mail.
+ *
+ * Same three-part shape as the headline: an eyebrow naming the thing, the
+ * number, the date underneath. The unit sits inline with the digits at a
+ * fraction of their size, which is how the live timer pairs "52" with "days".
+ * The old version hung a two-line caption off the number's baseline instead,
+ * and beside a four-slot timer that read as a different component.
+ */
+function DateCounter({
+  eyebrow,
+  targetIso,
+  dateLabel,
+}: {
+  eyebrow: string;
+  /** "YYYY-MM-DD" — the day being counted down to */
+  targetIso: string;
+  /** the human date or range beneath the number */
+  dateLabel: ReactNode;
+}) {
+  return (
+    <div>
+      <p className="type-label text-accent">{eyebrow}</p>
+      <p className="mt-3 flex items-baseline gap-2">
+        <CountdownDays
+          initialDays={daysUntil(targetIso)}
+          targetIso={targetIso}
+          className="font-sans font-medium leading-[0.95] tracking-[-0.03em] text-[clamp(2.5rem,5vw,3.5rem)] tabular-nums"
+        />
+        <span className="type-label-sm !tracking-[0.14em] text-text-secondary">
+          days
+        </span>
+      </p>
+      <p className="mt-2.5 font-serif text-[1rem] leading-[1.4] text-dark/80">
+        {dateLabel}
+      </p>
+    </div>
+  );
+}
+
+/**
  * Election-day countdown, the advance-vote and vote-by-mail counters, and the
- * pledge CTA. Regions that haven't published their advance-vote or mail-in
- * dates get a two-column band instead of three, rather than empty cells.
+ * survey (or, where a region runs none, the pledge).
+ *
+ * Two rows rather than one. The headline countdown takes the full width of the
+ * band, because a live days:hrs:min:sec timer is eleven glyphs plus four unit
+ * labels and cannot share a third of the row with anything — squeezed into a
+ * column it either clamps down to the size of the secondary counters, losing
+ * the hierarchy that made it the headline, or overruns its gutter. Its own row
+ * also puts the date and the guide links beside the number they describe,
+ * rather than across the band in the CTA cell where they used to sit.
+ *
+ * The second row is the supporting calendar: one cell per published date, then
+ * the survey. Regions that haven't published their advance-vote or mail-in
+ * dates drop those cells rather than render empty ones, and the survey takes
+ * the row on its own.
  */
 function KeyDates({
   election,
   surveyPath,
   guideLinks,
+  electionDay,
 }: {
   election: SupportedElection;
   /** where the region's voter survey lives; the panel falls back to the pledge
    *  where there is none */
   surveyPath?: string;
-  /** the region's supporting guide pages, listed under the poll-hours line */
+  /** the region's supporting guide pages, listed beside the headline number */
   guideLinks?: { label: string; href: string }[];
+  /** poll hours for election day, where the region has published them */
+  electionDay?: ElectionDayPeriod;
 }) {
   const { advanceVote, mailIn } = election;
-  const hasMiddle = Boolean(advanceVote || mailIn);
+  const dateCells = [advanceVote, mailIn].filter(Boolean).length;
 
   return (
-    <section
-      className={`grid ${hasMiddle ? "md:grid-cols-[1.15fr_0.85fr_1fr]" : "md:grid-cols-[1.6fr_1fr]"} border-b-2 border-dark`}
-    >
-      <div className="px-6 py-12 md:px-14 md:py-14 flex flex-col justify-center">
-        <div className="flex items-end gap-5 flex-wrap">
-          <CountdownDays
-            initialDays={daysUntil(election.electionDateIso)}
-            targetIso={election.electionDateIso}
-            className="font-sans font-semibold leading-[0.8] tracking-[-0.05em] text-[clamp(5rem,13vw,11rem)] tabular-nums"
-          />
-          <span className="type-label !tracking-[0.12em] leading-[1.5] pb-3.5">
-            Days until
-            <br />
-            polls open
-          </span>
+    <section className="border-b-2 border-dark">
+      {/* ── Headline: the countdown, and the day it counts to ── */}
+      <div className="px-6 py-12 md:px-14 md:py-14 border-b border-border-light grid gap-10 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end lg:gap-16">
+        <div>
+          {electionDay ? (
+            // The same live timer the /toronto hero band runs: the server
+            // reads the state and the remaining milliseconds once, and
+            // LiveCountdown ticks forward from there. It carries its own state
+            // label — "Until polls open" before the day, "Left to vote" during
+            // it — so the eyebrow above it names the election, not the count.
+            <>
+              <p className="type-label text-accent mb-5">
+                {yearOf(election.electionDateIso)} Election day
+              </p>
+              <ElectionDayCountdown period={electionDay} />
+            </>
+          ) : (
+            // Regions with no published poll hours get a whole-day count, in
+            // the same three-part shape so the band reads the same either way.
+            <>
+              <p className="type-label text-accent mb-5">Until polls open</p>
+              <p className="flex items-baseline gap-4">
+                <CountdownDays
+                  initialDays={daysUntil(election.electionDateIso)}
+                  targetIso={election.electionDateIso}
+                  className="font-sans font-medium leading-[0.95] tracking-[-0.04em] text-[clamp(4rem,10vw,8rem)] tabular-nums"
+                />
+                <span className="type-label !tracking-[0.14em] text-text-secondary">
+                  days
+                </span>
+              </p>
+            </>
+          )}
+        </div>
+
+        {/* Shrink-wrapped, so the grid hands the timer every pixel it can use
+            and this block stays as wide as its own longest line rather than
+            taking a fixed share of the row. */}
+        <div className="lg:shrink-0 lg:text-right">
+          <p className="font-serif text-[1.05rem] leading-[1.4] lg:text-[1.15rem]">
+            Polls open{" "}
+            <span className="text-accent">
+              {election.voteDayLabel},&nbsp;{yearOf(election.electionDateIso)}
+            </span>
+            , {election.pollHoursLabel}.
+          </p>
+          {guideLinks && guideLinks.length > 0 && (
+            <div className="mt-5 flex flex-col items-start gap-2 lg:items-end">
+              {guideLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="group/dates inline-flex items-center gap-1.5 type-label-sm !tracking-[0.1em] text-dark hover:text-accent transition-colors"
+                >
+                  {link.label}
+                  <ArrowRight className="size-3 shrink-0 transition-transform group-hover/dates:translate-x-0.5" />
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
-      {hasMiddle && (
-        <div className="px-6 py-12 md:px-14 md:py-14 border-t-2 md:border-t-0 md:border-l border-border-light flex flex-col justify-center gap-8">
-          {advanceVote && (
-            <div>
-              <div className="flex items-end gap-3">
-                <CountdownDays
-                  initialDays={daysUntil(advanceVote.iso)}
-                  targetIso={advanceVote.iso}
-                  className="font-sans font-semibold leading-[0.8] tracking-[-0.04em] text-[clamp(2.75rem,5.5vw,4rem)] tabular-nums"
-                />
-                <span className="type-label !tracking-[0.12em] leading-[1.4] pb-1">
-                  Days until
-                  <br />
-                  advance polls
-                </span>
-              </div>
-              <p className="mt-2.5 font-serif text-[1rem] leading-[1.4] text-accent">
-                {advanceVote.label}
-              </p>
-            </div>
-          )}
-          {mailIn && (
-            <div className={advanceVote ? "pt-7 border-t border-border-light" : ""}>
-              <div className="flex items-end gap-3">
-                <CountdownDays
-                  initialDays={daysUntil(mailIn.iso)}
-                  targetIso={mailIn.iso}
-                  className="font-sans font-semibold leading-[0.8] tracking-[-0.04em] text-[clamp(2.75rem,5.5vw,4rem)] tabular-nums"
-                />
-                <span className="type-label !tracking-[0.12em] leading-[1.4] pb-1">
-                  Days to apply
-                  <br />
-                  to vote by mail
-                </span>
-              </div>
-              <p className="mt-2.5 font-serif text-[1rem] leading-[1.4] text-accent">
-                {/* Also spelled out, with the rest of Toronto's calendar, in
-                    src/app/toronto/vote/2026/key-dates.ts. This component is
-                    shared by four cities and can't import a Toronto route
-                    module, so the cutoff is written twice — change both. */}
-                {mailIn.label}, 4:30&nbsp;p.m.
-              </p>
-            </div>
-          )}
-        </div>
-      )}
-
-      <div className="px-6 py-12 md:px-14 md:py-14 border-t-2 md:border-t-0 md:border-l border-border-light bg-bg-alt flex flex-col justify-center">
-        {surveyPath ? (
-          <SurveyCta href={surveyPath} className="w-full" />
-        ) : (
-          <>
-            <p className="type-label text-accent mb-3.5">Ready to vote?</p>
-            <p className="font-serif text-[1.15rem] leading-[1.45] max-w-[34ch] mb-6">
-              Put your name on the record. Pledging takes ten seconds — and
-              it&rsquo;s the first step to showing up on election day.
-            </p>
-            <PledgeButton
-              election={election.slug}
-              source="election-ready-to-vote"
-              className="group/btn self-start inline-flex items-center gap-3 type-button text-bg bg-dark px-5 py-4 transition-colors hover:bg-black cursor-pointer"
-            >
-              Pledge to vote
-              <ArrowRight className="size-3.5 shrink-0 transition-transform group-hover/btn:translate-x-0.5" />
-            </PledgeButton>
-          </>
-        )}
-        <p className="mt-7 pt-5 border-t border-border-light font-serif text-[1.05rem] leading-[1.4]">
-          Polls open{" "}
-          <span className="text-accent">
-            {election.voteDayLabel},&nbsp;{yearOf(election.electionDateIso)}
-          </span>
-          , {election.pollHoursLabel}.
-        </p>
-        {guideLinks && guideLinks.length > 0 && (
-          <div className="mt-4 flex flex-col items-start gap-2">
-            {guideLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className="group/dates inline-flex items-center gap-1.5 type-label-sm !tracking-[0.1em] text-dark hover:text-accent transition-colors"
-              >
-                {link.label}
-                <ArrowRight className="size-3 shrink-0 transition-transform group-hover/dates:translate-x-0.5" />
-              </Link>
-            ))}
+      {/* ── Supporting calendar, then the survey ── */}
+      <div
+        className={`grid ${
+          dateCells === 2
+            ? "md:grid-cols-[1fr_1fr_1.3fr]"
+            : dateCells === 1
+              ? "md:grid-cols-[1fr_1.3fr]"
+              : ""
+        }`}
+      >
+        {advanceVote && (
+          <div className="px-6 py-12 md:px-14 md:py-14 flex flex-col justify-center">
+            <DateCounter
+              eyebrow="Until advance polls"
+              targetIso={advanceVote.iso}
+              dateLabel={advanceVote.label}
+            />
           </div>
         )}
+
+        {mailIn && (
+          <div className="px-6 py-12 md:px-14 md:py-14 border-t md:border-t-0 md:border-l border-border-light flex flex-col justify-center">
+            <DateCounter
+              eyebrow="To apply to vote by mail"
+              targetIso={mailIn.iso}
+              /* Also spelled out, with the rest of Toronto's calendar, in
+                 src/app/toronto/vote/2026/key-dates.ts. This component is
+                 shared by four cities and can't import a Toronto route
+                 module, so the cutoff is written twice — change both. */
+              dateLabel={<>{mailIn.label}, 4:30&nbsp;p.m.</>}
+            />
+          </div>
+        )}
+
+        <div
+          className={`px-6 py-12 md:px-14 md:py-14 bg-bg-alt flex flex-col justify-center ${
+            dateCells > 0
+              ? "border-t md:border-t-0 md:border-l border-border-light"
+              : ""
+          }`}
+        >
+          {surveyPath ? (
+            <SurveyCta href={surveyPath} className="w-full" />
+          ) : (
+            <>
+              <p className="type-label text-accent mb-3.5">Ready to vote?</p>
+              <p className="font-serif text-[1.15rem] leading-[1.45] max-w-[34ch] mb-6">
+                Put your name on the record. Pledging takes ten seconds — and
+                it&rsquo;s the first step to showing up on election day.
+              </p>
+              <PledgeButton
+                election={election.slug}
+                source="election-ready-to-vote"
+                className="group/btn self-start inline-flex items-center gap-3 type-button text-bg bg-dark px-5 py-4 transition-colors hover:bg-black cursor-pointer"
+              >
+                Pledge to vote
+                <ArrowRight className="size-3.5 shrink-0 transition-transform group-hover/btn:translate-x-0.5" />
+              </PledgeButton>
+            </>
+          )}
+        </div>
       </div>
     </section>
   );

@@ -9,7 +9,7 @@ export default async function Image() {
   return new ImageResponse(
     <ElectionOGImage
       title="How to Vote in Toronto"
-      subtitle="Who can vote, what ID to bring, and the three ways to cast a ballot in 2026."
+      subtitle="Who can vote, what ID to bring, and the four ways to cast a ballot in 2026."
       logoSrc={await logoDataUri()}
     />,
     { ...size },

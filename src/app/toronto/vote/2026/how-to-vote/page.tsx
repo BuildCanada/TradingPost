@@ -12,17 +12,19 @@ import {
   ID_GOTCHAS,
   getVotingSteps,
 } from "../voter-guide";
+import VotingSteps from "./VotingSteps";
 
 /* Hourly, matching the key-dates page. Nothing here counts down, but the
    "pick how you want to vote" step changes as the mail-in, advance-voting and
    online-registration deadlines pass — and two of those land at 4:30 p.m. and
    7 p.m., so a daily revalidate would leave the wrong copy up for most of a
-   day. */
+   day. This bounds how stale the *crawled* copy can be; readers with JS get
+   the steps re-derived from their own clock on mount, in VotingSteps. */
 export const revalidate = 3600;
 
 const CANONICAL = "/toronto/vote/2026/how-to-vote";
 const DESCRIPTION =
-  "A step-by-step guide to voting in Toronto's 2026 municipal election: who is eligible, how to check the voters' list on MyVote, the three ways to vote, and exactly what ID to bring.";
+  "A step-by-step guide to voting in Toronto's 2026 municipal election: who is eligible, how to check the voters' list on MyVote, the four ways to vote, and exactly what ID to bring.";
 
 export const metadata: Metadata = {
   // Absolute because /toronto's layout appends "| Build Canada - Toronto".
@@ -121,8 +123,8 @@ export default function HowToVotePage() {
             </strong>
             , and living in Toronto or renting or owning property here. Check
             the voters&rsquo; list on MyVote, choose whether to vote on
-            election day, early, or by mail, and bring one piece of ID with
-            your name and Toronto address.
+            election day, early, by mail or by proxy, and bring one piece of ID
+            with your name and Toronto address.
           </p>
           <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-4">
             <Button
@@ -150,41 +152,7 @@ export default function HowToVotePage() {
               heavy lifting.
             </p>
           </div>
-          <ol className="border-t border-border-light">
-            {votingSteps.map((step, i) => (
-              <li
-                key={step.title}
-                className="grid md:grid-cols-[6rem_1fr] gap-y-3 px-6 py-10 md:px-14 border-b border-border-light last:border-b-0"
-              >
-                <div
-                  className="font-sans font-medium leading-none text-[clamp(2rem,3.5vw,2.75rem)] tabular-nums text-accent"
-                  aria-hidden="true"
-                >
-                  {i + 1}
-                </div>
-                <div>
-                  <h3 className="font-sans font-medium text-[1.3rem] leading-[1.25] tracking-[-0.02em] mb-2.5">
-                    <span className="sr-only">Step {i + 1}: </span>
-                    {step.title}
-                  </h3>
-                  <p className="font-serif text-[1.05rem] leading-[1.55] text-text-secondary max-w-[60ch]">
-                    {step.body}
-                  </p>
-                  {step.action && (
-                    <div className="mt-5">
-                      <Button
-                        as={step.action.external ? "external-link" : "link"}
-                        variant={i === 1 ? "auburn" : "ghost"}
-                        href={step.action.href}
-                      >
-                        {step.action.label}
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </li>
-            ))}
-          </ol>
+          <VotingSteps initialSteps={votingSteps} />
         </section>
 
         {/* ── Eligibility ──────────────────────────────────────── */}

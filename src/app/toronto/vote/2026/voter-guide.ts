@@ -133,6 +133,10 @@ const ADVANCE_OPENS = instant(votingPeriod("advance").opensAt!);
 /** Oct 11, 7 p.m. — advance voting closes, and the same instant is the
  *  deadline to check or update the voters' list online. */
 const ONLINE_REGISTRATION_CLOSES = instant(votingPeriod("advance").closesAt);
+/** Oct 14, noon — completed mail-in packages must be in hand. Not a phase
+ *  boundary: it falls inside `election-day-only`, and a voter still holding a
+ *  package needs telling about it right up to the minute it passes. */
+const MAIL_RETURN_DUE = instant(votingPeriod("mail-in-return").closesAt);
 /** Oct 26, 8 p.m. — polls close. */
 const POLLS_CLOSE = instant(ELECTION_DAY.closesAt);
 
@@ -167,8 +171,14 @@ function registrationBody(phase: Phase): string {
 
 /** Step 3 — the ways to vote. Toronto has four, not three: election day,
  *  advance voting, mail-in, and appointing a proxy. Two of them have
- *  deadlines, which is why this can't be a fixed sentence. */
-function waysToVoteBody(phase: Phase): string {
+ *  deadlines, which is why this can't be a fixed sentence.
+ *
+ *  Takes `now` as well as the phase because the mail-in return deadline sits
+ *  three days *inside* `election-day-only`: from Oct 11 at 7 p.m. the phase no
+ *  longer changes, but until noon on Oct 14 there are voters holding a package
+ *  who still have to get it back, and dropping the sentence at the phase
+ *  boundary would be the one omission that costs someone their ballot. */
+function waysToVoteBody(phase: Phase, now: number): string {
   switch (phase) {
     case "before-mail-deadline":
       return "Four ways, and you only use one: in person on election day, in person during advance voting from October 6 to 11, by mail, or by appointing someone you trust as your proxy. Voting by mail is the one with the earliest deadline — applications opened September 1 and close September 24 at 4:30 p.m.";
@@ -176,8 +186,13 @@ function waysToVoteBody(phase: Phase): string {
       return "Mail-in applications closed on September 24, so three ways are left: in person on election day, in person during advance voting from October 6 to 11, or by appointing someone you trust as your proxy. If you already have a mail-in package, Toronto Elections must receive it by noon on October 14 — received, not postmarked.";
     case "advance-open":
       return "Advance voting is running now, through October 11, and election day is October 26 — either one works, and you only vote once. You can also still appoint a proxy. Mail-in applications closed on September 24; if you already have a package it must arrive by noon on October 14.";
-    case "election-day-only":
-      return "Advance voting and mail-in applications have closed. Election day is October 26, 10 a.m. to 8 p.m., at the voting place assigned to your address. If you can't get there yourself, you can still appoint an eligible voter as your proxy — the form is certified by the City Clerk up to 4:30 p.m. on election day, and on election day itself only at Toronto City Hall.";
+    case "election-day-only": {
+      const mailStillDue =
+        now < MAIL_RETURN_DUE
+          ? " If you are holding a mail-in package, it is not too late: Toronto Elections must receive it by noon on October 14 — received, not postmarked."
+          : "";
+      return `Advance voting and mail-in applications have closed. Election day is October 26, 10 a.m. to 8 p.m., at the voting place assigned to your address. If you can't get there yourself, you can still appoint an eligible voter as your proxy — the form is certified by the City Clerk up to 4:30 p.m. on election day, and on election day itself only at Toronto City Hall.${mailStillDue}`;
+    }
     case "over":
       return "Voting in the 2026 election has closed. Election day was October 26, 2026.";
   }
@@ -238,7 +253,7 @@ export function getVotingSteps(now: Date = new Date()): VotingStep[] {
     },
     {
       title: "Pick how you want to vote",
-      body: waysToVoteBody(phase),
+      body: waysToVoteBody(phase, now.getTime()),
       action: waysToVoteAction(phase),
     },
     {

@@ -318,9 +318,10 @@ export default function AdvanceVotingPage() {
           <div className="px-6 py-12 md:px-14 md:py-14 border-t-2 md:border-t-0 md:border-l border-border-light bg-bg-alt flex flex-col justify-center">
             <p className="type-label text-accent mb-3.5">Other ways to vote</p>
             <p className="font-serif text-[1.15rem] leading-[1.45] max-w-[34ch] mb-6">
-              Advance voting is one of the ways. There is also election day
-              itself, and voting by mail &mdash; which has the earliest
-              deadline of the three.
+              Advance voting is one of four. There is also election day
+              itself, voting by mail &mdash; which has the earliest deadline
+              of the four &mdash; and appointing a proxy if you can&rsquo;t
+              get to a voting place yourself.
             </p>
             <div className="flex flex-wrap gap-3">
               <Button as="link" variant="ghost" href={KEY_DATES_PATH}>

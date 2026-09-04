@@ -255,7 +255,7 @@ export default async function WhenIsTheTorontoElectionPage() {
               You don&rsquo;t have to wait for October 26
             </h2>
             <p className="font-serif text-[1.1rem] leading-[1.5] max-w-[58ch] text-text-secondary">
-              Two of the three ways to vote close before election day, and the
+              Two of the four ways to vote close before election day, and the
               earliest deadline is the one people miss.
             </p>
           </div>
@@ -290,6 +290,22 @@ export default async function WhenIsTheTorontoElectionPage() {
               </div>
             ))}
           </div>
+          {/* The fourth way. It gets a line rather than a card because it is
+              the only one with no date of its own and no page of ours to send
+              people to — but leaving it out of a section that compares methods
+              would tell a reader who cannot get to a voting place that they
+              have run out of options, which is false. */}
+          <p className="px-6 md:px-14 py-8 border-t border-border-light font-serif text-[1.05rem] leading-[1.5] text-text-secondary max-w-[62ch]">
+            There is a fourth way. If you can&rsquo;t get to a voting place
+            yourself, you can appoint another eligible Toronto voter as your
+            proxy &mdash; the form is certified by the City Clerk up to 4:30
+            p.m. on election day, and on election day itself only at Toronto
+            City Hall.{" "}
+            <InlineLink href={HOW_TO_VOTE_PATH}>
+              How voting by proxy works
+            </InlineLink>
+            .
+          </p>
         </section>
 
         {/* ── Who's on the ballot ──────────────────────────────── */}
@@ -578,9 +594,11 @@ function InlineLink({
   );
 }
 
-/* The three ways to vote, as signposts rather than content. Two of them are
-   now their own pages; election day is this page, so its "link" is the City's
-   voting-place lookup instead of a self-reference. */
+/* Three of the four ways to vote, as signposts rather than content. Two of
+   them are now their own pages; election day is this page, so its "link" is
+   the City's voting-place lookup instead of a self-reference. Proxy voting is
+   the fourth, and it is a line under the grid instead of a card — it has no
+   date of its own to sit in the dateLine, and nowhere of ours to link to. */
 const WAYS_TO_VOTE: {
   title: string;
   dateLine: string;
@@ -594,7 +612,7 @@ const WAYS_TO_VOTE: {
     title: "Vote by mail",
     dateLine: "Apply by Sept 24, 4:30 p.m.",
     blurb:
-      "The earliest deadline of the three, and the only one you have to apply for. Two dates to keep: the application, and getting the ballot back by noon on October 14.",
+      "The earliest deadline of the four, and the only one you have to apply for. Two dates to keep: the application, and getting the ballot back by noon on October 14.",
     href: VOTE_BY_MAIL_PATH,
     linkLabel: "Mail-in deadlines",
     primary: true,

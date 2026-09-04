@@ -12,7 +12,7 @@ import { generateVotingEventSchema } from "@/lib/schemas/generators/event";
 import { breakdown, msUntil, periodTiming } from "@/lib/elections/dates";
 import { getToronto2026 } from "../data";
 import {
-  ALL_PERIODS,
+  ADVANCE_VOTING_PATH,
   ELECTION,
   ELECTION_DAY,
   FULL_CALENDAR,
@@ -20,8 +20,7 @@ import {
   KEY_DATES_PATH,
   MYVOTE_URL,
   SOURCE_URLS,
-  VOTING_PERIODS,
-  type VotingPeriod,
+  VOTE_BY_MAIL_PATH,
 } from "../key-dates";
 
 /* Internal destinations this page points at. Written once here rather than
@@ -59,18 +58,22 @@ export const metadata: Metadata = {
   },
 };
 
-/* The eight questions people actually type. Each answer is written to stand on
-   its own — repeating the date rather than saying "see above" — because these
-   are lifted verbatim into the FAQPage JSON-LD, where there is no "above".
+/* This page owns "when", and only "when".
+   
+   It used to answer eight questions covering early voting, mail deadlines,
+   eligibility and ID as well — which meant it was bidding against
+   /advance-voting, /vote-by-mail and /how-to-vote for queries those pages
+   answer in far more detail. Two of them ("do I need to register", "what ID
+   do I need") were near word-for-word duplicates of FAQs on /how-to-vote.
+   
+   What is left is date-shaped and unique to this page. Each answer still
+   stands on its own, repeating the date rather than saying "see above",
+   because these are lifted verbatim into the FAQPage JSON-LD where there is
+   no "above".
 
-   Eligibility, ID and same-day registration are summarised from the City
-   Clerk's own pages (linked in every answer); we are restating their rules,
-   not making our own.
-
-   `cta` renders as a link under the answer but is deliberately *not* folded
-   into the JSON-LD answer text — a schema answer that reads "click here" is
-   worse than one that doesn't, and Google strips the markup anyway. It exists
-   so a reader who came for a date leaves with somewhere to go next. */
+   `cta` renders as a link under the answer but is deliberately not folded
+   into the schema answer text — a schema answer that reads "click here" is
+   worse than one that doesn't, and Google strips the markup anyway. */
 const FAQS: {
   question: string;
   answer: string;
@@ -83,35 +86,23 @@ const FAQS: {
     cta: { label: "See every race on the 2026 ballot", href: LANDING_PATH },
   },
   {
-    question: "When can I vote early in Toronto?",
-    answer:
-      "Advance voting runs Tuesday, October 6 to Sunday, October 11, 2026, from 10 a.m. to 7 p.m. each day. Any eligible Toronto voter can use advance voting — you do not need a reason or an excuse to vote early.",
-  },
-  {
-    question: "What is the deadline to vote by mail in Toronto?",
-    answer:
-      "There are two deadlines. You must apply for a mail-in voting package by Thursday, September 24, 2026 at 4:30 p.m. Your completed package must then be received by Toronto Elections by Wednesday, October 14, 2026 at 12 p.m. (noon) — received, not postmarked, so mail it well in advance or use a drop-off location.",
-  },
-  {
     question: "What time do polls open and close on election day?",
     answer:
-      "Voting places are open from 10 a.m. to 8 p.m. on Monday, October 26, 2026. During advance voting, October 6 to 11, the hours are 10 a.m. to 7 p.m.",
+      "Voting places are open from 10 a.m. to 8 p.m. on Monday, October 26, 2026. Advance voting hours are different — 10 a.m. to 7 p.m., October 6 to 11.",
   },
   {
-    question: "Who can vote in the Toronto municipal election?",
+    question: "Can I vote before election day in Toronto?",
     answer:
-      "To vote you must be a Canadian citizen, at least 18 years old, and either a resident of Toronto or a non-resident who owns or rents property in Toronto (or whose spouse does) — and not prohibited from voting under any law.",
-    cta: { label: "The full step-by-step guide to voting", href: HOW_TO_VOTE_PATH },
+      "Yes, in two ways. Advance voting runs October 6 to 11, 2026, and is open to any eligible voter with no reason required. You can also vote by mail, but you have to apply for a package by September 24 at 4:30 p.m.",
+    cta: {
+      label: "Advance voting dates and places",
+      href: ADVANCE_VOTING_PATH,
+    },
   },
   {
-    question: "Do I need to register before I can vote?",
+    question: "How often are Toronto municipal elections held?",
     answer:
-      "You can check, add or update your information on the voters' list online through MyVote until Sunday, October 11, 2026 at 7 p.m. If you miss that, you have not lost your vote: you can still add your name to the voters' list in person during advance voting or on election day.",
-  },
-  {
-    question: "What ID do I need to bring to vote in Toronto?",
-    answer:
-      "Bring one piece of identification showing your name and your qualifying Toronto address. Photo ID is not required, and a wide range of documents qualify — a driver's licence, a utility bill, a bank statement, a lease, a pay stub, a property tax assessment. Note that your voter information card is not accepted as identification.",
+      "Every four years. Ontario municipal elections fall on the fourth Monday of October, which makes 2026's Monday, October 26. The previous one was October 24, 2022 and the next will be in 2030.",
   },
   {
     question: "Who is running for mayor and in my ward?",
@@ -148,18 +139,20 @@ export default async function WhenIsTheTorontoElectionPage() {
   const jsonLd = buildGraph(
     generateFAQPageSchema(FAQS),
     generateBreadcrumbSchema(CANONICAL, "When Is the Toronto Election?", siteUrl),
-    ...ALL_PERIODS.map((period) =>
-      generateVotingEventSchema({
-        name: `${period.title} — Toronto 2026 municipal election`,
-        description: period.blurb,
-        startDate: period.opensAt ?? period.closesAt,
-        endDate: period.closesAt,
-        url: `${siteUrl}${CANONICAL}`,
-        cityLabel: ELECTION.cityLabel,
-        organizerName: "City of Toronto Elections",
-        organizerUrl: SOURCE_URLS.city,
-      }),
-    ),
+    /* Election day only. The advance-voting and vote-by-mail periods are
+       described as Events on their own pages — emitting all four here as well
+       would put the same event on two URLs and have them bid against each
+       other. */
+    generateVotingEventSchema({
+      name: `${ELECTION_DAY.title} — Toronto 2026 municipal election`,
+      description: ELECTION_DAY.blurb,
+      startDate: ELECTION_DAY.opensAt ?? ELECTION_DAY.closesAt,
+      endDate: ELECTION_DAY.closesAt,
+      url: `${siteUrl}${CANONICAL}`,
+      cityLabel: ELECTION.cityLabel,
+      organizerName: "City of Toronto Elections",
+      organizerUrl: SOURCE_URLS.city,
+    }),
   );
 
   const electionDayTiming = periodTiming(ELECTION_DAY, absoluteNow);
@@ -250,30 +243,51 @@ export default async function WhenIsTheTorontoElectionPage() {
           </div>
         </section>
 
-        {/* ── The other three voting periods ───────────────────── */}
-        <section className="border-b-2 border-dark">
+        {/* ── The other ways, as signposts ─────────────────────── */}
+        {/* These used to be three live countdown cards. Advance voting and
+            vote-by-mail each have enough of their own detail — six days and a
+            separate set of places, two deadlines and a drop-box network — that
+            keeping them here buried the one fact most readers came for. They
+            are their own pages now, and this row is the signpost. */}
+        <section id="ways" className="border-b-2 border-dark scroll-mt-24">
           <div className="px-6 pt-12 pb-8 md:px-14">
             <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.9rem,3.2vw,2.5rem)] mb-2.5">
-              Every way to vote, and how long you have
+              You don&rsquo;t have to wait for October 26
             </h2>
             <p className="font-serif text-[1.1rem] leading-[1.5] max-w-[58ch] text-text-secondary">
-              Three deadlines fall before election day. Two of them are already
-              behind most people who wait for the campaign to get loud.
+              Two of the three ways to vote close before election day, and the
+              earliest deadline is the one people miss.
             </p>
           </div>
           <div className="grid md:grid-cols-3 border-t border-border-light">
-            {VOTING_PERIODS.map((period, i) => (
-              <PeriodCard
-                key={period.id}
-                period={period}
-                now={absoluteNow}
-                className={[
-                  cellPadding(i, VOTING_PERIODS.length),
-                  i > 0 && "border-t md:border-t-0 md:border-l border-border-light",
-                ]
-                  .filter(Boolean)
-                  .join(" ")}
-              />
+            {WAYS_TO_VOTE.map((way, i) => (
+              <div
+                key={way.title}
+                className={`px-6 py-11 flex flex-col ${cellPadding(i, WAYS_TO_VOTE.length)} ${
+                  i > 0
+                    ? "border-t md:border-t-0 md:border-l border-border-light"
+                    : ""
+                }`}
+              >
+                <h3 className="font-sans font-medium text-[1.2rem] leading-[1.25] tracking-[-0.02em] mb-2">
+                  {way.title}
+                </h3>
+                <p className="font-serif text-[1rem] leading-[1.4] text-accent mb-4">
+                  {way.dateLine}
+                </p>
+                <p className="font-serif text-[1rem] leading-[1.5] text-text-secondary flex-1 max-w-[42ch]">
+                  {way.blurb}
+                </p>
+                <div className="mt-7 self-start">
+                  <Button
+                    as={way.external ? "external-link" : "link"}
+                    variant={way.primary ? "auburn" : "ghost"}
+                    href={way.href}
+                  >
+                    {way.linkLabel}
+                  </Button>
+                </div>
+              </div>
             ))}
           </div>
         </section>
@@ -437,63 +451,6 @@ export default async function WhenIsTheTorontoElectionPage() {
           </p>
         </section>
 
-        {/* ── Three ways to vote ───────────────────────────────── */}
-        <section className="border-b-2 border-dark">
-          <div className="px-6 pt-12 pb-8 md:px-14">
-            <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.9rem,3.2vw,2.5rem)]">
-              Three ways to vote in Toronto
-            </h2>
-          </div>
-          <div className="grid md:grid-cols-3 border-t border-border-light">
-            <HowToVote
-              heading="On election day"
-              dateLine={`${ELECTION.voteDayLabel}, ${ELECTION.pollHoursLabel}`}
-              className={cellPadding(0, 3)}
-            >
-              <p>
-                Vote at your assigned voting place. Bring one piece of ID
-                showing your name and your Toronto address &mdash; photo ID is
-                not required, and a utility bill or bank statement is enough.
-              </p>
-              <p>
-                Your voter information card tells you where to go, but it is not
-                accepted as identification, so bring something else too.
-              </p>
-            </HowToVote>
-            <HowToVote
-              heading="Advance voting"
-              dateLine="Oct 6 – 11, 10 a.m. – 7 p.m. daily"
-              className={`${cellPadding(1, 3)} border-t md:border-t-0 md:border-l border-border-light`}
-            >
-              <p>
-                Six days of early voting, open to every eligible voter with no
-                reason required. Advance voting places are usually fewer and
-                busier than election-day ones, so check the location before you
-                travel.
-              </p>
-              <p>
-                If you are not on the voters&rsquo; list, you can be added in
-                person when you arrive.
-              </p>
-            </HowToVote>
-            <HowToVote
-              heading="By mail"
-              dateLine="Apply by Sept 24 · return by Oct 14, noon"
-              className={`${cellPadding(2, 3)} border-t md:border-t-0 md:border-l border-border-light`}
-            >
-              <p>
-                Request a package through MyVote by September 24 at 4:30 p.m.
-                Toronto Elections must then physically receive your completed
-                ballot by noon on October 14.
-              </p>
-              <p>
-                That second date is the one people miss: a ballot postmarked
-                October 13 that arrives October 15 does not count.
-              </p>
-            </HowToVote>
-          </div>
-        </section>
-
         {/* ── FAQ ──────────────────────────────────────────────── */}
         <section id="faq" className="border-b-2 border-dark scroll-mt-24">
           <div className="px-6 pt-12 pb-8 md:px-14">
@@ -621,6 +578,46 @@ function InlineLink({
   );
 }
 
+/* The three ways to vote, as signposts rather than content. Two of them are
+   now their own pages; election day is this page, so its "link" is the City's
+   voting-place lookup instead of a self-reference. */
+const WAYS_TO_VOTE: {
+  title: string;
+  dateLine: string;
+  blurb: string;
+  href: string;
+  linkLabel: string;
+  external?: boolean;
+  primary?: boolean;
+}[] = [
+  {
+    title: "Vote by mail",
+    dateLine: "Apply by Sept 24, 4:30 p.m.",
+    blurb:
+      "The earliest deadline of the three, and the only one you have to apply for. Two dates to keep: the application, and getting the ballot back by noon on October 14.",
+    href: VOTE_BY_MAIL_PATH,
+    linkLabel: "Mail-in deadlines",
+    primary: true,
+  },
+  {
+    title: "Advance voting",
+    dateLine: "Oct 6 – 11, 10 a.m. – 7 p.m.",
+    blurb:
+      "Six days of early voting, weekend included, open to every eligible voter with no reason required. The places are not the same as election day's.",
+    href: ADVANCE_VOTING_PATH,
+    linkLabel: "Advance voting dates",
+  },
+  {
+    title: "On election day",
+    dateLine: `${ELECTION.voteDayLabel}, ${ELECTION.pollHoursLabel}`,
+    blurb:
+      "The main day, and the one counted down above. Vote at the place assigned to your address, and bring one piece of ID with your name and Toronto address on it.",
+    href: MYVOTE_URL,
+    linkLabel: "Find your voting place",
+    external: true,
+  },
+];
+
 /* Horizontal padding for a cell in a full-bleed three-up grid. The dividers
    run edge to edge, but the first and last cells have to inset to md:px-14 —
    the gutter every other section on this page uses — or their content sits
@@ -631,98 +628,4 @@ function cellPadding(index: number, total: number): string {
   const left = index === 0 ? "md:pl-14" : "md:pl-9";
   const right = index === total - 1 ? "md:pr-14" : "md:pr-9";
   return `${left} ${right}`;
-}
-
-function PeriodCard({
-  period,
-  now,
-  className = "",
-}: {
-  period: VotingPeriod;
-  now: Date;
-  className?: string;
-}) {
-  const timing = periodTiming(period, now);
-  const initialParts = breakdown(
-    timing.targetInstant ? msUntil(timing.targetInstant, now) : 0,
-  );
-
-  return (
-    <div className={`px-6 py-11 flex flex-col ${className}`}>
-      <div className="flex items-center gap-3 mb-5">
-        <h3 className="font-sans font-medium text-[1.2rem] leading-[1.25] tracking-[-0.02em]">
-          {period.title}
-        </h3>
-        {/* Only a real window can be "open now". A pure deadline (no opensAt)
-            is live from the moment the page exists, so the pill would be
-            meaningless on it. */}
-        {timing.state === "open" && period.opensAt && (
-          <span className="type-label-sm !tracking-[0.1em] text-bg bg-accent px-2 py-1 whitespace-nowrap">
-            Open now
-          </span>
-        )}
-      </div>
-
-      <LiveCountdown
-        opensAt={period.opensAt}
-        closesAt={period.closesAt}
-        initialParts={initialParts}
-        initialState={timing.state}
-        labels={{
-          upcoming: period.upcomingLabel,
-          open: period.openLabel,
-          closed: period.closedLabel,
-        }}
-      />
-
-      <p className="mt-6 font-serif text-[1rem] leading-[1.4] text-accent">
-        {period.dateLabel}
-        {period.hoursLabel && (
-          <span className="block text-text-secondary">{period.hoursLabel}</span>
-        )}
-      </p>
-      <p className="mt-4 font-serif text-[1rem] leading-[1.5] text-text-secondary flex-1">
-        {period.blurb}
-      </p>
-      {/* Solid while the period is actually open, outlined otherwise — so the
-          one thing a reader can act on today is the one that draws the eye. */}
-      <div className="mt-7 self-start">
-        <Button
-          as="external-link"
-          variant={
-            timing.state === "open" && period.opensAt ? "auburn" : "ghost"
-          }
-          href={period.href}
-        >
-          {period.hrefLabel}
-        </Button>
-      </div>
-    </div>
-  );
-}
-
-function HowToVote({
-  heading,
-  dateLine,
-  children,
-  className = "",
-}: {
-  heading: string;
-  dateLine: string;
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={`px-6 py-11 ${className}`}>
-      <h3 className="font-sans font-medium text-[1.2rem] leading-[1.25] tracking-[-0.02em] mb-2">
-        {heading}
-      </h3>
-      <p className="font-serif text-[1rem] leading-[1.4] text-accent mb-5">
-        {dateLine}
-      </p>
-      <div className="font-serif text-[1.05rem] leading-[1.5] text-text-secondary space-y-3.5">
-        {children}
-      </div>
-    </div>
-  );
 }

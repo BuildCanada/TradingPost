@@ -33,6 +33,13 @@ function at(iso: string, time: string): string {
 
 export const KEY_DATES_PATH = "/toronto/vote/2026/when-is-the-election";
 export const HOW_TO_VOTE_PATH = "/toronto/vote/2026/how-to-vote";
+/* The two voting periods that used to be countdown cards on the key-dates
+   page. Each has enough of its own detail — two deadlines and a drop-box
+   network for mail, six days and a separate set of places for advance — that
+   the one page could not hold all of it without burying the thing most people
+   came for, which is the date of election day. */
+export const ADVANCE_VOTING_PATH = "/toronto/vote/2026/advance-voting";
+export const VOTE_BY_MAIL_PATH = "/toronto/vote/2026/vote-by-mail";
 
 const CITY_ELECTIONS_URL = "https://www.toronto.ca/city-government/elections/";
 const MAIL_IN_URL =
@@ -137,7 +144,7 @@ export const VOTING_PERIODS: VotingPeriod[] = [
     dateLabel: ELECTION.advanceVote!.label,
     hoursLabel: "10 a.m. – 7 p.m. daily",
     blurb:
-      "Six days of early voting. Any Toronto resident can vote at any advance voting place in their ward — no reason needed.",
+      "Six days of early voting, open to every eligible voter with no reason or excuse required. Advance voting places are separate from election-day ones, so check yours before you travel.",
     upcomingLabel: "Until advance polls open",
     openLabel: "Left to vote early",
     closedLabel: "Advance voting has closed",
@@ -163,6 +170,15 @@ export const VOTING_PERIODS: VotingPeriod[] = [
 
 /** Every period the page counts down, election day last. */
 export const ALL_PERIODS: VotingPeriod[] = [...VOTING_PERIODS, ELECTION_DAY];
+
+/** One period by id. Throws rather than returning undefined: every caller is
+ *  a page that cannot render without it, so a missing id is a build-time bug
+ *  and should read like one instead of a blank countdown. */
+export function votingPeriod(id: VotingPeriod["id"]): VotingPeriod {
+  const found = ALL_PERIODS.find((p) => p.id === id);
+  if (!found) throw new Error(`key-dates has no "${id}" period`);
+  return found;
+}
 
 /** One row of the full calendar table. Includes milestones with no countdown
  *  (nominations, the voters'-list dates) — they still answer real queries. */

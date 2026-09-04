@@ -11,7 +11,12 @@ import { getAllBillsFromDB } from "@/app/bills/server/get-all-bills-from-db";
 import { buildAbsoluteUrl } from "@/app/bills/utils/basePath";
 import { SECTIONS as ECONOMIC_SECTIONS } from "@/app/state-of-the-nation/indicators";
 import { WARD_NUMBERS } from "@/app/toronto/vote/2026/data";
-import { HOW_TO_VOTE_PATH, KEY_DATES_PATH } from "@/app/toronto/vote/2026/key-dates";
+import {
+  ADVANCE_VOTING_PATH,
+  HOW_TO_VOTE_PATH,
+  KEY_DATES_PATH,
+  VOTE_BY_MAIL_PATH,
+} from "@/app/toronto/vote/2026/key-dates";
 
 function toValidDate(value?: Date | string): Date | undefined {
   if (!value) return undefined;
@@ -63,6 +68,20 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       url: `${baseUrl}${HOW_TO_VOTE_PATH}`,
       lastModified: new Date(),
       changeFrequency: "weekly",
+      priority: 0.8,
+    },
+    // The two voting periods that used to live on the key-dates page. "daily"
+    // like that page: both carry live countdowns to a deadline.
+    {
+      url: `${baseUrl}${ADVANCE_VOTING_PATH}`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}${VOTE_BY_MAIL_PATH}`,
+      lastModified: new Date(),
+      changeFrequency: "daily",
       priority: 0.8,
     },
     {

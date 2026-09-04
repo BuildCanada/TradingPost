@@ -14,10 +14,12 @@
 //   https://www.toronto.ca/city-government/elections/voter-information/voting-options/
 
 import {
+  ADVANCE_VOTING_PATH,
   ELECTION_DAY,
   MYVOTE_URL,
   SOURCE_URLS,
-  VOTING_PERIODS,
+  VOTE_BY_MAIL_PATH,
+  votingPeriod,
 } from "./key-dates";
 
 /** Every condition a voter has to meet — all of them, not any of them. */
@@ -124,19 +126,13 @@ export type VotingStep = {
 
 const instant = (iso: string) => new Date(iso).getTime();
 
-const period = (id: (typeof VOTING_PERIODS)[number]["id"]) => {
-  const found = VOTING_PERIODS.find((p) => p.id === id);
-  if (!found) throw new Error(`key-dates is missing the "${id}" period`);
-  return found;
-};
-
 /** Sept 24, 4:30 p.m. — last moment to request a mail-in package. */
-const MAIL_APPLY_CLOSES = instant(period("mail-in-apply").closesAt);
+const MAIL_APPLY_CLOSES = instant(votingPeriod("mail-in-apply").closesAt);
 /** Oct 6, 10 a.m. — advance voting places open. */
-const ADVANCE_OPENS = instant(period("advance").opensAt!);
+const ADVANCE_OPENS = instant(votingPeriod("advance").opensAt!);
 /** Oct 11, 7 p.m. — advance voting closes, and the same instant is the
  *  deadline to check or update the voters' list online. */
-const ONLINE_REGISTRATION_CLOSES = instant(period("advance").closesAt);
+const ONLINE_REGISTRATION_CLOSES = instant(votingPeriod("advance").closesAt);
 /** Oct 26, 8 p.m. — polls close. */
 const POLLS_CLOSE = instant(ELECTION_DAY.closesAt);
 
@@ -195,9 +191,16 @@ function waysToVoteAction(phase: Phase): VotingStep["action"] {
   if (phase === "over") return undefined;
   if (phase === "before-mail-deadline") {
     return {
-      label: "Apply to vote by mail",
-      href: SOURCE_URLS.mailIn,
-      external: true,
+      label: "Mail-in deadlines and how to apply",
+      href: VOTE_BY_MAIL_PATH,
+      external: false,
+    };
+  }
+  if (phase === "mail-closed") {
+    return {
+      label: "Advance voting dates and places",
+      href: ADVANCE_VOTING_PATH,
+      external: false,
     };
   }
   return {

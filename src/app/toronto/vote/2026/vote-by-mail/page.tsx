@@ -161,10 +161,15 @@ export default function VoteByMailPage() {
         </section>
 
         {/* ── The two deadlines ────────────────────────────────── */}
+        {/* Stated as dates, not as clocks. These cards each had their own
+            countdown, which put three running timers on one page and made the
+            hero's — the only one a reader needs, since it always shows the
+            deadline that is still live — compete with two smaller copies of
+            itself. */}
         <section id="deadlines" className="border-b-2 border-dark scroll-mt-24">
           <div className="px-6 pt-12 pb-8 md:px-14">
             <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.9rem,3.2vw,2.5rem)] mb-2.5">
-              Two deadlines, and the second one catches people
+              Two important deadlines
             </h2>
             <p className="font-serif text-[1.1rem] leading-[1.5] max-w-[58ch] text-text-secondary">
               Applying on time is the easy half. Getting the ballot back in
@@ -177,25 +182,23 @@ export default function VoteByMailPage() {
               <h3 className="font-sans font-medium text-[1.3rem] leading-[1.2] tracking-[-0.02em] mb-3">
                 Apply by Thu, Sept 24, 4:30 p.m.
               </h3>
-              <p className="font-serif text-[1.05rem] leading-[1.5] text-text-secondary max-w-[44ch] mb-6">
+              <p className="font-serif text-[1.05rem] leading-[1.5] text-text-secondary max-w-[44ch]">
                 Applications opened September 1. Request the package through
                 MyVote or by phone. After 4:30 p.m. on September 24 no more
                 packages are issued, and mail is off the table for this
                 election.
               </p>
-              <PeriodCountdown period={APPLY} now={now} size="md" />
             </div>
             <div className="px-6 py-11 md:pl-9 md:pr-14 border-t md:border-t-0 md:border-l border-border-light">
               <p className="type-label text-accent mb-3">Deadline two</p>
               <h3 className="font-sans font-medium text-[1.3rem] leading-[1.2] tracking-[-0.02em] mb-3">
                 Received by Wed, Oct 14, noon
               </h3>
-              <p className="font-serif text-[1.05rem] leading-[1.5] text-text-secondary max-w-[44ch] mb-6">
+              <p className="font-serif text-[1.05rem] leading-[1.5] text-text-secondary max-w-[44ch]">
                 Toronto Elections must physically have your package by 12 p.m.
                 &mdash; not have it postmarked by then. A ballot mailed on
                 October 13 that lands on October 15 is not counted.
               </p>
-              <PeriodCountdown period={RETURN} now={now} size="md" />
             </div>
           </div>
         </section>

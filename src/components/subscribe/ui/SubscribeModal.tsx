@@ -1,11 +1,14 @@
 "use client";
 
 import { Dialog } from "@base-ui/react/dialog";
+import { usePathname } from "next/navigation";
 import { useSubscribeStore } from "../store";
 import { SubscribeForm } from "./SubscribeForm";
 import { SubscribeSuccess } from "./SubscribeSuccess";
 
 export function SubscribeModal() {
+  const pathname = usePathname();
+  const isToronto = pathname?.startsWith("/toronto") ?? false;
   const isOpen = useSubscribeStore((s) => s.isOpen);
   const subscribed = useSubscribeStore((s) => s.subscribed);
   const triggerSource = useSubscribeStore((s) => s.triggerSource);
@@ -39,7 +42,9 @@ export function SubscribeModal() {
             ) : (
               <>
                 <Dialog.Description className="type-body" style={{ marginBottom: "clamp(0.375rem, 1.5vw, 0.75rem)" }}>
-                  One email a week: new memos, the ideas behind them, and what we&rsquo;re working on 🏗️🇨🇦
+                  {isToronto
+                    ? "Receive all of the important updates regarding the upcoming Toronto Election to inform your vote 🗳️"
+                    : "One email a week: new memos, the ideas behind them, and what we’re working on 🏗️🇨🇦"}
                 </Dialog.Description>
                 <p className="type-label font-bold text-charcoal-600">
                   Over 10,000 subscribers

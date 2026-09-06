@@ -19,7 +19,8 @@ export async function fetchPolls() {
 
 export async function fetchPoll(slug: string) {
   return mapArticleDetail(await apiFetch<YFPollDetail>(`/polls/${slug}`, {
-    revalidate: 300,
+    // Generated assets can finish between requests; never cache a stale download set.
+    revalidate: 0,
     tags: [`poll:${slug}`],
   }));
 }

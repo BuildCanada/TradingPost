@@ -7,6 +7,7 @@ export const POLL_DOWNLOAD_ASSETS = new Set([
   "crosstabs_pdf_en",
   "crosstabs_pdf_fr",
   "crosstabs_json",
+  "crosstabs_xlsx",
 ]);
 
 export const POLL_DOWNLOAD_LABELS = {
@@ -14,6 +15,7 @@ export const POLL_DOWNLOAD_LABELS = {
   analysis_pdf: "Analysis (PDF)",
   crosstabs_pdf: "Crosstabs (PDF)",
   crosstabs_json: "Crosstabs (JSON)",
+  crosstabs_xlsx: "Crosstabs (Excel)",
 };
 
 export function mapPollDownloads(

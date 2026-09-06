@@ -15,6 +15,7 @@ for (const locale of ["en", "fr"]) {
       crosstabs_pdf: `${upstream}crosstabs_pdf_${locale}${query}`,
       analysis_markdown: `${upstream}analysis_markdown${query}`,
       crosstabs_json: `${upstream}crosstabs_json${query}`,
+      crosstabs_xlsx: `${upstream}crosstabs_xlsx${query}`,
     });
     assert.deepEqual(Object.keys(downloads).sort(), Object.keys(POLL_DOWNLOAD_LABELS).sort());
     for (const kind of Object.keys(POLL_DOWNLOAD_LABELS) as (keyof typeof POLL_DOWNLOAD_LABELS)[]) {

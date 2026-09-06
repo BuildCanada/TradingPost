@@ -153,7 +153,10 @@ export async function ArticlePage({ slug, kind }: { slug: string; kind: "memos" 
 
   const sidebar = (
     <div className="space-y-5">
-      <ShareSection title={article.title} url={fullUrl} />
+      <div className="space-y-3">
+        <ShareSection title={article.title} url={fullUrl} />
+        {article.poll && <PollDownloads poll={article.poll} />}
+      </div>
       <MemoSubscribe />
     </div>
   );
@@ -202,12 +205,13 @@ export async function ArticlePage({ slug, kind }: { slug: string; kind: "memos" 
           headings={headings}
           shareTitle={article.title}
           shareUrl={fullUrl}
+          afterShare={article.poll ? <PollDownloads poll={article.poll} /> : undefined}
         />
 
         <article className="w-full min-w-0 max-w-[720px]" data-memo-content>
           {keyMessages.length > 0 && (
             <div className="mb-8 p-6 border-[3px] border-double border-border-light bg-[#f0e5dc] space-y-4">
-              <span className="type-label block mb-3">Key Messages</span>
+              <span className="type-label block mb-3">{kind === "polls" ? "Key Takeaways" : "Key Messages"}</span>
               {keyMessages.map((msg, i) => (
                 <div key={i} className="flex items-start gap-4 type-body">
                   <span className="type-label mt-2 shrink-0">
@@ -219,7 +223,6 @@ export async function ArticlePage({ slug, kind }: { slug: string; kind: "memos" 
             </div>
           )}
 
-          {article.poll && <PollDownloads poll={article.poll} />}
           <ArticleBody html={bodyHtml} />
           {article.poll && <PollSupportingContent poll={article.poll} />}
 

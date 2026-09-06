@@ -1,39 +1,13 @@
-import { POLL_DOWNLOAD_LABELS } from "@/lib/polls/downloads";
 import type { YFPollPublication } from "@/lib/api/types";
 import { ArticleBody } from "./ArticleBody";
 
 export function PollDownloads({ poll }: { poll: YFPollPublication }) {
+  const { analysis_pdf, crosstabs_json, crosstabs_xlsx } = poll.downloads;
   return (
-    <section
-      aria-label="Poll information"
-      className="mb-8 border border-border-light p-5 space-y-3"
-    >
-      <p className="type-label">Poll analysis</p>
-      {poll.pollster && <p>Conducted by {poll.pollster}</p>}
-      {poll.sample_size != null && (
-        <p>Sample: {poll.sample_size.toLocaleString("en-CA")}</p>
-      )}
-      {(poll.fieldwork_start || poll.fieldwork_end) && (
-        <p>
-          Fieldwork:{" "}
-          {[poll.fieldwork_start, poll.fieldwork_end]
-            .filter(Boolean)
-            .join(" – ")}
-        </p>
-      )}
-      <ul className="flex flex-wrap gap-4">
-        {Object.entries(POLL_DOWNLOAD_LABELS).map(([key, label]) => {
-          const url = poll.downloads[key as keyof typeof POLL_DOWNLOAD_LABELS];
-          return url ? (
-            <li key={key}>
-              <a href={url} className="underline">
-                {label}
-              </a>
-            </li>
-          ) : null;
-        })}
-      </ul>
-    </section>
+    <div className="space-y-2 text-sm">
+      {analysis_pdf && <p><a href={analysis_pdf} className="underline">Download Report (PDF)</a></p>}
+      {(crosstabs_json || crosstabs_xlsx) && <p>Download Crosstabs ({crosstabs_json && <a href={crosstabs_json} className="underline">JSON</a>}{crosstabs_json && crosstabs_xlsx && ", "}{crosstabs_xlsx && <a href={crosstabs_xlsx} className="underline">Excel</a>})</p>}
+    </div>
   );
 }
 

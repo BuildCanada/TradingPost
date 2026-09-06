@@ -32,7 +32,7 @@ export interface YFPollPublication {
   methodology_markdown: string | null;
   news_release: string;
   news_release_markdown: string | null;
-  downloads: Partial<Record<"analysis_markdown" | "analysis_pdf" | "crosstabs_pdf" | "crosstabs_json", string>>;
+  downloads: Partial<Record<"analysis_markdown" | "analysis_pdf" | "crosstabs_pdf" | "crosstabs_json" | "crosstabs_xlsx", string>>;
 }
 
 export interface YFArticle {

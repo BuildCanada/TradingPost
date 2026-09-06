@@ -1,3 +1,8 @@
+import { ArticleBody } from "@/components/content/ArticleBody";
+import {
+  PollDownloads,
+  PollSupportingContent,
+} from "@/components/content/PollDetails";
 import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
 import { fetchMemo, fetchMemos, getSiteConfig } from "@/lib/api";
@@ -107,16 +112,16 @@ export default async function MemoDetailPage({
   // A memo is a draft when it has no publish date, or one scheduled in the
   // future. The preview banner is for genuine drafts only — not every memo an
   // admin happens to be viewing.
-  const isDraft =
-    !memo.publishedAt || new Date(memo.publishedAt) > new Date();
+  const isDraft = !memo.publishedAt || new Date(memo.publishedAt) > new Date();
 
-  const date = new Date(
-    memo.publishedAt || memo.createdAt
-  ).toLocaleDateString("en-CA", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
+  const date = new Date(memo.publishedAt || memo.createdAt).toLocaleDateString(
+    "en-CA",
+    {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    },
+  );
 
   const configData = getSiteConfig();
 
@@ -143,13 +148,18 @@ export default async function MemoDetailPage({
         xUrl: memo.author.xUrl,
         linkedinUrl: memo.author.linkedinUrl,
       },
-      configData
+      configData,
     ),
-    generateBreadcrumbSchema(`/memos/${memo.slug}`, memo.title, configData.siteUrl)
+    generateBreadcrumbSchema(
+      `/memos/${memo.slug}`,
+      memo.title,
+      configData.siteUrl,
+    ),
   );
 
   const sameCategory = allMemos.filter(
-    (m) => m.slug !== memo.slug && memo.category && m.category === memo.category,
+    (m) =>
+      m.slug !== memo.slug && memo.category && m.category === memo.category,
   );
   const hasSameCategory = sameCategory.length > 0;
   const relatedMemos = hasSameCategory
@@ -165,6 +175,10 @@ export default async function MemoDetailPage({
   );
 
   const { headings, html: bodyHtml } = extractHeadings(memo.body);
+  if (memo.poll?.methodology)
+    headings.push({ id: "poll-methodology", text: "Methodology", level: 2 });
+  if (memo.poll?.news_release)
+    headings.push({ id: "poll-news-release", text: "News release", level: 2 });
 
   return (
     <div className="mx-[10px] my-[10px] border border-border-light bg-bg">
@@ -201,40 +215,42 @@ export default async function MemoDetailPage({
         className="animate-fade-in max-w-[1400px] mx-auto px-[5vw] md:px-[10vw] pt-4 pb-[52px] 2xl-memo:grid 2xl-memo:grid-cols-[240px_minmax(0,1fr)] 2xl-memo:gap-12"
         style={{ animationDelay: "0.3s" }}
       >
-        <Signpost headings={headings} shareTitle={memo.title} shareUrl={fullUrl} />
+        <Signpost
+          headings={headings}
+          shareTitle={memo.title}
+          shareUrl={fullUrl}
+        />
 
         <article className="max-w-[720px]" data-memo-content>
-          <div className="mb-8 p-6 border-[3px] border-double border-border-light bg-[#f0e5dc] space-y-4">
-            <span className="type-label block mb-3">
-              Key Messages
-            </span>
-            {keyMessages.map((msg, i) => (
-              <div
-                key={i}
-                className="flex items-start gap-4 type-body"
-              >
-                <span className="type-label mt-2 shrink-0">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <p>{msg}</p>
-              </div>
-            ))}
-          </div>
+          {keyMessages.length > 0 && (
+            <div className="mb-8 p-6 border-[3px] border-double border-border-light bg-[#f0e5dc] space-y-4">
+              <span className="type-label block mb-3">Key Messages</span>
+              {keyMessages.map((msg, i) => (
+                <div key={i} className="flex items-start gap-4 type-body">
+                  <span className="type-label mt-2 shrink-0">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <p>{msg}</p>
+                </div>
+              ))}
+            </div>
+          )}
 
-          <div
-            className="prose-bc"
-            dangerouslySetInnerHTML={{ __html: bodyHtml }}
-          />
+          {memo.poll && <PollDownloads poll={memo.poll} />}
+          <ArticleBody html={bodyHtml} />
+          {memo.poll && <PollSupportingContent poll={memo.poll} />}
 
-          <MemoEngagement
-            memoSlug={memo.slug}
-            endorsementsCount={memo.endorsementsCount}
-            critiquesCount={memo.critiquesCount}
-            recentEndorsers={memo.recentEndorsers}
-            critiques={memo.critiques}
-            signedIn={!!viewer}
-            engagementReady={viewer?.engagementReady ?? false}
-          />
+          {!memo.poll && (
+            <MemoEngagement
+              memoSlug={memo.slug}
+              endorsementsCount={memo.endorsementsCount}
+              critiquesCount={memo.critiquesCount}
+              recentEndorsers={memo.recentEndorsers}
+              critiques={memo.critiques}
+              signedIn={!!viewer}
+              engagementReady={viewer?.engagementReady ?? false}
+            />
+          )}
 
           <div className="print-hide 2xl-memo:hidden mt-10 pt-8 border-t border-border-light">
             {sidebar}

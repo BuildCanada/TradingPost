@@ -1,0 +1,25 @@
+{
+  "definition": {
+    "title": "Support for the proposal",
+    "data": "inline",
+    "y": ["percent"],
+    "types": ["discrete-bar", "stacked-discrete-bar"],
+    "sourceText": "Illustrative data — not a real poll",
+    "note": "Weighted percentages. Unweighted base: 1,000."
+  },
+  "dataset": {
+    "manifest": {
+      "name": "poll-example",
+      "timeGrain": "none",
+      "entity": { "label": "Answer", "labelPlural": "Answers" },
+      "columns": {
+        "percent": { "name": "Weighted percent", "type": "percentage", "shortUnit": "%", "decimals": 0 }
+      }
+    },
+    "rows": [
+      { "entity": "Support", "percent": 54 },
+      { "entity": "Oppose", "percent": 31 },
+      { "entity": "Unsure", "percent": 15 }
+    ]
+  }
+}

@@ -21,7 +21,22 @@ export interface YFAuthor {
   profile_photo_url?: string | null;
 }
 
+export interface YFPollPublication {
+  survey_slug: string;
+  survey_campaign_id: string | null;
+  pollster: string | null;
+  sample_size: number | null;
+  fieldwork_start: string | null;
+  fieldwork_end: string | null;
+  methodology: string;
+  methodology_markdown: string | null;
+  news_release: string;
+  news_release_markdown: string | null;
+  downloads: Partial<Record<"analysis_markdown" | "analysis_pdf" | "crosstabs_pdf" | "crosstabs_json", string>>;
+}
+
 export interface YFMemo {
+  content_kind?: "memo" | "poll";
   id: number;
   slug: string;
   title: string;
@@ -46,6 +61,10 @@ export interface YFMemoCritique {
 }
 
 export interface YFMemoDetail extends YFMemo {
+  body_markdown?: string | null;
+  appendix_markdown?: string | null;
+  supporters_markdown?: string | null;
+  poll?: YFPollPublication;
   body: string;
   appendix: string | null;
   supporters: string | null;

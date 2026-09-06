@@ -1,3 +1,5 @@
+import { ArticleBody } from "@/components/content/ArticleBody";
+import { PollDownloads, PollSupportingContent } from "@/components/content/PollDetails";
 import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
 import { fetchMemo, fetchMemos, getSiteConfig } from "@/lib/api";
@@ -212,10 +214,9 @@ export default async function TorontoMemoDetailPage({
             ))}
           </div>
 
-          <div
-            className="prose-bc"
-            dangerouslySetInnerHTML={{ __html: bodyHtml }}
-          />
+          {memo.poll && <PollDownloads poll={memo.poll} />}
+          <ArticleBody html={bodyHtml} />
+          {memo.poll && <PollSupportingContent poll={memo.poll} />}
 
           <div className="print-hide 2xl-memo:hidden mt-10 pt-8 border-t border-border-light">
             {sidebar}

@@ -26,23 +26,32 @@ interface MemoSerialized {
 function extractKeyMessages(raw: unknown[]): string[] {
   return raw.map((km) => {
     if (typeof km === "string") return km;
-    if (km && typeof km === "object" && "message" in km) return (km as { message: string }).message;
+    if (km && typeof km === "object" && "message" in km)
+      return (km as { message: string }).message;
     return String(km);
   });
 }
 
-function mapMemo(m: YFMemo & { key_messages?: unknown[] }, authorTitles: Map<string, string | null>): MemoSerialized {
+function mapMemo(
+  m: YFMemo & { key_messages?: unknown[] },
+  authorTitles: Map<string, string | null>,
+): MemoSerialized {
   const keyMessages = extractKeyMessages(m.key_messages ?? []);
   const authorName = m.author?.name ?? "Build Canada";
   const authorSlug = m.author?.slug ?? "";
-  const authorTitle = authorSlug ? (authorTitles.get(authorSlug) ?? null) : null;
+  const authorTitle = authorSlug
+    ? (authorTitles.get(authorSlug) ?? null)
+    : null;
   return {
     id: String(m.id),
     title: m.title,
     slug: m.slug,
     author: {
       name: authorName,
-      photo: authorName === "Build Canada" ? "/assets/logos/buildcanada-logo-square.svg" : (m.author?.profile_photo_url ?? null),
+      photo:
+        authorName === "Build Canada"
+          ? "/assets/logos/buildcanada-logo-square.svg"
+          : (m.author?.profile_photo_url ?? null),
       title: authorTitle,
     },
     keyMessage1: keyMessages[0] ?? null,
@@ -61,8 +70,10 @@ export async function fetchMemos(params?: {
   featured?: boolean;
   category?: string;
   publication?: string;
+  contentKind?: "memo" | "poll";
 }): Promise<MemoSerialized[]> {
   const queryParams: Record<string, string> = {};
+  if (params?.contentKind) queryParams.content_kind = params.contentKind;
   if (params?.featured) queryParams.featured = "true";
   if (params?.category) queryParams.category = params.category;
   if (params?.publication) queryParams.publication = params.publication;
@@ -104,7 +115,10 @@ export async function fetchMemos(params?: {
   return all.map((m) => mapMemo(m, authorTitles));
 }
 
-export async function fetchMemo(slug: string, params?: { publication?: string }) {
+export async function fetchMemo(
+  slug: string,
+  params?: { publication?: string },
+) {
   const queryParams: Record<string, string> = {};
   if (params?.publication) queryParams.publication = params.publication;
   const m = await apiFetch<YFMemoDetail>(`/memos/${slug}`, {
@@ -139,7 +153,10 @@ export async function fetchMemo(slug: string, params?: { publication?: string })
     author: {
       name: authorName,
       slug: authorSlug,
-      photo: authorName === "Build Canada" ? "/assets/logos/buildcanada-logo-square.svg" : (m.author?.profile_photo_url ?? null),
+      photo:
+        authorName === "Build Canada"
+          ? "/assets/logos/buildcanada-logo-square.svg"
+          : (m.author?.profile_photo_url ?? null),
       title: m.author_title ?? teamProfile?.title ?? null,
       bio: null as string | null,
       websiteUrl: null as string | null,
@@ -151,6 +168,24 @@ export async function fetchMemo(slug: string, params?: { publication?: string })
     keyMessage3: keyMessages[2] ?? null,
     keyMessages,
     body: m.body,
+    bodyMarkdown: m.body_markdown,
+    appendixMarkdown: m.appendix_markdown,
+    supportersMarkdown: m.supporters_markdown,
+    poll: m.poll
+      ? {
+          ...m.poll,
+          downloads: Object.fromEntries(
+            Object.entries(m.poll.downloads).map(([kind, url]) => {
+              const upstream = new URL(url);
+              const asset = upstream.pathname.split("/").at(-1)!;
+              return [
+                kind,
+                `/api/memos/${encodeURIComponent(m.slug)}/downloads/${encodeURIComponent(asset)}${upstream.search}`,
+              ];
+            }),
+          ),
+        }
+      : undefined,
     appendix: m.appendix,
     supporters: m.supporters,
     bannerImage: m.banner_image_url ?? null,

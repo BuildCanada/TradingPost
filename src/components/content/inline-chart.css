@@ -1,0 +1,23 @@
+/* Use the same licensed font file as the library's committed text metrics.
+   The rest of the site registers this file under an ASCII family name. */
+@font-face {
+  font-family: "Söhne Kräftig";
+  src: url("/assets/fonts/soehne-kraftig.woff2") format("woff2");
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+.poll-inline-chart {
+  --bcds2-font: var(--font-sans);
+}
+
+/* Bound the server-rendered SVG before ResizeObserver measures the column. */
+.poll-inline-chart svg {
+  max-width: 100%;
+  height: auto;
+}
+
+@media print {
+  .poll-inline-chart { break-inside: avoid; }
+}

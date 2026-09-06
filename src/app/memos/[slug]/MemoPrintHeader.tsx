@@ -5,7 +5,7 @@ interface MemoPrintHeaderProps {
   authorImage: string | null;
   date: string;
   url: string;
-  brand?: "canada" | "toronto";
+  brand?: "canada" | "toronto" | "polling";
 }
 
 /* Print-only header: Build Canada branding + memo meta. Hidden on screen
@@ -22,11 +22,11 @@ export function MemoPrintHeader({
   return (
     <div className="print-only mb-10 pb-5 border-b border-black">
       <div className="flex items-center justify-between mb-8">
-        {brand === "toronto" ? (
+        {brand === "toronto" || brand === "polling" ? (
           /* The nav's Toronto lockup: white wordmark + "Toronto" in the
              accent-blue box (see Navbar.tsx). Forced color-adjust so the
              box prints. */
-          <div className="theme-toronto bg-accent flex items-center gap-3 px-4 py-3 [-webkit-print-color-adjust:exact] [print-color-adjust:exact]">
+          <div className={`${brand === "toronto" ? "theme-toronto " : ""}bg-accent border-2 border-charcoal-1000 flex items-center gap-3 px-4 py-3 [-webkit-print-color-adjust:exact] [print-color-adjust:exact]`}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/assets/logos/logo-standard.svg"
@@ -35,9 +35,9 @@ export function MemoPrintHeader({
               height={40}
               className="h-[36px] w-auto"
             />
-            <span aria-hidden="true" className="self-stretch w-px bg-bg" />
-            <span className="font-sans font-medium text-bg text-[18px] leading-none whitespace-nowrap">
-              Toronto
+            <span aria-hidden="true" className="self-stretch w-px bg-white" />
+            <span className="font-sans font-medium text-white text-[18px] leading-none whitespace-nowrap">
+              {brand === "toronto" ? "Toronto" : "Polling"}
             </span>
           </div>
         ) : (

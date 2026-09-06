@@ -21,17 +21,36 @@ export interface YFAuthor {
   profile_photo_url?: string | null;
 }
 
-export interface YFMemo {
+export interface YFPollPublication {
+  survey_slug: string;
+  survey_campaign_id: string | null;
+  pollster: string | null;
+  sample_size: number | null;
+  fieldwork_start: string | null;
+  fieldwork_end: string | null;
+  methodology: string;
+  methodology_markdown: string | null;
+  news_release: string;
+  news_release_markdown: string | null;
+  downloads: Partial<Record<"analysis_markdown" | "analysis_pdf" | "crosstabs_pdf" | "crosstabs_json" | "crosstabs_xlsx", string>>;
+}
+
+export interface YFArticle {
   id: number;
   slug: string;
   title: string;
-  category: string | null;
   featured: boolean;
   published_at: string | null;
   seo_image_url: string | null;
   banner_image_url: string | null;
   author: YFAuthor;
 }
+
+export interface YFMemo extends YFArticle {
+  category: string | null;
+}
+
+export type YFPoll = YFArticle;
 
 export interface YFMemoEndorser {
   name: string;
@@ -46,6 +65,9 @@ export interface YFMemoCritique {
 }
 
 export interface YFMemoDetail extends YFMemo {
+  body_markdown?: string | null;
+  appendix_markdown?: string | null;
+  supporters_markdown?: string | null;
   body: string;
   appendix: string | null;
   supporters: string | null;
@@ -58,6 +80,18 @@ export interface YFMemoDetail extends YFMemo {
   critiques_count: number;
   recent_endorsers: YFMemoEndorser[];
   critiques: YFMemoCritique[];
+}
+
+export interface YFPollDetail extends YFPoll {
+  body: string;
+  body_markdown: string | null;
+  appendix: string | null;
+  appendix_markdown: string | null;
+  key_messages: string[];
+  twitter_embed: string | null;
+  author_name: string | null;
+  author_title: string | null;
+  poll: YFPollPublication;
 }
 
 export interface YFTeamMember {

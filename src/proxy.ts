@@ -19,6 +19,7 @@ const FLAG = "dashboard";
 export const config = {
   matcher: [
     "/memos/:path*",
+    "/polls/:path*",
     "/posts/:path*",
     "/builders/:path*",
     "/api/auth/me",
@@ -29,7 +30,7 @@ export const config = {
 
 // Detail pages of these content types have a markdown representation for LLM
 // agents, served by src/app/md/[...path]/route.ts. Single-segment slugs only.
-const MARKDOWN_CONTENT = /^\/(memos|posts|builders)\/([^/]+?)(\.md)?$/;
+const MARKDOWN_CONTENT = /^\/(memos|polls|posts|builders)\/([^/]+?)(\.md)?$/;
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -41,7 +42,7 @@ export async function proxy(req: NextRequest) {
   const markdown = resolveMarkdownRewrite(req);
   if (markdown) return markdown;
 
-  if (pathname.startsWith("/memos/") || pathname === "/api/auth/me") {
+  if (pathname.startsWith("/memos/") || pathname === "/polls" || pathname.startsWith("/polls/") || pathname === "/api/auth/me") {
     return renewSession(req);
   }
   return NextResponse.next();

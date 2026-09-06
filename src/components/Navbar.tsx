@@ -10,13 +10,30 @@ import { SOCIALS } from "@/constants/socials";
 import { NAV_LINKS, TORONTO_NAV_LINKS } from "@/constants/nav-links";
 
 export default function Navbar() {
+  const [viewer, setViewer] = useState<{ admin: boolean } | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [showEmoji, setShowEmoji] = useState(false);
   const hasScrolled = useRef(false);
   const openModal = useSubscribeStore((s) => s.openModal);
   const pathname = usePathname();
   const isToronto = pathname?.startsWith("/toronto") ?? false;
-  const navLinks = isToronto ? TORONTO_NAV_LINKS : NAV_LINKS;
+  const isPolling = viewer?.admin && (pathname === "/polls" || pathname?.startsWith("/polls/"));
+  const navLinks = (isToronto ? TORONTO_NAV_LINKS : NAV_LINKS).filter(
+    (link) => link.href !== "/polls" || viewer?.admin,
+  );
+  if (!viewer) navLinks.push({
+    label: "Log in",
+    href: `/api/auth/login?redirect=${encodeURIComponent(pathname || "/")}`,
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/auth/me", { cache: "no-store" })
+      .then((response) => response.ok ? response.json() : { user: null })
+      .then(({ user }) => { if (!cancelled) setViewer(user); })
+      .catch(() => { if (!cancelled) setViewer(null); });
+    return () => { cancelled = true; };
+  }, [pathname]);
   // full-screen page, no site chrome — every region's pledge page
   const isChromeless = isPledgePath(pathname);
 
@@ -39,10 +56,10 @@ export default function Navbar() {
   return (
     <nav className="border-y-2 border-border flex items-stretch sticky top-[10px] z-50 bg-bg">
       {/* Logo */}
-      {isToronto ? (
+      {isToronto || isPolling ? (
         <Link
-          href="/toronto"
-          className="theme-toronto bg-accent flex items-center gap-3 px-4 py-3 shrink-0 relative"
+          href={isToronto ? "/toronto" : "/polls"}
+          className={`${isToronto ? "theme-toronto " : ""}bg-accent flex items-center gap-3 px-4 py-3 shrink-0 relative`}
         >
           <Image
             src="/assets/logos/logo-standard.svg"
@@ -52,9 +69,9 @@ export default function Navbar() {
             className="h-[36px] w-auto"
             priority
           />
-          <span aria-hidden="true" className="self-stretch w-px bg-bg" />
-          <span className="font-sans font-medium text-bg text-[18px] leading-none whitespace-nowrap">
-            Toronto
+          <span aria-hidden="true" className="self-stretch w-px bg-white" />
+          <span className="font-sans font-medium text-white text-[18px] leading-none whitespace-nowrap">
+            {isToronto ? "Toronto" : "Polling"}
           </span>
         </Link>
       ) : (
@@ -82,7 +99,7 @@ export default function Navbar() {
       )}
 
       {/* Desktop links */}
-      <div className="hidden md:flex items-stretch border-r border-border">
+      <div className="hidden lg:flex items-stretch border-r border-border">
         {navLinks.map((link) =>
           link.external ? (
             <a
@@ -107,8 +124,8 @@ export default function Navbar() {
       </div>
 
       {/* Desktop right: social icons + subscribe */}
-      <div className="hidden md:flex items-center ml-auto">
-        <div className="hidden lg:flex items-center gap-1.5 px-4">
+      <div className="hidden lg:flex items-center ml-auto">
+        <div className="hidden 2xl:flex items-center gap-1.5 px-4">
           {SOCIALS.map(({ href, label, iconFile }) => (
             <a
               key={label}
@@ -138,7 +155,7 @@ export default function Navbar() {
 
       {/* Mobile hamburger */}
       <button
-        className="md:hidden ml-auto flex flex-col gap-1.5 justify-center px-5 border-l border-border hover:bg-dark transition-colors group"
+        className="lg:hidden ml-auto flex flex-col gap-1.5 justify-center px-5 border-l border-border hover:bg-dark transition-colors group"
         onClick={() => setMenuOpen(!menuOpen)}
         aria-label="Toggle menu"
       >
@@ -149,7 +166,7 @@ export default function Navbar() {
 
       {/* Mobile menu */}
       <div
-        className={`absolute top-full left-0 right-0 md:hidden z-50 grid transition-[grid-template-rows] duration-200 ease-out ${
+        className={`absolute top-full left-0 right-0 lg:hidden z-50 grid transition-[grid-template-rows] duration-200 ease-out ${
           menuOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
         }`}
       >

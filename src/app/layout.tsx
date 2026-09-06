@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PUBLICATION_FEEDS } from "@/lib/feeds";
 import Script from "next/script";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
@@ -51,6 +52,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        {PUBLICATION_FEEDS.map(({ file, title }) => (
+          <link key={file} rel="alternate" type="application/rss+xml" title={title} href={`/feeds/${file}`} />
+        ))}
+      </head>
       {GA_ID && (
         <>
           <Script

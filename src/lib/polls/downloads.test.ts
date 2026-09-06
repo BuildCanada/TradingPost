@@ -9,7 +9,7 @@ import {
 for (const locale of ["en", "fr"]) {
   test(`${locale} report display keys retain localized PDF URLs through the proxy`, () => {
     const query = `?locale=${locale}&publication=build_canada`;
-    const upstream = "https://yorkfactory.buildcanada.com/api/v1/memos/poll/downloads/";
+    const upstream = "https://yorkfactory.buildcanada.com/api/v1/polls/poll/downloads/";
     const downloads = mapPollDownloads("poll", {
       analysis_pdf: `${upstream}analysis_pdf_${locale}${query}`,
       crosstabs_pdf: `${upstream}crosstabs_pdf_${locale}${query}`,
@@ -19,7 +19,7 @@ for (const locale of ["en", "fr"]) {
     assert.deepEqual(Object.keys(downloads).sort(), Object.keys(POLL_DOWNLOAD_LABELS).sort());
     for (const kind of Object.keys(POLL_DOWNLOAD_LABELS) as (keyof typeof POLL_DOWNLOAD_LABELS)[]) {
       const asset = kind.endsWith("_pdf") ? `${kind}_${locale}` : kind;
-      assert.equal(downloads[kind], `/api/memos/poll/downloads/${asset}${query}`);
+      assert.equal(downloads[kind], `/api/polls/poll/downloads/${asset}${query}`);
       assert.ok(POLL_DOWNLOAD_ASSETS.has(asset), "displayed download is accepted by proxy");
     }
   });
@@ -27,10 +27,10 @@ for (const locale of ["en", "fr"]) {
 
 test("French requests preserve the API's English PDF fallback", () => {
   const downloads = mapPollDownloads("poll", {
-    analysis_pdf: "https://example.com/api/v1/memos/poll/downloads/analysis_pdf_en?locale=fr&publication=build_canada",
+    analysis_pdf: "https://example.com/api/v1/polls/poll/downloads/analysis_pdf_en?locale=fr&publication=build_canada",
   });
   assert.deepEqual(downloads, {
-    analysis_pdf: "/api/memos/poll/downloads/analysis_pdf_en?locale=fr&publication=build_canada",
+    analysis_pdf: "/api/polls/poll/downloads/analysis_pdf_en?locale=fr&publication=build_canada",
   });
   assert.deepEqual(mapPollDownloads("poll", {}), {});
 });

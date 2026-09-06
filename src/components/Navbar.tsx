@@ -82,7 +82,7 @@ export default function Navbar() {
       )}
 
       {/* Desktop links */}
-      <div className="hidden md:flex items-stretch border-r border-border">
+      <div className="hidden lg:flex items-stretch border-r border-border">
         {navLinks.map((link) =>
           link.external ? (
             <a
@@ -107,8 +107,8 @@ export default function Navbar() {
       </div>
 
       {/* Desktop right: social icons + subscribe */}
-      <div className="hidden md:flex items-center ml-auto">
-        <div className="hidden lg:flex items-center gap-1.5 px-4">
+      <div className="hidden lg:flex items-center ml-auto">
+        <div className="hidden 2xl:flex items-center gap-1.5 px-4">
           {SOCIALS.map(({ href, label, iconFile }) => (
             <a
               key={label}
@@ -138,7 +138,7 @@ export default function Navbar() {
 
       {/* Mobile hamburger */}
       <button
-        className="md:hidden ml-auto flex flex-col gap-1.5 justify-center px-5 border-l border-border hover:bg-dark transition-colors group"
+        className="lg:hidden ml-auto flex flex-col gap-1.5 justify-center px-5 border-l border-border hover:bg-dark transition-colors group"
         onClick={() => setMenuOpen(!menuOpen)}
         aria-label="Toggle menu"
       >
@@ -149,7 +149,7 @@ export default function Navbar() {
 
       {/* Mobile menu */}
       <div
-        className={`absolute top-full left-0 right-0 md:hidden z-50 grid transition-[grid-template-rows] duration-200 ease-out ${
+        className={`absolute top-full left-0 right-0 lg:hidden z-50 grid transition-[grid-template-rows] duration-200 ease-out ${
           menuOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
         }`}
       >

@@ -1,3 +1,4 @@
+import { fetchPoll } from "@/lib/api/polls";
 import { fetchMemo } from "@/lib/api/memos";
 import { fetchPost } from "@/lib/api/posts";
 import { fetchBuilder } from "@/lib/api/builders";
@@ -17,16 +18,17 @@ export type MarkdownContentBuilder = (
   slug: string,
 ) => Promise<MarkdownContentResult>;
 
-export async function memoMarkdown(
+async function articleMarkdown(
   slug: string,
+  kind: "memos" | "polls",
 ): Promise<MarkdownContentResult> {
-  const memo = await fetchMemo(slug);
+  const memo = await (kind === "polls" ? fetchPoll(slug) : fetchMemo(slug));
   if (memo.slug !== slug) {
-    return { kind: "redirect", location: `/memos/${memo.slug}.md` };
+    return { kind: "redirect", location: `/${kind}/${memo.slug}.md` };
   }
 
   const config = getSiteConfig();
-  const canonicalUrl = `${config.siteUrl}/memos/${memo.slug}`;
+  const canonicalUrl = `${config.siteUrl}/${kind}/${memo.slug}`;
   const convert = (html: string | null | undefined) =>
     html
       ? htmlToMarkdown(html, { baseUrl: config.siteUrl })
@@ -54,6 +56,7 @@ export async function memoMarkdown(
       {
         title: memo.title,
         slug: memo.slug,
+        path: `/${kind}/${memo.slug}`,
         keyMessage1: memo.keyMessage1,
         seoImage: memo.seoImage,
         publishedAt: memo.publishedAt ? new Date(memo.publishedAt) : null,
@@ -71,7 +74,7 @@ export async function memoMarkdown(
       },
       config,
     ),
-    generateBreadcrumbSchema(`/memos/${memo.slug}`, memo.title, config.siteUrl),
+    generateBreadcrumbSchema(`/${kind}/${memo.slug}`, memo.title, config.siteUrl),
   );
 
   const doc = buildMarkdownDocument({
@@ -185,7 +188,8 @@ export async function builderMarkdown(
 }
 
 export const markdownBuilders: Record<string, MarkdownContentBuilder> = {
-  memos: memoMarkdown,
+  memos: (slug) => articleMarkdown(slug, "memos"),
+  polls: (slug) => articleMarkdown(slug, "polls"),
   posts: postMarkdown,
   builders: builderMarkdown,
 };

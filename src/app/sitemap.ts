@@ -1,3 +1,4 @@
+import { fetchPolls } from "@/lib/api/polls";
 import type { MetadataRoute } from "next";
 import { fetchBuilders, fetchFeedItems, fetchMemos, fetchPosts } from "@/lib/api";
 import { PROJECTS } from "@/constants/projects";
@@ -233,6 +234,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...ministryPages,
     ...commitmentPages,
     ...builderPages,
+    ...(await fetchPolls()).map((poll) => ({
+      url: `${baseUrl}/polls/${poll.slug}`,
+      lastModified: poll.publishedAt ? new Date(poll.publishedAt) : new Date(),
+    })),
     ...memoPages,
     ...postPages,
     ...feedPages,

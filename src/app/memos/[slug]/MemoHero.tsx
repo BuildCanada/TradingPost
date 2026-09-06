@@ -1,3 +1,4 @@
+import { ArticleContainer } from "@/components/content/ArticleLayout";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -21,7 +22,7 @@ export function MemoHero({
   backLabel,
 }: MemoHeroProps) {
   return (
-    <div className="max-w-[1400px] mx-auto w-full px-[5vw] py-10 md:px-[10vw]">
+    <ArticleContainer className="py-10">
       {backHref && backLabel && (
         <Link
           href={backHref}
@@ -74,6 +75,6 @@ export function MemoHero({
         </div>
       )}
 
-    </div>
+    </ArticleContainer>
   );
 }

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { fetchMemos } from "@/lib/api/memos";
+import { fetchPolls } from "@/lib/api/polls";
 
 export const metadata: Metadata = {
   title: "Polls | Build Canada",
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default async function PollsPage() {
-  const polls = await fetchMemos({ contentKind: "poll" });
+  const polls = await fetchPolls();
   return (
     <main className="max-w-[1000px] mx-auto px-6 py-12">
       <h1 className="type-title-lg mb-4">Polls</h1>
@@ -22,7 +22,7 @@ export default async function PollsPage() {
           {polls.map((poll) => (
             <li key={poll.id} className="border-t border-border-light pt-6">
               <Link
-                href={`/memos/${poll.slug}`}
+                href={`/polls/${poll.slug}`}
                 className="type-title-sm hover:underline"
               >
                 {poll.title}

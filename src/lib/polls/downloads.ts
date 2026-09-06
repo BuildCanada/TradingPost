@@ -28,7 +28,7 @@ export function mapPollDownloads(
       const asset = upstream.pathname.split("/").at(-1)!;
       return [
         kind,
-        `/api/memos/${encodeURIComponent(slug)}/downloads/${encodeURIComponent(asset)}${upstream.search}`,
+        `/api/polls/${encodeURIComponent(slug)}/downloads/${encodeURIComponent(asset)}${upstream.search}`,
       ];
     }),
   );

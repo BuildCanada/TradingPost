@@ -11,7 +11,7 @@ export async function GET(
   if (!POLL_DOWNLOAD_ASSETS.has(asset)) return new Response("Not found", { status: 404 });
   const token = await primeAdminPreviewToken();
   const url = new URL(
-    `${API_URL}/memos/${encodeURIComponent(slug)}/downloads/${asset}`,
+    `${API_URL}/polls/${encodeURIComponent(slug)}/downloads/${asset}`,
   );
   const query = new URL(request.url).searchParams;
   for (const key of ["publication", "locale"]) {

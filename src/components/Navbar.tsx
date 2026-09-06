@@ -43,7 +43,7 @@ export default function Navbar() {
       {isToronto || isPolling ? (
         <Link
           href={isToronto ? "/toronto" : "/polls"}
-          className={`${isToronto ? "theme-toronto " : ""}bg-accent border-2 border-charcoal-1000 flex items-center gap-3 px-4 py-3 shrink-0 relative`}
+          className={`${isToronto ? "theme-toronto " : ""}bg-accent flex items-center gap-3 px-4 py-3 shrink-0 relative`}
         >
           <Image
             src="/assets/logos/logo-standard.svg"

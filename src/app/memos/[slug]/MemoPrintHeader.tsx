@@ -26,7 +26,7 @@ export function MemoPrintHeader({
           /* The nav's Toronto lockup: white wordmark + "Toronto" in the
              accent-blue box (see Navbar.tsx). Forced color-adjust so the
              box prints. */
-          <div className={`${brand === "toronto" ? "theme-toronto " : ""}bg-accent flex items-center gap-3 px-4 py-3 [-webkit-print-color-adjust:exact] [print-color-adjust:exact]`}>
+          <div className={`${brand === "toronto" ? "theme-toronto " : ""}bg-accent border-2 border-charcoal-1000 flex items-center gap-3 px-4 py-3 [-webkit-print-color-adjust:exact] [print-color-adjust:exact]`}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/assets/logos/logo-standard.svg"
@@ -35,8 +35,8 @@ export function MemoPrintHeader({
               height={40}
               className="h-[36px] w-auto"
             />
-            <span aria-hidden="true" className="self-stretch w-px bg-bg" />
-            <span className="font-sans font-medium text-bg text-[18px] leading-none whitespace-nowrap">
+            <span aria-hidden="true" className="self-stretch w-px bg-white" />
+            <span className="font-sans font-medium text-white text-[18px] leading-none whitespace-nowrap">
               {brand === "toronto" ? "Toronto" : "Polling"}
             </span>
           </div>

@@ -43,7 +43,7 @@ export default function Navbar() {
       {isToronto || isPolling ? (
         <Link
           href={isToronto ? "/toronto" : "/polls"}
-          className={`${isToronto ? "theme-toronto " : ""}bg-accent flex items-center gap-3 px-4 py-3 shrink-0 relative`}
+          className={`${isToronto ? "theme-toronto " : ""}bg-accent border-2 border-charcoal-1000 flex items-center gap-3 px-4 py-3 shrink-0 relative`}
         >
           <Image
             src="/assets/logos/logo-standard.svg"
@@ -53,8 +53,8 @@ export default function Navbar() {
             className="h-[36px] w-auto"
             priority
           />
-          <span aria-hidden="true" className="self-stretch w-px bg-bg" />
-          <span className="font-sans font-medium text-bg text-[18px] leading-none whitespace-nowrap">
+          <span aria-hidden="true" className="self-stretch w-px bg-white" />
+          <span className="font-sans font-medium text-white text-[18px] leading-none whitespace-nowrap">
             {isToronto ? "Toronto" : "Polling"}
           </span>
         </Link>

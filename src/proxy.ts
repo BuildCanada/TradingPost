@@ -42,7 +42,7 @@ export async function proxy(req: NextRequest) {
   const markdown = resolveMarkdownRewrite(req);
   if (markdown) return markdown;
 
-  if (pathname.startsWith("/memos/") || pathname.startsWith("/polls/") || pathname === "/api/auth/me") {
+  if (pathname.startsWith("/memos/") || pathname === "/polls" || pathname.startsWith("/polls/") || pathname === "/api/auth/me") {
     return renewSession(req);
   }
   return NextResponse.next();

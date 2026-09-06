@@ -4,8 +4,8 @@ import { GET } from "../app/feeds/[feed]/route";
 
 test("RSS proxy preserves XML and does not forward private credentials or query parameters", async (t) => {
   t.mock.method(globalThis, "fetch", async (url: string, init: RequestInit) => {
-    assert.ok(url.endsWith("/feeds/all.xml"));
-    assert.equal(new URL(url).search, "");
+    assert.ok(url.includes("/feeds/all.xml"));
+    assert.equal(new URL(url).search, "?exclude=polls");
     assert.deepEqual(init.headers, { Accept: "application/rss+xml" });
     assert.equal(init.redirect, "error");
     return new Response('<?xml version="1.0"?><rss version="2.0"/>', {
@@ -30,8 +30,8 @@ test("unknown feed paths do not reach the backend", async (t) => {
 
 test("upstream errors do not expose response bodies", async (t) => {
   t.mock.method(globalThis, "fetch", async () => new Response("Private upstream detail", { status: 500 }));
-  const response = await GET(new Request("https://buildcanada.com/feeds/polls.xml"),
-    { params: Promise.resolve({ feed: "polls.xml" }) });
+  const response = await GET(new Request("https://buildcanada.com/feeds/memos.xml"),
+    { params: Promise.resolve({ feed: "memos.xml" }) });
   assert.equal(response.status, 502);
   assert.equal(await response.text(), "Feed unavailable");
   assert.equal(response.headers.get("cache-control"), "no-store");

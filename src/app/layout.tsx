@@ -53,7 +53,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {PUBLICATION_FEEDS.map(({ file, title }) => (
+        {PUBLICATION_FEEDS.filter(({ file }) => file !== "polls.xml").map(({ file, title }) => (
           <link key={file} rel="alternate" type="application/rss+xml" title={title} href={`/feeds/${file}`} />
         ))}
       </head>

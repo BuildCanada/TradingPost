@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { requirePollAdmin } from "@/lib/poll-access";
+import { primeAdminPreviewToken } from "@/lib/preview";
 import type { Metadata } from "next";
 import { fetchPolls } from "@/lib/api/polls";
 
@@ -10,6 +12,8 @@ export const metadata: Metadata = {
 };
 
 export default async function PollsPage() {
+  await requirePollAdmin("/polls");
+  await primeAdminPreviewToken();
   const polls = await fetchPolls();
   return (
     <main className="max-w-[1000px] mx-auto px-6 py-12">

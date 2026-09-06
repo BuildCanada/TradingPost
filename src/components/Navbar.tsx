@@ -10,14 +10,30 @@ import { SOCIALS } from "@/constants/socials";
 import { NAV_LINKS, TORONTO_NAV_LINKS } from "@/constants/nav-links";
 
 export default function Navbar() {
+  const [viewer, setViewer] = useState<{ admin: boolean } | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [showEmoji, setShowEmoji] = useState(false);
   const hasScrolled = useRef(false);
   const openModal = useSubscribeStore((s) => s.openModal);
   const pathname = usePathname();
   const isToronto = pathname?.startsWith("/toronto") ?? false;
-  const isPolling = pathname === "/polls" || pathname?.startsWith("/polls/");
-  const navLinks = isToronto ? TORONTO_NAV_LINKS : NAV_LINKS;
+  const isPolling = viewer?.admin && (pathname === "/polls" || pathname?.startsWith("/polls/"));
+  const navLinks = (isToronto ? TORONTO_NAV_LINKS : NAV_LINKS).filter(
+    (link) => link.href !== "/polls" || viewer?.admin,
+  );
+  if (!viewer) navLinks.push({
+    label: "Log in",
+    href: `/api/auth/login?redirect=${encodeURIComponent(pathname || "/")}`,
+  });
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/auth/me", { cache: "no-store" })
+      .then((response) => response.ok ? response.json() : { user: null })
+      .then(({ user }) => { if (!cancelled) setViewer(user); })
+      .catch(() => { if (!cancelled) setViewer(null); });
+    return () => { cancelled = true; };
+  }, [pathname]);
   // full-screen page, no site chrome — every region's pledge page
   const isChromeless = isPledgePath(pathname);
 

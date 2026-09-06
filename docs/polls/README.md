@@ -76,3 +76,7 @@ fallback URLs in French responses.
 
 Deploy the companion York Factory migration/API first. Until it is deployed,
 existing memo pages continue to work; `/polls` should be rolled out with the backend.
+
+## Administrator access
+
+TradingPost requires a live signed-in administrator for /polls and all detail, markdown and download routes. Anonymous users see a login link; signed-in non-admins cannot access poll content. The navigation only shows Polls and Polling branding after the identity endpoint confirms admin status. Polls are excluded from the sitemap, robots indexing and public combined RSS. The poll RSS route also requires an admin session. York Factory’s existing API access rules are unchanged.

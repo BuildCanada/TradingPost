@@ -1,3 +1,4 @@
+import { pollAccessDenied } from "@/lib/poll-access";
 import { API_URL } from "@/lib/api/client";
 import { primeAdminPreviewToken } from "@/lib/preview";
 
@@ -9,6 +10,8 @@ export async function GET(
 ) {
   const { slug, asset } = await params;
   if (!POLL_DOWNLOAD_ASSETS.has(asset)) return new Response("Not found", { status: 404 });
+  const denied = await pollAccessDenied(`/polls/${slug}`);
+  if (denied) return denied;
   const token = await primeAdminPreviewToken();
   const url = new URL(
     `${API_URL}/polls/${encodeURIComponent(slug)}/downloads/${asset}`,

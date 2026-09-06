@@ -47,9 +47,14 @@ Only named report assets are allowed; every backend request rechecks publication
 access. Downloads bypass caching, including markdown downloads. Public `.md` content
 negotiation continues to work as before.
 
+The API uses stable display keys (`analysis_pdf`, `crosstabs_pdf`) with localized
+asset names in their URL values (`analysis_pdf_fr`, `crosstabs_pdf_en`). The frontend
+preserves these keys for labels and the URL asset for the proxy, including English
+fallback URLs in French responses.
+
 ## Checks
 
-- `pnpm test:polls`: chart schema/data validation and CMS fence extraction regression.
+- `pnpm test:polls`: chart schema/data validation, CMS fence extraction and localized download contracts.
 - `pnpm exec next typegen && pnpm exec tsc --noEmit`.
 - ESLint on changed TypeScript files.
 - Preview two chart fences in a memo. Verify charts sit between paragraphs, hover

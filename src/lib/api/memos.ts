@@ -1,3 +1,4 @@
+import { mapPollDownloads } from "../polls/downloads";
 import { apiFetch } from "./client";
 import type {
   YFListResponse,
@@ -174,16 +175,7 @@ export async function fetchMemo(
     poll: m.poll
       ? {
           ...m.poll,
-          downloads: Object.fromEntries(
-            Object.entries(m.poll.downloads).map(([kind, url]) => {
-              const upstream = new URL(url);
-              const asset = upstream.pathname.split("/").at(-1)!;
-              return [
-                kind,
-                `/api/memos/${encodeURIComponent(m.slug)}/downloads/${encodeURIComponent(asset)}${upstream.search}`,
-              ];
-            }),
-          ),
+          downloads: mapPollDownloads(m.slug, m.poll.downloads),
         }
       : undefined,
     appendix: m.appendix,

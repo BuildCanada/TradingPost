@@ -1,13 +1,8 @@
+import { POLL_DOWNLOAD_LABELS } from "@/lib/polls/downloads";
 import type { YFPollPublication } from "@/lib/api/types";
 import { ArticleBody } from "./ArticleBody";
 
 export function PollDownloads({ poll }: { poll: YFPollPublication }) {
-  const labels = {
-    analysis_markdown: "Analysis (Markdown)",
-    analysis_pdf: "Analysis (PDF)",
-    crosstabs_pdf: "Crosstabs (PDF)",
-    crosstabs_json: "Crosstabs (JSON)",
-  };
   return (
     <section
       aria-label="Poll information"
@@ -27,8 +22,8 @@ export function PollDownloads({ poll }: { poll: YFPollPublication }) {
         </p>
       )}
       <ul className="flex flex-wrap gap-4">
-        {Object.entries(labels).map(([key, label]) => {
-          const url = poll.downloads[key as keyof typeof labels];
+        {Object.entries(POLL_DOWNLOAD_LABELS).map(([key, label]) => {
+          const url = poll.downloads[key as keyof typeof POLL_DOWNLOAD_LABELS];
           return url ? (
             <li key={key}>
               <a href={url} className="underline">

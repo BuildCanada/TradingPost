@@ -178,6 +178,7 @@ export async function ArticlePage({ slug, kind }: { slug: string; kind: "memos" 
       />
 
       <MemoPrintHeader
+        brand={kind === "polls" ? "polling" : "canada"}
         title={article.title}
         authorName={article.author.name}
         authorTitle={article.author.title}

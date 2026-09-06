@@ -16,6 +16,7 @@ export default function Navbar() {
   const openModal = useSubscribeStore((s) => s.openModal);
   const pathname = usePathname();
   const isToronto = pathname?.startsWith("/toronto") ?? false;
+  const isPolling = pathname === "/polls" || pathname?.startsWith("/polls/");
   const navLinks = isToronto ? TORONTO_NAV_LINKS : NAV_LINKS;
   // full-screen page, no site chrome — every region's pledge page
   const isChromeless = isPledgePath(pathname);
@@ -39,10 +40,10 @@ export default function Navbar() {
   return (
     <nav className="border-y-2 border-border flex items-stretch sticky top-[10px] z-50 bg-bg">
       {/* Logo */}
-      {isToronto ? (
+      {isToronto || isPolling ? (
         <Link
-          href="/toronto"
-          className="theme-toronto bg-accent flex items-center gap-3 px-4 py-3 shrink-0 relative"
+          href={isToronto ? "/toronto" : "/polls"}
+          className={`${isToronto ? "theme-toronto " : ""}bg-accent flex items-center gap-3 px-4 py-3 shrink-0 relative`}
         >
           <Image
             src="/assets/logos/logo-standard.svg"
@@ -54,7 +55,7 @@ export default function Navbar() {
           />
           <span aria-hidden="true" className="self-stretch w-px bg-bg" />
           <span className="font-sans font-medium text-bg text-[18px] leading-none whitespace-nowrap">
-            Toronto
+            {isToronto ? "Toronto" : "Polling"}
           </span>
         </Link>
       ) : (

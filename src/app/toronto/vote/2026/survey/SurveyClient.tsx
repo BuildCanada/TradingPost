@@ -1,6 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+} from "react";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
@@ -19,6 +25,7 @@ import AlignmentResults, {
   type SurveyRosterCandidate,
 } from "./AlignmentResults";
 import { submitSurvey, type SurveySubmission } from "./submitSurvey";
+import { useSurveyAnalytics, type SurveyProgress } from "./analytics";
 
 export type SurveyAnswers = Record<string, string>;
 
@@ -133,6 +140,8 @@ export default function SurveyClient({
   const [done, setDone] = useState(false);
   const [submission, setSubmission] = useState<SurveySubmission | null>(null);
 
+  const analytics = useSurveyAnalytics(survey);
+
   // Everything about the shape of the form comes from the fetched survey, so a
   // question added in the CMS shows up here with no change to this component.
   const steps = survey.steps;
@@ -141,6 +150,30 @@ export default function SurveyClient({
 
   const isLastStep = step === stepCount - 1;
   const currentStep = steps[step];
+
+  /* Where the respondent is, for whichever event is about to be sent. Built
+     from the answers as they stand at the call site rather than from state
+     read a render later, so a step event can't report the count from before
+     the answer that triggered it. */
+  const progressAt = (
+    stepIndex: number,
+    given: SurveyAnswers = answers,
+  ): SurveyProgress => {
+    const target = steps[stepIndex];
+    const answered = (ids: string[]) =>
+      ids.filter((id) => (given[id] ?? "").trim().length > 0).length;
+
+    return {
+      stepIndex,
+      stepId: target.id,
+      stepTitle: target.title,
+      answeredOnStep: answered(target.questions.map((q) => q.id)),
+      questionsOnStep: target.questions.length,
+      answeredTotal: answered(
+        steps.flatMap((s) => s.questions.map((q) => q.id)),
+      ),
+    };
+  };
 
   /* The comparison against the ward's candidates. Keyed on the ward the API
      actually recorded rather than one re-derived here, so the results a
@@ -239,7 +272,30 @@ export default function SurveyClient({
     return { races, wardLabel };
   }, [ward, responses, roster, mayoral, survey, answers, wardNames]);
 
+  /* What the respondent actually ended up seeing. Held until the ward's
+     answers have resolved one way or the other — reported the moment they are
+     done, since a comparison that is still loading is not yet an outcome. A
+     ward that never resolved has nothing to wait for. */
+  const reportedResults = useRef(false);
+  useEffect(() => {
+    if (!done || reportedResults.current) return;
+    if (ward && responses === null) return;
+    reportedResults.current = true;
+    analytics.resultsViewed({
+      hasComparison: Boolean(comparison),
+      ward: ward ?? null,
+      races: comparison?.races.map((race) => race.key) ?? [],
+    });
+  }, [done, ward, responses, comparison, analytics]);
+
   const set = (id: string, value: string) => {
+    // First answer touched is the start of the run; the hook only lets the
+    // first of these through. The projected answers are for the event only —
+    // the state update stays functional, so two changes in one tick can't
+    // drop each other.
+    if (value.trim().length > 0) {
+      analytics.started(progressAt(step, { ...answers, [id]: value }));
+    }
     setAnswers((prev) => ({ ...prev, [id]: value }));
     // Clear the error as soon as they start fixing it; it comes back on Next.
     setErrors((prev) => {
@@ -261,11 +317,18 @@ export default function SurveyClient({
       if (message) found[question.id] = message;
     }
     setErrors(found);
-    return Object.keys(found).length === 0;
+    if (Object.keys(found).length > 0) {
+      // A step people repeatedly fail to clear looks the same in a funnel as a
+      // step they lose interest in; this is what tells the two apart.
+      analytics.stepBlocked(progressAt(step), Object.keys(found));
+      return false;
+    }
+    return true;
   };
 
   const next = () => {
     if (!validateStep()) return;
+    analytics.stepCompleted(progressAt(step));
     setStep((s) => Math.min(stepCount - 1, s + 1));
     scrollTop();
   };
@@ -273,6 +336,7 @@ export default function SurveyClient({
   const back = () => {
     setErrors({});
     setSubmitError(null);
+    analytics.stepBack(progressAt(step));
     setStep((s) => Math.max(0, s - 1));
     scrollTop();
   };
@@ -282,11 +346,18 @@ export default function SurveyClient({
     setSubmitting(true);
     setSubmitError(null);
     try {
-      setSubmission(await submitSurvey(survey, answers));
+      const recorded = await submitSurvey(survey, answers);
+      // The last step is cleared by submitting it, so it gets the same step
+      // event as every other one — without it the funnel's final step is
+      // missing and the last screen reads as a total drop.
+      analytics.stepCompleted(progressAt(step));
+      analytics.submitted(progressAt(step), recorded);
+      setSubmission(recorded);
       setDone(true);
       scrollTop();
     } catch {
       // Answers stay on screen so they can just press submit again.
+      analytics.submitFailed(progressAt(step));
       setSubmitError("Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);

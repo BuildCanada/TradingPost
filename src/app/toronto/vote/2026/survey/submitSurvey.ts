@@ -74,15 +74,13 @@ export async function submitSurvey(
 
   const data = await res.json().catch(() => ({}));
 
+  // Identify here rather than in the caller: this is where the email is known
+  // to have been accepted. The `survey_submitted` event itself is captured by
+  // useSurveyAnalytics, which also holds the step and timing properties the
+  // completion funnel is built on — one event, one place that emits it.
   if (answers.email) {
     posthog.identify(answers.email, { email: answers.email });
   }
-  posthog.capture("survey_submitted", {
-    survey: survey.slug,
-    survey_version: survey.version,
-    election: DEFAULT_ELECTION_SLUG,
-    ward: data.derivedRegion ?? data.region ?? null,
-  });
 
   return {
     surveySlug: data.surveySlug ?? survey.slug,

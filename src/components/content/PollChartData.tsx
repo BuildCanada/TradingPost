@@ -14,27 +14,27 @@ async function fetchCrosstabs(url: string) {
 
 export function PollChartData({ url, questionId, locale = "en" }: { url: string; questionId: string; locale?: string }) {
   const { data, error, isLoading, mutate } = useSWR(url, fetchCrosstabs, { shouldRetryOnError: false });
-  const [demographic, setDemographic] = useState("");
+  const [breakdown, setBreakdown] = useState("");
   const match = data ? questionCrosstabs(data, questionId) : null;
   if (isLoading) return <p role="status" className="p-4 text-sm">Loading crosstabs…</p>;
   if (error) return <p role="status" className="p-4 text-sm">Unable to load the crosstabs. <button className="underline" onClick={() => void mutate()}>Try again</button></p>;
   if (!match) return <p role="status" className="p-4 text-sm">Detailed data is not available for this question.</p>;
   const { table, columns, groups } = match;
   const overall = new Set(groups.filter((g) => g.kind === "overall").map((g) => g.id));
-  const demographics = groups.filter((g) => g.kind !== "overall");
-  const selected = demographics.some((g) => g.id === demographic) ? demographic : "";
+  const breakdowns = groups.filter((g) => g.kind !== "overall");
+  const selected = breakdowns.some((g) => g.id === breakdown) ? breakdown : "";
   const visibleColumns = columns.filter((c) => overall.has(c.breakdownId) || c.breakdownId === selected);
   const number = new Intl.NumberFormat(locale, { maximumFractionDigits: 0 });
   return (
     <section className="poll-chart-data font-sans" style={{ "--poll-table-width": `${Math.max(720, 260 + visibleColumns.length * 140)}px` } as CSSProperties} aria-label="Question crosstabs">
       <div className="p-4 max-w-sm">
         <Select
-          label="Demographic"
+          label="Breakdown"
           value={selected}
-          onChange={(event) => setDemographic(event.target.value)}
+          onChange={(event) => setBreakdown(event.target.value)}
           options={[
             { value: "", label: "All respondents" },
-            ...demographics.map((group) => ({ value: group.id, label: demographicTitle(group, locale) })),
+            ...breakdowns.map((group) => ({ value: group.id, label: demographicTitle(group, locale) })),
           ]}
         />
       </div>

@@ -2,15 +2,13 @@ import type { Metadata } from "next";
 import PollInformationPage from "../PollInformationPage";
 
 export const metadata: Metadata = {
-  title: "Polling Privacy Policy",
-  description: "How Build Canada Research collects, uses, and protects personal information in public-opinion surveys.",
+  title: { absolute: "Build Canada Polling - Privacy Policy" },
+  description: "How Build Canada Polling collects, uses, and protects personal information in public-opinion surveys.",
   alternates: { canonical: "/polls/privacy-policy" },
 };
 
 export default function PollPrivacyPolicyPage() {
-  return <PollInformationPage title="Build Canada Research — Privacy Policy">{`
-*DRAFT for counsel review — not legal advice. Baseline: PIPEDA. Quebec Law 25 addendum required before any survey texts Quebec numbers (named privacy officer, privacy impact assessment, retention schedule filed).*
-
+  return <PollInformationPage title="Build Canada Polling - Privacy Policy">{`
 ## 1. Who we are
 
 Build Canada ("we", "us") conducts public-opinion surveys of Canadian adults. This policy covers personal information handled in that research. It is separate from, and additional to, the [general Build Canada privacy notice](/privacy-notice). Privacy contact: [polling@buildcanada.com](mailto:polling@buildcanada.com).

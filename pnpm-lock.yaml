@@ -15,8 +15,8 @@ importers:
         specifier: ^0.3.9
         version: 0.3.9(@types/react@19.2.14)(d3-selection@3.0.0)(mobx-react@7.6.0(mobx@6.15.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(mobx@6.15.3)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)
       '@buildcanada/charts-inline':
-        specifier: npm:@buildcanada/charts@^1.0.0
-        version: '@buildcanada/charts@1.0.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)'
+        specifier: npm:@buildcanada/charts@^1.1.0
+        version: '@buildcanada/charts@1.1.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)'
       '@buildcanada/colours':
         specifier: ^0.3.3
         version: 0.3.3(typescript@5.9.3)
@@ -319,8 +319,8 @@ packages:
       react: ^19.0.0
       react-dom: ^19.0.0
 
-  '@buildcanada/charts@1.0.0':
-    resolution: {integrity: sha512-zNJWt8WYXm667k7tBC3lMwsZknVxuPGLb2d/RoOoHN4OXP2pz7Vz3d+VyKaoixDmteqiepzl2rYP4Y+X2mFADQ==}
+  '@buildcanada/charts@1.1.0':
+    resolution: {integrity: sha512-daa6O8WAIciuwL+KeEoJTjvOUtXB0wg09njPZUoQYLk/ZMUOtA8CR+iL7+kWcUL57OpD31nE5ReyVMbcH1lw+Q==}
     hasBin: true
     peerDependencies:
       react: ^19.0.0
@@ -5054,7 +5054,7 @@ snapshots:
       - supports-color
       - typescript
 
-  '@buildcanada/charts@1.0.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)':
+  '@buildcanada/charts@1.1.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(typescript@5.9.3)':
     dependencies:
       '@buildcanada/colours': 1.0.0(typescript@5.9.3)
       '@buildcanada/components': 1.0.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)

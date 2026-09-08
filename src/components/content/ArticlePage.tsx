@@ -181,7 +181,9 @@ export async function ArticlePage({ slug, kind }: { slug: string; kind: "memos" 
 
       <MemoPrintHeader
         brand={kind === "polls" ? "polling" : "canada"}
+        showAuthor={kind !== "polls"}
         title={article.title}
+        subtitle={kind === "polls" ? article.subtitle : undefined}
         authorName={article.author.name}
         authorTitle={article.author.title}
         authorImage={authorImage}
@@ -193,9 +195,11 @@ export async function ArticlePage({ slug, kind }: { slug: string; kind: "memos" 
           title, author, and date. */}
       <div className="print-hide">
         <MemoHero
+          variant={kind === "polls" ? "poll" : "memo"}
           backHref={kind === "polls" ? "/polls" : undefined}
           backLabel={kind === "polls" ? "All polls" : undefined}
           title={article.title}
+          subtitle={kind === "polls" ? article.subtitle : undefined}
           authorName={article.author.name}
           authorImage={authorImage}
           date={date}
@@ -203,7 +207,7 @@ export async function ArticlePage({ slug, kind }: { slug: string; kind: "memos" 
         />
       </div>
 
-      <ArticleLayout>
+      <ArticleLayout wide={kind === "polls"}>
         <Signpost
           headings={headings}
           shareTitle={article.title}
@@ -211,7 +215,7 @@ export async function ArticlePage({ slug, kind }: { slug: string; kind: "memos" 
           afterShare={article.poll ? <PollDownloads poll={article.poll} /> : undefined}
         />
 
-        <article className="w-full min-w-0 max-w-[720px]" data-memo-content>
+        <article className={`w-full min-w-0 ${kind === "polls" ? "poll-article" : "max-w-[720px]"}`} data-memo-content>
           {keyMessages.length > 0 && (
             <div className="mb-8 p-6 border-[3px] border-double border-border-light bg-[#f0e5dc] space-y-4">
               <span className="type-label block mb-3">{kind === "polls" ? "Key Takeaways" : "Key Messages"}</span>
@@ -230,7 +234,7 @@ export async function ArticlePage({ slug, kind }: { slug: string; kind: "memos" 
             </div>
           )}
 
-          <ArticleBody html={bodyHtml} />
+          <ArticleBody html={bodyHtml} crosstabsUrl={article.poll?.downloads.crosstabs_json} />
           {article.poll && <PollSupportingContent poll={article.poll} />}
 
           {kind === "memos" && (

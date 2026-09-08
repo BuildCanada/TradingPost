@@ -4,25 +4,29 @@ import Link from "next/link";
 
 interface MemoHeroProps {
   title: string;
+  subtitle?: string | null;
   authorName: string;
   authorImage: string | null;
   date: string;
   supporters: string | null;
+  variant?: "memo" | "poll";
   backHref?: string;
   backLabel?: string;
 }
 
 export function MemoHero({
   title,
+  subtitle,
   authorName,
   authorImage,
   date,
   supporters,
+  variant = "memo",
   backHref,
   backLabel,
 }: MemoHeroProps) {
   return (
-    <ArticleContainer className="py-10">
+    <ArticleContainer wide={variant === "poll"} className={variant === "poll" ? "pt-5 pb-2 md:pt-6" : "py-10"}>
       {backHref && backLabel && (
         <Link
           href={backHref}
@@ -41,29 +45,36 @@ export function MemoHero({
         </Link>
       )}
 
-      <h1 className="type-title mb-4 max-w-[720px]">{title}</h1>
+      <h1 className={`type-title max-w-[720px] ${subtitle ? "mb-1" : "mb-4"}`}>{title}</h1>
+      {subtitle && (
+        <p className="max-w-[720px] mb-2 font-sans text-lg md:text-xl italic leading-snug text-text-secondary">{subtitle}</p>
+      )}
 
-      <div className="flex items-center gap-5 mb-6">
-        <div className="w-32 h-32 rounded-none bg-border-light overflow-hidden shrink-0">
-          {authorImage && (
-            <Image
-              src={authorImage}
-              alt={authorName}
-              width={128}
-              height={128}
-              className="w-full h-full object-cover"
-              unoptimized
-              priority
-            />
-          )}
+      {variant === "poll" ? (
+        <p className="font-mono text-[15px] md:text-base leading-relaxed text-text-secondary">{date}</p>
+      ) : (
+        <div className="flex items-center gap-5 mb-6">
+          <div className="w-32 h-32 rounded-none bg-border-light overflow-hidden shrink-0">
+            {authorImage && (
+              <Image
+                src={authorImage}
+                alt={authorName}
+                width={128}
+                height={128}
+                className="w-full h-full object-cover"
+                unoptimized
+                priority
+              />
+            )}
+          </div>
+          <div>
+            <p className="type-h3">{authorName}</p>
+            <p className="type-label text-text-secondary mt-1">{date}</p>
+          </div>
         </div>
-        <div>
-          <p className="type-h3">{authorName}</p>
-          <p className="type-label text-text-secondary mt-1">{date}</p>
-        </div>
-      </div>
+      )}
 
-      {supporters && (
+      {supporters && variant !== "poll" && (
         <div className="pb-2">
           <span className="type-label text-text-secondary block mb-2">
             Supporters

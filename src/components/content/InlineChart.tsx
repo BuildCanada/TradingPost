@@ -11,6 +11,7 @@ import {
 import {
   Chart,
   DataTable,
+  Tooltip,
   resolveBindings,
   type DataTableSort,
   type DataTableScope,
@@ -18,6 +19,7 @@ import {
 } from "@buildcanada/charts-inline";
 import "@buildcanada/charts-inline/styles.css";
 import "./inline-chart.css";
+import { PollChartData } from "./PollChartData";
 import { parseInlineChart } from "@/lib/charts/inline-chart";
 
 class ChartBoundary extends Component<
@@ -39,7 +41,7 @@ class ChartBoundary extends Component<
   }
 }
 
-function InteractiveChart({ source }: { source: string }) {
+function InteractiveChart({ source, crosstabsUrl }: { source: string; crosstabsUrl?: string }) {
   const result = useMemo(() => {
     try {
       return { chart: parseInlineChart(source), error: null };
@@ -80,6 +82,7 @@ function InteractiveChart({ source }: { source: string }) {
     (types.includes(definition.defaultTab as ChartType)
       ? (definition.defaultTab as ChartType)
       : types[0]);
+  const height = Math.max(420, Math.min(900, dataset.entities.length * 40 + 200));
   return (
     <figure
       className="poll-inline-chart not-prose my-8 min-w-0"
@@ -116,41 +119,21 @@ function InteractiveChart({ source }: { source: string }) {
           dataset={dataset}
           initialView={{ tab: activeType }}
           key={activeType}
-          height={Math.max(
-            420,
-            Math.min(900, dataset.entities.length * 40 + 200),
-          )}
+          height={height}
           syncUrl={false}
-          renderTooltip={({ tooltip, x }) => {
-            const cardWidth = Math.min(260, width - 16);
-            const left =
-              Math.max(8, Math.min(x - cardWidth / 2, width - cardWidth - 8)) -
-              x;
-            return (
-              <div
-                role="tooltip"
-                className="absolute border border-border-light bg-bg p-3 pointer-events-none shadow-sm"
-                style={{
-                  width: cardWidth,
-                  transform: `translate(${left}px, 8px)`,
-                }}
-              >
-                <strong>{tooltip.title}</strong>
-                {tooltip.subtitle && <p>{tooltip.subtitle}</p>}
-                {tooltip.rows.map((row, index) => (
-                  <p key={index}>
-                    {row.label}: {row.valueText}
-                  </p>
-                ))}
-                {tooltip.footers.map((footer, index) => (
-                  <p key={index}>{footer.text}</p>
-                ))}
-              </div>
-            );
-          }}
+          renderTooltip={({ tooltip, x, y }) => (
+            <div
+              className="poll-chart-tooltip-frame"
+              style={{ left: -x, top: -y, width, height }}
+            >
+              <Tooltip model={tooltip} x={x} y={y} bounds={{ width, height }} />
+            </div>
+          )}
         />
       </div>
-      {showData && (
+      {showData && crosstabsUrl ? (
+        <PollChartData url={crosstabsUrl} questionId={definition.slug ?? ""} locale={definition.locale} />
+      ) : showData && (
         <div className="overflow-x-auto mt-4">
           <DataTable
             dataset={dataset}
@@ -178,10 +161,10 @@ function InteractiveChart({ source }: { source: string }) {
   );
 }
 
-export function InlineChart({ source }: { source: string }) {
+export function InlineChart({ source, crosstabsUrl }: { source: string; crosstabsUrl?: string }) {
   return (
     <ChartBoundary key={source}>
-      <InteractiveChart source={source} />
+      <InteractiveChart source={source} crosstabsUrl={crosstabsUrl} />
     </ChartBoundary>
   );
 }

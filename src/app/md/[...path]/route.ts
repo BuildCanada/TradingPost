@@ -1,4 +1,3 @@
-import { pollAccessDenied } from "@/lib/poll-access";
 import { primeAdminPreviewToken } from "@/lib/preview";
 import { NextRequest } from "next/server";
 import { markdownBuilders } from "@/lib/markdown/content";
@@ -9,7 +8,7 @@ import { markdownResponse } from "@/lib/markdown/document";
 // /memos/foo.md and `Accept: text/markdown` on /memos/foo (same for posts
 // and builders). Upstream fetches are ISR-cached at the fetch layer
 // (revalidate in src/lib/api/*), so this handler is a cheap pure transform.
-// Poll markdown is admin-only and primes the preview token after authorization.
+// Poll markdown supports authenticated admin draft previews.
 // Other content keeps its existing public-only behavior.
 export async function GET(
   req: NextRequest,
@@ -28,8 +27,6 @@ export async function GET(
   }
 
   if (type === "polls") {
-    const denied = await pollAccessDenied(`/polls/${slug}`);
-    if (denied) return denied;
     await primeAdminPreviewToken();
   }
 

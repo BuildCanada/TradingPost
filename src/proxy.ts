@@ -64,6 +64,7 @@ function resolveMarkdownRewrite(req: NextRequest): NextResponse | null {
   if (!match) return null;
 
   const [, type, slug, mdSuffix] = match;
+  if (type === "polls" && ["methodology", "privacy-policy"].includes(slug)) return null;
   const wantsMarkdown =
     Boolean(mdSuffix) || (req.headers.get("accept") ?? "").includes("text/markdown");
   if (!wantsMarkdown) return null;

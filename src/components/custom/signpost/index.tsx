@@ -12,6 +12,7 @@ export function Signpost({
   headings,
   shareTitle,
   shareUrl,
+  afterShare,
   desktopTopClass,
   scrollOffset = 120,
   showMobileBar = true,
@@ -43,7 +44,7 @@ export function Signpost({
     [scrollOffset],
   );
 
-  if (headings.length === 0)
+  if (headings.length === 0 && !afterShare)
     return <div className="hidden 2xl-memo:block" aria-hidden="true" />;
 
   return (
@@ -62,7 +63,7 @@ export function Signpost({
       }}
     >
       {showMobileBar && <MobileBar />}
-      <DesktopNav topClass={desktopTopClass} showTopBorder={showTopBorder} />
+      <DesktopNav afterShare={afterShare} topClass={desktopTopClass} showTopBorder={showTopBorder} />
     </SignpostProvider>
   );
 }

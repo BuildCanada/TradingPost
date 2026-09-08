@@ -1,3 +1,4 @@
+import { primeAdminPreviewToken } from "@/lib/preview";
 import { NextRequest } from "next/server";
 import { markdownBuilders } from "@/lib/markdown/content";
 import { markdownResponse } from "@/lib/markdown/document";
@@ -7,8 +8,8 @@ import { markdownResponse } from "@/lib/markdown/document";
 // /memos/foo.md and `Accept: text/markdown` on /memos/foo (same for posts
 // and builders). Upstream fetches are ISR-cached at the fetch layer
 // (revalidate in src/lib/api/*), so this handler is a cheap pure transform.
-// Draft content can't leak: apiFetch only sends a bearer token when one is
-// explicitly set in the request scope, which never happens here.
+// Poll markdown supports authenticated admin draft previews.
+// Other content keeps its existing public-only behavior.
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ path: string[] }> },
@@ -25,6 +26,10 @@ export async function GET(
     return new Response("Not found", { status: 404 });
   }
 
+  if (type === "polls") {
+    await primeAdminPreviewToken();
+  }
+
   let result;
   try {
     result = await build(decodeURIComponent(slug));
@@ -33,8 +38,12 @@ export async function GET(
   }
 
   if (result.kind === "redirect") {
-    return Response.redirect(new URL(result.location, req.url), 308);
+    const response = new Response(null, { status: 308, headers: { Location: new URL(result.location, req.url).toString() } });
+    if (type === "polls") response.headers.set("Cache-Control", "private, no-store");
+    return response;
   }
 
-  return markdownResponse(result.doc, { canonicalUrl: result.canonicalUrl });
+  const response = markdownResponse(result.doc, { canonicalUrl: result.canonicalUrl });
+  if (type === "polls") response.headers.set("Cache-Control", "private, no-store");
+  return response;
 }

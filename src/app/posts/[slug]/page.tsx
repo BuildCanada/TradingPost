@@ -1,3 +1,4 @@
+import { ArticleContainer, ArticleLayout } from "@/components/content/ArticleLayout";
 import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
@@ -117,7 +118,7 @@ export default async function PostDetailPage({
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
-      <div className="max-w-[1400px] mx-auto w-full px-[5vw] py-10 md:px-[10vw]">
+      <ArticleContainer className="py-10">
         <Link
           href="/posts"
           className="type-label text-text-secondary hover:text-dark transition-colors flex items-center gap-1.5 mb-6 py-1"
@@ -136,15 +137,12 @@ export default async function PostDetailPage({
 
         <h1 className="type-title mb-4 max-w-[720px]">{post.title}</h1>
         <p className="type-label text-text-secondary">{date}</p>
-      </div>
+      </ArticleContainer>
 
-      <div
-        className="animate-fade-in max-w-[1400px] mx-auto px-[5vw] md:px-[10vw] pt-4 pb-[52px] 2xl-memo:grid 2xl-memo:grid-cols-[240px_minmax(0,1fr)] 2xl-memo:gap-12"
-        style={{ animationDelay: "0.3s" }}
-      >
+      <ArticleLayout>
         <Signpost headings={headings} shareTitle={post.title} shareUrl={fullUrl} />
 
-        <article className="max-w-[720px]" data-memo-content>
+        <article className="w-full min-w-0 max-w-[720px]" data-memo-content>
           {post.summary && (
             <div className="mb-8 p-6 border-[3px] border-double border-border-light bg-[#f0e5dc]">
               <span className="type-label block mb-3">Summary</span>
@@ -161,7 +159,7 @@ export default async function PostDetailPage({
             {sidebar}
           </div>
         </article>
-      </div>
+      </ArticleLayout>
     </div>
   );
 }

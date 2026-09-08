@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 export interface Heading {
   id: string;
   text: string;
@@ -13,6 +14,7 @@ export interface SignpostProps {
   headings: Heading[];
   shareTitle?: string;
   shareUrl?: string;
+  afterShare?: ReactNode;
   // Pages with an extra sticky bar below the global navbar (e.g. the
   // state-of-the-nation section nav) push the rail and scroll target down,
   // and may already have their own narrow-screen navigation.

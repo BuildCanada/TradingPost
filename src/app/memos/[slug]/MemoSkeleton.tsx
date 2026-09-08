@@ -1,3 +1,4 @@
+import { ArticleContainer, ArticleLayout } from "@/components/content/ArticleLayout";
 // The placeholder a memo route shows while its content streams in.
 //
 // It mirrors the real layout in page.tsx (hero → signpost → key messages →
@@ -41,9 +42,11 @@ function Line({
 export function MemoSkeleton({
   brand = "default",
   showBackLink = false,
+  contentLabel = "memo",
 }: {
   brand?: keyof typeof KEY_MESSAGES_FILL;
   showBackLink?: boolean;
+  contentLabel?: "memo" | "poll";
 }) {
   return (
     <div
@@ -52,13 +55,13 @@ export function MemoSkeleton({
       aria-busy="true"
       aria-live="polite"
     >
-      <span className="sr-only">Loading memo…</span>
+      <span className="sr-only">Loading {contentLabel}…</span>
 
       <div aria-hidden="true">
         {/* Hero — mirrors MemoHero: title, then author frame beside name/date.
             Title lines are display-weight; the author frame uses the same
             border-light square MemoHero shows before its photo loads. */}
-        <div className="max-w-[1400px] mx-auto w-full px-[5vw] py-10 md:px-[10vw]">
+        <ArticleContainer className="py-10">
           {showBackLink && <Line className="h-3 w-40 mb-6" />}
 
           <div className="max-w-[720px] mb-4 space-y-3">
@@ -73,9 +76,9 @@ export function MemoSkeleton({
               <Line className="h-3 w-32" i={1} />
             </div>
           </div>
-        </div>
+        </ArticleContainer>
 
-        <div className="max-w-[1400px] mx-auto px-[5vw] md:px-[10vw] pt-4 pb-[52px] 2xl-memo:grid 2xl-memo:grid-cols-[240px_minmax(0,1fr)] 2xl-memo:gap-12">
+        <ArticleLayout>
           {/* Signpost — the desktop-only rail. Its accent top rule, Share
               eyebrow, share buttons and dotted track are all real. */}
           <div className="print-hide hidden 2xl-memo:block">
@@ -146,7 +149,7 @@ export function MemoSkeleton({
               ))}
             </div>
           </div>
-        </div>
+        </ArticleLayout>
       </div>
     </div>
   );

@@ -50,6 +50,7 @@ export function QuestionRollCall({
   seats,
   notes = true,
   yourKey,
+  headingId,
 }: {
   question: ComparedQuestion;
   /** on the ballot, but never returned the questionnaire */
@@ -82,6 +83,10 @@ export function QuestionRollCall({
    *  so "who agreed with me" is a plate sitting in the same block rather than
    *  a column to compare against. Their plate is marked; nobody else's is. */
   yourKey?: string;
+  /** the id the scroll rail scrolls to. A question is a level-3 entry under
+   *  its section, which is what makes the rail nest rather than run thirty-odd
+   *  headings down one list. */
+  headingId?: string;
 }) {
   const { groups, verbatim, unanswered } = rollCall(
     question,
@@ -101,9 +106,12 @@ export function QuestionRollCall({
        height in every card — the one piece of every card that says the same
        thing was the piece a reader could never find twice in the same place. */
     <article className="flex flex-col gap-4 border border-border-light p-6 md:p-7">
-      <h4 className="font-sans font-medium leading-[1.2] tracking-[-0.025em] text-[1.45rem] text-dark text-pretty">
+      <h3
+        id={headingId}
+        className="scroll-mt-24 font-sans font-medium leading-[1.2] tracking-[-0.025em] text-[1.45rem] text-dark text-pretty"
+      >
         {question.question}
-      </h4>
+      </h3>
 
       {empty ? (
         <p className="type-caption text-text-muted">

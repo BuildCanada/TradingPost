@@ -9,6 +9,7 @@ import { PledgeButton } from "./PledgeButton";
 import { SurveyCta } from "./SurveyCta";
 import { ResidencyModal } from "./ResidencyModal";
 import { WardCard } from "./WardCard";
+import WardLookup from "./WardLookup";
 import {
   breakdown,
   daysUntil,
@@ -148,13 +149,13 @@ export function ElectionLanding({
   const mayorCards: ExploreItem[] =
     mayorRosterPath && mayorSurveyPath
       ? [
-          {
-            eyebrow: "Mayor",
-            title: "The race for mayor",
-            blurb: "How the candidates for mayor answered our questions.",
-            href: mayorSurveyPath,
-          },
-        ]
+        {
+          eyebrow: "Mayor",
+          title: "The race for mayor",
+          blurb: "How the candidates for mayor answered our questions.",
+          href: mayorSurveyPath,
+        },
+      ]
       : [];
   /* The ask, in the middle of the grid rather than only at the foot of the
      page. Everything else here is somewhere to go and read; this is the one
@@ -164,17 +165,36 @@ export function ElectionLanding({
      earn the ask. */
   const invite: ExploreItem[] = surveyPath
     ? [
-        {
-          eyebrow: "Voter survey",
-          title: "Where do you stand?",
-          blurb:
-            "Answer the same questions we put to the candidates and see which of them line up with you.",
-          href: surveyPath,
-          tone: "invite",
-          cta: "Take the survey",
-        },
-      ]
+      {
+        eyebrow: "Voter survey",
+        title: "Where do you stand?",
+        blurb:
+          "Answer the same questions we put to the candidates and see which of them line up with you.",
+        href: surveyPath,
+        tone: "invite",
+        cta: "Take the survey",
+      },
+    ]
     : [];
+
+  /* The tiles the lookup shows once it has an answer. Built here rather than
+     inside it, because a ward's locator map is server-rendered geometry a
+     client component cannot make. Only where the region has boundary data —
+     otherwise nothing renders them and the loop is a wasted pass over the
+     whole ward list. */
+  const wardCards: Record<number, ReactNode> = {};
+  if (election.wardLookup) {
+    for (const ward of view.wards) {
+      wardCards[ward.number] = (
+        <WardCard
+          ward={ward}
+          basePath={election.basePath}
+          map={renderWardMap?.(ward)}
+          className="border border-border-light max-w-[300px]"
+        />
+      );
+    }
+  }
 
   const pages = [...mayorCards, ...(content.explore ?? [])];
   const exploreItems = [
@@ -233,7 +253,7 @@ export function ElectionLanding({
               )}
             </div>
 
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(272px,1fr))] border-t border-l border-border-light">
+            <CardGrid min="272px">
               {view.mayoral.map((cand) => (
                 <MayoralCard
                   key={cand.key}
@@ -241,7 +261,7 @@ export function ElectionLanding({
                   election={election.slug}
                 />
               ))}
-            </div>
+            </CardGrid>
           </section>
         )}
 
@@ -256,6 +276,20 @@ export function ElectionLanding({
               <p className="font-serif text-[1.05rem] leading-[1.45] max-w-[52ch] text-dark/80">
                 {content.wardsBlurb}
               </p>
+              {/* Twenty-five tiles is a list nobody reads to find their own
+                  ward: they know their postal code and not their ward number,
+                  which is the whole reason this section is called "find". The
+                  grid below stays, for the reader who wants to browse and for
+                  the one the lookup guesses wrong. */}
+              {election.wardLookup && (
+                <div className="mt-7">
+                  <WardLookup
+                    wards={view.wards}
+                    cards={wardCards}
+                    cityLabel={election.cityLabel}
+                  />
+                </div>
+              )}
             </div>
             <p className="type-label text-text-secondary pb-1.5 !tracking-[0.08em]">
               {view.wards.length} wards
@@ -263,7 +297,7 @@ export function ElectionLanding({
           </div>
 
           {wardMapDefs}
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] border-t border-l border-border-light">
+          <CardGrid min="250px">
             {view.wards.map((ward) => (
               <WardCard
                 key={ward.n}
@@ -273,7 +307,7 @@ export function ElectionLanding({
                 className="border-b border-r border-border-light"
               />
             ))}
-          </div>
+          </CardGrid>
         </section>
 
         {/* ── Also city-wide (French-language school boards) ────── */}
@@ -301,6 +335,9 @@ export function ElectionLanding({
             ))}
           </section>
         )}
+
+        {/* ── Dates and how to vote ────────────────────────────── */}
+        <VotingCalendar election={election} content={content} />
 
         {/* ── Closing CTA ──────────────────────────────────────── */}
         <section className="bg-bg text-dark px-6 py-14 md:px-14 md:py-16 text-center flex flex-col items-center">
@@ -419,11 +456,12 @@ function DateCounter({
  * then the live timer under a hairline inside the same section — so the first
  * screen answers "which election" and "how long do I have" together.
  *
- * The supporting calendar drops out of the headline and becomes the strip
- * along the bottom: the advance-vote and mail-in counters at a fraction of the
- * headline's size, then this region's guide pages. Cells a region can't fill
- * are dropped rather than rendered empty, so a region with no published
- * advance date and no guides gets the hero alone and no orphaned rule.
+ * The supporting calendar is not here. Advance polls, the mail-in cutoff and
+ * the how-to-vote guides used to run as a strip along the bottom of this
+ * band, which put three secondary deadlines between the reader and the field
+ * — on a first screen whose one job is which election, and how long. They are
+ * the last thing on the page now, in VotingCalendar, which is where someone
+ * who has read the candidates and wants to know how to vote for one looks.
  *
  * The survey ask that used to sit in this band is now the explore grid's
  * alignment card and the closing CTA — asking twice in the first screen was
@@ -439,23 +477,6 @@ function Hero({
   /** poll hours for election day, where the region has published them */
   electionDay?: ElectionDayPeriod;
 }) {
-  const { advanceVote, mailIn } = election;
-  const guideLinks = content.guideLinks ?? [];
-  const dateCells = [advanceVote, mailIn].filter(Boolean).length;
-  const hasStrip = dateCells > 0 || guideLinks.length > 0;
-  /* The strip's columns, counted rather than auto-fit: the guides cell holds a
-     stack of links and wants the wider share, the counters are a number and a
-     date apiece. One cell takes the row on its own. */
-  const stripCells = dateCells + (guideLinks.length > 0 ? 1 : 0);
-  const stripCols =
-    stripCells === 3
-      ? "md:grid-cols-[1fr_1fr_1.15fr]"
-      : stripCells === 2
-        ? guideLinks.length > 0
-          ? "md:grid-cols-[1fr_1.15fr]"
-          : "md:grid-cols-2"
-        : "";
-
   return (
     <section className="border-b-2 border-dark">
       <div className="px-6 pt-14 pb-12 md:px-14 md:pt-16 md:pb-14">
@@ -515,59 +536,108 @@ function Hero({
           </p>
         </div>
       </div>
+    </section>
+  );
+}
 
-      {/* ── The supporting calendar, and this region's guides ── */}
-      {hasStrip && (
-        <div className={`border-t border-border-light grid ${stripCols}`}>
-          {advanceVote && (
-            <div className="px-6 py-8 md:px-14 md:py-9">
-              <DateCounter
-                eyebrow="Until advance polls"
-                targetIso={advanceVote.iso}
-                dateLabel={advanceVote.label}
-              />
-            </div>
-          )}
+/**
+ * How to vote, and by when — the last thing on the page.
+ *
+ * These three cells opened the page, tucked under the hero: two deadline
+ * counters and a stack of guide links, read before the reader had met a single
+ * candidate. That is the wrong order for what they are. A deadline matters to
+ * someone who has decided to vote, and the page spends its whole length making
+ * that decision possible; asked at the top, "apply to vote by mail by Friday"
+ * is an errand in front of the thing they came for.
+ *
+ * So it closes rather than opens, immediately before the call to action, where
+ * a reader who has just read the field and wants to know how to act on it is
+ * already looking down the page.
+ *
+ * Cells a region can't fill are dropped rather than rendered empty, so a region
+ * with no published advance date and no guides gets no band at all.
+ */
+function VotingCalendar({
+  election,
+  content,
+}: {
+  election: SupportedElection;
+  content: LandingContent;
+}) {
+  const { advanceVote, mailIn } = election;
+  const guideLinks = content.guideLinks ?? [];
+  const dateCells = [advanceVote, mailIn].filter(Boolean).length;
+  if (dateCells === 0 && guideLinks.length === 0) return null;
 
-          {mailIn && (
-            <div className="px-6 py-8 md:px-14 md:py-9 border-t md:border-t-0 md:border-l border-border-light">
-              <DateCounter
-                eyebrow="To apply to vote by mail"
-                targetIso={mailIn.iso}
-                /* Also spelled out, with the rest of Toronto's calendar, in
-                   src/app/toronto/vote/2026/key-dates.ts. This component is
-                   shared by four cities and can't import a Toronto route
-                   module, so the cutoff is written twice — change both. */
-                dateLabel={<>{mailIn.label}, 4:30&nbsp;p.m.</>}
-              />
-            </div>
-          )}
+  /* The columns, counted rather than auto-fit: the guides cell holds a stack
+     of links and wants the wider share, the counters are a number and a date
+     apiece. One cell takes the row on its own. */
+  const cells = dateCells + (guideLinks.length > 0 ? 1 : 0);
+  const cols =
+    cells === 3
+      ? "md:grid-cols-[1fr_1fr_1.15fr]"
+      : cells === 2
+        ? guideLinks.length > 0
+          ? "md:grid-cols-[1fr_1.15fr]"
+          : "md:grid-cols-2"
+        : "";
 
-          {guideLinks.length > 0 && (
-            <div
-              className={`px-6 py-8 md:px-14 md:py-9 bg-bg-alt ${
-                dateCells > 0
-                  ? "border-t md:border-t-0 md:border-l border-border-light"
-                  : ""
+  return (
+    <section className="border-b-2 border-dark">
+      <div className="px-6 pt-10 pb-6 md:px-14">
+        <p className="type-label text-accent mb-3">Before you vote</p>
+        <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.85rem,3vw,2.4rem)] mb-2">
+          Dates and how to vote
+        </h2>
+      </div>
+      <div className={`border-t border-border-light grid ${cols}`}>
+        {advanceVote && (
+          <div className="px-6 py-8 md:px-14 md:py-9">
+            <DateCounter
+              eyebrow="Until advance polls"
+              targetIso={advanceVote.iso}
+              dateLabel={advanceVote.label}
+            />
+          </div>
+        )}
+
+        {mailIn && (
+          <div className="px-6 py-8 md:px-14 md:py-9 border-t md:border-t-0 md:border-l border-border-light">
+            <DateCounter
+              eyebrow="To apply to vote by mail"
+              targetIso={mailIn.iso}
+              /* Also spelled out, with the rest of Toronto's calendar, in
+                 src/app/toronto/vote/2026/key-dates.ts. This component is
+                 shared by four cities and can't import a Toronto route
+                 module, so the cutoff is written twice — change both. */
+              dateLabel={<>{mailIn.label}, 4:30&nbsp;p.m.</>}
+            />
+          </div>
+        )}
+
+        {guideLinks.length > 0 && (
+          <div
+            className={`px-6 py-8 md:px-14 md:py-9 bg-bg-alt ${dateCells > 0
+                ? "border-t md:border-t-0 md:border-l border-border-light"
+                : ""
               }`}
-            >
-              <p className="type-label text-accent mb-4">How to vote</p>
-              <div className="flex flex-col items-start gap-2.5">
-                {guideLinks.map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="group/dates inline-flex items-center gap-1.5 type-label-sm !tracking-[0.1em] text-dark hover:text-accent transition-colors"
-                  >
-                    {link.label}
-                    <ArrowRight className="size-3 shrink-0 transition-transform group-hover/dates:translate-x-0.5" />
-                  </Link>
-                ))}
-              </div>
+          >
+            <p className="type-label text-accent mb-4">How to vote</p>
+            <div className="flex flex-col items-start gap-2.5">
+              {guideLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="group/dates inline-flex items-center gap-1.5 type-label-sm !tracking-[0.1em] text-dark hover:text-accent transition-colors"
+                >
+                  {link.label}
+                  <ArrowRight className="size-3 shrink-0 transition-transform group-hover/dates:translate-x-0.5" />
+                </Link>
+              ))}
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
+      </div>
     </section>
   );
 }
@@ -606,14 +676,13 @@ function ExploreSection({
         />
       )}
       <div className="px-6 pt-10 pb-6 md:px-14">
-        <p className="type-label text-accent mb-3">Explore</p>
         <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.85rem,3vw,2.4rem)] mb-2">
           Explore the election
         </h2>
         <p className="font-serif text-[1.05rem] leading-[1.45] max-w-[52ch] text-dark/80">
-          Campaigns talk in slogans. We asked every candidate on the ballot the
-          same specific questions and published what they sent back, word for
-          word.
+          We put the same questions to every candidate on the ballot. See how
+          they answered — then answer them yourself and find out who lines up
+          with you.
         </p>
       </div>
 
@@ -623,46 +692,41 @@ function ExploreSection({
           half the row a blank rectangle inside the same border. Fitting
           collapses the empty tracks, so however many cards a region has, they
           divide the row between them. */}
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(288px,1fr))] border-t border-l border-border-light">
+      <CardGrid min="288px" fit>
         {items.map((item) => {
           const invite = item.tone === "invite";
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`group/explore flex flex-col border-b border-r px-6 py-6 md:px-8 md:py-7 lg:min-h-[290px] lg:px-10 lg:py-9 transition-colors ${
-                invite
+              className={`group/explore flex flex-col border-b border-r px-6 py-6 md:px-8 md:py-7 lg:min-h-[290px] lg:px-10 lg:py-9 transition-colors ${invite
                   ? "border-accent bg-accent text-bg hover:bg-dark"
                   : "border-border-light hover:bg-bg-alt"
-              }`}
+                }`}
             >
               <p
-                className={`type-label-sm !tracking-[0.1em] mb-3 ${
-                  invite ? "text-bg/70" : "text-text-secondary"
-                }`}
+                className={`type-label-sm !tracking-[0.1em] mb-3 ${invite ? "text-bg/70" : "text-text-secondary"
+                  }`}
               >
                 {item.eyebrow}
               </p>
               <h3
-                className={`type-h3 lg:text-[1.75rem] lg:leading-[1.15] transition-colors ${
-                  invite ? "" : "group-hover/explore:text-accent"
-                }`}
+                className={`type-h3 lg:text-[1.75rem] lg:leading-[1.15] transition-colors ${invite ? "" : "group-hover/explore:text-accent"
+                  }`}
               >
                 {item.title}
               </h3>
               {item.meta && (
                 <p
-                  className={`mt-2 font-sans font-medium tracking-[-0.02em] text-[1.35rem] leading-none tabular-nums ${
-                    invite ? "text-bg/80" : "text-accent"
-                  }`}
+                  className={`mt-2 font-sans font-medium tracking-[-0.02em] text-[1.35rem] leading-none tabular-nums ${invite ? "text-bg/80" : "text-accent"
+                    }`}
                 >
                   {item.meta}
                 </p>
               )}
               <p
-                className={`mt-3 font-serif text-[1rem] leading-[1.45] lg:mt-4 lg:text-[1.1rem] lg:leading-[1.5] ${
-                  invite ? "text-bg/85" : "text-dark/80"
-                }`}
+                className={`mt-3 font-serif text-[1rem] leading-[1.45] lg:mt-4 lg:text-[1.1rem] lg:leading-[1.5] ${invite ? "text-bg/85" : "text-dark/80"
+                  }`}
               >
                 {item.blurb}
               </p>
@@ -685,8 +749,60 @@ function ExploreSection({
             </Link>
           );
         })}
-      </div>
+      </CardGrid>
     </section>
+  );
+}
+
+/**
+ * A row of cards that closes on all four sides, exactly once.
+ *
+ * THE PROBLEM THIS SOLVES
+ *   Cards in a full-bleed grid have to be ruled off from each other without
+ *   doubling the page frame that already surrounds them, and neither obvious
+ *   arrangement manages it:
+ *
+ *   · Rules on the container (`border-t border-l`) plus rules after each cell
+ *     (`border-b border-r`) draws a second line on top of the frame's left and
+ *     right borders, and leaves a hairline sitting a pixel above the section's
+ *     2px rule at the foot.
+ *   · Rules before each cell (`border-t border-r`) fixes all three of those and
+ *     breaks something worse: twenty-five wards in a four-column grid leave one
+ *     card alone on the last row, and the rule above it spans one column of
+ *     four. A line that stops a quarter of the way across the page is not a
+ *     subtle defect.
+ *
+ * THE ARRANGEMENT
+ *   Cells rule *after* themselves, so every row draws a full-width line under
+ *   itself whether or not the row below it is complete. The two lines that
+ *   would then land on the frame — the last row's and the last column's — are
+ *   pushed a pixel past the edge with negative margins and clipped away by the
+ *   wrapper. What is left is the frame's own border on the outside, the
+ *   section's rule at the foot, and one line between any two cards.
+ */
+function CardGrid({
+  min,
+  fit = false,
+  children,
+}: {
+  /** the narrowest a column may get before the grid drops one */
+  min: string;
+  /** collapse empty tracks so a few cards fill the row, rather than lining up
+   *  at their minimum width with the rest of the row left blank */
+  fit?: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <div className="overflow-hidden">
+      <div
+        className="-mb-px -mr-px grid border-t border-border-light"
+        style={{
+          gridTemplateColumns: `repeat(${fit ? "auto-fit" : "auto-fill"}, minmax(${min}, 1fr))`,
+        }}
+      >
+        {children}
+      </div>
+    </div>
   );
 }
 
@@ -789,9 +905,8 @@ export function CandidateRow({
 }) {
   return (
     <li
-      className={`flex gap-5 sm:gap-6 items-center px-6 md:px-14 py-5 border-t border-border-light ${
-        candidate.withdrawn ? "opacity-55" : ""
-      }`}
+      className={`flex gap-5 sm:gap-6 items-center px-6 md:px-14 py-5 border-t border-border-light ${candidate.withdrawn ? "opacity-55" : ""
+        }`}
     >
       <span
         aria-hidden="true"
@@ -802,9 +917,8 @@ export function CandidateRow({
       <div className="flex-1 min-w-0">
         <div className="flex items-baseline gap-3 flex-wrap">
           <p
-            className={`font-sans font-medium text-[1.25rem] tracking-[-0.02em] leading-[1.15] ${
-              candidate.withdrawn ? "line-through decoration-1" : ""
-            }`}
+            className={`font-sans font-medium text-[1.25rem] tracking-[-0.02em] leading-[1.15] ${candidate.withdrawn ? "line-through decoration-1" : ""
+              }`}
           >
             {candidate.name}
           </p>

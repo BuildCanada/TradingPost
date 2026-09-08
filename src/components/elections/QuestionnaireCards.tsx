@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
+import type { Heading } from "@/components/custom/signpost/config";
 import type { GridCandidate } from "./SurveyGrid";
 import { QuestionRollCall } from "./QuestionRollCall";
 import type { Seat } from "./QuestionRollCall";
@@ -39,6 +40,34 @@ import type { ComparedGroup } from "@/lib/elections/candidate-answers";
  *   already say once.
  */
 
+/** The id a section heading answers to, and the one the rail scrolls at. */
+export function sectionId(stepId: string, prefix?: string): string {
+  return prefix ? `${prefix}-${stepId}` : stepId;
+}
+
+/** The questionnaire's sections, as the scroll rail wants them.
+ *
+ * Sections only. Hanging every question off its section was tried and is
+ * wrong for this rail: a level-3 entry on a memo is three words of a
+ * sub-heading, where a question here is a full sentence — "Should Toronto
+ * permit substantially more housing as-of-right in every ward, including
+ * areas currently dominated by detached and semi-detached homes?" — and
+ * thirty-three of those turn a navigation aid into a second copy of the page
+ * you have to read to navigate.
+ *
+ * The questions still carry their ids, so a deep link into one works and the
+ * rail can be given them later if the case for it changes. */
+export function questionnaireHeadings(
+  groups: ComparedGroup[],
+  { prefix }: { prefix?: string } = {},
+): Heading[] {
+  return groups.map((group) => ({
+    id: sectionId(group.stepId, prefix),
+    text: group.stepTitle,
+    level: 2 as const,
+  }));
+}
+
 export function QuestionnaireCards({
   groups,
   respondents,
@@ -47,6 +76,7 @@ export function QuestionnaireCards({
   seats,
   notes = true,
   yourKey,
+  idPrefix,
 }: {
   groups: ComparedGroup[];
   /** the candidates who returned the questionnaire */
@@ -64,6 +94,12 @@ export function QuestionnaireCards({
   /** the reader's own row, where they have answered the same questionnaire —
    *  see QuestionRollCall. */
   yourKey?: string;
+  /** namespaces the section headings' ids. A page showing one questionnaire
+   *  needs none; the survey results show two, a mayoral race and a ward one,
+   *  built from the same question set — without a prefix both would put an
+   *  element called "housing" in the document and the scroll rail would only
+   *  ever find the first. */
+  idPrefix?: string;
 }) {
   const silentNames = silent.map((candidate) => ({
     key: candidate.key,
@@ -76,14 +112,17 @@ export function QuestionnaireCards({
        same grid rather than a change of subject. */
     <div className="grid gap-12">
       {groups.map((group) => (
-        <section key={group.stepId} className="grid gap-4 scroll-mt-6">
+        <section key={group.stepId} className="grid gap-4 scroll-mt-24">
           {/* The rule that opens a section, on one line. Five headings should
               not be five screens — but they do have to sit above the question
               headings inside the cards, which sit above the answer titles
               inside those, so the three are set a step apart. */}
-          <h3 className="border-b border-border-light pb-2 font-sans font-medium leading-none tracking-[-0.03em] text-[1.8rem]">
+          <h2
+            id={sectionId(group.stepId, idPrefix)}
+            className="scroll-mt-24 border-b border-border-light pb-2 font-sans font-medium leading-none tracking-[-0.03em] text-[1.8rem]"
+          >
             {group.stepTitle}
-          </h3>
+          </h2>
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {group.questions.map((question) => (
               <QuestionRollCall
@@ -91,6 +130,7 @@ export function QuestionnaireCards({
                 question={question}
                 silent={silentNames}
                 nameTheSilent={respondents.length > 0}
+                headingId={sectionId(question.questionId, idPrefix)}
                 seats={seats}
                 notes={notes}
                 yourKey={yourKey}
@@ -117,6 +157,12 @@ function WardAnswerNote({
   /** the reader's own row, where they have answered the same questionnaire —
    *  see QuestionRollCall. */
   yourKey?: string;
+  /** namespaces the section headings' ids. A page showing one questionnaire
+   *  needs none; the survey results show two, a mayoral race and a ward one,
+   *  built from the same question set — without a prefix both would put an
+   *  element called "housing" in the document and the scroll rail would only
+   *  ever find the first. */
+  idPrefix?: string;
 }) {
   return (
     <div className="grid gap-2 border-t border-border-light pt-4">

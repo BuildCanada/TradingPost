@@ -11,7 +11,12 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-import { QuestionnaireCards } from "@/components/elections/QuestionnaireCards";
+import {
+  QuestionnaireCards,
+  questionnaireHeadings,
+} from "@/components/elections/QuestionnaireCards";
+import { QuestionnaireRail } from "@/components/elections/QuestionnaireRail";
+import type { Heading } from "@/components/custom/signpost/config";
 import type { Seat } from "@/components/elections/QuestionRollCall";
 import { AgreementChart } from "./AgreementChart";
 import {
@@ -134,9 +139,48 @@ export default function AlignmentResults({
   /** the reader's own answers, by question id */
   answers: Record<string, string>;
 }) {
-  const shown = races.filter(
-    (race) => race.alignment.scores.length > 0 && race.alignment.rows.length > 0,
+  /* Memoised, not just filtered inline: `grids` keys off this, and a fresh
+     array every render would rebuild both pivots on every keystroke the page
+     ever sees. */
+  const shown = useMemo(
+    () =>
+      races.filter(
+        (race) =>
+          race.alignment.scores.length > 0 && race.alignment.rows.length > 0,
+      ),
+    [races],
   );
+
+  const grids = useMemo(
+    () => shown.map((race) => raceGrid(survey, race, answers)),
+    [shown, survey, answers],
+  );
+
+  /* The rail's list: each race's sections, in ballot order, namespaced by
+     race. Both races ask the same questionnaire, so without the prefix the
+     document would hold two elements called "housing" and the rail would
+     scroll to whichever came first, whatever you clicked.
+
+     A race's own heading takes the level-2 slot and its sections hang under
+     it as level 3, which is the one place in the tracker where the rail
+     nests — there are two questionnaires on this page and the sections would
+     otherwise read as one run of eighteen.
+
+     A closed race unmounts its sections and the rail simply cannot find them:
+     the spy skips a heading with no element and the jump no-ops. Both races
+     open by default, so that is the state after a reader has folded one away,
+     which is a reader saying they do not want those sections. */
+  const headings: Heading[] = useMemo(
+    () =>
+      shown.flatMap((race, i) => [
+        { id: race.key, text: race.label, level: 2 as const },
+        ...questionnaireHeadings(grids[i].groups, { prefix: race.key }).map(
+          (heading) => ({ ...heading, level: 3 as const }),
+        ),
+      ]),
+    [shown, grids],
+  );
+
   if (shown.length === 0) return null;
 
   /* No heading of its own. Once the answers are in, the page is this
@@ -146,40 +190,124 @@ export default function AlignmentResults({
      live here: see `SurveyClient`. */
   return (
     <section className="min-w-0 px-6 pt-10 pb-14 md:px-10">
-      <div className="grid min-w-0 gap-10">
-        {shown.map((race) => (
-          <RaceBlock
-            key={race.key}
-            race={race}
-            survey={survey}
-            answers={answers}
-          />
-        ))}
-      </div>
+      <QuestionnaireRail headings={headings}>
+        <div className="grid min-w-0 gap-10">
+          {shown.map((race, i) => (
+            <RaceBlock key={race.key} race={race} grid={grids[i]} />
+          ))}
+        </div>
+      </QuestionnaireRail>
 
       {/* One note for the whole page rather than one under every grid: it is
           the same reading in both races. */}
       <p className="type-caption mt-10 max-w-[78ch] border-t border-border-light pt-4 text-text-muted text-pretty">
-        <span className="text-text-secondary">Reading these.</span> Every
-        candidate on the ballot has a column, whether or not they answered us;
-        yours is the first. Open a question for the options in full and what the
-        rest of the field said. Counts are out of the candidates who returned
-        the questionnaire, not the whole ballot.
+        <span className="text-text-secondary">Reading these.</span> Each card
+        is one question, with the candidates filed under the answer they gave —
+        and your own answer among them, marked. Options nobody picked are not
+        shown. The bars above count only the candidates who returned the
+        questionnaire, not the whole ballot.
       </p>
     </section>
   );
 }
 
+/* The cards, and the reader inside them.
+ *
+ * `candidateAnswers` does the pivoting for both — the reader is passed through
+ * it as a response of their own, so their answers are built by the same code
+ * that builds everyone else's and cannot disagree with them.
+ *
+ * Computed by the parent rather than inside the block that renders it, because
+ * the scroll rail has to list both races' sections before either block has
+ * rendered, and the sections are a property of this result. One computation,
+ * two readers. */
+function raceGrid(
+  survey: Survey,
+  race: RaceComparison,
+  answers: Record<string, string>,
+) {
+
+  const entries = candidateAnswers(survey, race.responses);
+  const byKey = byCandidateKey(entries);
+  const field = surveyRoster<SurveyRosterCandidate>(
+    race.roster.length > 0
+      ? race.roster
+      : entries.map((entry) => ({
+          key: entry.key,
+          name: entry.candidateName,
+        })),
+    byKey,
+  );
+
+  const [you] = candidateAnswers(survey, [
+    {
+      candidateName: YOU,
+      ward: "",
+      surveySlug: survey.slug,
+      surveyVersion: "",
+      answers,
+      explanations: {},
+      source: "form" as const,
+    },
+  ]);
+
+  /* Every name the cards can print, the reader first. The order here is
+     only the order the pivot hands the rows over in — inside a card the
+     candidates are filed under the answer they gave and sorted by surname,
+     so a reader looking for one person finds them in the same place on all
+     thirty questions. The agreement sort above drives the chart, which is
+     where a ranking belongs: it is a ranking. */
+  const candidates = [
+    ...(you ? [{ key: you.key, name: YOU }] : []),
+    ...field.map(({ key, name, website }) => ({ key, name, website })),
+  ];
+
+  /* The ballot line each plate belongs to.
+
+     A race block is one race, so its heading already says which — but the
+     two blocks sit one under the other on a page a reader scrolls through
+     with a candidate's name in mind, and a plate that says only a name is
+     a plate whose race depends on remembering which heading you passed.
+     Every plate carries its own. The reader's own plate carries none: they
+     are not running for anything. */
+  const seat: Seat =
+    race.key === "mayor"
+      ? { race: "mayor", label: "Mayor" }
+      : { race: "councillor", label: "Councillor" };
+  const seats = Object.fromEntries(
+    field.map((candidate) => [candidate.key, seat]),
+  );
+
+  return {
+    yourKey: you?.key,
+    seats,
+    /* The reader counts as a respondent: they answered the questionnaire,
+       which is the whole reason there is a page. */
+    respondents: [
+      ...(you ? [{ key: you.key, name: YOU }] : []),
+      ...field.filter((candidate) => candidate.answers),
+    ],
+    silent: field
+      .filter((candidate) => !candidate.answers)
+      .map(({ key, name, website }) => ({ key, name, website })),
+    groups: comparedQuestions(
+      you ? [you, ...entries] : entries,
+      candidates,
+      questionnaireShape(survey, race.responses),
+    ),
+  };
+}
+
+type RaceGrid = ReturnType<typeof raceGrid>;
+
 /* ── One race: who is closest, then everyone question by question ─── */
 
 function RaceBlock({
   race,
-  survey,
-  answers,
+  grid,
 }: {
   race: RaceComparison;
-  survey: Survey;
-  answers: Record<string, string>;
+  grid: RaceGrid;
 }) {
   const [sort, setSort] = useState<Sort>("agreement");
   const scores = useMemo(
@@ -187,81 +315,7 @@ function RaceBlock({
     [race.alignment.scores, sort],
   );
 
-  /* The cards, and the reader inside them.
-     `candidateAnswers` does the pivoting for both — the reader is passed
-     through it as a response of their own, so their answers are built by the
-     same code that builds everyone else's and cannot disagree with them. */
-  const grid = useMemo(() => {
-    const entries = candidateAnswers(survey, race.responses);
-    const byKey = byCandidateKey(entries);
-    const field = surveyRoster<SurveyRosterCandidate>(
-      race.roster.length > 0
-        ? race.roster
-        : entries.map((entry) => ({
-            key: entry.key,
-            name: entry.candidateName,
-          })),
-      byKey,
-    );
 
-    const [you] = candidateAnswers(survey, [
-      {
-        candidateName: YOU,
-        ward: "",
-        surveySlug: survey.slug,
-        surveyVersion: "",
-        answers,
-        explanations: {},
-        source: "form" as const,
-      },
-    ]);
-
-    /* Every name the cards can print, the reader first. The order here is
-       only the order the pivot hands the rows over in — inside a card the
-       candidates are filed under the answer they gave and sorted by surname,
-       so a reader looking for one person finds them in the same place on all
-       thirty questions. The agreement sort above drives the chart, which is
-       where a ranking belongs: it is a ranking. */
-    const candidates = [
-      ...(you ? [{ key: you.key, name: YOU }] : []),
-      ...field.map(({ key, name, website }) => ({ key, name, website })),
-    ];
-
-    /* The ballot line each plate belongs to.
-
-       A race block is one race, so its heading already says which — but the
-       two blocks sit one under the other on a page a reader scrolls through
-       with a candidate's name in mind, and a plate that says only a name is
-       a plate whose race depends on remembering which heading you passed.
-       Every plate carries its own. The reader's own plate carries none: they
-       are not running for anything. */
-    const seat: Seat =
-      race.key === "mayor"
-        ? { race: "mayor", label: "Mayor" }
-        : { race: "councillor", label: "Councillor" };
-    const seats = Object.fromEntries(
-      field.map((candidate) => [candidate.key, seat]),
-    );
-
-    return {
-      yourKey: you?.key,
-      seats,
-      /* The reader counts as a respondent: they answered the questionnaire,
-         which is the whole reason there is a page. */
-      respondents: [
-        ...(you ? [{ key: you.key, name: YOU }] : []),
-        ...field.filter((candidate) => candidate.answers),
-      ],
-      silent: field
-        .filter((candidate) => !candidate.answers)
-        .map(({ key, name, website }) => ({ key, name, website })),
-      groups: comparedQuestions(
-        you ? [you, ...entries] : entries,
-        candidates,
-        questionnaireShape(survey, race.responses),
-      ),
-    };
-  }, [survey, answers, race.key, race.responses, race.roster]);
 
   /* Both races open to begin with. A reader who has just answered thirty
      questions is owed the answer to them, not two closed doors — the fold is
@@ -270,7 +324,10 @@ function RaceBlock({
   return (
     <Collapsible defaultOpen className="min-w-0">
       <CollapsibleTrigger className="group/race flex w-full items-baseline gap-3 border-t-2 border-dark pt-3 pb-4 text-left transition-colors">
-        <h3 className="flex-1 font-sans font-medium leading-[1.15] tracking-[-0.025em] text-[clamp(1.3rem,2vw,1.6rem)] text-dark transition-colors group-hover/race:text-accent">
+        <h3
+          id={race.key}
+          className="flex-1 scroll-mt-24 font-sans font-medium leading-[1.15] tracking-[-0.025em] text-[clamp(1.3rem,2vw,1.6rem)] text-dark transition-colors group-hover/race:text-accent"
+        >
           {race.label}
         </h3>
         {/* What is behind the fold, so a closed race still says whether it
@@ -312,6 +369,7 @@ function RaceBlock({
           seats={grid.seats}
           notes={false}
           yourKey={grid.yourKey}
+          idPrefix={race.key}
         />
       </CollapsibleContent>
     </Collapsible>

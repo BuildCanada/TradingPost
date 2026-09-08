@@ -4,7 +4,11 @@ import type { ReactNode } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import CountdownDays from "./CountdownDays";
 import { CandidateRoster } from "./CandidateRoster";
-import { QuestionnaireCards } from "./QuestionnaireCards";
+import {
+  QuestionnaireCards,
+  questionnaireHeadings,
+} from "./QuestionnaireCards";
+import { QuestionnaireRail } from "./QuestionnaireRail";
 import { SurveyCta } from "./SurveyCta";
 import { IncumbentBadge, SiteLink } from "./ElectionLanding";
 import {
@@ -335,12 +339,14 @@ function RaceQuestionnaire({
       {showHeading && <RaceHeading race={race} />}
       <div className="px-6 md:px-14 pb-10">
         {groups.length > 0 ? (
-          <QuestionnaireCards
-            groups={groups}
-            respondents={answered}
-            silent={silent}
-            issuesHref={issuesHref}
-          />
+          <QuestionnaireRail headings={questionnaireHeadings(groups)}>
+            <QuestionnaireCards
+              groups={groups}
+              respondents={answered}
+              silent={silent}
+              issuesHref={issuesHref}
+            />
+          </QuestionnaireRail>
         ) : (
           /* Only two ways to get here now: nobody has filed for the seat, or
              the questionnaire itself could not be fetched. Either way there is

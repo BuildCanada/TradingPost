@@ -14,6 +14,8 @@ export function CandidateRoster({
   race,
   ward,
   wardName,
+  respondentsLabel = "Answered our questionnaire",
+  silentLabel = "Also on the ballot, yet to answer our questionnaire",
 }: {
   respondents: GridCandidate[];
   silent: GridCandidate[];
@@ -21,6 +23,12 @@ export function CandidateRoster({
   race: "mayor" | "councillor" | "trustee";
   ward?: string;
   wardName?: string;
+  /** what the first list is. The split into answered and not is the useful
+   *  one on a ward page, where both halves are a handful of names — but a page
+   *  that hands over the whole ballot in one list needs to say so, rather than
+   *  labelling fifty-three candidates as the nine who wrote back. */
+  respondentsLabel?: string;
+  silentLabel?: string;
 }) {
   /* Surname order within each half. The clerk's order is a filing order, and
      a reader checking whether their own councillor answered needs somewhere
@@ -59,18 +67,14 @@ export function CandidateRoster({
     <div className="grid gap-5">
       {respondents.length > 0 && (
         <div className="grid gap-2.5">
-          <p className="type-label-sm text-text-muted">
-            Answered our questionnaire
-          </p>
+          <p className="type-label-sm text-text-muted">{respondentsLabel}</p>
           {list([...respondents].sort(bySurname))}
         </div>
       )}
 
       {silent.length > 0 && (
         <div className="grid gap-2.5">
-          <p className="type-label-sm text-text-muted">
-            Also on the ballot, yet to answer our questionnaire
-          </p>
+          <p className="type-label-sm text-text-muted">{silentLabel}</p>
           {list([...silent].sort(bySurname))}
         </div>
       )}

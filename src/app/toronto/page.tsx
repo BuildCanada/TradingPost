@@ -293,7 +293,7 @@ function ElectionCardsSection() {
 
           <ElectionCard
             href={ELECTION.basePath}
-            title="Explore the candidates"
+            title="Explore the election"
             cta="See all candidates"
             className="bg-bg text-dark"
             buttonClassName={button}

@@ -3,7 +3,11 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
 import { CandidateRoster } from "@/components/elections/CandidateRoster";
-import { QuestionnaireCards } from "@/components/elections/QuestionnaireCards";
+import {
+  QuestionnaireCards,
+  questionnaireHeadings,
+} from "@/components/elections/QuestionnaireCards";
+import { QuestionnaireRail } from "@/components/elections/QuestionnaireRail";
 import { SurveyCta } from "@/components/elections/SurveyCta";
 import CountdownDays from "@/components/elections/CountdownDays";
 import {
@@ -152,22 +156,35 @@ export default async function MayorPage() {
         {/* ── The field, question by question ────────────────── */}
         {groups.length > 0 && mayoral.length > 0 ? (
           <section className="px-6 md:px-14 py-9 md:py-11 border-b-2 border-dark grid gap-9">
-            {/* The nine who answered, named and linked once. The forty-four
-                who have not are on the roster page, which groups the field by
-                exactly that line — naming them here, on each of thirty-four
-                cards, would bury the nine. */}
+            {/* THE WHOLE BALLOT, ONCE
+
+                This listed the nine who answered and nobody else, under the
+                heading "Answered our questionnaire" — which is a page about
+                the mayoral race that never names most of the people in it. A
+                reader arriving with a name in mind, and most do, could not
+                find out from this page whether that person is running.
+
+                So it is the ballot: every registered candidate, in surname
+                order, each linked to their campaign. Who answered is what the
+                thirty-four cards below are made of, and does not need saying
+                twice. Still one list rather than two — a second heading of
+                forty-four names reading "yet to answer" is a scoreboard, and
+                the cards keep that score already. */}
             <CandidateRoster
-              respondents={mayoral}
+              respondents={roster}
               silent={[]}
               election={ELECTION.slug}
               race="mayor"
+              respondentsLabel={`On the ballot for mayor · ${registered} candidates`}
             />
-            <QuestionnaireCards
-              groups={groups}
-              respondents={mayoral}
-              silent={[]}
-              issuesHref={`${ELECTION.basePath}/issues`}
-            />
+            <QuestionnaireRail headings={questionnaireHeadings(groups)}>
+              <QuestionnaireCards
+                groups={groups}
+                respondents={mayoral}
+                silent={[]}
+                issuesHref={`${ELECTION.basePath}/issues`}
+              />
+            </QuestionnaireRail>
           </section>
         ) : (
           <section className="px-6 md:px-14 py-14 border-b-2 border-dark">

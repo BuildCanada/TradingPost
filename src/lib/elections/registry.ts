@@ -70,6 +70,10 @@ export type SupportedElection = {
    * redirect there (see next.config.ts). Only Toronto is live right now.
    */
   hidden?: boolean;
+  /** the region has postal-code → ward boundary data upstream, so the wards
+   *  section can offer the lookup. False is not "no map": it is "asking for a
+   *  postal code here would answer with boundary_data_unavailable". */
+  wardLookup?: boolean;
 };
 
 const TORONTO_2026: SupportedElection = {
@@ -89,6 +93,7 @@ const TORONTO_2026: SupportedElection = {
   nominationCloseIso: "2026-08-21",
   advanceVote: { iso: "2026-10-06", label: "Oct 6 – 11" },
   mailIn: { iso: "2026-09-24", label: "Thu, Sept 24" },
+  wardLookup: true,
   themeClass: "theme-election",
 };
 

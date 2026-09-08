@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
-import { QuestionnaireCards } from "@/components/elections/QuestionnaireCards";
+import {
+  QuestionnaireCards,
+  questionnaireHeadings,
+} from "@/components/elections/QuestionnaireCards";
+import { QuestionnaireRail } from "@/components/elections/QuestionnaireRail";
 import { SurveyCta } from "@/components/elections/SurveyCta";
 import CountdownDays from "@/components/elections/CountdownDays";
 import { fieldSentiment } from "@/lib/elections/field-sentiment";
@@ -151,13 +155,15 @@ export default async function IssuesPage() {
                 mayoral race and two dozen wards, and a flat list of them is a
                 list with no ballot behind it. The seat on each plate is the
                 pointer instead. */}
-            <QuestionnaireCards
-              groups={groups}
-              respondents={roster}
-              silent={[]}
-              seats={seats}
-              notes={false}
-            />
+            <QuestionnaireRail headings={questionnaireHeadings(groups)}>
+              <QuestionnaireCards
+                groups={groups}
+                respondents={roster}
+                silent={[]}
+                seats={seats}
+                notes={false}
+              />
+            </QuestionnaireRail>
           </section>
         ) : (
           <section className="px-6 md:px-14 py-16 border-b-2 border-dark">

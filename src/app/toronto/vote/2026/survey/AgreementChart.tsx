@@ -1,254 +1,188 @@
-"use client";
+import type { Alignment, CandidateScore } from "@/lib/elections/alignment";
 
-import { useState, type CSSProperties } from "react";
-
-import { palette } from "@/components/charts/trilemma";
-import { lastName } from "@/lib/elections/names";
-import type {
-  Alignment,
-  CandidateScore,
-  QuestionRow,
-  Verdict,
-} from "@/lib/elections/alignment";
-
-/* One card per candidate, one square per question.
+/* How much of the questionnaire each candidate answered the way you did.
  *
- * Ported from the "Survey Agreement Chart" design and dressed in the election
- * theme: the design's own palette is the house palette by another name — its
- * ink, rule, linen and auburn are `--color-dark`, `--color-border-light`,
- * `--color-bg` and `--color-accent` — so the colours are taken from the tokens
- * rather than pasted as hex, and the same page in another region's theme comes
- * out in that region's colours. Its three typefaces map onto the two the site
- * ships: Inter Tight to the sans, Source Serif to the serif, and the mono
- * labels to the house's tracked uppercase caption, which is what mono was
- * standing in for.
+ * WHAT THIS REPLACED
+ *   A card per candidate, each carrying a grid of thirty-three little squares —
+ *   one per question, coloured by the option they picked and faded where it was
+ *   not yours. It was a handsome object and the wrong one. Three faults:
  *
- * FORM
- *   The ranked list this replaces gave a share and a sentence — "agrees on 9
- *   of 14" — which says how much and never says where. A row of squares says
- *   both: the count is the filled ones, and which questions they are is the
- *   pattern. Two candidates on the same percentage look different here, and
- *   that difference is the thing a voter is actually choosing between.
+ *   · It answered the wrong question. A reader arriving here has just spent ten
+ *     minutes on a questionnaire and wants a ranking: who is closest to me. The
+ *     card grid gave a ranking you had to assemble by reading a two-digit
+ *     figure out of every card and holding all of them in your head, because
+ *     the cards were laid across four columns and the eye cannot compare down a
+ *     grid.
+ *   · The squares were unreadable at their size. Thirty-three cells across a
+ *     card three hundred pixels wide are seven pixels each; which question a
+ *     cell stood for was recoverable only by hovering it one at a time.
+ *   · It matched nothing else on the site. Every other page in the tracker is
+ *     rules, plates and house type. This was a heatmap.
  *
- *   Hovering a square names the question under the card rather than in a
- *   floating tip: a tooltip that covers its neighbours is no use for reading a
- *   row, and the space is reserved so the card does not jump.
+ * WHAT IT IS NOW
+ *   A ranked list, one candidate per ruled row, each with a single bar divided
+ *   into how you and they compare. The ranking is the layout: the longest bar
+ *   is at the top and a reader gets the order by looking down the left edge,
+ *   which is the thing they came for.
  *
- *   The design has two states, same and different. The questionnaire has four
- *   — a candidate can answer in their own words, or not answer at all — and
- *   collapsing those into "different" would report silence as disagreement.
+ *   The bar is the whole questionnaire every time, so the rows are comparable —
+ *   a candidate who answered nine questions and agreed on all nine does not
+ *   draw the same bar as one who answered thirty-three and agreed on all of
+ *   them. Silence takes up its own share of the bar, which is the honest
+ *   picture of a candidate who barely filled the thing in.
  *
- * COLOUR
- *   The option's own hue, from the same chart palette the trilemma dials and
- *   the grid's wedges use: first option, same colour, every surface. A black
- *   square said only "agreed"; a coloured one says which answer, so a
- *   disagreement is legible as a direction rather than as an absence — two
- *   candidates who both differ from you can differ from each other, and that
- *   is the whole of what a voter is choosing between.
- *
- *   Agreement is carried by weight rather than by hue: where they answered as
- *   you did the square is solid, and where they did not it is the same hue at
- *   a whisper of its strength. The gap between the two has to be enormous —
- *   the first thing the row says, from across the room and before any of the
- *   colours are read, is how much of it is filled in, and a disagreement at a
- *   third strength was still dark enough to count as a mark. Faint enough to
- *   register as an empty square, but not so faint that leaning in cannot tell
- *   which way they went.
+ * WHERE THE DETAIL WENT
+ *   Nowhere it was not already. The question cards below this chart file every
+ *   candidate under the answer they gave — and the reader's own plate sits in
+ *   those blocks too, so "where do we differ" is answered by scrolling rather
+ *   than by hovering thirty-three squares in turn. A hover panel here was the
+ *   same information in a worse format, and it reserved five empty lines under
+ *   every card to say "Hover a square for the question".
  */
 
-/* Their answer at a glance: the option's colour, solid where it is yours too.
-   `unclear` and `unanswered` have no option to take a colour from — the first
-   is prose that matched nothing, the second is silence — so both stay
-   uncoloured, one ruled and one dashed. */
-function squareStyle(
-  verdict: Verdict,
-  choice: number | null,
-  optionCount: number,
-): { className: string; style?: CSSProperties } {
-  if (verdict === "unclear")
-    return { className: "border border-border-light bg-border-light/40" };
-  if (verdict === "unanswered" || choice === null)
-    return { className: "border border-dashed border-border-light" };
+/* The bands, in the order they stack along the bar: agreement first, from the
+   left edge, because that is the quantity being ranked and a reader compares
+   the length of the run that starts in the same place on every row.
 
-  return {
-    className: "",
-    style: {
-      background: palette(optionCount)[choice],
-      opacity: verdict === "agree" ? 1 : 0.12,
-    },
-  };
-}
+   Agreement takes the accent. Everything else is the same ink at descending
+   strengths rather than four hues — the bar is one quantity split up, not four
+   competing ones, and a palette here would say that disagreeing and not
+   answering are different in kind rather than different in degree. */
+const BANDS = [
+  {
+    key: "agreed",
+    label: "Same as you",
+    className: "bg-accent",
+  },
+  {
+    key: "differed",
+    label: "Different",
+    className: "bg-dark/30",
+  },
+  {
+    key: "unclear",
+    label: "Their own words",
+    className: "bg-dark/12",
+  },
+  {
+    key: "unanswered",
+    label: "No answer",
+    className: "bg-dark/6",
+  },
+] as const;
 
-const VERDICT_WORD: Record<Verdict, string> = {
-  agree: "Same",
-  differ: "Different",
-  unclear: "Their own words",
-  unanswered: "No answer",
-};
-
-type Hover = { candidate: string; index: number } | null;
+type BandKey = (typeof BANDS)[number]["key"];
 
 export function AgreementChart({
   alignment,
   scores,
-  yourName = "You",
 }: {
   alignment: Alignment;
   /** the candidates in the order they should print; defaults to the
    *  alignment's own ranking, which is by agreement */
   scores?: CandidateScore[];
-  /** how the reader is named in the comparison line under a card */
-  yourName?: string;
 }) {
-  const [hover, setHover] = useState<Hover>(null);
   const { rows } = alignment;
   const ordered = scores ?? alignment.scores;
   if (rows.length === 0 || ordered.length === 0) return null;
 
+  const total = rows.length;
+
+  /* A band that never occurs is left out of the key. Most fields produce three
+     of the four, and a key naming a colour nobody can find on the page is a
+     colour the reader goes looking for. */
+  const present = BANDS.filter((band) =>
+    ordered.some((score) => score[band.key] > 0),
+  );
+
   return (
     <div>
-      <p className="type-caption mb-3 text-text-secondary text-pretty">
-        Each square is one of the {rows.length} questions you both had in front
-        of you, coloured by the option they picked — the same colours the
-        charts give those options. Solid where they answered as you did, faded
-        where they did not.
+      <p className="type-caption mb-4 text-text-secondary text-pretty">
+        Every bar is the same {total} questions. The filled run is how many of
+        them that candidate answered the way you did.
       </p>
 
-      {/* Rules on the cards themselves rather than a gap over a coloured
-          background. The background trick draws the grid's empty cells too:
-          five candidates in a row of three left a grey panel sitting where a
-          sixth card would have gone, which read as a card that had failed to
-          load rather than as the end of the list. Each card carries its own
-          right and bottom rule and the container closes the top and left, so
-          an unfilled last row simply stops. */}
-      <div className="grid border-t border-l border-border-light sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+      <div className="border-t border-border-light">
         {ordered.map((score) => (
-          <CandidateCard
-            key={score.candidateName}
-            name={score.candidateName}
-            agreed={score.agreed}
-            compared={score.compared}
-            share={score.share}
-            rows={rows}
-            yourName={yourName}
-            hover={hover?.candidate === score.candidateName ? hover.index : null}
-            onHover={(index) =>
-              setHover(
-                index === null
-                  ? null
-                  : { candidate: score.candidateName, index },
-              )
-            }
-          />
+          <Row key={score.candidateName} score={score} total={total} />
         ))}
       </div>
+
+      {/* The key, under the rows rather than over them: a reader looks at the
+          bars first and comes here only when a band needs naming. */}
+      <ul className="mt-3.5 flex list-none flex-wrap items-center gap-x-5 gap-y-2 m-0 p-0">
+        {present.map((band) => (
+          <li key={band.key} className="flex items-center gap-2">
+            <span
+              className={`size-2.5 flex-none ${band.className}`}
+              aria-hidden="true"
+            />
+            <span className="type-label-sm text-text-muted">{band.label}</span>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
 
-function CandidateCard({
-  name,
-  agreed,
-  compared,
-  share,
-  rows,
-  yourName,
-  hover,
-  onHover,
-}: {
-  name: string;
-  agreed: number;
-  compared: number;
-  share: number | null;
-  rows: QuestionRow[];
-  yourName: string;
-  /** index of the square under the pointer, within `rows` */
-  hover: number | null;
-  onHover: (index: number | null) => void;
-}) {
-  const cells = rows.map(
-    (row) =>
-      row.cells.find((cell) => cell.candidateName === name) ?? {
-        candidateName: name,
-        verdict: "unanswered" as Verdict,
-        answer: undefined,
-        choice: null,
-      },
-  );
-
-  const held = hover === null ? null : { row: rows[hover], cell: cells[hover] };
+/* One candidate.
+ *
+ * Three tracks on a wide screen — name, bar, figures — so the bars all start
+ * and end on the same two lines and their lengths can be read against each
+ * other without a gridline to help. Below `sm` the name takes its own line
+ * above the bar, because a name column narrow enough to leave a usable bar is
+ * a name column that wraps every candidate onto three lines. */
+function Row({ score, total }: { score: CandidateScore; total: number }) {
+  const share = score.share === null ? null : Math.round(score.share * 100);
 
   return (
-    <div
-      className="grid content-start border-r border-b border-border-light bg-bg p-4"
-      onMouseLeave={() => onHover(null)}
-    >
-      <h4 className="font-sans font-medium leading-[1.15] tracking-[-0.02em] text-[1.1rem] text-dark text-balance">
-        {name}
-      </h4>
-
-      {/* The count large, the share small: the count is the honest figure at
-          this size — "9 of 14" is a fact about fourteen questions, where a
-          percentage of fourteen invites being read as a poll result. */}
-      <div className="mt-3 flex items-end gap-2.5">
-        <span className="font-sans font-medium leading-[0.8] tracking-[-0.04em] text-[2.1rem] tabular-nums text-dark">
-          {agreed}
-        </span>
-        <span className="font-serif text-[0.9rem] leading-[1.2] pb-0.5 text-text-secondary">
-          of {compared} answers
-          <br />
-          the same
-        </span>
-      </div>
-      <p className="type-label-sm mt-1.5 text-accent">
-        {share === null
-          ? "Nothing to compare yet"
-          : `${Math.round(share * 100)}% agreement`}
+    <div className="grid items-center gap-x-5 gap-y-2 border-b border-border-light py-3.5 sm:grid-cols-[minmax(0,13rem)_minmax(0,1fr)_auto]">
+      <p className="font-sans font-medium leading-[1.2] tracking-[-0.015em] text-[1.05rem] text-dark text-pretty">
+        {score.candidateName}
       </p>
 
-      {/* One square per question, in the order the questionnaire asked them,
-          so the same column is the same question on every card. */}
-      <div className="mt-3.5 grid grid-cols-[repeat(17,1fr)] gap-[3px]">
-        {cells.map((cell, i) => {
-          const square = squareStyle(
-            cell.verdict,
-            cell.choice,
-            rows[i].options.length,
-          );
-          return (
-            <span
-              key={rows[i].questionId}
-              onMouseEnter={() => onHover(i)}
-              title={`${rows[i].question} — ${VERDICT_WORD[cell.verdict]}`}
-              style={square.style}
-              className={`aspect-square transition-[outline-color] duration-150 hover:outline hover:outline-2 hover:outline-offset-2 hover:outline-accent ${square.className}`}
-            />
-          );
-        })}
-      </div>
+      <Bar score={score} total={total} />
 
-      {/* Reserved, so a card does not resize as the pointer crosses it. */}
-      <div className="mt-3.5 min-h-[4.75rem] border-t border-border-light pt-2.5">
-        {held ? (
-          <>
-            <p className="type-caption text-text-muted">
-              Q{(hover ?? 0) + 1} · {held.row.stepTitle} ·{" "}
-              {VERDICT_WORD[held.cell.verdict]}
-            </p>
-            <p className="mt-1 font-serif text-[0.88rem] leading-[1.3] text-dark text-pretty">
-              {held.row.question}
-            </p>
-            <p className="type-caption mt-1.5 text-accent text-pretty">
-              {yourName}: {held.row.yourAnswer} / {lastName(name)}:{" "}
-              {held.cell.answer ?? "—"}
-            </p>
-          </>
-        ) : (
-          <p className="type-caption text-text-muted">
-            Hover a square for the question
-          </p>
-        )}
-      </div>
+      {/* The count is the honest figure and leads; the share follows it in
+          muted ink. "24 of 33" is a fact about a questionnaire, where a bare
+          73% invites being read as a poll result. */}
+      <p className="flex items-baseline gap-2 justify-self-start tabular-nums sm:justify-self-end">
+        <span className="font-sans font-semibold leading-none tracking-[-0.03em] text-[1.35rem] text-dark">
+          {score.agreed}
+        </span>
+        <span className="type-label-sm text-text-muted">
+          of {total}
+          {share !== null && ` · ${share}%`}
+        </span>
+      </p>
     </div>
+  );
+}
+
+function Bar({ score, total }: { score: CandidateScore; total: number }) {
+  /* Everything the candidate did with the questionnaire, summing to its whole
+     length — including the questions they never reached, which is why the
+     denominator here is the question count and not `compared`. */
+  const segments = BANDS.map((band) => ({
+    ...band,
+    n: score[band.key as BandKey],
+  })).filter((segment) => segment.n > 0);
+
+  return (
+    <span
+      className="flex h-3.5 w-full overflow-hidden bg-dark/6"
+      role="img"
+      aria-label={segments
+        .map((segment) => `${segment.n} ${segment.label.toLowerCase()}`)
+        .join(", ")}
+    >
+      {segments.map((segment) => (
+        <span
+          key={segment.key}
+          className={segment.className}
+          style={{ width: `${(segment.n / total) * 100}%` }}
+        />
+      ))}
+    </span>
   );
 }

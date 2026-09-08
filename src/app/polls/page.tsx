@@ -9,7 +9,7 @@ import { formatEditorialDate } from "@/lib/date-format";
 
 export const metadata: Metadata = {
   title: "Polls | Build Canada",
-  description: "Public opinion research, analysis and crosstabs from Build Canada.",
+  description: "Public opinion research and analysis from Build Canada",
   alternates: { canonical: "/polls" },
 };
 
@@ -21,7 +21,7 @@ export default async function PollsPage() {
   const [latestPoll, ...earlierPolls] = polls;
   return (
     <div className="mx-[10px] my-[10px] border border-border-light bg-bg">
-      <PageHeader title="Polls — What Canadians Think" description="Public opinion research, analysis and crosstabs from Build Canada." />
+      <PageHeader title="Polls — What Canadians Think" description="Public opinion research and analysis from Build Canada" />
       <section className="px-5 py-10 border-b border-border-light">
         <div className="max-w-[1080px] mx-auto">
           <SectionLabel as="h2" className="mb-6">Latest poll</SectionLabel>

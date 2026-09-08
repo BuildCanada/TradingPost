@@ -14,6 +14,8 @@ export async function fetchPolls() {
   );
   return [first, ...rest].flatMap(({ data }) => data).map((poll) => ({
     id: String(poll.id), slug: poll.slug, title: poll.title, publishedAt: poll.published_at,
+    subtitle: poll.subtitle?.trim() || null,
+    bannerImage: poll.banner_image_url ?? poll.seo_image_url ?? null,
   }));
 }
 

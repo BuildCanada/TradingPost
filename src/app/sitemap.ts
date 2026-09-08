@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { fetchBuilders, fetchFeedItems, fetchMemos, fetchPosts } from "@/lib/api";
 import { PROJECTS } from "@/constants/projects";
+import { fetchPolls } from "@/lib/api/polls";
 import { fetchApi } from "@/lib/tracker-api";
 import type {
   CommitmentsResponse,
@@ -28,6 +29,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://buildcanada.com";
 
   const staticPages: MetadataRoute.Sitemap = [
+    { url: `${baseUrl}/polls`, changeFrequency: "daily", priority: 0.9 },
+    { url: `${baseUrl}/polls/methodology`, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${baseUrl}/polls/privacy-policy`, changeFrequency: "yearly", priority: 0.3 },
     { url: baseUrl, lastModified: new Date(), changeFrequency: "daily", priority: 1 },
     { url: `${baseUrl}/memos`, lastModified: new Date(), changeFrequency: "daily", priority: 0.9 },
     { url: `${baseUrl}/posts`, lastModified: new Date(), changeFrequency: "daily", priority: 0.8 },
@@ -153,6 +157,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   const posts = await fetchPosts();
+  const polls = await fetchPolls().catch(() => []);
+  const pollPages: MetadataRoute.Sitemap = polls.map((poll) => ({
+    url: `${baseUrl}/polls/${poll.slug}`,
+    lastModified: poll.publishedAt ? new Date(poll.publishedAt) : undefined,
+    changeFrequency: "weekly",
+    priority: 0.7,
+  }));
   const postPages: MetadataRoute.Sitemap = posts.map((p) => ({
     url: `${baseUrl}/posts/${p.slug}`,
     lastModified: p.publishedAt ? new Date(p.publishedAt) : new Date(),
@@ -233,6 +244,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...commitmentPages,
     ...builderPages,
     ...memoPages,
+    ...pollPages,
     ...postPages,
     ...feedPages,
     ...billPages,

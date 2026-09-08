@@ -5,7 +5,7 @@ import { GET } from "../app/feeds/[feed]/route";
 test("RSS proxy preserves XML and does not forward private credentials or query parameters", async (t) => {
   t.mock.method(globalThis, "fetch", async (url: string, init: RequestInit) => {
     assert.ok(url.includes("/feeds/all.xml"));
-    assert.equal(new URL(url).search, "?exclude=polls");
+    assert.equal(new URL(url).search, "");
     assert.deepEqual(init.headers, { Accept: "application/rss+xml" });
     assert.equal(init.redirect, "error");
     return new Response('<?xml version="1.0"?><rss version="2.0"/>', {
@@ -19,6 +19,22 @@ test("RSS proxy preserves XML and does not forward private credentials or query 
   assert.equal(response.headers.get("content-type"), "application/rss+xml; charset=utf-8");
   assert.equal(response.headers.get("cache-control"), "public, max-age=60");
   assert.equal(await response.text(), '<?xml version="1.0"?><rss version="2.0"/>');
+});
+
+test("poll feeds are public and never forward preview credentials", async (t) => {
+  t.mock.method(globalThis, "fetch", async (url: string, init: RequestInit) => {
+    assert.equal(new URL(url).pathname, "/api/v1/feeds/polls.xml");
+    assert.equal(new URL(url).search, "");
+    assert.deepEqual(init.headers, { Accept: "application/rss+xml" });
+    return new Response('<rss version="2.0"/>', {
+      headers: { "Content-Type": "application/rss+xml" },
+    });
+  });
+  const response = await GET(new Request("https://buildcanada.com/feeds/polls.xml?preview=true", {
+    headers: { Authorization: "Bearer private", Cookie: "session=private" },
+  }), { params: Promise.resolve({ feed: "polls.xml" }) });
+  assert.equal(response.status, 200);
+  assert.equal(response.headers.get("cache-control"), "public, max-age=60");
 });
 
 test("unknown feed paths do not reach the backend", async (t) => {

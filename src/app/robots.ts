@@ -10,9 +10,6 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
         disallow: [
           "/admin",
-          "/polls",
-          "/md/polls",
-          "/feeds/polls.xml",
           "/api/",
           "/toronto/vote/survey-questions",
         ],
@@ -20,22 +17,22 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "GPTBot",
         allow: "/",
-        disallow: ["/polls", "/md/polls", "/feeds/polls.xml", "/toronto/vote/survey-questions"],
+        disallow: ["/toronto/vote/survey-questions"],
       },
       {
         userAgent: "ChatGPT-User",
         allow: "/",
-        disallow: ["/polls", "/md/polls", "/feeds/polls.xml", "/toronto/vote/survey-questions"],
+        disallow: ["/toronto/vote/survey-questions"],
       },
       {
         userAgent: "ClaudeBot",
         allow: "/",
-        disallow: ["/polls", "/md/polls", "/feeds/polls.xml", "/toronto/vote/survey-questions"],
+        disallow: ["/toronto/vote/survey-questions"],
       },
       {
         userAgent: "PerplexityBot",
         allow: "/",
-        disallow: ["/polls", "/md/polls", "/feeds/polls.xml", "/toronto/vote/survey-questions"],
+        disallow: ["/toronto/vote/survey-questions"],
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,

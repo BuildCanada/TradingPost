@@ -17,10 +17,8 @@ export default function Navbar() {
   const openModal = useSubscribeStore((s) => s.openModal);
   const pathname = usePathname();
   const isToronto = pathname?.startsWith("/toronto") ?? false;
-  const isPolling = viewer?.admin && (pathname === "/polls" || pathname?.startsWith("/polls/"));
-  const navLinks = (isToronto ? TORONTO_NAV_LINKS : NAV_LINKS).filter(
-    (link) => link.href !== "/polls" || viewer?.admin,
-  );
+  const isPolling = pathname === "/polls" || pathname?.startsWith("/polls/");
+  const navLinks = [...(isToronto ? TORONTO_NAV_LINKS : NAV_LINKS)];
   if (!viewer) navLinks.push({
     label: "Log in",
     href: `/api/auth/login?redirect=${encodeURIComponent(pathname || "/")}`,

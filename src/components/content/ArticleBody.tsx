@@ -3,7 +3,7 @@ import { chartFenceSource } from "@/lib/charts/chart-fence";
 import { InlineChart } from "./InlineChart";
 
 /** Preserve the CMS's trusted HTML, replacing only explicitly marked chart fences. */
-export function ArticleBody({ html }: { html: string }) {
+export function ArticleBody({ html, crosstabsUrl }: { html: string; crosstabsUrl?: string }) {
   // Keep the existing rendering path for all content without chart blocks.
   if (!html.includes("buildcanada-chart")) {
     return (
@@ -16,7 +16,7 @@ export function ArticleBody({ html }: { html: string }) {
         replace(node) {
           const source = chartFenceSource(node);
           if (source === null) return;
-          return <InlineChart source={source} />;
+          return <InlineChart source={source} crosstabsUrl={crosstabsUrl} />;
         },
       })}
     </div>

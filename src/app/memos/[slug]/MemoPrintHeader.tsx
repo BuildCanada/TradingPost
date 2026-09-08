@@ -1,10 +1,12 @@
 interface MemoPrintHeaderProps {
   title: string;
+  subtitle?: string | null;
   authorName: string;
   authorTitle: string | null;
   authorImage: string | null;
   date: string;
   url: string;
+  showAuthor?: boolean;
   brand?: "canada" | "toronto" | "polling";
 }
 
@@ -12,12 +14,14 @@ interface MemoPrintHeaderProps {
    via the .print-only rules in globals.css. */
 export function MemoPrintHeader({
   title,
+  subtitle,
   authorName,
   authorTitle,
   authorImage,
   date,
   url,
   brand = "canada",
+  showAuthor = true,
 }: MemoPrintHeaderProps) {
   return (
     <div className="print-only mb-10 pb-5 border-b border-black">
@@ -57,9 +61,12 @@ export function MemoPrintHeader({
           {url.replace(/^https?:\/\//, "")}
         </span>
       </div>
-      <h1 className="type-title mb-4">{title}</h1>
+      <h1 className={`type-title ${subtitle ? "mb-1" : "mb-4"}`}>{title}</h1>
+      {subtitle && (
+        <p className="max-w-[720px] mb-2 font-sans text-lg md:text-xl italic leading-snug text-text-secondary">{subtitle}</p>
+      )}
       <div className="flex items-center gap-4">
-        {authorImage && (
+        {showAuthor && authorImage && (
           /* eslint-disable-next-line @next/next/no-img-element */
           <img
             src={authorImage}
@@ -70,8 +77,8 @@ export function MemoPrintHeader({
           />
         )}
         <div className="min-w-0">
-          <p className="type-label font-medium m-0">{authorName}</p>
-          {authorTitle && (
+          {showAuthor && <p className="type-label font-medium m-0">{authorName}</p>}
+          {showAuthor && authorTitle && (
             <p className="type-label text-text-secondary m-0 mt-0.5">
               {authorTitle}
             </p>

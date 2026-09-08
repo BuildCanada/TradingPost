@@ -27,6 +27,7 @@ export async function mapArticleDetail(m: YFMemoDetail | YFPollDetail) {
   return {
     id: String(m.id),
     title: m.title,
+    subtitle: "subtitle" in m ? m.subtitle?.trim() || null : null,
     slug: m.slug,
     author: {
       name: authorName,

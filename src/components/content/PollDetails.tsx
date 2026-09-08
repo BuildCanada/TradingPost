@@ -19,7 +19,7 @@ export function PollSupportingContent({ poll }: { poll: YFPollPublication }) {
           <h2 id="poll-methodology" className="type-title-sm mb-4">
             Methodology
           </h2>
-          <ArticleBody html={poll.methodology} />
+          <ArticleBody html={poll.methodology} crosstabsUrl={poll.downloads.crosstabs_json} />
         </section>
       )}
       {poll.news_release && (
@@ -27,7 +27,7 @@ export function PollSupportingContent({ poll }: { poll: YFPollPublication }) {
           <h2 id="poll-news-release" className="type-title-sm mb-4">
             News release
           </h2>
-          <ArticleBody html={poll.news_release} />
+          <ArticleBody html={poll.news_release} crosstabsUrl={poll.downloads.crosstabs_json} />
         </section>
       )}
     </div>

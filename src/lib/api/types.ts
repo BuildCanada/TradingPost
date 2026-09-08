@@ -50,7 +50,9 @@ export interface YFMemo extends YFArticle {
   category: string | null;
 }
 
-export type YFPoll = YFArticle;
+export interface YFPoll extends YFArticle {
+  subtitle?: string | null;
+}
 
 export interface YFMemoEndorser {
   name: string;

@@ -80,3 +80,25 @@ existing memo pages continue to work; `/polls` should be rolled out with the bac
 ## Administrator access
 
 TradingPost requires a live signed-in administrator for /polls and all detail, markdown and download routes. Anonymous users see a login link; signed-in non-admins cannot access poll content. The navigation only shows Polls and Polling branding after the identity endpoint confirms admin status. Polls are excluded from the sitemap, robots indexing and public combined RSS. The poll RSS route also requires an admin session. York Factory’s existing API access rules are unchanged.
+
+## Demographic data under charts
+
+On poll pages, View data fetches the poll's crosstabs JSON download through the
+authenticated download proxy. Set `definition.slug` to the exact Surveyor question
+ID (`tables[].id`); Surveyor's publication export already does this. Matching uses
+IDs, never translated question wording or question order. The selector displays
+the selected demographic alongside the overall results, including sample sizes.
+Unknown categories are omitted. Charts share the download cache, and the file is
+only requested when View data is opened. Missing question matches and failed
+downloads show an explicit message. Memos and polls without crosstabs retain the
+inline dataset table.
+
+Customer crosstab values require an unweighted base of at least 50 for each
+question/subgroup. York Factory removes smaller values from downloads, and the
+data table also applies the rule defensively. Suppressed sample sizes and
+percentages display as Suppressed, distinct from zero and unavailable results.
+
+Polls support an optional plain-text `subtitle` from York Factory, shown below
+the title and above the date on screen and in browser print. Editors set it in
+the poll form; empty subtitles take no space. Requires the subtitle migration
+and API update in York Factory.

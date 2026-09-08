@@ -1,4 +1,6 @@
 import { ArticleLayout } from "./ArticleLayout";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { fetchPoll } from "@/lib/api/polls";
 import { ArticleBody } from "@/components/content/ArticleBody";
 import {
@@ -179,7 +181,9 @@ export async function ArticlePage({ slug, kind }: { slug: string; kind: "memos" 
 
       <MemoPrintHeader
         brand={kind === "polls" ? "polling" : "canada"}
+        showAuthor={kind !== "polls"}
         title={article.title}
+        subtitle={kind === "polls" ? article.subtitle : undefined}
         authorName={article.author.name}
         authorTitle={article.author.title}
         authorImage={authorImage}
@@ -191,9 +195,11 @@ export async function ArticlePage({ slug, kind }: { slug: string; kind: "memos" 
           title, author, and date. */}
       <div className="print-hide">
         <MemoHero
+          variant={kind === "polls" ? "poll" : "memo"}
           backHref={kind === "polls" ? "/polls" : undefined}
           backLabel={kind === "polls" ? "All polls" : undefined}
           title={article.title}
+          subtitle={kind === "polls" ? article.subtitle : undefined}
           authorName={article.author.name}
           authorImage={authorImage}
           date={date}
@@ -201,7 +207,7 @@ export async function ArticlePage({ slug, kind }: { slug: string; kind: "memos" 
         />
       </div>
 
-      <ArticleLayout>
+      <ArticleLayout wide={kind === "polls"}>
         <Signpost
           headings={headings}
           shareTitle={article.title}
@@ -209,7 +215,7 @@ export async function ArticlePage({ slug, kind }: { slug: string; kind: "memos" 
           afterShare={article.poll ? <PollDownloads poll={article.poll} /> : undefined}
         />
 
-        <article className="w-full min-w-0 max-w-[720px]" data-memo-content>
+        <article className={`w-full min-w-0 ${kind === "polls" ? "poll-article" : "max-w-[720px]"}`} data-memo-content>
           {keyMessages.length > 0 && (
             <div className="mb-8 p-6 border-[3px] border-double border-border-light bg-[#f0e5dc] space-y-4">
               <span className="type-label block mb-3">{kind === "polls" ? "Key Takeaways" : "Key Messages"}</span>
@@ -218,13 +224,17 @@ export async function ArticlePage({ slug, kind }: { slug: string; kind: "memos" 
                   <span className="type-label mt-2 shrink-0">
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  <p>{msg}</p>
+                  <div className="min-w-0 flex-1 break-words [&_p]:mb-3 [&_p:last-child]:mb-0 [&_strong]:font-bold [&_em]:italic [&_a]:text-accent [&_a]:underline [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5 [&_li]:my-1 [&_blockquote]:border-l-2 [&_blockquote]:border-border-light [&_blockquote]:pl-4 [&_pre]:overflow-x-auto">
+                    <Markdown remarkPlugins={[remarkGfm]} skipHtml>
+                      {msg}
+                    </Markdown>
+                  </div>
                 </div>
               ))}
             </div>
           )}
 
-          <ArticleBody html={bodyHtml} />
+          <ArticleBody html={bodyHtml} crosstabsUrl={article.poll?.downloads.crosstabs_json} />
           {article.poll && <PollSupportingContent poll={article.poll} />}
 
           {kind === "memos" && (

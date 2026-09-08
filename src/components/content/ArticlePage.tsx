@@ -1,4 +1,6 @@
 import { ArticleLayout } from "./ArticleLayout";
+import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { fetchPoll } from "@/lib/api/polls";
 import { ArticleBody } from "@/components/content/ArticleBody";
 import {
@@ -218,7 +220,11 @@ export async function ArticlePage({ slug, kind }: { slug: string; kind: "memos" 
                   <span className="type-label mt-2 shrink-0">
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  <p>{msg}</p>
+                  <div className="min-w-0 flex-1 break-words [&_p]:mb-3 [&_p:last-child]:mb-0 [&_strong]:font-bold [&_em]:italic [&_a]:text-accent [&_a]:underline [&_ul]:list-disc [&_ol]:list-decimal [&_ul]:pl-5 [&_ol]:pl-5 [&_li]:my-1 [&_blockquote]:border-l-2 [&_blockquote]:border-border-light [&_blockquote]:pl-4 [&_pre]:overflow-x-auto">
+                    <Markdown remarkPlugins={[remarkGfm]} skipHtml>
+                      {msg}
+                    </Markdown>
+                  </div>
                 </div>
               ))}
             </div>

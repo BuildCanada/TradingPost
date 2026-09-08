@@ -64,19 +64,16 @@ export type SupportedElection = {
    */
   themeClass?: string;
   /**
-   * Whether to offer the postal-code → ward lookup on this election's page.
-   * Off unless we've confirmed the upstream lookup returns *this* city's
-   * municipal wards — a lookup that silently resolves to another city's ward
-   * number would match our roster and show a confidently wrong ward.
-   */
-  wardLookup: boolean;
-  /**
    * Whether this region's coverage is switched off. The config stays here so
    * the routes keep type-checking and the pages can be turned back on in one
    * line, but a hidden election is dropped from the /vote index and its URLs
    * redirect there (see next.config.ts). Only Toronto is live right now.
    */
   hidden?: boolean;
+  /** the region has postal-code → ward boundary data upstream, so the wards
+   *  section can offer the lookup. False is not "no map": it is "asking for a
+   *  postal code here would answer with boundary_data_unavailable". */
+  wardLookup?: boolean;
 };
 
 const TORONTO_2026: SupportedElection = {
@@ -96,8 +93,8 @@ const TORONTO_2026: SupportedElection = {
   nominationCloseIso: "2026-08-21",
   advanceVote: { iso: "2026-10-06", label: "Oct 6 – 11" },
   mailIn: { iso: "2026-09-24", label: "Thu, Sept 24" },
-  themeClass: "theme-election",
   wardLookup: true,
+  themeClass: "theme-election",
 };
 
 const BRAMPTON_2026: SupportedElection = {
@@ -114,7 +111,6 @@ const BRAMPTON_2026: SupportedElection = {
   pollHoursLabel: "10:00 a.m. – 8:00 p.m.",
   // Brampton hasn't published its advance-vote or vote-by-mail dates yet;
   // those countdowns stay off the page rather than guess at them.
-  wardLookup: false,
   hidden: true,
 };
 
@@ -131,7 +127,6 @@ const HAMILTON_2026: SupportedElection = {
   electionDayLabel: "Mon, Oct 26",
   pollHoursLabel: "10:00 a.m. – 8:00 p.m.",
   // As with Brampton — not yet published by the city.
-  wardLookup: false,
   hidden: true,
 };
 
@@ -148,7 +143,6 @@ const OTTAWA_2026: SupportedElection = {
   electionDayLabel: "Mon, Oct 26",
   pollHoursLabel: "10:00 a.m. – 8:00 p.m.",
   // As with Brampton and Hamilton — not yet published by the city.
-  wardLookup: false,
   hidden: true,
 };
 

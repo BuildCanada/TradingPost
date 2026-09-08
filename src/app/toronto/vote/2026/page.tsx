@@ -5,6 +5,7 @@ import { WARD_GEO } from "./wardGeo";
 import { ELECTION, getToronto2026 } from "./data";
 import {
   ADVANCE_VOTING_PATH,
+  ELECTION_DAY,
   HOW_TO_VOTE_PATH,
   KEY_DATES_PATH,
   VOTE_BY_MAIL_PATH,
@@ -30,6 +31,12 @@ export default async function Toronto2026ElectionPage() {
     <ElectionLanding
       election={ELECTION}
       view={view}
+      mayorSurveyPath={`${ELECTION.basePath}/mayor`}
+      mayorRosterPath={`${ELECTION.basePath}/mayor/candidates`}
+      // Toronto publishes its poll hours, so the band's headline counter is
+      // the live timer from the /toronto hero rather than a whole-day count.
+      electionDay={ELECTION_DAY}
+      surveyPath={`${ELECTION.basePath}/survey`}
       wardMapDefs={<WardMapDefs geo={WARD_GEO} />}
       renderWardMap={(ward) => (
         <WardMap
@@ -54,10 +61,31 @@ export default async function Toronto2026ElectionPage() {
         ),
         closingBlurb: (
           <>
-            Toronto votes Monday, October 26. Add your name — then bring someone
-            with you.
+            Toronto votes Monday, October 26. Answer the questions we put to the
+            candidates and see which of them line up with you.
           </>
         ),
+        /* WHAT IS ONLY HERE
+           A card earns its place by going somewhere a reader would not
+           otherwise get to, and by being the thing they came for. What is left
+           is the two questionnaire reads — one race, then every race — with
+           the survey between them; ElectionLanding supplies the mayoral card
+           and the survey card itself.
+
+           Everything else is reachable from the section that owns it, which is
+           where a reader looks for it anyway: the question set is linked from
+           the survey and from every questionnaire page, the pledge from the
+           closing band, and the wards from the ward grid two hundred pixels
+           below. */
+        explore: [
+          {
+            eyebrow: "Every race",
+            title: "Where the candidates stand",
+            blurb:
+              "Mayor and council together, question by question: where the field agrees, and where it splits.",
+            href: `${ELECTION.basePath}/issues`,
+          },
+        ],
         guideLinks: [
           { label: "See all key dates", href: KEY_DATES_PATH },
           { label: "How to vote in Toronto", href: HOW_TO_VOTE_PATH },

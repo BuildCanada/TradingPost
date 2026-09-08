@@ -109,7 +109,9 @@ function PreRoster() {
           </div>
           <p className="mt-7 pt-5 border-t border-border-light font-serif text-[1.05rem] leading-[1.4]">
             Polls open{" "}
-            <span className="text-accent">{ELECTION.voteDayLabel},&nbsp;2026</span>
+            <span className="text-accent">
+              {ELECTION.voteDayLabel},&nbsp;2026
+            </span>
             , {ELECTION.pollHoursLabel}.
           </p>
         </section>
@@ -134,23 +136,29 @@ function PreRoster() {
           </div>
 
           <WardMapDefs geo={WARD_GEO} />
-          <div className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] border-t border-l border-border-light">
-            {WARDS.map((ward) => (
-              <WardCard
-                key={ward.n}
-                ward={ward}
-                basePath={ELECTION.basePath}
-                countLabel="Candidates to come"
-                map={
-                  <WardMap
-                    geo={WARD_GEO}
-                    activeWard={ward.n}
-                    className="w-[92px] h-auto flex-none block"
-                  />
-                }
-                className="border-b border-r border-border-light"
-              />
-            ))}
+          {/* Cells rule after themselves and the overhang is clipped, so the
+              grid closes once on every side — see CardGrid in ElectionLanding,
+              which this mirrors by hand rather than importing a component out
+              of a shared page. */}
+          <div className="overflow-hidden">
+            <div className="-mb-px -mr-px grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] border-t border-border-light">
+              {WARDS.map((ward) => (
+                <WardCard
+                  key={ward.n}
+                  ward={ward}
+                  basePath={ELECTION.basePath}
+                  countLabel="Candidates to come"
+                  map={
+                    <WardMap
+                      geo={WARD_GEO}
+                      activeWard={ward.n}
+                      className="w-[92px] h-auto flex-none block"
+                    />
+                  }
+                  className="border-b border-r border-border-light"
+                />
+              ))}
+            </div>
           </div>
         </section>
 
@@ -158,8 +166,8 @@ function PreRoster() {
         <section className="px-6 py-14 md:px-14 md:py-16">
           <p className="type-label-sm text-text-muted !tracking-[0.06em] max-w-[60ch] leading-[1.7]">
             Ward boundaries are the City of Ottawa&rsquo;s published 2022–2026
-            wards. The candidate list will follow the City Clerk&rsquo;s official
-            registered-candidate listing once nominations open.
+            wards. The candidate list will follow the City Clerk&rsquo;s
+            official registered-candidate listing once nominations open.
           </p>
         </section>
       </div>

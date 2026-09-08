@@ -157,7 +157,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   const posts = await fetchPosts();
-  const polls = await fetchPolls();
+  const polls = await fetchPolls().catch(() => []);
   const pollPages: MetadataRoute.Sitemap = polls.map((poll) => ({
     url: `${baseUrl}/polls/${poll.slug}`,
     lastModified: poll.publishedAt ? new Date(poll.publishedAt) : undefined,

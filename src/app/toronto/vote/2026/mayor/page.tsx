@@ -2,10 +2,17 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
-import { FieldSentiment } from "@/components/elections/FieldSentiment";
+import { CandidateRoster } from "@/components/elections/CandidateRoster";
+import { QuestionnaireCards } from "@/components/elections/QuestionnaireCards";
 import { SurveyCta } from "@/components/elections/SurveyCta";
 import CountdownDays from "@/components/elections/CountdownDays";
-import { fieldSentiment } from "@/lib/elections/field-sentiment";
+import {
+  byCandidateKey,
+  candidateAnswers,
+  comparedQuestions,
+  questionnaireShape,
+  surveyRoster,
+} from "@/lib/elections/candidate-answers";
 import {
   CANDIDATE_QUESTIONNAIRE_SLUG,
   fetchCandidateResponses,
@@ -28,16 +35,18 @@ import { ELECTION, getToronto2026 } from "../data";
  *   forty-four blanks to compare the nine. An empty column stops being a
  *   finding somewhere around the tenth one; after that it is furniture.
  *
- *   So the page turns ninety degrees. The question becomes the object, the
- *   candidates become the distribution inside it, and nothing scrolls
- *   sideways. It is the same treatment the city-wide issues page uses, pinned
- *   to this one ballot line — which also means the two pages can never
- *   disagree about what the mayoral field said, since they are one component
- *   reading one dataset.
+ *   So the page turns ninety degrees. The question becomes the object and the
+ *   candidates are filed inside it, under the answer each one gave — the same
+ *   cards the ward pages use, so the two can never disagree about how a
+ *   questionnaire reads. Nine respondents is a comfortable fit: it is a
+ *   handful of names under each answer, which is what the form was built for,
+ *   where the fifty-three-column grid was thirteen screens of drag.
  *
- *   The forty-four who have not answered are not lost: they are on the roster
- *   page, which groups the field by exactly that line, and this page links to
- *   it from the hero and names the count in its stats.
+ *   The forty-four who have not answered are not named on the cards. On a
+ *   ward, where the field is a dozen, every card names its silent candidates;
+ *   here that would be fifteen hundred names saying one thing. They are on
+ *   the roster page, which groups the field by exactly that line, and this
+ *   page links to it from the hero and names the count in its stats.
  */
 
 export const metadata: Metadata = {
@@ -60,14 +69,33 @@ export default async function MayorPage() {
     fetchCandidateResponses(ELECTION.slug),
   ]);
 
-  /* The whole election's responses, pivoted question-first, then pinned to the
-     mayoral line by the component. Deliberately not pre-filtered here: the
-     splits, the ordering and the two feature cards all come out of the same
-     `race` argument, and doing half the narrowing in the page and half in the
-     component is how the two would drift apart. */
-  const field = survey ? fieldSentiment(survey, responses) : null;
-  const mayoral = (field?.respondents ?? []).filter((r) => r.race === "mayor");
-  const registered = view.mayoral.filter((c) => !c.withdrawn).length;
+  /* The ballot line, and the part of it that wrote back.
+
+     The whole election's responses come back from one fetch — the counts a
+     candidate's answer is measured against are the field's, not this race's —
+     and the roster narrows who gets named, exactly as the ward pages do. */
+  const ballot = view.mayoral.filter((candidate) => !candidate.withdrawn);
+  const registered = ballot.length;
+
+  const ballotKeys = new Set(ballot.map((candidate) => candidate.key));
+  const answers = survey
+    ? byCandidateKey(
+        candidateAnswers(survey, responses).filter((entry) =>
+          ballotKeys.has(entry.key),
+        ),
+      )
+    : {};
+  const roster = surveyRoster(ballot, answers);
+  const mayoral = roster.filter((candidate) => candidate.answers);
+  const groups = comparedQuestions(
+    mayoral.map((candidate) => candidate.answers!),
+    mayoral,
+    survey ? questionnaireShape(survey, responses) : undefined,
+  );
+  const questionCount = groups.reduce(
+    (n, group) => n + group.questions.length,
+    0,
+  );
 
   return (
     <div className={`${ELECTION.themeClass ?? ""} bg-bg text-dark`}>
@@ -108,7 +136,7 @@ export default async function MayorPage() {
         <section className="grid grid-cols-2 md:grid-cols-4 border-b-2 border-dark">
           <Stat value={mayoral.length} label="Answered us" />
           <Stat value={registered} label="On the ballot" />
-          <Stat value={field?.questions.length ?? 0} label="Policy questions" />
+          <Stat value={questionCount} label="Policy questions" />
           <div className="px-6 py-4 md:px-14 border-b md:border-b-0 border-border-light">
             <CountdownDays
               initialDays={daysUntil(ELECTION.electionDateIso)}
@@ -122,12 +150,25 @@ export default async function MayorPage() {
         </section>
 
         {/* ── The field, question by question ────────────────── */}
-        {field && mayoral.length > 0 ? (
-          <FieldSentiment
-            groups={field.groups}
-            respondents={field.respondents}
-            race="mayor"
-          />
+        {groups.length > 0 && mayoral.length > 0 ? (
+          <section className="px-6 md:px-14 py-9 md:py-11 border-b-2 border-dark grid gap-9">
+            {/* The nine who answered, named and linked once. The forty-four
+                who have not are on the roster page, which groups the field by
+                exactly that line — naming them here, on each of thirty-four
+                cards, would bury the nine. */}
+            <CandidateRoster
+              respondents={mayoral}
+              silent={[]}
+              election={ELECTION.slug}
+              race="mayor"
+            />
+            <QuestionnaireCards
+              groups={groups}
+              respondents={mayoral}
+              silent={[]}
+              issuesHref={`${ELECTION.basePath}/issues`}
+            />
+          </section>
         ) : (
           <section className="px-6 md:px-14 py-14 border-b-2 border-dark">
             <p className="font-serif text-[1.05rem] leading-[1.5] text-dark/80 max-w-[58ch] text-pretty">

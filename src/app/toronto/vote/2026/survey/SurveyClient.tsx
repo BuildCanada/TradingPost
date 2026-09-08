@@ -317,11 +317,9 @@ export default function SurveyClient({
         </button>
       )}
       {/* The form is a column of questions and stays at a reading measure; the
-          results are two comparison grids — a question a row, a candidate a
-          column, and a mayoral field of fifty-odd. Held to the form's width
-          they were strips a couple of columns wide with everything else behind
-          a sideways drag, so the card opens up to the window once there is
-          something to show in it. */}
+          results are two races' worth of question cards, laid two to a row.
+          Held to the form's width they stack into one very long column, so the
+          card opens up to the window once there is something to show in it. */}
       <div
         className={`mx-auto w-full overflow-x-clip border-2 border-dark bg-bg transition-[max-width] duration-500 ${done ? "max-w-[1720px]" : "max-w-[760px]"
           }`}

@@ -11,7 +11,8 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-import { SurveyGrid } from "@/components/elections/SurveyGrid";
+import { QuestionnaireCards } from "@/components/elections/QuestionnaireCards";
+import type { Seat } from "@/components/elections/QuestionRollCall";
 import { AgreementChart } from "./AgreementChart";
 import {
   byCandidateKey,
@@ -20,8 +21,6 @@ import {
   questionnaireShape,
   surveyRoster,
 } from "@/lib/elections/candidate-answers";
-import { DEFAULT_ELECTION_SLUG } from "@/lib/elections/registry";
-import { nameKey } from "@/lib/elections/election-data";
 import { lastName } from "@/lib/elections/names";
 import type { CandidateSurveyResponse } from "@/lib/elections/alignment";
 import type { Survey } from "@/lib/elections/survey";
@@ -57,12 +56,17 @@ export type SurveyRosterCandidate = {
   withdrawn?: boolean;
 };
 
-/* The reader's own column. Named as the questionnaire would name a candidate,
-   because that is exactly what it is to the grid — a respondent with answers,
-   pivoted by the same code as everyone else's. */
+/* The reader, as the cards name them. Named as the questionnaire would name a
+   candidate, because that is exactly what they are to the pivot — a respondent
+   with answers, run through the same code as everyone else's. */
 const YOU = "You";
 
-/* How the candidates are ordered, in both the cards and the grid's columns.
+/* How the agreement chart is ordered.
+ *
+ * The cards below it are not sorted by this and should not be: a card files
+ * its candidates under the answer they gave, and inside a group they run by
+ * surname so a reader finds the same person in the same place on all thirty
+ * questions. A ranking belongs in the thing that is a ranking.
  *
  * Agreement first by default: the reader has just answered thirty questions,
  * and "who is closest to me" is the question that brought them here. The rest
@@ -183,10 +187,10 @@ function RaceBlock({
     [race.alignment.scores, sort],
   );
 
-  /* The grid's columns and rows: the reader first, then the field.
+  /* The cards, and the reader inside them.
      `candidateAnswers` does the pivoting for both — the reader is passed
-     through it as a response of their own, so their column is built by the
-     same code that builds everyone else's and cannot disagree with it. */
+     through it as a response of their own, so their answers are built by the
+     same code that builds everyone else's and cannot disagree with them. */
   const grid = useMemo(() => {
     const entries = candidateAnswers(survey, race.responses);
     const byKey = byCandidateKey(entries);
@@ -212,34 +216,52 @@ function RaceBlock({
       },
     ]);
 
-    /* The columns follow whatever order the cards are in, so the two halves
-       of a race read the same way round. The reader stays first: their column
-       is the one every other column is being compared against, and a sort is
-       about the candidates. */
-    const rank = new Map(
-      scores.map((score, i) => [nameKey(score.candidateName), i]),
-    );
+    /* Every name the cards can print, the reader first. The order here is
+       only the order the pivot hands the rows over in — inside a card the
+       candidates are filed under the answer they gave and sorted by surname,
+       so a reader looking for one person finds them in the same place on all
+       thirty questions. The agreement sort above drives the chart, which is
+       where a ranking belongs: it is a ranking. */
     const candidates = [
       ...(you ? [{ key: you.key, name: YOU }] : []),
-      ...[...field]
-        .sort(
-          (a, b) =>
-            (rank.get(a.key) ?? Number.MAX_SAFE_INTEGER) -
-            (rank.get(b.key) ?? Number.MAX_SAFE_INTEGER),
-        )
-        .map(({ key, name, website }) => ({ key, name, website })),
+      ...field.map(({ key, name, website }) => ({ key, name, website })),
     ];
+
+    /* The ballot line each plate belongs to.
+
+       A race block is one race, so its heading already says which — but the
+       two blocks sit one under the other on a page a reader scrolls through
+       with a candidate's name in mind, and a plate that says only a name is
+       a plate whose race depends on remembering which heading you passed.
+       Every plate carries its own. The reader's own plate carries none: they
+       are not running for anything. */
+    const seat: Seat =
+      race.key === "mayor"
+        ? { race: "mayor", label: "Mayor" }
+        : { race: "councillor", label: "Councillor" };
+    const seats = Object.fromEntries(
+      field.map((candidate) => [candidate.key, seat]),
+    );
 
     return {
       yourKey: you?.key,
-      candidates,
+      seats,
+      /* The reader counts as a respondent: they answered the questionnaire,
+         which is the whole reason there is a page. */
+      respondents: [
+        ...(you ? [{ key: you.key, name: YOU }] : []),
+        ...field.filter((candidate) => candidate.answers),
+      ],
+      silent: field
+        .filter((candidate) => !candidate.answers)
+        .map(({ key, name, website }) => ({ key, name, website })),
       groups: comparedQuestions(
         you ? [you, ...entries] : entries,
         candidates,
         questionnaireShape(survey, race.responses),
       ),
     };
-  }, [survey, answers, race.responses, race.roster, scores]);
+  }, [survey, answers, race.key, race.responses, race.roster]);
 
   /* Both races open to begin with. A reader who has just answered thirty
      questions is owed the answer to them, not two closed doors — the fold is
@@ -268,7 +290,7 @@ function RaceBlock({
             htmlFor={`sort-${race.key}`}
             className="type-label-sm text-text-muted"
           >
-            Order by
+            Order the chart by
           </label>
           <Select
             id={`sort-${race.key}`}
@@ -283,12 +305,12 @@ function RaceBlock({
           <AgreementChart alignment={race.alignment} scores={scores} />
         </div>
 
-        <SurveyGrid
+        <QuestionnaireCards
           groups={grid.groups}
-          candidates={grid.candidates}
-          election={DEFAULT_ELECTION_SLUG}
-          race={race.key === "mayor" ? "mayor" : "councillor"}
-          wardName={race.label}
+          respondents={grid.respondents}
+          silent={grid.silent}
+          seats={grid.seats}
+          notes={false}
           yourKey={grid.yourKey}
         />
       </CollapsibleContent>

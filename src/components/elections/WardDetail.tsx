@@ -3,8 +3,8 @@ import Image from "next/image";
 import type { ReactNode } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import CountdownDays from "./CountdownDays";
-import { SurveyChartNote } from "./CandidateSurveyAnswers";
-import { CandidateName, SurveyGrid } from "./SurveyGrid";
+import { CandidateRoster } from "./CandidateRoster";
+import { QuestionnaireCards } from "./QuestionnaireCards";
 import { SurveyCta } from "./SurveyCta";
 import { IncumbentBadge, SiteLink } from "./ElectionLanding";
 import {
@@ -154,18 +154,40 @@ export function WardDetail({
 
         {/* ── Questionnaire ──────────────────────────────────── */}
         <section id="questionnaire">
-          <div className="px-6 md:px-14 pt-11 pb-6 grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-12">
-            <div>
+          {/* The heading, what it amounts to, and the ballot it is about —
+              one column, with the survey beside it. The ballot used to sit in
+              a band of its own under this one, which left the heading's column
+              as a line of type and a sentence against a survey card three
+              times its height: a rectangle of nothing exactly where the names
+              a reader came for should have been. */}
+          <div className="px-6 md:px-14 pt-11 pb-7 grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-12">
+            <div className="grid content-start gap-5">
               <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.75rem,3vw,2.5rem)] max-w-[24ch] text-balance">
                 Know Your Candidates
               </h2>
-              <p className="mt-5 font-serif text-[1.08rem] leading-[1.5] text-dark/85 max-w-[64ch] text-pretty">
-                {councilCandidates.length === 0
-                  ? "No one has registered in this ward yet."
-                  : respondents.length === 0
-                    ? "Nobody in this ward has answered yet. These are the questions we asked."
-                    : `${respondents.length} of ${councilCandidates.length} candidates answered our questionnaire. Open a question to see every option and what the rest of the city said.`}
-              </p>
+              {/* Only the empty states get a sentence. Where candidates have
+                  answered, the roster underneath names both halves of the
+                  ballot — "2 of 11 answered" was the same count, spelled out,
+                  immediately above the list it was counting. */}
+              {respondents.length === 0 && (
+                <p className="font-serif text-[1.08rem] leading-[1.5] text-dark/85 max-w-[64ch] text-pretty">
+                  {councilCandidates.length === 0
+                    ? "No one has registered in this ward yet."
+                    : "Nobody in this ward has answered yet. These are the questions we asked."}
+                </p>
+              )}
+              {councilCandidates.length > 0 && (
+                <CandidateRoster
+                  respondents={respondents}
+                  silent={councilCandidates.filter(
+                    (candidate) => !surveyAnswers?.[candidate.key],
+                  )}
+                  election={election.slug}
+                  race="councillor"
+                  ward={ward.n}
+                  wardName={ward.name}
+                />
+              )}
             </div>
 
             <SurveyCta href={`${election.basePath}/survey`} />
@@ -184,17 +206,12 @@ export function WardDetail({
                 surveyAnswers={surveyAnswers}
                 surveyShape={surveyShape}
                 showHeading={showRaceHeadings}
-                election={election.slug}
-                ward={ward.n}
-                wardName={ward.name}
+                issuesHref={`${election.basePath}/issues`}
               />
             ))
           )}
 
           <div className="px-6 md:px-14 py-4 border-t border-border-light grid gap-2.5">
-            {respondents.length > 0 && (
-              <SurveyChartNote candidateCount={respondents.length} />
-            )}
             <p className="type-label-sm text-text-muted">
               Registered candidates from the City Clerk&rsquo;s list, less
               anyone who has withdrawn. The field is not final until nominations
@@ -267,13 +284,12 @@ export function WardDetail({
 }
 
 /**
- * One race's questionnaire: every candidate on it as a column, whether or not
- * they answered us.
+ * One race's questionnaire, question by question.
  *
- * A grid per race rather than one for the ward, because a ward can elect more
+ * One per race rather than one for the ward, because a ward can elect more
  * than one councillor — Brampton's wards elect a city and a regional
- * councillor — and two rival fields merged into one set of columns would
- * compare candidates who are not running against each other.
+ * councillor — and two rival fields read together would compare candidates who
+ * are not running against each other.
  *
  * A race nobody answered has no questions to draw, since the questions come
  * from the returned questionnaires. That case still names the candidates: they
@@ -284,26 +300,19 @@ function RaceQuestionnaire({
   surveyAnswers,
   surveyShape,
   showHeading,
-  election,
-  ward,
-  wardName,
+  issuesHref,
 }: {
   race: RaceView;
   surveyAnswers?: Record<string, CandidateAnswers>;
   surveyShape?: ComparedGroup[];
   showHeading: boolean;
-  /** York Factory election slug, for the outbound-link tracking */
-  election: string;
-  ward: string;
-  wardName: string;
+  issuesHref?: string;
 }) {
-  /* Two lists, not one set of columns. Everyone on the ballot used to get a
-     column, which put a ward's dozen registered candidates across the grid and
-     filled eleven of them with "Did not respond" — thirty rows deep, that is
-     three hundred cells of nothing, and the two or three columns worth reading
-     were somewhere behind a sideways drag. So the grid is the candidates who
-     answered, and the rest are named under it, where a reader can still see
-     who is on their ballot and go to their site. */
+  /* Two lists, not one. The candidates who wrote back are the ones the
+     questions can group, and the rest are named beside them — a reader can
+     still see everyone on their ballot and go to their site, without a
+     ward's dozen registrants turning thirty questions into three hundred
+     cells of "did not respond". */
   const roster = surveyRoster(
     race.candidates.map((candidate) => ({
       ...candidate,
@@ -326,37 +335,12 @@ function RaceQuestionnaire({
       {showHeading && <RaceHeading race={race} />}
       <div className="px-6 md:px-14 pb-10">
         {groups.length > 0 ? (
-          <>
-            <SurveyGrid
-              groups={groups}
-              candidates={answered}
-              election={election}
-              race="councillor"
-              ward={ward}
-              wardName={wardName}
-            />
-
-            {silent.length > 0 && (
-              <div className="mt-7 border-t border-border-light pt-4">
-                <p className="type-label-sm mb-3 text-text-muted">
-                  Also on the ballot, yet to answer our questionnaire
-                </p>
-                <ul className="flex list-none flex-wrap gap-x-6 gap-y-2 m-0 p-0">
-                  {silent.map((candidate) => (
-                    <li key={candidate.key}>
-                      <CandidateName
-                        candidate={candidate}
-                        election={election}
-                        race="councillor"
-                        ward={ward}
-                        wardName={wardName}
-                      />
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-          </>
+          <QuestionnaireCards
+            groups={groups}
+            respondents={answered}
+            silent={silent}
+            issuesHref={issuesHref}
+          />
         ) : (
           /* Only two ways to get here now: nobody has filed for the seat, or
              the questionnaire itself could not be fetched. Either way there is

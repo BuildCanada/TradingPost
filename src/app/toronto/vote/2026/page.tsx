@@ -10,7 +10,6 @@ import {
   KEY_DATES_PATH,
   VOTE_BY_MAIL_PATH,
 } from "./key-dates";
-import { SURVEY_PATH } from "../survey-questions/path";
 
 export const metadata: Metadata = {
   title: "Toronto 2026 Election",
@@ -67,37 +66,24 @@ export default async function Toronto2026ElectionPage() {
           </>
         ),
         /* WHAT IS ONLY HERE
-           This grid used to carry six cards, and three of them pointed at
-           things the reader could already see. The alignment survey is the
-           closing call to action at the foot of the page; the mayoral
-           questionnaire is linked from the "Candidates for Mayor" heading it
-           belongs to; and "your ward" was a card whose whole function was to
-           scroll you past itself to the ward grid two hundred pixels below.
+           A card earns its place by going somewhere a reader would not
+           otherwise get to, and by being the thing they came for. What is left
+           is the two questionnaire reads — one race, then every race — with
+           the survey between them; ElectionLanding supplies the mayoral card
+           and the survey card itself.
 
-           A card earns its place by going somewhere the page does not
-           otherwise go. These three do. Everything else is reachable from the
-           section that owns it, which is where a reader looks for it anyway. */
+           Everything else is reachable from the section that owns it, which is
+           where a reader looks for it anyway: the question set is linked from
+           the survey and from every questionnaire page, the pledge from the
+           closing band, and the wards from the ward grid two hundred pixels
+           below. */
         explore: [
           {
-            eyebrow: "The whole field",
+            eyebrow: "Every race",
             title: "Where the candidates stand",
             blurb:
-              "One chart per question, each carrying every answer we received: where the people running to govern Toronto converge, and where they split.",
+              "Mayor and council together, question by question: where the field agrees, and where it splits.",
             href: `${ELECTION.basePath}/issues`,
-          },
-          {
-            eyebrow: "Questionnaire",
-            title: "The questions we asked",
-            blurb:
-              "The full question set every candidate received, with the reasoning behind each one.",
-            href: SURVEY_PATH,
-          },
-          {
-            eyebrow: "Turnout",
-            title: "Pledge to vote",
-            blurb:
-              "Put your name on the record and share the stamp. It takes ten seconds, and it is the first step to showing up.",
-            href: ELECTION.pledgePath,
           },
         ],
         guideLinks: [

@@ -234,7 +234,7 @@ function Answer({
               <h6 className="type-label-sm text-text-muted mb-1">
                 {possessive(firstName(candidateName))} note
               </h6>
-              <p className="font-serif italic text-[1rem] leading-[1.45] text-text-secondary text-pretty">
+              <p className="font-serif text-[1.1rem] leading-[1.5] text-text-secondary text-pretty">
                 {answer.explanation}
               </p>
             </div>

@@ -577,12 +577,12 @@ function Cell({
   const said = (
     <>
       {answer.verbatim && answer.answer && (
-        <span className="font-serif italic text-[1.1rem] leading-[1.4] text-dark text-pretty">
+        <span className="font-serif text-[1.2rem] leading-[1.45] text-dark text-pretty">
           &ldquo;{answer.answer}&rdquo;
         </span>
       )}
       {answer.explanation && (
-        <span className="font-serif italic text-[0.98rem] leading-[1.45] text-text-secondary">
+        <span className="font-serif text-[1.08rem] leading-[1.5] text-text-secondary">
           {answer.explanation}
         </span>
       )}

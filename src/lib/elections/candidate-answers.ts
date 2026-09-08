@@ -360,3 +360,106 @@ export function questionnaireShape(
 
   return groups;
 }
+
+/* ------------------------------------------------------------------ */
+/* Roll call                                                           */
+/* ------------------------------------------------------------------ */
+
+/** A candidate under the answer they gave. */
+export type RollCallName = {
+  key: string;
+  /** their name in full — the page names the same handful of people many
+   *  times over, and a surname is not enough to tell them apart at a glance */
+  name: string;
+  /** their own words about why, where they wrote any */
+  note: string | null;
+};
+
+/** One answer, and everyone who gave it. */
+export type RollCallGroup = {
+  /** index into the question's options */
+  option: number;
+  label: string;
+  detail: string | null;
+  candidates: RollCallName[];
+};
+
+export type RollCall = {
+  /** the options at least one candidate picked, in the order they were offered */
+  groups: RollCallGroup[];
+  /** answered, but in words that matched no option — so on no option */
+  verbatim: (RollCallName & { answer: string })[];
+  /** skipped this question, or never returned the questionnaire at all */
+  unanswered: RollCallName[];
+};
+
+/**
+ * One question's respondents, grouped by the answer they gave.
+ *
+ * The grid pivot above puts a candidate in every question and a question in
+ * every candidate, which is the shape that answers "what did this one person
+ * say" — and the shape a reader has to drag sideways to compare anybody. A
+ * ward page's question is the other one: how did these four differ. So this
+ * pivots once more, to the answer itself, and files the candidates under it.
+ *
+ * Only the options somebody picked get a group. The grid printed all of them,
+ * unclaimed rows included, on the argument that a position nobody will take is
+ * a finding; at thirty questions it is mostly whitespace, and the reader came
+ * to compare people rather than to audit the option list. The full list of
+ * what was offered is on the questionnaire page.
+ *
+ * `silent` are the candidates who never wrote back. They join the unanswered
+ * line rather than getting a place of their own, because on this question the
+ * two facts read the same: nothing from them.
+ */
+export function rollCall(
+  question: ComparedQuestion,
+  silent: { key: string; name: string }[] = [],
+): RollCall {
+  const named = (cell: AnswerCell): RollCallName => ({
+    key: cell.key,
+    name: cell.candidateName,
+    note: cell.answer?.explanation?.trim() || null,
+  });
+
+  /* Surname order inside every group, so a candidate sits in the same relative
+     place on all thirty questions and a reader stops having to look. */
+  const bySurname = (a: AnswerCell, b: AnswerCell) =>
+    lastName(a.candidateName).localeCompare(lastName(b.candidateName)) ||
+    a.candidateName.localeCompare(b.candidateName);
+
+  const cells = question.cells.filter((cell) => cell.responded).sort(bySurname);
+
+  const groups: RollCallGroup[] = [];
+  question.options.forEach((label, option) => {
+    const candidates = cells
+      .filter((cell) => cell.answer?.choice === option)
+      .map(named);
+    if (candidates.length === 0) return;
+    groups.push({
+      option,
+      label,
+      detail: question.details[option] ?? null,
+      candidates,
+    });
+  });
+
+  const verbatim = cells
+    .filter((cell) => cell.answer && cell.answer.choice === null)
+    .map((cell) => ({ ...named(cell), answer: cell.answer!.answer }));
+
+  const unanswered = [
+    ...cells.filter((cell) => !cell.answer).map(named),
+    ...silent.map((candidate) => ({
+      key: candidate.key,
+      name: candidate.name,
+      note: null,
+    })),
+  ].sort(
+    (a, b) =>
+      lastName(a.name).localeCompare(lastName(b.name)) ||
+      a.name.localeCompare(b.name),
+  );
+
+  return { groups, verbatim, unanswered };
+}

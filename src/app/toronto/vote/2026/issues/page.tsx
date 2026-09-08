@@ -2,10 +2,15 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
-import { FieldSentiment } from "@/components/elections/FieldSentiment";
+import { QuestionnaireCards } from "@/components/elections/QuestionnaireCards";
 import { SurveyCta } from "@/components/elections/SurveyCta";
 import CountdownDays from "@/components/elections/CountdownDays";
 import { fieldSentiment } from "@/lib/elections/field-sentiment";
+import {
+  candidateAnswers,
+  comparedQuestions,
+  questionnaireShape,
+} from "@/lib/elections/candidate-answers";
 import {
   CANDIDATE_QUESTIONNAIRE_SLUG,
   fetchCandidateResponses,
@@ -22,8 +27,11 @@ import { ELECTION } from "../data";
  * is not "what did this candidate say" anyway. It is where the people running
  * to govern Toronto converge, and where they split.
  *
- * A card per question, each carrying that question's whole field as a row of
- * cells — one cell per candidate. See FieldSentiment for the reasoning.
+ * A card per question, with the candidates filed under the answer they gave —
+ * the same roll-call form the ward and mayoral pages use, so a reader who has
+ * learned to read one page of the tracker can read all of them. The only
+ * difference here is scale: the field is the whole city, so a name plate also
+ * carries the seat that candidate is running for.
  *
  * The shell around them is deliberately short. Two dozen questions is the
  * page; every band of prose above them is a band the reader scrolls past to
@@ -53,12 +61,44 @@ export default async function IssuesPage() {
     fetchCandidateResponses(ELECTION.slug),
   ]);
 
+  /* `fieldSentiment` is still what tells us who counts as a respondent and
+     what seat they are running for — it reads the responses against the
+     ballot and drops anyone who returned the form without answering a policy
+     question. The cards themselves come from the same pivot the ward and
+     mayoral pages use, over the whole city's entries rather than one race's. */
   const field = survey ? fieldSentiment(survey, responses) : null;
   const respondents = field?.respondents ?? [];
   const mayoral = respondents.filter((r) => r.race === "mayor").length;
   const council = respondents.length - mayoral;
   const wards = new Set(respondents.filter((r) => r.ward).map((r) => r.ward))
     .size;
+
+  /* The roster the cards name, in the order `fieldSentiment` sorted it
+     (surname), and the seat each of them is running for — which is both what
+     prints on a plate and what splits each answer into its two races. */
+  const roster = respondents.map((r) => ({ key: r.key, name: r.name }));
+  const seats = Object.fromEntries(
+    respondents.map((r) => [
+      r.key,
+      r.ward
+        ? { race: "councillor" as const, label: `Ward ${r.ward}` }
+        : { race: "mayor" as const },
+    ]),
+  );
+
+  const entries = survey ? candidateAnswers(survey, responses) : [];
+  const groups = comparedQuestions(
+    entries,
+    roster,
+    survey ? questionnaireShape(survey, responses) : undefined,
+  );
+  /* Counted off the cards rather than off the questionnaire: a question
+     nobody has answered yet draws no card, and a stats row that claims one
+     more question than the page shows is a stats row a reader can catch. */
+  const questionCount = groups.reduce(
+    (n, group) => n + group.questions.length,
+    0,
+  );
 
   return (
     <div className={`${ELECTION.themeClass ?? ""} bg-bg text-dark`}>
@@ -82,7 +122,7 @@ export default async function IssuesPage() {
             Where the candidates stand
           </h1>
           <p className="font-serif text-[1.05rem] leading-[1.5] text-dark/85 max-w-[58ch] text-pretty">
-            The same {field?.questions.length ?? 0} questions, put to everyone
+            The same {questionCount} questions, put to everyone
             running for mayor and for council. Read across the whole field, the
             answers show what no single ballot can: what Toronto&rsquo;s next
             council already agrees on, and what it will spend four years
@@ -93,7 +133,7 @@ export default async function IssuesPage() {
         {/* ── Key stats ──────────────────────────────────────── */}
         <section className="grid grid-cols-2 md:grid-cols-4 border-b-2 border-dark">
           <Stat value={respondents.length} label="Candidates answered" />
-          <Stat value={field?.questions.length ?? 0} label="Policy questions" />
+          <Stat value={questionCount} label="Policy questions" />
           <Stat
             value={`${mayoral} / ${council}`}
             label="Mayoral / council"
@@ -102,9 +142,23 @@ export default async function IssuesPage() {
           <Stat value={wards} label="Wards represented" last />
         </section>
 
-        {/* ── The field ──────────────────────────────────────── */}
-        {field && respondents.length > 0 ? (
-          <FieldSentiment groups={field.groups} respondents={respondents} />
+        {/* ── The field, question by question ────────────────── */}
+        {groups.length > 0 && respondents.length > 0 ? (
+          <section className="px-6 md:px-14 py-9 md:py-11 border-b-2 border-dark">
+            {/* No roster above the cards, unlike the ward and mayoral pages.
+                Theirs names one ballot line and links each candidate to their
+                campaign; this page's field is thirty-odd people across a
+                mayoral race and two dozen wards, and a flat list of them is a
+                list with no ballot behind it. The seat on each plate is the
+                pointer instead. */}
+            <QuestionnaireCards
+              groups={groups}
+              respondents={roster}
+              silent={[]}
+              seats={seats}
+              notes={false}
+            />
+          </section>
         ) : (
           <section className="px-6 md:px-14 py-16 border-b-2 border-dark">
             <p className="font-serif text-[1.1rem] leading-[1.5] text-dark/80 max-w-[58ch] text-pretty">
@@ -142,18 +196,19 @@ export default async function IssuesPage() {
         {/* ── Method ─────────────────────────────────────────── */}
         <section className="px-6 md:px-14 py-4 border-t border-border-light grid gap-2">
           <p className="type-label-sm text-text-muted max-w-[80ch] text-pretty">
-            Every bar is the whole field, one cell per candidate: filled with
-            the option that candidate picked, hollow where they did not answer.
-            The percentages beside it are out of the candidates who answered
-            that question, not the whole ballot, and each card prints its own
-            denominator.
+            Each card is one question, and each block inside it is one of the
+            answers offered, printed in the wording the candidates were shown.
+            Under it are the candidates who gave that answer, with the seat
+            they are running for. Options nobody picked are not shown, and a
+            candidate who answered in their own words sits on no option.
           </p>
           <p className="type-label-sm text-text-muted max-w-[80ch] text-pretty">
-            Open a card for the candidates behind the bars, the full wording
-            each option was offered under, and whatever the candidate wrote
-            about their own answer — published verbatim, as they sent it.
-            Answers appear as candidates return the questionnaire and staff
-            review them, so the field shown here grows through the campaign.
+            Most candidates also wrote a note explaining their answer. Thirty
+            of them under every question is more reading than this page can
+            carry, so the notes live on the ward and mayoral pages, where the
+            field is small enough to read them in full. Answers appear as
+            candidates return the questionnaire and staff review them, so the
+            field shown here grows through the campaign.
           </p>
         </section>
 

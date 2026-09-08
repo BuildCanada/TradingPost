@@ -9,6 +9,10 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import {
+  EMPTY,
+  optionColors as rampFor,
+} from "@/lib/elections/option-colors";
+import {
   forRace,
   splitOf,
   type FieldGroup,
@@ -330,49 +334,11 @@ function CardGrid({ children }: { children: React.ReactNode }) {
 /* Colour                                                              */
 /* ------------------------------------------------------------------ */
 
-/* Option colours, by position, from the brand's designated chart ramps.
- *
- * The set is the one the palette validator passes on this page's own surface
- * — lake, copper and the lighter pine step, which clear the colour-blind
- * separation floor as a trio where the darker pine did not: deep green beside
- * copper is ΔE 3.4 under protanopia, which is to say the same colour. The
- * fourth is the national brand's auburn, and it is written as a literal rather
- * than as `--color-auburn-800` on purpose: this page runs under
- * `.theme-election`, which repaints auburn to Toronto blue, and a fourth
- * option that arrived as blue would land on top of the first one.
- *
- * Everything else is a custom property, so the ramps stay theme-following.
- */
-const CATEGORICAL = [
-  "var(--color-lake-700)",
-  "var(--color-copper-600)",
-  "var(--color-pine-400)",
-  "#932f2f",
-];
-
-/* The Yes / Yes-with-conditions / No questions are not categories, they are a
- * scale with two poles — so they get the diverging treatment that shape calls
- * for: a hue at each end and a neutral in the middle, never a third hue. It
- * also gives the reader a second thing to scan on. On a page where every
- * question is blue-and-orange, the direct ones read as a different kind of
- * question at a glance, which is what they are. */
-const DIVERGING = [
-  "var(--color-lake-700)",
-  "var(--color-charcoal-300)",
-  "var(--color-copper-600)",
-];
-
-/** An option nobody chose, and the hollow cells for candidates who skipped the
- *  question: quiet, and never a further colour a reader might try to read as a
- *  category. */
-const EMPTY = "color-mix(in oklab, var(--color-dark) 12%, transparent)";
-
+/* Option colours, by position — see src/lib/elections/option-colors.ts, which
+ * this page shares with the ward cards so an option is the same colour on
+ * both. */
 function optionColors(question: FieldQuestion): string[] {
-  const n = question.options.length;
-  if (question.ordinal && n <= DIVERGING.length)
-    /* A two-option scale takes the poles and skips the neutral. */
-    return n === 2 ? [DIVERGING[0], DIVERGING[2]] : DIVERGING.slice(0, n);
-  return CATEGORICAL.slice(0, Math.max(2, Math.min(n, CATEGORICAL.length)));
+  return rampFor(question.options.length, question.ordinal);
 }
 
 /* ------------------------------------------------------------------ */
@@ -466,19 +432,19 @@ function UnitRows({
             >
               {row.label}
             </span>
-            <span className="type-label-sm flex-none tabular-nums">
-              <span className={row.lead ? "text-dark" : "text-text-secondary"}>
-                {row.count}
-              </span>
-              {row.share !== null && (
-                <span className="text-text-muted"> {row.share}%</span>
-              )}
+            {/* The tally itself is the row of cells below — countable, and
+                the only place the number needs to be. What stays here is the
+                share, which the cells cannot show. The count survives for a
+                screen reader, which has no cells to count. */}
+            <span className="type-label-sm flex-none tabular-nums text-text-muted">
+              <span className="sr-only">{row.count} </span>
+              {row.share !== null && <>{row.share}%</>}
             </span>
           </span>
 
-          {/* The cells are decoration: the count and the share are already
-              printed above them as text, so a screen reader that walked the
-              grid would only hear the same row twice. */}
+          {/* The cells carry the count for a sighted reader, but a screen
+              reader gets it as the number beside the label instead: walking
+              a grid of thirty-two blank cells is not counting them. */}
           <span
             aria-hidden="true"
             className="grid gap-px md:gap-[2px]"
@@ -765,7 +731,7 @@ function Who({
                         option and cannot show that they meant nine different
                         things by it. */}
                     {pick.note?.trim() && (
-                      <span className="mt-1 block border-l-2 border-border-light pl-2.5 font-serif text-[0.9rem] leading-[1.4] text-text-secondary text-pretty">
+                      <span className="mt-1 block border-l-2 border-border-light pl-2.5 font-serif text-[1.02rem] leading-[1.5] text-text-secondary text-pretty">
                         {pick.note.trim()}
                       </span>
                     )}
@@ -784,11 +750,11 @@ function Who({
           <ul className="m-0 p-0 list-none grid gap-1.5">
             {unplaced.map((pick) => (
               <li key={pick.key}>
-                <span className="block font-serif text-[0.95rem] leading-[1.35] text-dark/85">
+                <span className="block font-serif text-[1.08rem] leading-[1.45] text-dark/85">
                   {pick.name}: &ldquo;{pick.answer}&rdquo;
                 </span>
                 {pick.note?.trim() && (
-                  <span className="mt-1 block border-l-2 border-border-light pl-2.5 font-serif text-[0.9rem] leading-[1.4] text-text-secondary text-pretty">
+                  <span className="mt-1 block border-l-2 border-border-light pl-2.5 font-serif text-[1.02rem] leading-[1.5] text-text-secondary text-pretty">
                     {pick.note.trim()}
                   </span>
                 )}

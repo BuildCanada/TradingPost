@@ -81,6 +81,15 @@ export type ExploreItem = {
   blurb: ReactNode;
   href: string;
   meta?: ReactNode;
+  /** the one card that is an ask rather than a page. Filled in the region's
+   *  accent — Toronto blue on this tracker, since `.theme-election` overrides
+   *  the token — so it is the only solid block of colour in the grid and the
+   *  only thing in it that is not somewhere to go and read. Same fill as the
+   *  SurveyCta at the foot of the page and beside every questionnaire on the
+   *  site: one ask, one colour, wherever a reader meets it. `cta` replaces the
+   *  "Open" foot, because this card is a control and should say what it does. */
+  tone?: "invite";
+  cta?: string;
 };
 
 export function ElectionLanding({
@@ -120,6 +129,60 @@ export function ElectionLanding({
   /** this region's locator map for a ward, when it has ward geometry */
   renderWardMap?: (ward: WardView) => ReactNode;
 }) {
+  /* THE MAYORAL RACE, WHERE IT IS A SIGNPOST RATHER THAN A LIST
+     A region with a roster page had a whole band of the front page — heading,
+     blurb, count, and two link rows — pointing at two other pages, which is
+     exactly what the explore grid is made of. Set as a section of its own it
+     pushed the wards a screen further down for no reading a card could not
+     carry.
+
+     One card, not two. The other pointed at the roster of every registered
+     candidate, which is a page that exists to be indexed rather than read:
+     fifty-three names and their campaign links, no answers. It is still
+     linked from the mayoral page it belongs to. What a reader on the front
+     page wants from this race is what the field said, so that is the card.
+
+     A region with no roster page keeps its own section below: its cards are
+     the candidates themselves, names and campaign links, which is a list
+     rather than a pointer and belongs nowhere near a grid of pages. */
+  const mayorCards: ExploreItem[] =
+    mayorRosterPath && mayorSurveyPath
+      ? [
+          {
+            eyebrow: "Mayor",
+            title: "The race for mayor",
+            blurb: "How the candidates for mayor answered our questions.",
+            href: mayorSurveyPath,
+          },
+        ]
+      : [];
+  /* The ask, in the middle of the grid rather than only at the foot of the
+     page. Everything else here is somewhere to go and read; this is the one
+     card that asks the reader for something, and a reader who has just seen
+     what the candidates said is the likeliest person on the page to have an
+     opinion about it. Middle, not first: the cards on either side are what
+     earn the ask. */
+  const invite: ExploreItem[] = surveyPath
+    ? [
+        {
+          eyebrow: "Voter survey",
+          title: "Where do you stand?",
+          blurb:
+            "Answer the same questions we put to the candidates and see which of them line up with you.",
+          href: surveyPath,
+          tone: "invite",
+          cta: "Take the survey",
+        },
+      ]
+    : [];
+
+  const pages = [...mayorCards, ...(content.explore ?? [])];
+  const exploreItems = [
+    ...pages.slice(0, Math.ceil(pages.length / 2)),
+    ...invite,
+    ...pages.slice(Math.ceil(pages.length / 2)),
+  ];
+
   return (
     <div className={`${election.themeClass ?? ""} bg-bg text-dark`}>
       <Suspense fallback={null}>
@@ -129,42 +192,37 @@ export function ElectionLanding({
         {/* ── Hero: the election, and the clock on it ─────────── */}
         <Hero election={election} content={content} electionDay={electionDay} />
 
-        {/* ── Explore: what we've published on top of the roster ─ */}
-        {content.explore && content.explore.length > 0 && (
-          <ExploreSection items={content.explore} />
+        {/* ── Explore: the mayoral race, and what we've published ─ */}
+        {exploreItems.length > 0 && (
+          <ExploreSection
+            items={exploreItems}
+            /* Three other pages link to #candidates, and with the mayoral
+               section suppressed that anchor has to land here. Keyed off the
+               roster path rather than off the cards: it is the roster path
+               that removes the section, so it is what has to replace it. */
+            anchorCandidates={Boolean(mayorRosterPath)}
+          />
         )}
 
         {/* ── Candidates for mayor ─────────────────────────────── */}
-        {/* Where a region has a roster page, this is a signpost rather than a
-            list: Toronto's mayoral field is fifty-three people, and printing
-            it here spent half the city's front page on a list whose reader
-            either wants one name or wants all of them — and is better served,
-            either way, by the page that holds the whole thing. Regions with no
-            roster page still print their field, which is the right answer for
-            the ones running a race of eight. */}
-        <section
-          id="candidates"
-          className="border-b-2 border-dark scroll-mt-24"
-        >
-          <div className="px-6 pt-10 pb-6 md:px-14 flex justify-between items-end gap-6 flex-wrap">
-            <div>
-              <p className="type-label text-accent mb-3">Mayor</p>
-              <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.85rem,3vw,2.4rem)] mb-2">
-                Candidates for Mayor
-              </h2>
-              {mayorRosterPath && (
-                <p className="font-serif text-[1.05rem] leading-[1.45] max-w-[52ch] text-dark/80">
-                  Every voter in the city votes in this race.{" "}
-                  {view.mayoral.length} candidates have registered for it.
-                </p>
-              )}
-            </div>
-            {mayorRosterPath ? (
-              <p className="type-label text-text-secondary pb-1.5 !tracking-[0.08em]">
-                {view.mayoral.length} candidates
-              </p>
-            ) : (
-              mayorSurveyPath && (
+        {/* Only where there is no roster page to point at. Toronto's mayoral
+            field is fifty-three people and lives on a page of its own, which
+            the explore grid above links to; a region running a race of eight
+            has nowhere else to put them, and printing the names here is the
+            right answer for a field that size. */}
+        {!mayorRosterPath && (
+          <section
+            id="candidates"
+            className="border-b-2 border-dark scroll-mt-24"
+          >
+            <div className="px-6 pt-10 pb-6 md:px-14 flex justify-between items-end gap-6 flex-wrap">
+              <div>
+                <p className="type-label text-accent mb-3">Mayor</p>
+                <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.85rem,3vw,2.4rem)] mb-2">
+                  Candidates for Mayor
+                </h2>
+              </div>
+              {mayorSurveyPath && (
                 <Link
                   href={mayorSurveyPath}
                   className="group/answers type-label-sm text-accent hover:underline inline-flex items-center gap-1.5 pb-1.5"
@@ -172,34 +230,9 @@ export function ElectionLanding({
                   How they answered our questionnaire
                   <ArrowRight className="size-3.5 transition-transform group-hover/answers:translate-x-0.5" />
                 </Link>
-              )
-            )}
-          </div>
-
-          {mayorRosterPath ? (
-            <div className="border-t border-border-light grid md:grid-cols-2">
-              <Link
-                href={mayorRosterPath}
-                className="group/roster px-6 md:px-14 py-6 flex items-center justify-between gap-4 transition-colors hover:bg-bg-alt"
-              >
-                <span className="font-sans font-medium text-[1.15rem] tracking-[-0.015em]">
-                  Every candidate for mayor
-                </span>
-                <ArrowRight className="size-4 flex-none text-text-secondary transition-transform group-hover/roster:translate-x-0.5" />
-              </Link>
-              {mayorSurveyPath && (
-                <Link
-                  href={mayorSurveyPath}
-                  className="group/answers px-6 md:px-14 py-6 flex items-center justify-between gap-4 border-t md:border-t-0 md:border-l border-border-light transition-colors hover:bg-bg-alt"
-                >
-                  <span className="font-sans font-medium text-[1.15rem] tracking-[-0.015em]">
-                    How they answered our questionnaire
-                  </span>
-                  <ArrowRight className="size-4 flex-none text-text-secondary transition-transform group-hover/answers:translate-x-0.5" />
-                </Link>
               )}
             </div>
-          ) : (
+
             <div className="grid grid-cols-[repeat(auto-fill,minmax(272px,1fr))] border-t border-l border-border-light">
               {view.mayoral.map((cand) => (
                 <MayoralCard
@@ -209,8 +242,8 @@ export function ElectionLanding({
                 />
               ))}
             </div>
-          )}
-        </section>
+          </section>
+        )}
 
         {/* ── Wards ────────────────────────────────────────────── */}
         <section id="wards" className="border-b-2 border-dark scroll-mt-24">
@@ -554,47 +587,104 @@ function Hero({
  * shows; the same border-collapse trick as the ward and mayoral grids, so the
  * three sections read as one table rather than three treatments.
  */
-function ExploreSection({ items }: { items: ExploreItem[] }) {
+function ExploreSection({
+  items,
+  anchorCandidates = false,
+}: {
+  items: ExploreItem[];
+  /** also answer to #candidates, which three other pages link to and which
+   *  lands here whenever the mayoral cards do */
+  anchorCandidates?: boolean;
+}) {
   return (
     <section id="explore" className="border-b-2 border-dark scroll-mt-24">
+      {anchorCandidates && (
+        <span
+          id="candidates"
+          className="block scroll-mt-24"
+          aria-hidden="true"
+        />
+      )}
       <div className="px-6 pt-10 pb-6 md:px-14">
         <p className="type-label text-accent mb-3">Explore</p>
         <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.85rem,3vw,2.4rem)] mb-2">
-          The data behind the race
+          Explore the election
         </h2>
         <p className="font-serif text-[1.05rem] leading-[1.45] max-w-[52ch] text-dark/80">
-          We put the same questions to every candidate on the ballot. Here is
-          what came back.
+          Campaigns talk in slogans. We asked every candidate on the ballot the
+          same specific questions and published what they sent back, word for
+          word.
         </p>
       </div>
 
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(288px,1fr))] border-t border-l border-border-light">
-        {items.map((item) => (
-          <Link
-            key={item.href}
-            href={item.href}
-            className="group/explore flex flex-col border-b border-r border-border-light px-6 py-6 md:px-8 md:py-7 transition-colors hover:bg-bg-alt"
-          >
-            <p className="type-label-sm !tracking-[0.1em] text-text-secondary mb-3">
-              {item.eyebrow}
-            </p>
-            <h3 className="type-h3 transition-colors group-hover/explore:text-accent">
-              {item.title}
-            </h3>
-            {item.meta && (
-              <p className="mt-2 font-sans font-medium tracking-[-0.02em] text-[1.35rem] leading-none text-accent tabular-nums">
-                {item.meta}
+      {/* auto-FIT, not auto-fill. Filling laid out as many 288px tracks as the
+          row could hold and left the spare ones empty: three cards on a wide
+          screen were three narrow columns hard against the left edge, with
+          half the row a blank rectangle inside the same border. Fitting
+          collapses the empty tracks, so however many cards a region has, they
+          divide the row between them. */}
+      <div className="grid grid-cols-[repeat(auto-fit,minmax(288px,1fr))] border-t border-l border-border-light">
+        {items.map((item) => {
+          const invite = item.tone === "invite";
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`group/explore flex flex-col border-b border-r px-6 py-6 md:px-8 md:py-7 lg:min-h-[290px] lg:px-10 lg:py-9 transition-colors ${
+                invite
+                  ? "border-accent bg-accent text-bg hover:bg-dark"
+                  : "border-border-light hover:bg-bg-alt"
+              }`}
+            >
+              <p
+                className={`type-label-sm !tracking-[0.1em] mb-3 ${
+                  invite ? "text-bg/70" : "text-text-secondary"
+                }`}
+              >
+                {item.eyebrow}
               </p>
-            )}
-            <p className="mt-3 font-serif text-[1rem] leading-[1.45] text-dark/80">
-              {item.blurb}
-            </p>
-            <span className="mt-auto pt-5 inline-flex items-center gap-1.5 type-label-sm !tracking-[0.1em] text-accent">
-              Open
-              <ArrowRight className="size-3 shrink-0 transition-transform group-hover/explore:translate-x-0.5" />
-            </span>
-          </Link>
-        ))}
+              <h3
+                className={`type-h3 lg:text-[1.75rem] lg:leading-[1.15] transition-colors ${
+                  invite ? "" : "group-hover/explore:text-accent"
+                }`}
+              >
+                {item.title}
+              </h3>
+              {item.meta && (
+                <p
+                  className={`mt-2 font-sans font-medium tracking-[-0.02em] text-[1.35rem] leading-none tabular-nums ${
+                    invite ? "text-bg/80" : "text-accent"
+                  }`}
+                >
+                  {item.meta}
+                </p>
+              )}
+              <p
+                className={`mt-3 font-serif text-[1rem] leading-[1.45] lg:mt-4 lg:text-[1.1rem] lg:leading-[1.5] ${
+                  invite ? "text-bg/85" : "text-dark/80"
+                }`}
+              >
+                {item.blurb}
+              </p>
+              {/* A button rather than a link with an arrow, on the one card
+                  that is a control — the same distinction the survey card
+                  makes everywhere else on the site. */}
+              {invite ? (
+                <span className="type-button mt-auto pt-5 inline-flex items-center gap-2">
+                  <span className="inline-flex items-center gap-2 bg-bg px-4 py-2.5 text-dark">
+                    {item.cta ?? "Open"}
+                    <ArrowRight className="size-3.5 transition-transform group-hover/explore:translate-x-0.5" />
+                  </span>
+                </span>
+              ) : (
+                <span className="mt-auto pt-5 inline-flex items-center gap-1.5 type-label-sm !tracking-[0.1em] text-accent">
+                  Open
+                  <ArrowRight className="size-3 shrink-0 transition-transform group-hover/explore:translate-x-0.5" />
+                </span>
+              )}
+            </Link>
+          );
+        })}
       </div>
     </section>
   );

@@ -7,6 +7,7 @@ import {
   useState,
   type CSSProperties,
 } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
@@ -395,6 +396,42 @@ export default function SurveyClient({
         className={`mx-auto w-full overflow-x-clip border-2 border-dark bg-bg transition-[max-width] duration-500 ${done ? "max-w-[1720px]" : "max-w-[760px]"
           }`}
       >
+        {/* ── Banner ─────────────────────────────────────────── */}
+        {/* The city the questions are about, before the first one is asked.
+            Thirty questions on what Toronto should do next open on a wall of
+            type otherwise, and the survey asks for a postal code and an email
+            before it gives anything back — a photograph is what says which
+            city's survey this is at a glance.
+
+            Only before the answers are in. Once the card widens to hold the
+            comparison, a banner is the width of the results and pushes the
+            thing the reader came back for below the fold; the comparison is a
+            findings page and does not want a hero. */}
+        {!done && (
+          <div className="relative h-36 w-full overflow-hidden border-b border-border-light sm:h-48 md:h-64">
+            <Image
+              /* Served from public/, like every other election photograph
+                 here — the only asset directory shipped into the production
+                 image (see the pledge OG template, which learned this the
+                 hard way). */
+              src="/elections/toronto/2026/survey-skyline.jpg"
+              alt="The Toronto skyline at sunset, seen across the lake from the Islands"
+              fill
+              // The card is 760px wide before the results widen it, so the
+              // banner never renders larger than that on any viewport.
+              sizes="(max-width: 800px) 100vw, 760px"
+              /* The skyline sits low in the frame under a lot of open sky, so
+                 a centred crop of a band this short is mostly empty air. The
+                 band's height and this focal point are a pair: the CN Tower
+                 spire sits about a third of the way down and the waterline
+                 four-fifths, and a shorter band or a lower focus cuts one end
+                 or the other off the one landmark that says Toronto. */
+              className="object-cover object-[50%_60%]"
+              priority
+            />
+          </div>
+        )}
+
         {/* ── Masthead ───────────────────────────────────────── */}
         {/* Its own band, ruled off from what follows. It had no bottom padding
             at all: the title sat on top of the progress bar, and the only

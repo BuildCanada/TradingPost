@@ -1,10 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense, type ReactNode } from "react";
-import { ArrowRight, ArrowUpRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import CountdownDays from "./CountdownDays";
 import LiveCountdown from "./LiveCountdown";
-import { CandidateSiteLink } from "./CandidateSiteLink";
+import { CandidateNameLink } from "./CandidateNameLink";
 import { PledgeButton } from "./PledgeButton";
 import { SurveyCta } from "./SurveyCta";
 import { ResidencyModal } from "./ResidencyModal";
@@ -830,14 +830,18 @@ function MayoralCard({
           candidate.initials
         )}
       </div>
-      <div className="min-w-0 flex flex-col gap-1.5">
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <h3 className="font-sans font-medium text-[1.15rem] tracking-[-0.02em] leading-[1.15]">
-            {candidate.name}
-          </h3>
-          {candidate.tag === "Incumbent" && <IncumbentBadge />}
-        </div>
-        <SiteLink candidate={candidate} election={election} race="mayor" />
+      {/* The name is the link. It used to be plain text with "Campaign site"
+          on the line beneath it, which spent a second line saying that the
+          thing above it led somewhere — and led off the site. */}
+      <div className="min-w-0 flex items-center gap-2.5 flex-wrap">
+        <h3 className="font-sans font-medium text-[1.15rem] tracking-[-0.02em] leading-[1.15]">
+          <CandidateNameLink
+            candidate={candidate}
+            election={election}
+            race="mayor"
+          />
+        </h3>
+        {candidate.tag === "Incumbent" && <IncumbentBadge />}
       </div>
     </div>
   );
@@ -920,7 +924,11 @@ export function CandidateRow({
             className={`font-sans font-medium text-[1.25rem] tracking-[-0.02em] leading-[1.15] ${candidate.withdrawn ? "line-through decoration-1" : ""
               }`}
           >
-            {candidate.name}
+            <CandidateNameLink
+              candidate={candidate}
+              election={election}
+              race={race}
+            />
           </p>
           {candidate.withdrawn && (
             <span className="type-label-sm !text-[10px] !tracking-[0.12em] px-2 py-1 border border-border-light text-text-secondary">
@@ -944,9 +952,6 @@ export function CandidateRow({
           </div>
         )}
       </div>
-      <div className="hidden sm:block flex-none">
-        <SiteLink candidate={candidate} election={election} race={race} />
-      </div>
     </li>
   );
 }
@@ -956,43 +961,6 @@ export function IncumbentBadge() {
     <span className="inline-flex items-center type-label-sm !text-[10px] !leading-none !tracking-[0.12em] pl-2 pr-[calc(0.5rem-0.12em)] py-1.5 border border-accent text-accent">
       Incumbent
     </span>
-  );
-}
-
-/** The campaign-site link, or the placeholder shown when we have no URL. */
-export function SiteLink({
-  candidate,
-  election,
-  race,
-  ward,
-  wardName,
-}: {
-  candidate: CandidateView;
-  election: string;
-  race: "mayor" | "councillor" | "trustee";
-  ward?: string;
-  wardName?: string;
-}) {
-  /* No site, no line. "Profile to come" was a promise we do not control — a
-     candidate with no web presence may never acquire one — and printed under
-     every third name it read as a column of missing things rather than as the
-     ordinary state of a municipal candidate. The absence says it already. */
-  if (!candidate.website) return null;
-  return (
-    <CandidateSiteLink
-      href={candidate.website}
-      candidate={candidate.name}
-      candidateKey={candidate.key}
-      election={election}
-      race={race}
-      tag={candidate.tag}
-      ward={ward}
-      wardName={wardName}
-      className="group/btn self-start inline-flex items-center gap-1.5 type-label-sm text-accent hover:underline"
-    >
-      Campaign site
-      <ArrowUpRight className="size-3 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
-    </CandidateSiteLink>
   );
 }
 

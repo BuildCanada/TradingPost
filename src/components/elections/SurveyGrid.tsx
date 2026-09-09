@@ -2,11 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { CSSProperties } from "react";
-import { ArrowUpRight, ChevronDown } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 
 import { WedgeGlyph, palette } from "@/components/charts/trilemma";
 import { AnswerChart, isDial, sharedRadius } from "./AnswerChart";
-import { CandidateSiteLink } from "./CandidateSiteLink";
+import { CandidateNameLink } from "./CandidateNameLink";
 import { lastName } from "@/lib/elections/names";
 import {
   Collapsible,
@@ -330,11 +330,14 @@ export function SurveyGrid({
 }
 
 /**
- * A candidate's name, and where they have a campaign site the name is the way
- * to it — a name is what a reader is looking for and what they will click, and
- * "Campaign site" on a line of its own spent a second line of a narrow column
- * saying so. The arrow is the whole tell that a name is a link, so it only
- * appears where there is somewhere to go.
+ * A candidate's name, and the name is the way to the candidate — a name is
+ * what a reader is looking for and what they will click, and "Campaign site"
+ * on a line of its own spent a second line of a narrow column saying so.
+ *
+ * Where the region has candidate pages the name leads to ours, which carries
+ * the campaign site along with the ward and these same answers; where it does
+ * not, the name still leads straight to the campaign site. `CandidateNameLink`
+ * decides which, so every roster in the app agrees.
  *
  * Shared by the column heads, the roster a phone gets instead of them, and the
  * list of candidates who never wrote back, so the three cannot drift apart.
@@ -352,25 +355,15 @@ export function CandidateName({
   ward?: string;
   wardName?: string;
 }) {
-  const type =
-    "font-sans text-[1rem] font-medium leading-[1.15] tracking-[-0.015em] text-dark text-balance";
-
-  if (!candidate.website) return <span className={type}>{candidate.name}</span>;
-
   return (
-    <CandidateSiteLink
-      href={candidate.website}
-      candidate={candidate.name}
-      candidateKey={candidate.key}
+    <CandidateNameLink
+      candidate={candidate}
       election={election}
       race={race}
       ward={ward}
       wardName={wardName}
-      className={`group/site transition-colors hover:text-accent ${type}`}
-    >
-      {candidate.name}
-      <ArrowUpRight className="ml-1 inline size-3 align-[1px] transition-transform group-hover/site:translate-x-0.5 group-hover/site:-translate-y-0.5" />
-    </CandidateSiteLink>
+      className="font-sans text-[1rem] font-medium leading-[1.15] tracking-[-0.015em] text-dark text-balance"
+    />
   );
 }
 

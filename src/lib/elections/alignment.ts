@@ -33,6 +33,14 @@ const NON_POLICY_STEPS = new Set(["about-you", "stay-in-touch"]);
  */
 const NON_POLICY_QUESTIONS = new Set(["volunteer", "updates"]);
 
+/**
+ * The steps that are consent and contact rather than substance. A subset of
+ * NON_POLICY_STEPS: `about-you` is not policy either, but a candidate's bio in
+ * it is publishable prose, where anything in `stay-in-touch` is a private
+ * arrangement between the respondent and us. See `writtenQuestions`.
+ */
+const CONSENT_STEPS = new Set(["stay-in-touch"]);
+
 /** Question types with a fixed option list, so two answers can be compared. */
 const CHOICE_TYPES = new Set(["yesno", "radio", "select"]);
 
@@ -164,6 +172,50 @@ export function comparableQuestions(
               CHOICE_TYPES.has(question.type) &&
               !NON_POLICY_QUESTIONS.has(question.id) &&
               (question.options?.length ?? 0) > 0,
+          )
+          .map((question) => ({
+            question,
+            stepId: step.id,
+            stepTitle: step.title,
+          })),
+  );
+}
+
+/**
+ * The prose a respondent wrote, in the order they were asked to write it.
+ *
+ * The complement of `comparableQuestions`, and the reason both exist: a
+ * questionnaire is a set of choices plus the things the respondent said in
+ * their own words, and the choices are the only half anything could pivot,
+ * chart or count. So the written half was filtered out at the first step and
+ * then never picked up again — which meant the candidate questionnaire's `bio`,
+ * answered by 55 of the 58 candidates who returned it, was data we held and
+ * published nowhere.
+ *
+ * TEXTAREA ONLY, AND THAT IS A PRIVACY RULE
+ *   `textarea` is the type the CMS uses for a paragraph the respondent means to
+ *   be read. The short free-text types are where identity lives — `text` and
+ *   `email` hold a name, an email, a postal code — and the resident survey is
+ *   full of them. Selecting the long-form type rather than "everything that is
+ *   not a choice" means a contact field added in the CMS can never arrive here
+ *   as publishable prose.
+ *
+ *   The consent questions are excluded on top of that, by step and by id, the
+ *   same way `comparableQuestions` excludes them. `about-you` is NOT excluded
+ *   here, unlike there: a candidate's bio is the one thing in that step which
+ *   is a public statement rather than a fact about a private person.
+ */
+export function writtenQuestions(
+  survey: Survey,
+): { question: SurveyQuestion; stepId: string; stepTitle: string }[] {
+  return survey.steps.flatMap((step) =>
+    CONSENT_STEPS.has(step.id)
+      ? []
+      : step.questions
+          .filter(
+            (question) =>
+              question.type === "textarea" &&
+              !NON_POLICY_QUESTIONS.has(question.id),
           )
           .map((question) => ({
             question,

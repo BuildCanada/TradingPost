@@ -13,17 +13,20 @@
 
 import { WARD_SHAPES } from "./wardGeo";
 import {
+  getCandidateProfiles,
   getElectionView,
   getNominationCloseLabel,
   getWardDetail,
   initialsFor,
   nameKey,
+  type CandidateProfile,
   type CandidateView,
   type ElectionDataOptions,
   type ElectionView,
   type WardDetail,
   type WardRosterEntry,
 } from "@/lib/elections/election-data";
+import { candidateSlug } from "@/lib/elections/candidate-profile";
 import { getElection } from "@/lib/elections/registry";
 import {
   MAYORAL_CANDIDATES,
@@ -33,7 +36,8 @@ import {
 } from "./candidates";
 
 export type { MayoralCandidate, CouncillorCandidate };
-export { initialsFor, nameKey };
+export { initialsFor, nameKey, candidateSlug };
+export type { CandidateProfile };
 
 export const ELECTION = getElection("toronto-2026");
 
@@ -145,6 +149,7 @@ export async function getToronto2026Ward(
         label: `Councillor — ${ward.name}`,
         officeBody: null,
         districtName: ward.name,
+        districtNumber: number,
         wardNumbers: [number],
         atLarge: false,
         candidates,
@@ -153,4 +158,57 @@ export async function getToronto2026Ward(
     ],
     trusteeRaces: [],
   };
+}
+
+// ── Candidate pages ────────────────────────────────────────────────────────
+
+/* Every candidate has a page of their own at ./candidates/[candidate], keyed
+   by `candidateSlug(name)`. Two things follow from the roster being rebuilt
+   from the Clerk's feed rather than stored: the slug has to be derivable from
+   the name, and a candidate who withdraws — or a name the Clerk corrects —
+   changes the set of valid URLs. So the routes are generated from whatever the
+   roster says today and anything outside it 404s. */
+
+/** Every candidate in the election, mayoral and council alike, each with the
+ *  race they are in. Falls back to the local roster when the API is down —
+ *  which means the mayoral field only, since the fallback's ward races are
+ *  assembled per ward. */
+export async function getToronto2026Candidates(): Promise<CandidateProfile[]> {
+  const live = await getCandidateProfiles(ELECTION.slug, OPTIONS);
+  if (live) return live;
+
+  const view = fallbackView();
+  return view.mayoral.map((candidate) => ({
+    candidate,
+    races: [
+      {
+        id: "mayor||at-large",
+        seat: "Mayor",
+        label: "Mayor",
+        officeBody: null,
+        districtName: null,
+        districtNumber: null,
+        wardNumbers: [],
+        atLarge: true,
+        candidates: view.mayoral,
+        registeredCount: view.mayoral.length,
+      },
+    ],
+    officeTypes: ["mayor"],
+    wards: [],
+    withdrawnFrom: [],
+  }));
+}
+
+/** One candidate by their URL slug, or null for a slug that names nobody on
+ *  the current roster. */
+export async function getToronto2026Candidate(
+  slug: string,
+): Promise<CandidateProfile | null> {
+  const profiles = await getToronto2026Candidates();
+  return (
+    profiles.find(
+      (profile) => candidateSlug(profile.candidate.name) === slug,
+    ) ?? null
+  );
 }

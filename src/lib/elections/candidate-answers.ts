@@ -15,7 +15,7 @@
 // carry it: most wards have one or two respondents, where a per-ward count
 // says only that the candidate agrees with themselves.
 
-import { comparableQuestions, isYesNoScale } from "./alignment";
+import { comparableQuestions, isYesNoScale, writtenQuestions } from "./alignment";
 import type { CandidateSurveyResponse } from "./alignment";
 import { nameKey } from "./election-data";
 import { lastName } from "./names";
@@ -462,4 +462,64 @@ export function rollCall(
   );
 
   return { groups, verbatim, unanswered };
+}
+
+/* ------------------------------------------------------------------ */
+/* What they wrote                                                     */
+/* ------------------------------------------------------------------ */
+
+/** The question a candidate's bio is asked under. Its own constant because
+ *  the profile page treats it differently from every other written answer —
+ *  a biography belongs beside the portrait, not among the policy answers. */
+export const BIO_QUESTION_ID = "bio";
+
+/** One free-text answer, as the candidate wrote it. */
+export type WrittenAnswer = {
+  questionId: string;
+  /** the question as it was put to them, for the answers that need it */
+  question: string;
+  stepId: string;
+  stepTitle: string;
+  /** their words, trimmed; never empty — blanks are dropped */
+  text: string;
+};
+
+/**
+ * The prose each candidate wrote, keyed by `nameKey` and in the order the
+ * questionnaire asked for it.
+ *
+ * Separate from `candidateAnswers` because the two halves of a questionnaire
+ * are different kinds of thing: a choice can be counted against the field and
+ * a paragraph cannot, so nothing here carries counts, charts or a comparison.
+ * It is what the candidate said, attributed, and that is all it can be.
+ *
+ * Candidates who wrote nothing are absent rather than present and empty.
+ */
+export function candidateWriting(
+  survey: Survey,
+  responses: CandidateSurveyResponse[],
+): Record<string, WrittenAnswer[]> {
+  const questions = writtenQuestions(survey);
+  const out: Record<string, WrittenAnswer[]> = {};
+
+  for (const response of responses) {
+    const written = questions.flatMap(({ question, stepId, stepTitle }) => {
+      const text = (response.answers[question.id] ?? "").trim();
+      return text
+        ? [
+            {
+              questionId: question.id,
+              question: question.label,
+              stepId,
+              stepTitle,
+              text,
+            },
+          ]
+        : [];
+    });
+
+    if (written.length > 0) out[nameKey(response.candidateName)] = written;
+  }
+
+  return out;
 }

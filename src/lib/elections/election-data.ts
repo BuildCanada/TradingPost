@@ -21,6 +21,7 @@
 
 import { fetchElection, type ApiCandidate, type ApiRace } from "@/lib/api/elections";
 import { daysUntil, parseDateOnly } from "./dates";
+import { nameKey } from "./names";
 import { SUPPORTED_ELECTIONS } from "./registry";
 
 export { daysUntil, parseDateOnly };
@@ -57,19 +58,10 @@ export function initialsFor(name: string): string {
   return (first + last).toUpperCase();
 }
 
-/** Matching key for enrichment lookups: lowercase, diacritics and punctuation
- *  stripped, so the Clerk's "Ala'a Adib" matches a local entry written "Alaa
- *  Adib". Also the stable candidate key in analytics events, since the clerks'
- *  feeds carry no candidate IDs. */
-export function nameKey(name: string): string {
-  return name
-    .normalize("NFD")
-    .replace(new RegExp("[\\u0300-\\u036f]", "g"), "")
-    .toLowerCase()
-    .replace(/[^a-z0-9 ]+/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-}
+/** Matching key for enrichment lookups — re-exported from ./names, which the
+ *  client components that link to a candidate's own page also need and which
+ *  cannot import this module (it reaches the API). */
+export { nameKey };
 
 /**
  * "First Last" display name. `first_name` is null for mononymous candidates,
@@ -156,6 +148,14 @@ export type RaceView = {
   officeBody: string | null;
   /** e.g. "Etobicoke North" or "Wards 1, 5"; null when at-large */
   districtName: string | null;
+  /**
+   * The API's `district_number`, null when at-large. Safe to print only where
+   * `districtName` is null and the district is not a city ward — which in
+   * practice is the school boards, whose own ward numbering is the only name
+   * their districts have. For a council race it is the lowest ward of the
+   * district and `wardNumbers` is what to show instead.
+   */
+  districtNumber: number | null;
   /** city wards this race covers; empty when at-large or unmapped */
   wardNumbers: number[];
   atLarge: boolean;
@@ -290,6 +290,7 @@ function toRaceView(race: ApiRace, enrichment?: EnrichmentMap): RaceView {
     label: race.district_name ? `${seat} — ${race.district_name}` : seat,
     officeBody: race.office_body,
     districtName: race.district_name,
+    districtNumber: race.district_number,
     wardNumbers: wardsFor(race),
     atLarge: race.district_type === "at_large",
     candidates,
@@ -440,5 +441,128 @@ export async function getWardDetail(
           race.office_type === "trustee" && wardsFor(race).includes(number),
       )
       .map((race) => toRaceView(race)),
+  };
+}
+
+// ── Candidate profiles ─────────────────────────────────────────────────────
+
+/** One race a candidate appears in, and whether they are still standing in it. */
+type Appearance = {
+  candidate: CandidateView;
+  race: RaceView;
+  officeType: ApiRace["office_type"];
+  wards: WardView[];
+};
+
+/**
+ * One candidate, with the race context their own page needs.
+ *
+ * A name is not a key: candidates are joined on `nameKey`, the clerks' feeds
+ * carry no candidate ids, and one person turns up in more than one race often
+ * enough that it has to be handled — on Toronto's 2026 ballot ten candidates
+ * registered somewhere, withdrew, and registered somewhere else. So a profile
+ * carries the races the candidate is actually standing in, and names the ones
+ * they left separately rather than letting a stale ward speak for them.
+ */
+export type CandidateProfile = {
+  /** their details, taken from a race they are still standing in where there
+   *  is one — so a candidate who moved wards does not read as withdrawn */
+  candidate: CandidateView;
+  /** the races they are standing in; the withdrawn ones only when every race
+   *  they appear in is withdrawn, so this is never empty */
+  races: RaceView[];
+  /** the office kinds those races are for, aligned with `races` */
+  officeTypes: ApiRace["office_type"][];
+  /** the region's wards those races cover, resolved against its roster */
+  wards: WardView[];
+  /** races they registered in and withdrew from, where they are standing
+   *  somewhere else — empty for all but a handful of candidates */
+  withdrawnFrom: RaceView[];
+};
+
+/**
+ * Every candidate in the election, each with their race — the roster a
+ * per-candidate route generates its static params from and looks a slug up
+ * in. Null when the API is unreachable, so callers can fall back or 404.
+ *
+ * Built in one pass over the races rather than by walking `getWardDetail` for
+ * each ward: enrichment is per-race anyway, and 25 ward fetches to answer
+ * "who is this person" is 25 recomputations of the same election.
+ */
+export async function getCandidateProfiles(
+  slug: string,
+  options: ElectionDataOptions = {},
+): Promise<CandidateProfile[] | null> {
+  const election = await fetchElection(slug);
+  if (!election) return null;
+
+  const view = await getElectionView(slug, options);
+  if (!view) return null;
+
+  const wardByNumber = new Map(view.wards.map((ward) => [ward.number, ward]));
+
+  /* Keyed by `nameKey`, which is `CandidateView.key`, so a name in two races
+     accumulates rather than overwriting. */
+  const appearances = new Map<string, Appearance[]>();
+
+  for (const apiRace of election.races) {
+    const wardNumbers = wardsFor(apiRace);
+
+    /* Toronto's hand-maintained extras are held per ward, and its council
+       races are one ward each. A race spanning several wards (Brampton's) has
+       no single ward's enrichment to draw on, and no region that shape has
+       any. */
+    const enrichment =
+      apiRace.office_type === "mayor"
+        ? options.mayoralEnrichment
+        : apiRace.office_type === "councillor" && wardNumbers.length === 1
+          ? options.councillorEnrichment?.(wardNumbers[0])
+          : undefined;
+
+    const race = toRaceView(apiRace, enrichment);
+    const wards = wardNumbers
+      .map((number) => wardByNumber.get(number))
+      .filter((ward): ward is WardView => ward !== undefined);
+
+    for (const candidate of race.candidates) {
+      const list = appearances.get(candidate.key);
+      const appearance: Appearance = {
+        candidate,
+        race,
+        officeType: apiRace.office_type,
+        wards,
+      };
+      if (list) list.push(appearance);
+      else appearances.set(candidate.key, [appearance]);
+    }
+  }
+
+  return [...appearances.values()].map(toProfile);
+}
+
+/** One candidate's appearances folded into their profile: the races they are
+ *  standing in lead, and the ones they left are set aside. */
+function toProfile(appearances: Appearance[]): CandidateProfile {
+  const standing = appearances.filter((a) => !a.candidate.withdrawn);
+  /* Withdrawn everywhere — the withdrawal is the whole story, so those races
+     are the profile's races rather than a footnote to an empty page. */
+  const active = standing.length > 0 ? standing : appearances;
+
+  const wards: WardView[] = [];
+  for (const appearance of active) {
+    for (const ward of appearance.wards) {
+      if (!wards.some((w) => w.number === ward.number)) wards.push(ward);
+    }
+  }
+
+  return {
+    candidate: active[0].candidate,
+    races: active.map((a) => a.race),
+    officeTypes: active.map((a) => a.officeType),
+    wards,
+    withdrawnFrom:
+      standing.length > 0
+        ? appearances.filter((a) => a.candidate.withdrawn).map((a) => a.race)
+        : [],
   };
 }

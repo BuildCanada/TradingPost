@@ -418,11 +418,17 @@ export default async function CandidatePage({
               </p>
             </div>
 
-            <div className="max-w-[70ch]">
+            {/* No measure cap. The prose runs the full width of its column:
+                capped at 70ch it left a third of the band empty, and filling
+                the width was the call. Leading goes up with the line length —
+                a long line needs more space beneath it for the eye to find
+                the start of the next one, which is the one thing that can be
+                done for readability without narrowing the column again. */}
+            <div>
               {selfBio && (
                 <Prose
                   text={selfBio}
-                  className="font-serif text-[1.15rem] leading-[1.6] text-dark text-pretty"
+                  className="font-serif text-[1.15rem] leading-[1.75] text-dark text-pretty"
                 />
               )}
 
@@ -431,12 +437,12 @@ export default async function CandidatePage({
                   key={entry.questionId}
                   className="mt-7 border-t border-border-light pt-5"
                 >
-                  <h3 className="font-sans text-[1.05rem] font-medium leading-[1.35] tracking-[-0.015em] text-dark text-pretty max-w-[62ch] mb-2.5">
+                  <h3 className="font-sans text-[1.05rem] font-medium leading-[1.35] tracking-[-0.015em] text-dark text-pretty mb-2.5">
                     {entry.question}
                   </h3>
                   <Prose
                     text={entry.text}
-                    className="font-serif text-[1.1rem] leading-[1.55] text-dark/90 text-pretty"
+                    className="font-serif text-[1.1rem] leading-[1.7] text-dark/90 text-pretty"
                   />
                 </div>
               ))}

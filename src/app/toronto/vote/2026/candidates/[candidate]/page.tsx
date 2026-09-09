@@ -389,42 +389,58 @@ export default async function CandidatePage({
             paragraphs, so in the hero the longest of them pushed the ballot
             facts and the questionnaire off the screen. Here they have the room
             the length needs, in the reading order a candidate page actually
-            has — who is this, then what do they think. */}
+            has — who is this, then what do they think.
+
+            TWO COLUMNS, because prose has a measure and a band does not. Set
+            as one column this was 640px of serif — the width a paragraph can
+            be read at — sitting in a 1300px section, so two-thirds of the band
+            was air with a heading floating at the top of it. The heading and
+            the attribution take a rail of their own and the prose keeps its
+            measure beside them, which spends the width on structure rather
+            than on a line too long to read. */}
         {(selfBio || otherProse.length > 0) && (
-          <section className="px-6 md:px-14 py-9 border-b-2 border-dark">
-            <p className="type-label text-accent mb-3">In their own words</p>
-            <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.6rem,2.6vw,2.1rem)] mb-3">
-              About {firstName(candidate.name)}
-            </h2>
-            {/* Whose words these are, said before they are read. A candidate's
-                account of themselves set in the same type as the rest of the
-                page would read as ours. */}
-            <p className="type-label-sm text-text-muted mb-6 max-w-[70ch] text-pretty">
-              Written by {candidate.name} in answer to our questionnaire, and
-              published as given. Not our description of them.
-            </p>
+          <section className="px-6 md:px-14 py-9 border-b-2 border-dark grid gap-6 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] lg:gap-14 lg:items-start">
+            <div className="grid gap-3 lg:sticky lg:top-24">
+              {/* No eyebrow. "In their own words" over a line that already
+                  says the candidate wrote this and we did not was the label
+                  and its own caption, stacked. */}
+              <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.6rem,2.6vw,2.1rem)] text-balance">
+                About {firstName(candidate.name)}
+              </h2>
+              {/* Whose words these are, said before they are read. A
+                  candidate's account of themselves set in the same type as the
+                  rest of the page would read as ours. In the rail it stays
+                  beside the prose it qualifies rather than becoming a line the
+                  reader passes once and scrolls away from. */}
+              <p className="type-label-sm text-text-muted text-pretty">
+                Written by {candidate.name} in answer to our questionnaire, and
+                published as given. Not our description of them.
+              </p>
+            </div>
 
-            {selfBio && (
-              <Prose
-                text={selfBio}
-                className="font-serif text-[1.15rem] leading-[1.6] text-dark max-w-[68ch] text-pretty"
-              />
-            )}
-
-            {otherProse.map((entry) => (
-              <div
-                key={entry.questionId}
-                className="mt-7 border-t border-border-light pt-5"
-              >
-                <h3 className="font-sans text-[1.05rem] font-medium leading-[1.35] tracking-[-0.015em] text-dark text-pretty max-w-[62ch] mb-2.5">
-                  {entry.question}
-                </h3>
+            <div className="max-w-[70ch]">
+              {selfBio && (
                 <Prose
-                  text={entry.text}
-                  className="font-serif text-[1.1rem] leading-[1.55] text-dark/90 max-w-[68ch] text-pretty"
+                  text={selfBio}
+                  className="font-serif text-[1.15rem] leading-[1.6] text-dark text-pretty"
                 />
-              </div>
-            ))}
+              )}
+
+              {otherProse.map((entry) => (
+                <div
+                  key={entry.questionId}
+                  className="mt-7 border-t border-border-light pt-5"
+                >
+                  <h3 className="font-sans text-[1.05rem] font-medium leading-[1.35] tracking-[-0.015em] text-dark text-pretty max-w-[62ch] mb-2.5">
+                    {entry.question}
+                  </h3>
+                  <Prose
+                    text={entry.text}
+                    className="font-serif text-[1.1rem] leading-[1.55] text-dark/90 text-pretty"
+                  />
+                </div>
+              ))}
+            </div>
           </section>
         )}
 

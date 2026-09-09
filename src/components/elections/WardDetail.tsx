@@ -12,6 +12,7 @@ import { QuestionnaireRail } from "./QuestionnaireRail";
 import { SurveyCta } from "./SurveyCta";
 import { IncumbentBadge } from "./ElectionLanding";
 import { CandidateNameLink } from "./CandidateNameLink";
+import { WardProfileSection, type WardProfile } from "./WardProfile";
 import {
   comparedQuestions,
   surveyRoster,
@@ -45,6 +46,7 @@ export function WardDetail({
   wardMap,
   surveyAnswers,
   surveyShape,
+  profile,
 }: {
   election: SupportedElection;
   data: WardDetailData;
@@ -67,6 +69,12 @@ export function WardDetail({
    * show which questions they did not answer.
    */
   surveyShape?: ComparedGroup[];
+  /**
+   * What this ward is, above the race to represent it — a short brief and the
+   * Census statistics behind it. Only regions that maintain ward profiles
+   * pass one; without it the section is left out entirely.
+   */
+  profile?: WardProfile;
 }) {
   const { ward, wards, councilRaces, trusteeRaces } = data;
   const idx = wards.findIndex((w) => w.number === ward.number);
@@ -257,6 +265,9 @@ export function WardDetail({
             ))}
           </section>
         )}
+
+        {/* ── About this ward ────────────────────────────────── */}
+        {profile && <WardProfileSection profile={profile} />}
 
         {/* ── Prev / next ward ───────────────────────────────── */}
         <section className="grid grid-cols-2 border-t border-border-light border-dark">

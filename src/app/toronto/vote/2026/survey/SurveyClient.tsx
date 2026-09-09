@@ -439,7 +439,7 @@ export default function SurveyClient({
             happened to carry. The intro keeps a reading measure of its own —
             once the card widens to hold the results, a line of intro type set
             across seventeen hundred pixels is a line nobody finishes. */}
-        <div className="flex flex-wrap items-end justify-between gap-x-10 gap-y-5 border-b border-border-light px-6 pt-10 pb-8 md:px-10 md:pt-12 md:pb-9">
+        <div className="border-b border-border-light px-6 pt-10 pb-8 md:px-10 md:pt-12 md:pb-9">
           {/* One masthead, saying whichever of the two things the page is
               currently for. Before the answers are in it introduces the
               survey; after, it is the heading of the comparison — which used
@@ -477,16 +477,6 @@ export default function SurveyClient({
               </p>
             )}
           </div>
-
-          {/* The way out, in the masthead where a reader looks for it rather
-              than at the bottom of a page they have to finish first. */}
-          <Link
-            href="/toronto/vote/2026"
-            className="group/btn type-button inline-flex flex-none items-center gap-2 pb-1 text-dark hover:text-accent"
-          >
-            Explore the candidates
-            <ArrowRight className="size-3.5 transition-transform group-hover/btn:translate-x-0.5" />
-          </Link>
         </div>
 
         {done ? (
@@ -500,6 +490,22 @@ export default function SurveyClient({
                 />
               </div>
             )}
+
+            {/* ── The way on ─────────────────────────────────── */}
+            {/* At the end rather than in the masthead. Offered up top it
+                competed with the survey for the reader's first move — a way
+                off the page, beside the reason they came to it. Here it is
+                what to do next once the comparison has been read: the names
+                in it are the ones this links to. */}
+            <div className="border-t-2 border-dark px-6 py-8 md:px-10">
+              <Link
+                href="/toronto/vote/2026"
+                className="group/btn type-button inline-flex items-center gap-2 text-dark hover:text-accent"
+              >
+                Explore the candidates
+                <ArrowRight className="size-3.5 transition-transform group-hover/btn:translate-x-0.5" />
+              </Link>
+            </div>
           </>
         ) : (
           <>

@@ -17,3 +17,28 @@ export const lastName = (name: string) => name.trim().split(/\s+/).at(-1) || nam
  *  ending in s takes the bare apostrophe. */
 export const possessive = (name: string) =>
   name.endsWith("s") || name.endsWith("S") ? `${name}’` : `${name}’s`;
+
+/**
+ * Matching key for a candidate: lowercase, diacritics and punctuation
+ * stripped, so the Clerk's "Ala'a Adib" matches a hand-written "Alaa Adib".
+ * Also the stable candidate key in analytics events and the roster joins,
+ * since the clerks' feeds carry no candidate IDs.
+ *
+ * Lives here rather than in election-data because the client components that
+ * link to a candidate's page need it, and election-data reaches the API.
+ */
+export function nameKey(name: string): string {
+  return name
+    .normalize("NFD")
+    .replace(new RegExp("[\\u0300-\\u036f]", "g"), "")
+    .toLowerCase()
+    .replace(/[^a-z0-9 ]+/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** `nameKey` as a URL segment — "Brad Bradford" → "brad-bradford". The whole
+ *  identity of a candidate's own page, so it must stay derivable from the name
+ *  alone: the roster is rebuilt from the Clerk's feed daily and carries no ids
+ *  we could key a URL to. */
+export const candidateSlug = (name: string) => nameKey(name).replace(/ /g, "-");

@@ -74,6 +74,15 @@ export type SupportedElection = {
    *  section can offer the lookup. False is not "no map": it is "asking for a
    *  postal code here would answer with boundary_data_unavailable". */
   wardLookup?: boolean;
+  /**
+   * The region has a page per candidate under `${basePath}/candidates/:slug`.
+   * Where it does, a candidate's name is a link to that page and the campaign
+   * site is one of the things on it; where it doesn't, the name links straight
+   * out to the campaign site as it always did. Only Toronto has the route, and
+   * a name linking to a 404 is worse than a name linking outward, so this is
+   * opt-in rather than assumed from `basePath`.
+   */
+  candidateProfiles?: boolean;
 };
 
 const TORONTO_2026: SupportedElection = {
@@ -94,6 +103,7 @@ const TORONTO_2026: SupportedElection = {
   advanceVote: { iso: "2026-10-06", label: "Oct 6 – 11" },
   mailIn: { iso: "2026-09-24", label: "Thu, Sept 24" },
   wardLookup: true,
+  candidateProfiles: true,
   themeClass: "theme-election",
 };
 

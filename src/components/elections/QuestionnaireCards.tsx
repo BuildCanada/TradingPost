@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { ArrowRight } from "lucide-react";
 
 import type { Heading } from "@/components/custom/signpost/config";
@@ -77,6 +78,7 @@ export function QuestionnaireCards({
   notes = true,
   yourKey,
   idPrefix,
+  answerNote,
 }: {
   groups: ComparedGroup[];
   /** the candidates who returned the questionnaire */
@@ -100,6 +102,11 @@ export function QuestionnaireCards({
    *  element called "housing" in the document and the scroll rail would only
    *  ever find the first. */
   idPrefix?: string;
+  /** replaces the sentence at the foot explaining how to read the cards. The
+   *  default is written for a race — "options nobody in this ward picked are
+   *  not shown" — and a page whose cards hold a single candidate has a
+   *  different thing to say about what is missing from them. */
+  answerNote?: ReactNode;
 }) {
   const silentNames = silent.map((candidate) => ({
     key: candidate.key,
@@ -140,7 +147,11 @@ export function QuestionnaireCards({
         </section>
       ))}
 
-      <WardAnswerNote issuesHref={issuesHref} notes={notes} />
+      <WardAnswerNote
+        issuesHref={issuesHref}
+        notes={notes}
+        note={answerNote}
+      />
     </div>
   );
 }
@@ -151,9 +162,12 @@ export function QuestionnaireCards({
 function WardAnswerNote({
   issuesHref,
   notes,
+  note,
 }: {
   issuesHref?: string;
   notes?: boolean;
+  /** an override for the sentence — see `answerNote` */
+  note?: ReactNode;
   /** the reader's own row, where they have answered the same questionnaire —
    *  see QuestionRollCall. */
   yourKey?: string;
@@ -167,10 +181,14 @@ function WardAnswerNote({
   return (
     <div className="grid gap-2 border-t border-border-light pt-4">
       <p className="type-label-sm text-text-muted text-pretty">
-        Candidates are grouped by the answer they gave. Options nobody in this
-        ward picked are not shown, and a candidate who answered in their own
-        words sits on no option.
-        {notes ? " Notes are the candidates’ own words." : ""}
+        {note ?? (
+          <>
+            Candidates are grouped by the answer they gave. Options nobody in
+            this ward picked are not shown, and a candidate who answered in
+            their own words sits on no option.
+            {notes ? " Notes are the candidates’ own words." : ""}
+          </>
+        )}
       </p>
       {issuesHref && (
         <Link

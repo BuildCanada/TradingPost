@@ -10,7 +10,8 @@ import {
 } from "./QuestionnaireCards";
 import { QuestionnaireRail } from "./QuestionnaireRail";
 import { SurveyCta } from "./SurveyCta";
-import { IncumbentBadge, SiteLink } from "./ElectionLanding";
+import { IncumbentBadge } from "./ElectionLanding";
+import { CandidateNameLink } from "./CandidateNameLink";
 import {
   comparedQuestions,
   surveyRoster,
@@ -442,7 +443,13 @@ function CouncilCandidate({
                 candidate.withdrawn ? "line-through decoration-1" : ""
               }`}
             >
-              {candidate.name}
+              <CandidateNameLink
+                candidate={candidate}
+                election={election}
+                race={race}
+                ward={ward}
+                wardName={wardName}
+              />
             </h3>
             {candidate.tag === "Incumbent" && <IncumbentBadge />}
             {candidate.withdrawn && (
@@ -456,15 +463,6 @@ function CouncilCandidate({
               {candidate.bio}
             </p>
           )}
-        </div>
-        <div className="hidden sm:block flex-none">
-          <SiteLink
-            candidate={candidate}
-            election={election}
-            race={race}
-            ward={ward}
-            wardName={wardName}
-          />
         </div>
       </div>
     </div>

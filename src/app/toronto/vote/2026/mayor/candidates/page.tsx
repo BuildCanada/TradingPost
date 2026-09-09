@@ -3,10 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 
-import {
-  IncumbentBadge,
-  SiteLink,
-} from "@/components/elections/ElectionLanding";
+import { IncumbentBadge } from "@/components/elections/ElectionLanding";
+import { CandidateNameLink } from "@/components/elections/CandidateNameLink";
 import CountdownDays from "@/components/elections/CountdownDays";
 import { surveyRoster } from "@/lib/elections/candidate-answers";
 import { daysUntil } from "@/lib/elections/dates";
@@ -286,19 +284,17 @@ function Roster({ candidates }: { candidates: CandidateView[] }) {
                   candidate.withdrawn ? "line-through decoration-1" : ""
                 }`}
               >
-                {candidate.name}
-              </span>
-              {candidate.tag === "Incumbent" && <IncumbentBadge />}
-            </span>
-            {candidate.website && (
-              <span className="mt-1 block">
-                <SiteLink
+                {/* The name is the link — to our page for this candidate,
+                    which carries the campaign site that used to sit on a
+                    second line under every name here. */}
+                <CandidateNameLink
                   candidate={candidate}
                   election={ELECTION.slug}
                   race="mayor"
                 />
               </span>
-            )}
+              {candidate.tag === "Incumbent" && <IncumbentBadge />}
+            </span>
           </span>
         </li>
       ))}

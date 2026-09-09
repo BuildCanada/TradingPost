@@ -5,6 +5,7 @@ import { WardMap, WardMapDefs } from "@/components/elections/WardMap";
 import { rosterSurvey } from "@/lib/elections/survey-answers";
 import { ELECTION, WARD_NUMBERS, getToronto2026, getToronto2026Ward } from "../../data";
 import { WARD_GEO, WARD_SHAPES } from "../../wardGeo";
+import { wardProfile } from "../../wardProfiles";
 
 export function generateStaticParams() {
   return WARD_NUMBERS.map((n) => ({ ward: n }));
@@ -57,6 +58,12 @@ export default async function WardDetailPage({
       nominationCloseLabel={view.nominationCloseLabel}
       surveyAnswers={surveyAnswers}
       surveyShape={surveyShape}
+      profile={
+        wardProfile(
+          data.ward.n,
+          data.councilRaces.flatMap((race) => race.candidates),
+        ) ?? undefined
+      }
       wardMapDefs={<WardMapDefs geo={WARD_GEO} />}
       wardMap={
         <WardMap

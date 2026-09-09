@@ -12,10 +12,13 @@ import {
 import { QuestionnaireRail } from "@/components/elections/QuestionnaireRail";
 import CountdownDays from "@/components/elections/CountdownDays";
 import { IncumbentBadge } from "@/components/elections/ElectionLanding";
-import { comparedQuestions } from "@/lib/elections/candidate-answers";
+import {
+  BIO_QUESTION_ID,
+  comparedQuestions,
+} from "@/lib/elections/candidate-answers";
 import { rosterSurvey } from "@/lib/elections/survey-answers";
 import { daysUntil } from "@/lib/elections/dates";
-import { possessive } from "@/lib/elections/names";
+import { firstName, possessive } from "@/lib/elections/names";
 import type { CandidateProfile, RaceView } from "@/lib/elections/election-data";
 import {
   ELECTION,
@@ -127,8 +130,27 @@ export default async function CandidatePage({
      is fetched for the whole election — the counts beside each answer are the
      field's split — and narrowed to this candidate by key. A missing
      questionnaire costs the answers, not the page. */
-  const { answers } = await rosterSurvey(ELECTION.slug, new Set([candidate.key]));
+  const { answers, written } = await rosterSurvey(
+    ELECTION.slug,
+    new Set([candidate.key]),
+  );
   const surveyAnswers = answers[candidate.key];
+
+  /* What the candidate wrote, as against what they picked.
+     55 of the 58 candidates who returned the questionnaire wrote a bio in it,
+     and until now the page showed none of them: the bio sits in the
+     questionnaire's `about-you` step, which the policy pivot excludes, so the
+     only bio this page could print was the hand-maintained one in
+     candidates.ts — which is empty for all but a handful. Theirs is a self
+     description and ours is not, so it is attributed rather than merged into
+     the same paragraph. */
+  const prose = written[candidate.key] ?? [];
+  const selfBio = prose.find(
+    (entry) => entry.questionId === BIO_QUESTION_ID,
+  )?.text;
+  const otherProse = prose.filter(
+    (entry) => entry.questionId !== BIO_QUESTION_ID,
+  );
 
   /* The ward pages' cards, given a roster of one.
      `comparedQuestions` is the same pivot a ward runs — question first, the
@@ -269,7 +291,7 @@ export default async function CandidatePage({
                   the reader to read absence as a judgement. Most of a
                   fifty-three-name ballot is in exactly this state, and it is
                   the ordinary condition of a municipal candidate. */}
-              {!candidate.bio && !candidate.website && (
+              {!candidate.bio && !candidate.website && !selfBio && (
                 <p className="font-serif text-[1.05rem] leading-[1.5] text-dark/80 max-w-[62ch] text-pretty">
                   A registered candidate on the City Clerk&rsquo;s list. We have
                   no campaign site or profile for {candidate.name} yet — this
@@ -357,6 +379,54 @@ export default async function CandidatePage({
             />
           </div>
         </section>
+
+        {/* ── In their own words ─────────────────────────────── */}
+        {/* Their bio, and any other prose the questionnaire asked them to
+            write, in one place and plainly attributed.
+
+            A section of its own rather than a paragraph in the hero: these run
+            to a median of 800 characters and half of them are several
+            paragraphs, so in the hero the longest of them pushed the ballot
+            facts and the questionnaire off the screen. Here they have the room
+            the length needs, in the reading order a candidate page actually
+            has — who is this, then what do they think. */}
+        {(selfBio || otherProse.length > 0) && (
+          <section className="px-6 md:px-14 py-9 border-b-2 border-dark">
+            <p className="type-label text-accent mb-3">In their own words</p>
+            <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.6rem,2.6vw,2.1rem)] mb-3">
+              About {firstName(candidate.name)}
+            </h2>
+            {/* Whose words these are, said before they are read. A candidate's
+                account of themselves set in the same type as the rest of the
+                page would read as ours. */}
+            <p className="type-label-sm text-text-muted mb-6 max-w-[70ch] text-pretty">
+              Written by {candidate.name} in answer to our questionnaire, and
+              published as given. Not our description of them.
+            </p>
+
+            {selfBio && (
+              <Prose
+                text={selfBio}
+                className="font-serif text-[1.15rem] leading-[1.6] text-dark max-w-[68ch] text-pretty"
+              />
+            )}
+
+            {otherProse.map((entry) => (
+              <div
+                key={entry.questionId}
+                className="mt-7 border-t border-border-light pt-5"
+              >
+                <h3 className="font-sans text-[1.05rem] font-medium leading-[1.35] tracking-[-0.015em] text-dark text-pretty max-w-[62ch] mb-2.5">
+                  {entry.question}
+                </h3>
+                <Prose
+                  text={entry.text}
+                  className="font-serif text-[1.1rem] leading-[1.55] text-dark/90 max-w-[68ch] text-pretty"
+                />
+              </div>
+            ))}
+          </section>
+        )}
 
         {/* ── Questionnaire ──────────────────────────────────── */}
         <section className="px-6 md:px-14 py-9">
@@ -446,6 +516,30 @@ export default async function CandidatePage({
    are not figures: "Councillor" arriving above the words telling you what it
    is means the reader meets an answer before the question, and reads the cell
    twice. */
+/* A written answer, as the candidate typed it.
+ *
+ * Blank lines are paragraph breaks — half of these bios have them, and run
+ * together into one block the reader gets a wall of prose that reads as though
+ * we had transcribed it carelessly. Single newlines inside a paragraph are
+ * kept by `whitespace-pre-line` rather than collapsed, because in these
+ * answers they are usually a deliberate list. */
+function Prose({ text, className }: { text: string; className?: string }) {
+  const paragraphs = text
+    .split(/\n\s*\n/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+
+  return (
+    <div className="grid gap-4">
+      {paragraphs.map((paragraph, i) => (
+        <p key={i} className={`whitespace-pre-line ${className ?? ""}`}>
+          {paragraph}
+        </p>
+      ))}
+    </div>
+  );
+}
+
 function Stat({ value, label }: { value: string; label: string }) {
   return (
     <div className="px-6 py-4 md:px-14 border-r border-b md:border-b-0 border-border-light">

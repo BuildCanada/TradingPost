@@ -15,9 +15,11 @@
 import {
   byCandidateKey,
   candidateAnswers,
+  candidateWriting,
   questionnaireShape,
   type CandidateAnswers,
   type ComparedGroup,
+  type WrittenAnswer,
 } from "./candidate-answers";
 import {
   CANDIDATE_QUESTIONNAIRE_SLUG,
@@ -31,6 +33,9 @@ export type RosterSurvey = {
   /** every question, with nobody attached — the grid's shape when the whole
    *  roster stayed quiet */
   shape: ComparedGroup[];
+  /** the roster's free-text answers, keyed by `nameKey`. The choices are what
+   *  a grid can compare; this is what the candidates wrote. */
+  written: Record<string, WrittenAnswer[]>;
 };
 
 /**
@@ -58,11 +63,18 @@ export async function rosterSurvey(
     const entries = candidateAnswers(survey, responses).filter((entry) =>
       candidateKeys.has(entry.key),
     );
+    const written = candidateWriting(survey, responses);
+
     return {
       answers: byCandidateKey(entries),
       shape: questionnaireShape(survey, responses),
+      /* Narrowed to the roster on the same rule the answers are: prose we
+         cannot place on a candidate is prose we must not attribute. */
+      written: Object.fromEntries(
+        Object.entries(written).filter(([key]) => candidateKeys.has(key)),
+      ),
     };
   } catch {
-    return { answers: {}, shape: [] };
+    return { answers: {}, shape: [], written: {} };
   }
 }

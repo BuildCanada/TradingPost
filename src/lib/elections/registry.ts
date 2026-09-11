@@ -99,7 +99,43 @@ export type SupportedElection = {
    * ask, so the rule lives in one place and no call site can forget it.
    */
   surveyClosed?: boolean;
+  /**
+   * The candidates' questionnaire answers are off for now.
+   *
+   * The sibling of `surveyClosed` and the same bargain: temporary, one line,
+   * and nothing deleted. What comes down is every published answer — the cards
+   * on the ward, mayoral and candidate pages, the whole-field view on /issues,
+   * and the read proxy that serves them to the browser. What stays up is the
+   * ballot: who is running, in which ward, with their campaign site, which is
+   * a fact about the election rather than anything a candidate told us.
+   *
+   * A candidate's own bio stays too, though it arrives in the same response.
+   * It is a self-description rather than a position, and it is the only thing
+   * standing between most candidate pages and an empty one.
+   *
+   * The pages need no empty states written for this: they already have the
+   * ones built for the weeks before anybody had written back — "Nobody in this
+   * ward has answered yet", "No answers from the mayoral field have been
+   * published yet" — and hiding the answers at the source puts every page into
+   * exactly that state.
+   */
+  questionnaireHidden?: boolean;
 };
+
+/**
+ * What a page says where the candidates' answers would be.
+ *
+ * One phrase, in one place, because it appears on the ward pages, the mayoral
+ * page, /issues and every candidate page, and four hand-written versions of it
+ * would be four different accounts of the same fact.
+ *
+ * What it must not do is reuse the empty states these pages already had for
+ * the weeks before anybody had written back. "Nobody in this ward has answered
+ * yet", printed over a ward whose candidates answered months ago, is a claim
+ * about those candidates and it is ours, not theirs — and on a candidate page
+ * it sits under a named person's photograph.
+ */
+export const ANSWERS_WITHHELD = "Coming soon.";
 
 /**
  * Where this region's voter survey lives, or nothing while it is closed.
@@ -136,6 +172,7 @@ const TORONTO_2026: SupportedElection = {
   candidateProfiles: true,
   themeClass: "theme-election",
   surveyClosed: true,
+  questionnaireHidden: true,
 };
 
 const BRAMPTON_2026: SupportedElection = {

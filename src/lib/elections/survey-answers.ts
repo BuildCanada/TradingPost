@@ -13,6 +13,7 @@
 // is nothing to show at all.
 
 import {
+  BIO_QUESTION_ID,
   byCandidateKey,
   candidateAnswers,
   candidateWriting,
@@ -25,6 +26,7 @@ import {
   CANDIDATE_QUESTIONNAIRE_SLUG,
   fetchCandidateResponses,
 } from "./candidate-responses";
+import { getElection } from "./registry";
 import { fetchSurvey } from "./survey";
 
 export type RosterSurvey = {
@@ -64,6 +66,32 @@ export async function rosterSurvey(
       candidateKeys.has(entry.key),
     );
     const written = candidateWriting(survey, responses);
+
+    /* Answers withheld, prose kept — see `questionnaireHidden` in the
+       registry. The responses are still fetched because the bio rides in on
+       them, and a candidate's account of themselves is not one of the answers
+       being held back. Every page reading this is left with the empty state it
+       already had for a field that has not written back yet.
+
+       `written` is narrowed to the bio alone rather than passed through. The
+       rest of it is prose answering a policy question — the questionnaire's
+       ward-commitment target is one — and letting that through under the
+       heading "About" would publish an answer by another door. */
+    if (getElection(electionSlug).questionnaireHidden) {
+      return {
+        answers: {},
+        shape: [],
+        written: Object.fromEntries(
+          Object.entries(written)
+            .filter(([key]) => candidateKeys.has(key))
+            .map(([key, entries]) => [
+              key,
+              entries.filter((entry) => entry.questionId === BIO_QUESTION_ID),
+            ])
+            .filter(([, entries]) => (entries as WrittenAnswer[]).length > 0),
+        ),
+      };
+    }
 
     return {
       answers: byCandidateKey(entries),

@@ -8,7 +8,7 @@ import {
 } from "@/components/elections/QuestionnaireCards";
 import { QuestionnaireRail } from "@/components/elections/QuestionnaireRail";
 import { SurveyCta } from "@/components/elections/SurveyCta";
-import { surveyHref } from "@/lib/elections/registry";
+import { ANSWERS_WITHHELD, surveyHref } from "@/lib/elections/registry";
 import CountdownDays from "@/components/elections/CountdownDays";
 import { fieldSentiment } from "@/lib/elections/field-sentiment";
 import {
@@ -64,10 +64,17 @@ export default async function IssuesPage() {
   /* Unlike the ward and mayoral pages, the questionnaire is not a
      nice-to-have here — it is the entire page. A failed fetch has nothing to
      fall back to, so it renders as the empty state rather than as a roster. */
-  const [survey, responses] = await Promise.all([
+  const [survey, published] = await Promise.all([
     fetchSurvey(ELECTION.slug, CANDIDATE_QUESTIONNAIRE_SLUG).catch(() => null),
     fetchCandidateResponses(ELECTION.slug),
   ]);
+
+  /* Held back at the top of the page rather than at each place that draws
+     them — see `questionnaireHidden` in the registry. This page is nothing but
+     the answers, so emptying the array empties the page; what is left is the
+     masthead saying so. */
+  const withheld = ELECTION.questionnaireHidden ?? false;
+  const responses = withheld ? [] : published;
 
   /* `fieldSentiment` is still what tells us who counts as a respondent and
      what seat they are running for — it reads the responses against the
@@ -137,25 +144,39 @@ export default async function IssuesPage() {
             Where the candidates stand
           </h1>
           <p className="font-serif text-[1.05rem] leading-[1.5] text-dark/85 max-w-[58ch] text-pretty">
-            The same {questionCount} questions, put to everyone
-            running for mayor and for council. Read across the whole field, the
-            answers show what no single ballot can: what Toronto&rsquo;s next
-            council already agrees on, and what it will spend four years
-            fighting over.
+            {withheld ? (
+              <>
+                {ANSWERS_WITHHELD} This page reads the whole field&rsquo;s
+                answers across every issue we asked about.
+              </>
+            ) : (
+              <>
+                The same {questionCount} questions, put to everyone running for
+                mayor and for council. Read across the whole field, the answers
+                show what no single ballot can: what Toronto&rsquo;s next
+                council already agrees on, and what it will spend four years
+                fighting over.
+              </>
+            )}
           </p>
         </section>
 
         {/* ── Key stats ──────────────────────────────────────── */}
-        <section className="grid grid-cols-2 md:grid-cols-4 border-b-2 border-dark">
-          <Stat value={respondents.length} label="Candidates answered" />
-          <Stat value={questionCount} label="Policy questions" />
-          <Stat
-            value={`${mayoral} / ${council}`}
-            label="Mayoral / council"
-            small
-          />
-          <Stat value={wards} label="Wards represented" last />
-        </section>
+        {/* Every one of these four counts the answers, so with them withheld
+            the row is four zeros — a page-wide claim that nobody answered
+            anything. It goes rather than lies. */}
+        {!withheld && (
+          <section className="grid grid-cols-2 md:grid-cols-4 border-b-2 border-dark">
+            <Stat value={respondents.length} label="Candidates answered" />
+            <Stat value={questionCount} label="Policy questions" />
+            <Stat
+              value={`${mayoral} / ${council}`}
+              label="Mayoral / council"
+              small
+            />
+            <Stat value={wards} label="Wards represented" last />
+          </section>
+        )}
 
         {/* ── The field, question by question ────────────────── */}
         {groups.length > 0 && respondents.length > 0 ? (
@@ -189,8 +210,9 @@ export default async function IssuesPage() {
         ) : (
           <section className="px-6 md:px-14 py-16 border-b-2 border-dark">
             <p className="font-serif text-[1.1rem] leading-[1.5] text-dark/80 max-w-[58ch] text-pretty">
-              No candidate answers have been published yet. Responses appear
-              here as they are reviewed and released.
+              {withheld
+                ? ANSWERS_WITHHELD
+                : "No candidate answers have been published yet. Responses appear here as they are reviewed and released."}
             </p>
           </section>
         )}
@@ -231,29 +253,34 @@ export default async function IssuesPage() {
         )}
 
         {/* ── Method ─────────────────────────────────────────── */}
-        <section className="px-6 md:px-14 py-4 border-t border-border-light grid gap-2">
-          <p className="type-label-sm text-text-muted max-w-[80ch] text-pretty">
-            Each card is one question, drawn as the share of the field that
-            gave each answer. The options are listed in full under the band,
-            in the wording the candidates were shown, with the number who chose
-            each. Options nobody picked are not shown, and a candidate who
-            answered in their own words is counted in the unshaded segment
-            rather than on any option. Shares are of the candidates who
-            answered that particular question, not of the whole field — a
-            questionnaire can come back half filled in, so the number behind a
-            card is the counts in its own legend added up. Hover or select any
-            answer to see the candidates who gave it, with the seat each is
-            running for.
-          </p>
-          <p className="type-label-sm text-text-muted max-w-[80ch] text-pretty">
-            The note most candidates wrote to explain their answer lives on
-            the ward and mayoral pages — thirty notes under every question is
-            more reading than this page can carry, and it is on those pages
-            that a reader has a ballot to weigh them against. Answers appear as
-            candidates return the questionnaire and staff review them, so the
-            field shown here grows through the campaign.
-          </p>
-        </section>
+        {/* How to read cards that are not on the page is not method, it is
+            noise — and the second paragraph explains where the notes went,
+            which is a distinction with nothing to draw it between. */}
+        {!withheld && (
+          <section className="px-6 md:px-14 py-4 border-t border-border-light grid gap-2">
+            <p className="type-label-sm text-text-muted max-w-[80ch] text-pretty">
+              Each card is one question, drawn as the share of the field that
+              gave each answer. The options are listed in full under the band,
+              in the wording the candidates were shown, with the number who
+              chose each. Options nobody picked are not shown, and a candidate
+              who answered in their own words is counted in the unshaded segment
+              rather than on any option. Shares are of the candidates who
+              answered that particular question, not of the whole field — a
+              questionnaire can come back half filled in, so the number behind a
+              card is the counts in its own legend added up. Hover or select any
+              answer to see the candidates who gave it, with the seat each is
+              running for.
+            </p>
+            <p className="type-label-sm text-text-muted max-w-[80ch] text-pretty">
+              The note most candidates wrote to explain their answer lives on
+              the ward and mayoral pages — thirty notes under every question is
+              more reading than this page can carry, and it is on those pages
+              that a reader has a ballot to weigh them against. Answers appear
+              as candidates return the questionnaire and staff review them, so
+              the field shown here grows through the campaign.
+            </p>
+          </section>
+        )}
 
         {/* ── Elsewhere ──────────────────────────────────────── */}
         <section className="border-t border-dark grid md:grid-cols-2">

@@ -6,6 +6,7 @@ import {
 } from "@/lib/elections/candidate-responses";
 import {
   DEFAULT_ELECTION_SLUG,
+  getElection,
   isSupportedElection,
 } from "@/lib/elections/registry";
 import {
@@ -51,6 +52,15 @@ export async function GET(req: NextRequest) {
   }
   if (!WARD_PATTERN.test(ward)) {
     return NextResponse.json({ error: "Invalid ward" }, { status: 400 });
+  }
+
+  /* The answers are held back everywhere, and "everywhere" has to include the
+     door the pages do not come through. This is a read proxy for exactly the
+     answers the ward and mayoral pages have stopped drawing, and left open it
+     would serve the whole comparison as JSON to anyone who asked. Its only
+     caller is the survey page, which is closed too. */
+  if (getElection(election).questionnaireHidden) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
   const toronto = election === TORONTO_2026_SLUG;

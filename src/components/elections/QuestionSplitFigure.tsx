@@ -51,34 +51,26 @@ import { OptionBar, percentOf } from "@/components/charts/trilemma";
  *   open, focus opens one, Escape and leaving the figure close it. What they
  *   no longer do is open on hover.
  *
- * THE PANEL TAKES NO POINTER
- *   It is `pointer-events-none`, and that is load-bearing rather than tidy.
- *   The panel hangs under the band, which puts it over the legend rows. Were
- *   it to catch the pointer, a row latched open by a click would be buried
- *   under the thing it opened, with no way to click it again to close — and
- *   back when the rows opened on hover it was worse: the panel took the hover
- *   off the row the moment it appeared, so the row fired mouseleave, the
- *   panel closed, the row fired mouseenter, and it strobed.
+ * THE PANEL IS BOUNDED, AND IT DOES TAKE THE POINTER
+ *   It hangs under the band and lies across the legend rows, so left
+ *   unbounded a forty-name segment ran past the foot of its own card and over
+ *   the cards below — which stayed laid out as though nothing were there. It
+ *   is capped and scrolls.
  *
- *   Transparent to the pointer, the rows stay clickable through it. Nothing in
- *   here is interactive, so nothing is lost — and nothing in here scrolls
- *   either, which is why the names are set in columns that fit rather than in
- *   a scrolling box.
+ *   Scrolling means it has to take the pointer, and there was a spell when it
+ *   could not: back when the legend rows opened on hover, the panel covering
+ *   them stole the hover the instant it appeared, so the row fired mouseleave,
+ *   the panel closed, the row fired mouseenter, and it strobed. That is gone
+ *   with the trigger — hover lives on the band now, which the panel starts
+ *   below and never covers. Nothing it overlaps opens it any more.
+ *
+ *   What it does still bury is the row you would click a second time to let a
+ *   latched panel go, so clicking the panel closes it too.
  *
  */
 
 /** The band's height, and so where the panel of names hangs from. */
 const BAR = 32;
-
-/* The width the band is drawn at until the browser has measured its container.
- *
- * `responsive` fits the bar to the card, but it fits it with a ResizeObserver,
- * which cannot run on the server — so the markup that ships carries whatever
- * width was asked for and snaps to the real one on hydration. OptionBar's own
- * default is 230px, which on a page of thirty-three cards is thirty-three
- * stubs that all jump at once. This is roughly a card in the two-up grid, so
- * the snap is a nudge rather than a jump. */
-const BAR_WIDTH_BEFORE_MEASURE = 560;
 
 export type SplitSlice = {
   key: string;
@@ -149,7 +141,6 @@ export function QuestionSplitFigure({
         /* -1 from findIndex is "no option", which OptionBar spells null. */
         highlight={highlight < 0 ? null : highlight}
         height={BAR}
-        width={BAR_WIDTH_BEFORE_MEASURE}
         responsive
         showCounts={false}
         label={question}
@@ -175,7 +166,7 @@ export function QuestionSplitFigure({
           came from picked out directly above it. It overlaps the legend rows,
           which is the right trade: they are still there when it closes, and
           the alternative was distance. */}
-      {shown && <Names slice={shown} />}
+      {shown && <Names slice={shown} onDismiss={close} />}
     </div>
   );
 }
@@ -270,30 +261,39 @@ function Legend({
 /* Who gave this answer, set just below the band.
  *
  * Over the card rather than in the flow of it: a panel that pushed the legend
- * down would move the rows out from under the reader's cursor every time they
- * opened one, and shift every card beneath it on the page.
+ * down would move the rows out from under the reader as it opened, and shift
+ * every card beneath it on the page.
  *
  * The top offset is the band's own height and the gap under it, so the panel
  * meets the bottom of the bar whichever option opened it.
  *
+ * And capped, because an overlay in nobody's layout is an overlay that will
+ * happily run over the card below it: a segment can hold forty people, which
+ * at two columns on a phone is twenty rows and taller than the card it
+ * belongs to. Fourteen rem holds the common cases outright and scrolls the
+ * rest.
+ *
  * Names as plain text, not as the bordered plates the ward pages use. A plate
  * is an object a reader counts in a field of four or five; forty of them in a
- * panel is a mosaic, and the count is already on the row that opened it. */
-function Names({ slice }: { slice: SplitSlice }) {
+ * panel is a mosaic, and the count is already at the top of the panel. */
+function Names({ slice, onDismiss }: { slice: SplitSlice; onDismiss: () => void }) {
   return (
     <div
-      className="pointer-events-none absolute inset-x-0 z-20 border border-dark bg-bg p-3 shadow-[0_6px_20px_rgba(0,0,0,0.1)]"
+      className="absolute inset-x-0 z-20 max-h-[14rem] overflow-y-auto border border-dark bg-bg p-3 shadow-[0_6px_20px_rgba(0,0,0,0.1)]"
       style={{ top: `calc(${BAR}px + 0.75rem)` }}
+      /* The legend row that would let a latched panel go is underneath this,
+         so the panel itself is the way out. Harmless on a panel opened by
+         hover, which the pointer never reaches. */
+      onClick={onDismiss}
     >
       <p className="type-label-sm text-text-muted">
         {slice.names.length === 1
           ? "1 candidate"
           : `${slice.names.length} candidates`}
       </p>
-      {/* Columns, because a segment can hold forty people. In one run they are
-          a list taller than the card, and this panel cannot be scrolled — it
-          takes no pointer, by design. Three columns puts forty names in
-          fourteen rows.
+      {/* Columns, because a segment can hold forty people: in one run they are
+          a list taller than anything this panel can be allowed to be. Three
+          columns puts forty names in fourteen rows.
 
           Set small. A name here is a thing the reader scans for rather than
           reads — they are looking for one they know, or counting how many of

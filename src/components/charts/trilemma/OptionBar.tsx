@@ -116,11 +116,31 @@ export function OptionBar({
   const labelRows = labelLines.reduce((n, lines) => Math.max(n, lines.length), 0)
   const labelBlock = labelRows > 0 ? 6 + labelRows * 13 : 0
 
+  /* A viewBox, so the band fits whatever it is put in rather than whatever it
+     was drawn at.
+   *
+   * `responsive` measures its container with a ResizeObserver, which does not
+   * run on a server and does not run at all where scripting is off. Until it
+   * has (or for good, without JS), the bar is laid out at whatever `width` the
+   * caller asked for — and drawn at a fixed pixel width it simply overflowed a
+   * narrower parent and was clipped by whatever had the hidden overflow.
+   *
+   * Scaled into the box instead, the fallback width stops being a promise
+   * about the reader's screen and becomes what it should be: a unit system.
+   * `none` for the aspect ratio, so the band keeps its stated height while the
+   * width takes up the slack — a bar that shortened itself on a phone to hold
+   * its ratio would be a different chart. Once the observer reports, the
+   * viewBox and the box agree exactly and the scale factor is 1, so the
+   * segments and any type in them are pixel-true from then on. */
+  const boxHeight = height + labelBlock
+
   return (
     <div ref={ref} className={className} style={{ width: responsive ? '100%' : width, maxWidth: '100%' }}>
       <svg
-        width={width}
-        height={height + labelBlock}
+        width={responsive ? '100%' : width}
+        height={boxHeight}
+        viewBox={`0 0 ${width} ${boxHeight}`}
+        preserveAspectRatio={responsive ? 'none' : undefined}
         style={{ display: 'block', overflow: 'visible' }}
         role="img"
         aria-label={aria}

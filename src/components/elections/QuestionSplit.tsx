@@ -23,6 +23,15 @@ import type { ComparedQuestion } from "@/lib/elections/candidate-answers";
  *   under it. A question the field agrees on is one colour, a question it is
  *   torn on is a divided band, and both read without a word.
  *
+ * NO DENOMINATOR PRINTED
+ *   The card used to carry a line at its foot saying how many candidates had
+ *   answered this particular question — the figure every percentage above is
+ *   taken against, which is not the same from card to card. It is off the
+ *   card now, and not lost with it: the legend prints a count beside every
+ *   option, so a reader who wants the denominator can add them, and one who
+ *   only wants the shape of the split is not made to read a sentence of
+ *   bookkeeping under all thirty-three cards to get it.
+ *
  * THE NAMES ARE STILL HERE
  *   Behind the legend rows, one option at a time — see QuestionSplitFigure.
  *   Hidden, they stop crowding out the split; reachable, the reader can still
@@ -53,7 +62,7 @@ export function QuestionSplit({
   /** the id the scroll rail scrolls to — see QuestionRollCall */
   headingId?: string;
 }) {
-  const { groups, verbatim, unanswered } = rollCall(question);
+  const { groups, verbatim } = rollCall(question);
 
   const colors = optionColors(question.options.length, question.ordinal);
 
@@ -114,35 +123,6 @@ export function QuestionSplit({
         />
       )}
 
-      {/* THE DENOMINATOR, ON EVERY CARD
-
-          Every percentage above is a share of the people who answered THIS
-          question, which is not the same number from card to card — a
-          questionnaire can come back with half of it filled in, and the field
-          grows all through the campaign. Two thirds of six and two thirds of
-          fifty-eight are not the same finding, so the figure they are taken
-          against is printed rather than left for the reader to total up from
-          the legend. It lived in the middle of the donut this card used to
-          draw; a band has no middle, so it comes down here.
-
-          Where somebody skipped, this is also the line that says so. Counted,
-          not named: the names are the clutter this card was drawn to get out
-          of the way, and unlike the segments there is nothing behind them
-          worth opening — a list of people who said nothing tells a reader
-          nothing they can weigh. */}
-      <p className="type-caption mt-auto border-t border-border-light pt-3 text-text-muted text-pretty">
-        <span className="type-label-sm">Answered by</span>{" "}
-        {unanswered.length > 0 ? (
-          <>
-            {answered} of the {answered + unanswered.length} candidates who
-            returned the questionnaire
-          </>
-        ) : (
-          <>
-            all {answered} candidates who returned the questionnaire
-          </>
-        )}
-      </p>
     </article>
   );
 }

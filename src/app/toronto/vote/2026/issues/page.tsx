@@ -170,10 +170,9 @@ export default async function IssuesPage() {
                 answerNote={
                   <>
                     Each segment is the share of the candidates who answered
-                    that question who gave that answer, counted against the
-                    figure at the foot of the card. Options nobody picked are
-                    not shown. Select an answer to see which candidates gave
-                    it; what they wrote about it is on the{" "}
+                    that particular question who gave that answer. Options
+                    nobody picked are not shown. Select an answer to see which
+                    candidates gave it; what they wrote about it is on the{" "}
                     <span className="text-dark">mayoral</span> and{" "}
                     <span className="text-dark">ward</span> pages.
                   </>
@@ -224,9 +223,11 @@ export default async function IssuesPage() {
             each. Options nobody picked are not shown, and a candidate who
             answered in their own words is counted in the unshaded segment
             rather than on any option. Shares are of the candidates who
-            answered that particular question, which is the figure at the foot
-            of each card. Hover or select any answer to see the candidates who
-            gave it, with the seat each is running for.
+            answered that particular question, not of the whole field — a
+            questionnaire can come back half filled in, so the number behind a
+            card is the counts in its own legend added up. Hover or select any
+            answer to see the candidates who gave it, with the seat each is
+            running for.
           </p>
           <p className="type-label-sm text-text-muted max-w-[80ch] text-pretty">
             The note most candidates wrote to explain their answer lives on

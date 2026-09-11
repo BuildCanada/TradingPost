@@ -31,11 +31,14 @@ import { ELECTION } from "../data";
  * is not "what did this candidate say" anyway. It is where the people running
  * to govern Toronto converge, and where they split.
  *
- * A card per question, with the candidates filed under the answer they gave —
- * the same roll-call form the ward and mayoral pages use, so a reader who has
- * learned to read one page of the tracker can read all of them. The only
- * difference here is scale: the field is the whole city, so a name plate also
- * carries the seat that candidate is running for.
+ * A card per question, and on this page the card is a band: how the
+ * field divided, with the options in full under it. The ward and mayoral pages name
+ * names under each answer, because four or five candidates under a question is
+ * the comparison their reader came for. Here the same form put thirty-odd
+ * names under each of two dozen questions — several hundred plates, none of
+ * them a ballot line any one reader votes on, and all of them standing between
+ * the reader and the split the page exists to show. The names stay on the
+ * pages where a reader can act on them; this one shows the shape of the field.
  *
  * The shell around them is deliberately short. Two dozen questions is the
  * page; every band of prose above them is a band the reader scrolls past to
@@ -77,9 +80,11 @@ export default async function IssuesPage() {
   const wards = new Set(respondents.filter((r) => r.ward).map((r) => r.ward))
     .size;
 
-  /* The roster the cards name, in the order `fieldSentiment` sorted it
-     (surname), and the seat each of them is running for — which is both what
-     prints on a plate and what splits each answer into its two races. */
+  /* The field the bands are drawn over, in the order `fieldSentiment` sorted it
+     (surname), and the seat each of them is running for. The cards lead with
+     shares rather than names, but the names are behind every slice, and a name
+     on a city-wide page is only useful to a reader once they can see whether
+     it is on their ballot. */
   const roster = respondents.map((r) => ({ key: r.key, name: r.name }));
   const seats = Object.fromEntries(
     respondents.map((r) => [
@@ -153,15 +158,25 @@ export default async function IssuesPage() {
                 Theirs names one ballot line and links each candidate to their
                 campaign; this page's field is thirty-odd people across a
                 mayoral race and two dozen wards, and a flat list of them is a
-                list with no ballot behind it. The seat on each plate is the
-                pointer instead. */}
+                list with no ballot behind it. The links out at the foot of the
+                page are the pointer instead. */}
             <QuestionnaireRail headings={questionnaireHeadings(groups)}>
               <QuestionnaireCards
                 groups={groups}
                 respondents={roster}
                 silent={[]}
+                chart
                 seats={seats}
-                notes={false}
+                answerNote={
+                  <>
+                    Each segment is the share of the candidates who answered
+                    that particular question who gave that answer. Options
+                    nobody picked are not shown. Select an answer to see which
+                    candidates gave it; what they wrote about it is on the{" "}
+                    <span className="text-dark">mayoral</span> and{" "}
+                    <span className="text-dark">ward</span> pages.
+                  </>
+                }
               />
             </QuestionnaireRail>
           </section>
@@ -202,17 +217,23 @@ export default async function IssuesPage() {
         {/* ── Method ─────────────────────────────────────────── */}
         <section className="px-6 md:px-14 py-4 border-t border-border-light grid gap-2">
           <p className="type-label-sm text-text-muted max-w-[80ch] text-pretty">
-            Each card is one question, and each block inside it is one of the
-            answers offered, printed in the wording the candidates were shown.
-            Under it are the candidates who gave that answer, with the seat
-            they are running for. Options nobody picked are not shown, and a
-            candidate who answered in their own words sits on no option.
+            Each card is one question, drawn as the share of the field that
+            gave each answer. The options are listed in full under the band,
+            in the wording the candidates were shown, with the number who chose
+            each. Options nobody picked are not shown, and a candidate who
+            answered in their own words is counted in the unshaded segment
+            rather than on any option. Shares are of the candidates who
+            answered that particular question, not of the whole field — a
+            questionnaire can come back half filled in, so the number behind a
+            card is the counts in its own legend added up. Hover or select any
+            answer to see the candidates who gave it, with the seat each is
+            running for.
           </p>
           <p className="type-label-sm text-text-muted max-w-[80ch] text-pretty">
-            Most candidates also wrote a note explaining their answer. Thirty
-            of them under every question is more reading than this page can
-            carry, so the notes live on the ward and mayoral pages, where the
-            field is small enough to read them in full. Answers appear as
+            The note most candidates wrote to explain their answer lives on
+            the ward and mayoral pages — thirty notes under every question is
+            more reading than this page can carry, and it is on those pages
+            that a reader has a ballot to weigh them against. Answers appear as
             candidates return the questionnaire and staff review them, so the
             field shown here grows through the campaign.
           </p>

@@ -293,12 +293,19 @@ function Names({ slice }: { slice: SplitSlice }) {
       {/* Columns, because a segment can hold forty people. In one run they are
           a list taller than the card, and this panel cannot be scrolled — it
           takes no pointer, by design. Three columns puts forty names in
-          fourteen rows. */}
+          fourteen rows.
+
+          Set small. A name here is a thing the reader scans for rather than
+          reads — they are looking for one they know, or counting how many of
+          a slice they recognise — and forty of them is a block that has to sit
+          under the chart without becoming the card. Smaller also buys the
+          columns their width back, which is what keeps a long name on one
+          line. */}
       <ul className="mt-1.5 list-none gap-1 m-0 p-0 columns-2 sm:columns-3">
         {slice.names.map((candidate) => (
           <li
             key={candidate.key}
-            className="break-inside-avoid pb-1 font-sans text-[0.92rem] leading-[1.3] text-dark"
+            className="break-inside-avoid pb-1 font-sans text-[0.84rem] leading-[1.35] text-dark"
           >
             {candidate.name}
             {candidate.seat && (

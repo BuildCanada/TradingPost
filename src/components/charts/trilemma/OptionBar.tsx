@@ -41,6 +41,19 @@ export interface OptionBarProps {
    */
   showLabels?: boolean
 
+  /* ---- pointer ---- */
+  /**
+   * The pointer entering a segment, by option index — for a caller whose bar
+   * drives something beside it, a key or a panel of names.
+   *
+   * Leaving is reported from the bar as a whole rather than per segment,
+   * because the segments are drawn a pixel apart to keep their joins visible:
+   * per-segment, dragging across the bar would report a leave and an enter at
+   * every join, and whatever the caller is driving would blink on each one.
+   */
+  onSegmentEnter?: (index: number) => void
+  onSegmentLeave?: () => void
+
   /* ---- chrome ---- */
   colors?: string[]
   theme?: ThemeName
@@ -67,6 +80,8 @@ export function OptionBar({
   showCounts = true,
   valueFormat = String,
   showLabels = false,
+  onSegmentEnter,
+  onSegmentLeave,
   colors: colorsProp,
   theme = 'light',
   fontFamily,
@@ -109,9 +124,14 @@ export function OptionBar({
         style={{ display: 'block', overflow: 'visible' }}
         role="img"
         aria-label={aria}
+        onMouseLeave={onSegmentLeave}
       >
         {segments.map(({ i, x: sx, w, count, color }) => (
-          <g key={i}>
+          <g
+            key={i}
+            onMouseEnter={onSegmentEnter && (() => onSegmentEnter(i))}
+            style={onSegmentEnter ? { cursor: 'pointer' } : undefined}
+          >
             {/* A 1px bite out of each segment keeps the joins visible without a stroke. */}
             <rect x={sx} y={0} width={Math.max(0, w - 1)} height={height} fill={color} />
             {showCounts && w > 26 && (

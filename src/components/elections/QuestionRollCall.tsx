@@ -330,7 +330,15 @@ function AnswerPanel({
  * sentence is not, and running the two along one line makes the plate read as
  * the first few words of the sentence. A candidate who took the trouble to
  * explain has left the most useful thing on the page, so it prints in the
- * open: a note behind a disclosure is a note nobody reads. */
+ * open: a note behind a disclosure is a note nobody reads.
+ *
+ * Those written lines are ruled off from each other. Stacked, a plate, a
+ * paragraph, a plate and a paragraph run together into one column of prose
+ * with names in it, and the reader has to work out where one candidate stops
+ * and the next starts from the shape of the text. A hairline above each one
+ * after the first says it instead — faint enough to stay out of the way of
+ * the tinted panel it sits in, present enough that the block reads as a list
+ * of people rather than a passage. */
 function Plates({
   candidates,
   seats,
@@ -346,11 +354,20 @@ function Plates({
 }) {
   return (
     <ul className="flex list-none flex-wrap items-baseline gap-1.5 m-0 p-0">
-      {candidates.map((candidate) => {
+      {candidates.map((candidate, index) => {
         const note = notes ? candidate.note : null;
         const words = candidate.answer || note;
+        /* Not on the first entry in the run: a rule above the opening line
+           divides the names from the answer they are filed under, which is
+           the one break the panel already makes with its own heading. */
+        const ruled = Boolean(words) && index > 0;
         return (
-          <li key={candidate.key} className={words ? "basis-full" : ""}>
+          <li
+            key={candidate.key}
+            className={`${words ? "basis-full" : ""} ${
+              ruled ? "mt-1 border-t border-border-light pt-2.5" : ""
+            }`}
+          >
             <NamePlate
               name={candidate.name}
               seat={seats?.[candidate.key]?.label}

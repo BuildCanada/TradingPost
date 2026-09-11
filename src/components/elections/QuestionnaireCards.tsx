@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 import type { Heading } from "@/components/custom/signpost/config";
 import type { GridCandidate } from "./SurveyGrid";
 import { QuestionRollCall } from "./QuestionRollCall";
+import { QuestionSplit } from "./QuestionSplit";
 import type { Seat } from "./QuestionRollCall";
 import type { ComparedGroup } from "@/lib/elections/candidate-answers";
 
@@ -31,6 +32,15 @@ import type { ComparedGroup } from "@/lib/elections/candidate-answers";
  *   per name per question is several hundred outbound links on one page. The
  *   links live once, in the CandidateRoster beside the section heading, where
  *   a reader gets the whole ballot before reading thirty cards about it.
+ *
+ * TWO CARDS, CHOSEN BY THE SIZE OF THE FIELD
+ *   A race's own page names names: four candidates under a question is the
+ *   comparison the reader came for. The city-wide page puts the same question
+ *   to thirty-odd people across a mayoral race and two dozen wards, and the
+ *   names there are neither a comparison nor a ballot the reader can act on —
+ *   they are several hundred plates standing between the reader and the split.
+ *   `chart` swaps the roll call for QuestionSplit, which draws the same data
+ *   as a share of the field.
  *
  * `silent` IS A JUDGEMENT THE PAGE MAKES
  *   A ward passes its non-respondents in, and every card names them: the
@@ -79,6 +89,7 @@ export function QuestionnaireCards({
   yourKey,
   idPrefix,
   answerNote,
+  chart = false,
 }: {
   groups: ComparedGroup[];
   /** the candidates who returned the questionnaire */
@@ -88,7 +99,8 @@ export function QuestionnaireCards({
   /** the whole city's answers, where this election has that page */
   issuesHref?: string;
   /** the seat each candidate is running for, keyed by candidate key — see
-   *  QuestionRollCall. Only the city-wide page passes one. */
+   *  QuestionRollCall, and QuestionSplit, which prints it beside the names
+   *  behind a segment. Only the city-wide page passes one. */
   seats?: Record<string, Seat>;
   /** print each candidate's own words about their answer — see
    *  QuestionRollCall. The city-wide page turns them off. */
@@ -107,6 +119,10 @@ export function QuestionnaireCards({
    *  not shown" — and a page whose cards hold a single candidate has a
    *  different thing to say about what is missing from them. */
   answerNote?: ReactNode;
+  /** draw each question as a band of the field's split rather than a roll
+   *  call of names — see QuestionSplit. The city-wide page turns it on; a
+   *  race's own page never should. */
+  chart?: boolean;
 }) {
   const silentNames = silent.map((candidate) => ({
     key: candidate.key,
@@ -131,18 +147,27 @@ export function QuestionnaireCards({
             {group.stepTitle}
           </h2>
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-            {group.questions.map((question) => (
-              <QuestionRollCall
-                key={question.questionId}
-                question={question}
-                silent={silentNames}
-                nameTheSilent={respondents.length > 0}
-                headingId={sectionId(question.questionId, idPrefix)}
-                seats={seats}
-                notes={notes}
-                yourKey={yourKey}
-              />
-            ))}
+            {group.questions.map((question) =>
+              chart ? (
+                <QuestionSplit
+                  key={question.questionId}
+                  question={question}
+                  seats={seats}
+                  headingId={sectionId(question.questionId, idPrefix)}
+                />
+              ) : (
+                <QuestionRollCall
+                  key={question.questionId}
+                  question={question}
+                  silent={silentNames}
+                  nameTheSilent={respondents.length > 0}
+                  headingId={sectionId(question.questionId, idPrefix)}
+                  seats={seats}
+                  notes={notes}
+                  yourKey={yourKey}
+                />
+              ),
+            )}
           </div>
         </section>
       ))}

@@ -399,11 +399,11 @@ function RaceQuestionnaire({
             {roster.length === 0
               ? "No one has filed for this seat yet."
               : withheld
-                ? /* Just the notice. The ballot is already above this, as a
-                     list of linked names — repeating it here as a run of
-                     plain text is the same names twice, the second time
-                     worse. */
-                  ANSWERS_WITHHELD
+                ? /* Nothing. The notice is already up beside the ballot at the
+                     top of this section, and a ward with two races would
+                     otherwise print it once per race under the one that
+                     covers them all. */
+                  null
                 : `On the ballot, and yet to respond to us: ${roster
                     .map((candidate) => candidate.name)
                     .join(", ")}.`}

@@ -129,13 +129,18 @@ export type SupportedElection = {
  * page, /issues and every candidate page, and four hand-written versions of it
  * would be four different accounts of the same fact.
  *
+ * Once per page. It names what is missing rather than only promising a return,
+ * so on a page that says it twice — in the masthead and again where the cards
+ * would be — it reads as a stutter rather than as a fuller explanation. Each
+ * page keeps it in the one place a reader looks for the thing that is gone.
+ *
  * What it must not do is reuse the empty states these pages already had for
  * the weeks before anybody had written back. "Nobody in this ward has answered
  * yet", printed over a ward whose candidates answered months ago, is a claim
  * about those candidates and it is ours, not theirs — and on a candidate page
  * it sits under a named person's photograph.
  */
-export const ANSWERS_WITHHELD = "Coming soon.";
+export const ANSWERS_WITHHELD = "Candidate survey coming soon.";
 
 /**
  * Where this region's voter survey lives, or nothing while it is closed.

@@ -146,8 +146,8 @@ export default async function IssuesPage() {
           <p className="font-serif text-[1.05rem] leading-[1.5] text-dark/85 max-w-[58ch] text-pretty">
             {withheld ? (
               <>
-                {ANSWERS_WITHHELD} This page reads the whole field&rsquo;s
-                answers across every issue we asked about.
+                This page reads the whole field&rsquo;s answers across every
+                issue we asked about.
               </>
             ) : (
               <>

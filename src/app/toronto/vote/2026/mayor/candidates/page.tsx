@@ -106,7 +106,7 @@ export default async function MayoralCandidatesPage() {
             {roster.length > 0 && answered.length > 0
               ? `${roster.length} candidates have registered; ${answered.length} of them have told us where they stand.`
               : `${roster.length} candidates have registered.`}
-            {withheld ? ` ${ANSWERS_WITHHELD}` : ""}
+
           </p>
         </section>
 

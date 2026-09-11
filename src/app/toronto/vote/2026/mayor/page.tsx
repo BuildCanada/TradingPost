@@ -136,7 +136,7 @@ export default async function MayorPage() {
           </h1>
           <p className="font-serif text-[1.05rem] leading-[1.5] text-dark/85 max-w-[58ch] text-pretty">
             {withheld
-              ? `${ANSWERS_WITHHELD} ${registered} candidates have registered for the race — the ballot is below.`
+              ? `${registered} candidates have registered for the race. The ballot is below.`
               : mayoral.length > 0
                 ? `${mayoral.length} of the ${registered} candidates for mayor returned our questionnaire. Their answers, question by question — the mayoral field on each one.`
                 : `No one running for mayor has answered our questionnaire yet. ${registered} candidates have registered for the race.`}

@@ -17,7 +17,6 @@ import {
   comparedQuestions,
 } from "@/lib/elections/candidate-answers";
 import { rosterSurvey } from "@/lib/elections/survey-answers";
-import { ANSWERS_WITHHELD } from "@/lib/elections/registry";
 import { daysUntil } from "@/lib/elections/dates";
 import { firstName, possessive } from "@/lib/elections/names";
 import type { CandidateProfile, RaceView } from "@/lib/elections/election-data";
@@ -464,7 +463,14 @@ export default async function CandidatePage({
             {surveyAnswers
               ? `Where ${candidate.name} stands`
               : withheld
-                ? "Coming soon"
+                ? /* Held back, which is not the same as never sent — and this
+                     page of all of them must not confuse the two. "Yet to
+                     answer", over a named person's photograph, is a claim
+                     about that person that we would be making for them. The
+                     heading carries it alone: a line under it repeating the
+                     same four words is the eyebrow, the heading and the body
+                     all saying one thing. */
+                  "Candidate survey coming soon"
                 : "Yet to answer"}
           </h2>
 
@@ -490,17 +496,7 @@ export default async function CandidatePage({
                 />
               </QuestionnaireRail>
             </>
-          ) : withheld ? (
-            /* Held back, which is not the same as never sent — and this page
-               of all of them must not confuse the two. "X has not returned our
-               questionnaire" printed under a named person's photograph is a
-               claim about that person, and here it would be our doing and
-               untrue. Nor does it point at /issues, which is showing the same
-               nothing. */
-            <p className="font-serif text-[1.05rem] leading-[1.5] text-dark/85 max-w-[62ch] text-pretty">
-              {ANSWERS_WITHHELD}
-            </p>
-          ) : (
+          ) : withheld ? null : (
             <p className="font-serif text-[1.05rem] leading-[1.5] text-dark/85 max-w-[62ch] text-pretty">
               {candidate.name} has not returned our questionnaire. We publish
               answers as they arrive, so check back — and{" "}

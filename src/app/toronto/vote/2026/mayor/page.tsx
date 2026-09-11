@@ -9,6 +9,7 @@ import {
 } from "@/components/elections/QuestionnaireCards";
 import { QuestionnaireRail } from "@/components/elections/QuestionnaireRail";
 import { SurveyCta } from "@/components/elections/SurveyCta";
+import { surveyHref } from "@/lib/elections/registry";
 import CountdownDays from "@/components/elections/CountdownDays";
 import {
   byCandidateKey,
@@ -80,6 +81,10 @@ export default async function MayorPage() {
      and the roster narrows who gets named, exactly as the ward pages do. */
   const ballot = view.mayoral.filter((candidate) => !candidate.withdrawn);
   const registered = ballot.length;
+  /* Nothing while the voter survey is closed — see `surveyClosed` in the
+     registry. Named for the invitation rather than the survey, because
+     `survey` here is already the candidate questionnaire. */
+  const surveyInvite = surveyHref(ELECTION);
 
   const ballotKeys = new Set(ballot.map((candidate) => candidate.key));
   const answers = survey
@@ -196,18 +201,23 @@ export default async function MayorPage() {
         )}
 
         {/* ── Your turn ──────────────────────────────────────── */}
-        <section className="px-6 md:px-14 py-9 md:py-10 border-t-2 border-dark grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
-          <div>
-            <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.6rem,2.6vw,2.1rem)] max-w-[20ch] text-balance">
-              Now answer them yourself
-            </h2>
-            <p className="mt-3.5 font-serif text-[1.05rem] leading-[1.5] text-dark/85 max-w-[56ch] text-pretty">
-              These are the same questions we put to the field. Answer them and
-              see which candidates line up with you.
-            </p>
-          </div>
-          <SurveyCta href={`${ELECTION.basePath}/survey`} />
-        </section>
+        {/* The whole band goes while the survey is closed, not just its
+            button: "Now answer them yourself" over a paragraph promising the
+            reader they can, with nothing to answer, is worse than silence. */}
+        {surveyInvite && (
+          <section className="px-6 md:px-14 py-9 md:py-10 border-t-2 border-dark grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+            <div>
+              <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.6rem,2.6vw,2.1rem)] max-w-[20ch] text-balance">
+                Now answer them yourself
+              </h2>
+              <p className="mt-3.5 font-serif text-[1.05rem] leading-[1.5] text-dark/85 max-w-[56ch] text-pretty">
+                These are the same questions we put to the field. Answer them
+                and see which candidates line up with you.
+              </p>
+            </div>
+            <SurveyCta href={surveyInvite} />
+          </section>
+        )}
 
         {/* ── Method ─────────────────────────────────────────── */}
         <section className="px-6 md:px-14 py-4 border-t border-border-light grid gap-2">

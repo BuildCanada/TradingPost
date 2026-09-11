@@ -10,6 +10,7 @@ import {
 } from "./QuestionnaireCards";
 import { QuestionnaireRail } from "./QuestionnaireRail";
 import { SurveyCta } from "./SurveyCta";
+import { surveyHref } from "@/lib/elections/registry";
 import { IncumbentBadge } from "./ElectionLanding";
 import { CandidateNameLink } from "./CandidateNameLink";
 import { WardProfileSection, type WardProfile } from "./WardProfile";
@@ -203,7 +204,12 @@ export function WardDetail({
               )}
             </div>
 
-            <SurveyCta href={`${election.basePath}/survey`} />
+            {/* Absent entirely while the survey is closed. The column beside
+                it is the heading and the ballot, which stand on their own —
+                this was always the ask, not part of the ward's own facts. */}
+            {surveyHref(election) && (
+              <SurveyCta href={surveyHref(election)!} />
+            )}
           </div>
 
           {councilCandidates.length === 0 ? (

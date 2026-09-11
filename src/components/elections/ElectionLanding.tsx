@@ -666,6 +666,11 @@ function ExploreSection({
    *  lands here whenever the mayoral cards do */
   anchorCandidates?: boolean;
 }) {
+  /* Read off the cards rather than taken as a prop: the survey card IS the
+     invite, so the blurb and the grid cannot disagree about whether there is
+     one. */
+  const invitesSurvey = items.some((item) => item.tone === "invite");
+
   return (
     <section id="explore" className="border-b-2 border-dark scroll-mt-24">
       {anchorCandidates && (
@@ -679,10 +684,16 @@ function ExploreSection({
         <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.85rem,3vw,2.4rem)] mb-2">
           Explore the election
         </h2>
+        {/* The second half of this is a promise about the survey, so it is
+            only made where there is a survey to make it about. Read under a
+            grid with no survey card in it, "then answer them yourself" sends
+            a reader hunting the page for something that is not on it. */}
         <p className="font-serif text-[1.05rem] leading-[1.45] max-w-[52ch] text-dark/80">
           We put the same questions to every candidate on the ballot. See how
-          they answered — then answer them yourself and find out who lines up
-          with you.
+          they answered
+          {invitesSurvey
+            ? " — then answer them yourself and find out who lines up with you."
+            : ", question by question and ward by ward."}
         </p>
       </div>
 

@@ -66,6 +66,17 @@ export async function POST(req: NextRequest) {
       : DEFAULT_ELECTION_SLUG;
     const config = getElection(electionSlug);
 
+    /* A closed survey does not take answers, whoever is asking.
+       The page 404s and every link to it is gone, but neither of those closes
+       this: a tab opened before the survey came down still holds a filled-in
+       form and a working endpoint, and a submission accepted here is a
+       response recorded against a survey we have stopped running. Same status
+       as the page, because as far as the site is concerned there is no survey
+       at this election to post to. */
+    if (config.surveyClosed) {
+      return NextResponse.json({ error: "Survey not found" }, { status: 404 });
+    }
+
     if (typeof survey_slug !== "string" || !SLUG_PATTERN.test(survey_slug)) {
       return NextResponse.json(
         { error: "A survey_slug is required" },

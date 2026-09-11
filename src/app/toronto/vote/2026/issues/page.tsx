@@ -8,6 +8,7 @@ import {
 } from "@/components/elections/QuestionnaireCards";
 import { QuestionnaireRail } from "@/components/elections/QuestionnaireRail";
 import { SurveyCta } from "@/components/elections/SurveyCta";
+import { surveyHref } from "@/lib/elections/registry";
 import CountdownDays from "@/components/elections/CountdownDays";
 import { fieldSentiment } from "@/lib/elections/field-sentiment";
 import {
@@ -73,6 +74,11 @@ export default async function IssuesPage() {
      ballot and drops anyone who returned the form without answering a policy
      question. The cards themselves come from the same pivot the ward and
      mayoral pages use, over the whole city's entries rather than one race's. */
+  /* Nothing while the voter survey is closed — see `surveyClosed` in the
+     registry. Named for the invitation because `survey` here is already the
+     candidate questionnaire. */
+  const surveyInvite = surveyHref(ELECTION);
+
   const field = survey ? fieldSentiment(survey, responses) : null;
   const respondents = field?.respondents ?? [];
   const mayoral = respondents.filter((r) => r.race === "mayor").length;
@@ -190,29 +196,39 @@ export default async function IssuesPage() {
         )}
 
         {/* ── Your turn ──────────────────────────────────────── */}
-        <section className="px-6 md:px-14 py-9 md:py-10 border-t-2 border-dark grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
-          <div>
-            <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.6rem,2.6vw,2.1rem)] max-w-[20ch] text-balance">
-              Now answer them yourself
-            </h2>
-            <p className="mt-3.5 font-serif text-[1.05rem] leading-[1.5] text-dark/85 max-w-[56ch] text-pretty">
-              These are the same questions we asked the candidates. Answer them
-              and see which of the {respondents.length} line up with you — and
-              where you sit against the field you just read.
-            </p>
-            <div className="mt-6 flex flex-wrap items-center gap-x-7 gap-y-3">
-              <CountdownDays
-                initialDays={daysUntil(ELECTION.electionDateIso)}
-                targetIso={ELECTION.electionDateIso}
-                className="font-sans font-semibold text-[2.25rem] leading-none tracking-[-0.03em] tabular-nums"
-              />
-              <span className="type-label-sm !tracking-[0.1em] text-text-secondary">
-                Days until polls open
-              </span>
+        {/* The whole band goes while the survey is closed, not just its
+            button: "Now answer them yourself" over a paragraph promising the
+            reader they can, with nothing to answer, is worse than silence.
+
+            The countdown goes with it, which is the one thing here worth
+            regretting — it is this page's only clock. It is not worth keeping
+            a band alive for: the days to polls are on the landing page, the
+            mayoral page and every ward page. */}
+        {surveyInvite && (
+          <section className="px-6 md:px-14 py-9 md:py-10 border-t-2 border-dark grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+            <div>
+              <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.6rem,2.6vw,2.1rem)] max-w-[20ch] text-balance">
+                Now answer them yourself
+              </h2>
+              <p className="mt-3.5 font-serif text-[1.05rem] leading-[1.5] text-dark/85 max-w-[56ch] text-pretty">
+                These are the same questions we asked the candidates. Answer
+                them and see which of the {respondents.length} line up with you
+                — and where you sit against the field you just read.
+              </p>
+              <div className="mt-6 flex flex-wrap items-center gap-x-7 gap-y-3">
+                <CountdownDays
+                  initialDays={daysUntil(ELECTION.electionDateIso)}
+                  targetIso={ELECTION.electionDateIso}
+                  className="font-sans font-semibold text-[2.25rem] leading-none tracking-[-0.03em] tabular-nums"
+                />
+                <span className="type-label-sm !tracking-[0.1em] text-text-secondary">
+                  Days until polls open
+                </span>
+              </div>
             </div>
-          </div>
-          <SurveyCta href={`${ELECTION.basePath}/survey`} />
-        </section>
+            <SurveyCta href={surveyInvite} />
+          </section>
+        )}
 
         {/* ── Method ─────────────────────────────────────────── */}
         <section className="px-6 md:px-14 py-4 border-t border-border-light grid gap-2">

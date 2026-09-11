@@ -83,7 +83,37 @@ export type SupportedElection = {
    * opt-in rather than assumed from `basePath`.
    */
   candidateProfiles?: boolean;
+  /**
+   * The region's voter survey is off for now.
+   *
+   * Temporary and deliberately one line: the survey route stops answering and
+   * every invitation to it disappears, while the questions, the submissions
+   * already taken and the code that reads them all stay exactly where they
+   * are. Turning it back on is deleting this flag.
+   *
+   * Set it rather than unpicking the call sites. There are four separate
+   * invitations to the survey across the tracker — the landing page's card,
+   * its closing call to action, the mayoral page and the issues page — plus
+   * every ward page, and a survey withdrawn from three of them is a survey a
+   * reader still finds from the fourth. `surveyHref` below is what they all
+   * ask, so the rule lives in one place and no call site can forget it.
+   */
+  surveyClosed?: boolean;
 };
+
+/**
+ * Where this region's voter survey lives, or nothing while it is closed.
+ *
+ * Returning `undefined` rather than a path plus a flag to check is what makes
+ * the closed case hard to get wrong: a caller has nothing to link to, so the
+ * invitation has to disappear rather than being left pointing at a page that
+ * will not answer.
+ */
+export function surveyHref(
+  election: SupportedElection,
+): string | undefined {
+  return election.surveyClosed ? undefined : `${election.basePath}/survey`;
+}
 
 const TORONTO_2026: SupportedElection = {
   slug: "toronto-2026",
@@ -105,6 +135,7 @@ const TORONTO_2026: SupportedElection = {
   wardLookup: true,
   candidateProfiles: true,
   themeClass: "theme-election",
+  surveyClosed: true,
 };
 
 const BRAMPTON_2026: SupportedElection = {

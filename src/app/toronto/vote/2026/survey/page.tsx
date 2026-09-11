@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { DEFAULT_ELECTION_SLUG } from "@/lib/elections/registry";
+import { DEFAULT_ELECTION_SLUG, getElection } from "@/lib/elections/registry";
 import {
   CITY_PRIORITIES_SLUG,
   fetchSurvey,
@@ -30,6 +30,13 @@ const WARD_NAMES: Record<string, string> = Object.fromEntries(
 // than an honest miss, and keeping a hard-coded copy here to fall back on is
 // the drift this move was meant to end.
 async function loadSurvey(): Promise<Survey | null> {
+  /* Closed means closed at the route, not only at the links into it. Dropping
+     the invitations alone would leave the form standing for anyone holding the
+     URL — a bookmark, a share, a search result — and still taking answers and
+     still showing a reader their alignment, which is the half of this we were
+     asked to stop. See `surveyClosed` in the registry. */
+  if (getElection(DEFAULT_ELECTION_SLUG).surveyClosed) return null;
+
   try {
     return await fetchSurvey(DEFAULT_ELECTION_SLUG, CITY_PRIORITIES_SLUG);
   } catch {

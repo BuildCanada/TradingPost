@@ -103,21 +103,35 @@ export type SupportedElection = {
    * The candidates' questionnaire answers are off for now.
    *
    * The sibling of `surveyClosed` and the same bargain: temporary, one line,
-   * and nothing deleted. What comes down is every published answer — the cards
-   * on the ward, mayoral and candidate pages, the whole-field view on /issues,
-   * and the read proxy that serves them to the browser. What stays up is the
-   * ballot: who is running, in which ward, with their campaign site, which is
-   * a fact about the election rather than anything a candidate told us.
+   * and nothing deleted. It shuts the answers off at the source — the read
+   * proxy that serves them to the browser, and `rosterSurvey`, which every
+   * page reading them goes through. Turning them back on is deleting this
+   * flag.
    *
-   * A candidate's own bio stays too, though it arrives in the same response.
-   * It is a self-description rather than a position, and it is the only thing
+   * A candidate's own bio stays, though it arrives in the same response. It is
+   * a self-description rather than a position, and it is the only thing
    * standing between most candidate pages and an empty one.
    *
-   * The pages need no empty states written for this: they already have the
-   * ones built for the weeks before anybody had written back — "Nobody in this
-   * ward has answered yet", "No answers from the mayoral field have been
-   * published yet" — and hiding the answers at the source puts every page into
-   * exactly that state.
+   * WHAT THE PAGES SHOW INSTEAD
+   *
+   * The pre-questionnaire ballot, which is what they showed before there were
+   * answers to publish: who is running, in which ward, with their campaign
+   * site — every one of which is a fact about the election rather than
+   * anything a candidate told us. The ward pages list their candidates,
+   * /mayor/candidates lists the mayoral field flat, and a candidate's own page
+   * keeps their bio and their links.
+   *
+   * None of them says anything about the answers. An empty state written for
+   * the weeks before anybody had written back — "Nobody in this ward has
+   * answered yet" — is a claim about candidates who answered months ago, and
+   * a notice that the answers are coming is a promise on a page that is
+   * complete without one.
+   *
+   * The two pages that exist only to publish answers, /issues and /mayor, have
+   * nothing left when those are gone, so they are switched off at the router
+   * instead and land on the nearest ballot (see next.config.ts). They stay in
+   * the repo exactly as built, which is why `ANSWERS_WITHHELD` below is still
+   * here for them.
    */
   questionnaireHidden?: boolean;
 };
@@ -125,20 +139,17 @@ export type SupportedElection = {
 /**
  * What a page says where the candidates' answers would be.
  *
- * One phrase, in one place, because it appears on the ward pages, the mayoral
- * page, /issues and every candidate page, and four hand-written versions of it
- * would be four different accounts of the same fact.
+ * Nothing a reader can reach says it today: the pages that publish the ballot
+ * are complete without the answers, and are left to say what they do know
+ * rather than what they are not saying yet — see `questionnaireHidden` above.
+ * It is still here because /issues and /mayor, the two pages that were nothing
+ * but the answers, are kept in the repo as built and switched off at the
+ * router; this is the line they print if either is ever served again.
  *
- * Once per page. It names what is missing rather than only promising a return,
- * so on a page that says it twice — in the masthead and again where the cards
- * would be — it reads as a stutter rather than as a fuller explanation. Each
- * page keeps it in the one place a reader looks for the thing that is gone.
- *
- * What it must not do is reuse the empty states these pages already had for
- * the weeks before anybody had written back. "Nobody in this ward has answered
- * yet", printed over a ward whose candidates answered months ago, is a claim
- * about those candidates and it is ours, not theirs — and on a candidate page
- * it sits under a named person's photograph.
+ * One phrase, in one place, because four hand-written versions of it would be
+ * four different accounts of the same fact. Once per page: it names what is
+ * missing rather than only promising a return, so on a page that says it twice
+ * it reads as a stutter rather than as a fuller explanation.
  */
 export const ANSWERS_WITHHELD = "Candidate survey coming soon.";
 

@@ -2,23 +2,15 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
+import { ArrowLeft, ArrowUpRight } from "lucide-react";
 
 import { CandidateSiteLink } from "@/components/elections/CandidateSiteLink";
-import {
-  QuestionnaireCards,
-  questionnaireHeadings,
-} from "@/components/elections/QuestionnaireCards";
-import { QuestionnaireRail } from "@/components/elections/QuestionnaireRail";
 import CountdownDays from "@/components/elections/CountdownDays";
 import { IncumbentBadge } from "@/components/elections/ElectionLanding";
-import {
-  BIO_QUESTION_ID,
-  comparedQuestions,
-} from "@/lib/elections/candidate-answers";
+import { BIO_QUESTION_ID } from "@/lib/elections/candidate-answers";
 import { rosterSurvey } from "@/lib/elections/survey-answers";
 import { daysUntil } from "@/lib/elections/dates";
-import { firstName, possessive } from "@/lib/elections/names";
+import { firstName } from "@/lib/elections/names";
 import type { CandidateProfile, RaceView } from "@/lib/elections/election-data";
 import {
   ELECTION,
@@ -103,7 +95,7 @@ export async function generateMetadata({
 
   return {
     title: `${name} — ${race}`,
-    description: `${name} is a registered candidate for ${race} in Toronto's October 26, 2026 municipal election. Their campaign site, and how they answered our questionnaire.`,
+    description: `${name} is a registered candidate for ${race} in Toronto's October 26, 2026 municipal election — the ward they are standing in, and how to reach their campaign.`,
     alternates: { canonical: `${ELECTION.basePath}/candidates/${slug}` },
     openGraph: {
       title: `${name} — Toronto 2026 Election`,
@@ -127,14 +119,14 @@ export default async function CandidatePage({
   const race = races[0];
 
   /* The one-candidate case of what every roster page does: the questionnaire
-     is fetched for the whole election — the counts beside each answer are the
-     field's split — and narrowed to this candidate by key. A missing
-     questionnaire costs the answers, not the page. */
-  const { answers, written } = await rosterSurvey(
-    ELECTION.slug,
-    new Set([candidate.key]),
-  );
-  const surveyAnswers = answers[candidate.key];
+     is fetched for the whole election and narrowed to this candidate by key. A
+     missing questionnaire costs the prose, not the page.
+
+     Only the prose is read off it. The answers are not published yet, so the
+     page has no cards to draw — what it still wants is the bio a candidate
+     wrote in the questionnaire's own words, which `rosterSurvey` is left
+     holding while `questionnaireHidden` is set. */
+  const { written } = await rosterSurvey(ELECTION.slug, new Set([candidate.key]));
 
   /* What the candidate wrote, as against what they picked.
      55 of the 58 candidates who returned the questionnaire wrote a bio in it,
@@ -144,12 +136,6 @@ export default async function CandidatePage({
      candidates.ts — which is empty for all but a handful. Theirs is a self
      description and ours is not, so it is attributed rather than merged into
      the same paragraph. */
-  /* The answers come back empty either way, so the page has to ask rather
-     than infer — see `questionnaireHidden` in the registry. The bio survives
-     it: a self-description is not one of the positions being held back, and
-     without it most of these pages have nothing on them. */
-  const withheld = ELECTION.questionnaireHidden ?? false;
-
   const prose = written[candidate.key] ?? [];
   const selfBio = prose.find(
     (entry) => entry.questionId === BIO_QUESTION_ID,
@@ -157,26 +143,6 @@ export default async function CandidatePage({
   const otherProse = prose.filter(
     (entry) => entry.questionId !== BIO_QUESTION_ID,
   );
-
-  /* The ward pages' cards, given a roster of one.
-     `comparedQuestions` is the same pivot a ward runs — question first, the
-     candidates filed under the answer they gave — so this page's cards are
-     literally the ward's cards with a field of one person in them. A card
-     therefore shows the one option this candidate picked, in the option's own
-     colour, with their note printed in the open underneath their name plate.
-     What it cannot show is the split, since the other candidates are not in
-     the roster; "How the whole city answered" at the foot is the way to it. */
-  const roster = [
-    {
-      key: candidate.key,
-      name: candidate.name,
-      website: candidate.website,
-      bio: candidate.bio || undefined,
-    },
-  ];
-  const groups = surveyAnswers
-    ? comparedQuestions([surveyAnswers], roster)
-    : [];
 
   const raceKind = profile.officeTypes[0] === "mayor" ? "mayor" : profile.officeTypes[0] === "trustee" ? "trustee" : "councillor";
 
@@ -456,61 +422,6 @@ export default async function CandidatePage({
           </section>
         )}
 
-        {/* ── Questionnaire ──────────────────────────────────── */}
-        <section className="px-6 md:px-14 py-9">
-          <p className="type-label text-accent mb-3">Our questionnaire</p>
-          <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.6rem,2.6vw,2.1rem)] mb-3">
-            {surveyAnswers
-              ? `Where ${candidate.name} stands`
-              : withheld
-                ? /* Held back, which is not the same as never sent — and this
-                     page of all of them must not confuse the two. "Yet to
-                     answer", over a named person's photograph, is a claim
-                     about that person that we would be making for them. The
-                     heading carries it alone: a line under it repeating the
-                     same four words is the eyebrow, the heading and the body
-                     all saying one thing. */
-                  "Candidate survey coming soon"
-                : "Yet to answer"}
-          </h2>
-
-          {surveyAnswers ? (
-            <>
-              <p className="font-serif text-[1.05rem] leading-[1.5] text-dark/85 max-w-[62ch] text-pretty mb-8">
-                {possessive(candidate.name)} own answers to the questions we put
-                to every candidate, published as given — including, where they
-                wrote one, their reasoning in their own words.
-              </p>
-              <QuestionnaireRail headings={questionnaireHeadings(groups)}>
-                <QuestionnaireCards
-                  groups={groups}
-                  respondents={roster}
-                  silent={[]}
-                  issuesHref={`${ELECTION.basePath}/issues`}
-                  answerNote={
-                    `Each card is one question, with ${candidate.name} filed ` +
-                    "under the answer they gave and their own words underneath " +
-                    "it. The other options offered are not shown, nor how the " +
-                    "rest of the field answered."
-                  }
-                />
-              </QuestionnaireRail>
-            </>
-          ) : withheld ? null : (
-            <p className="font-serif text-[1.05rem] leading-[1.5] text-dark/85 max-w-[62ch] text-pretty">
-              {candidate.name} has not returned our questionnaire. We publish
-              answers as they arrive, so check back — and{" "}
-              <Link
-                href={`${ELECTION.basePath}/issues`}
-                className="text-accent hover:underline"
-              >
-                see where the rest of the field stands
-              </Link>{" "}
-              in the meantime.
-            </p>
-          )}
-        </section>
-
         {/* ── Source note ────────────────────────────────────── */}
         <section className="px-6 md:px-14 py-4 border-t-2 border-dark">
           <p className="type-label-sm text-text-muted max-w-[80ch] text-pretty">
@@ -521,7 +432,10 @@ export default async function CandidatePage({
         </section>
 
         {/* ── Elsewhere ──────────────────────────────────────── */}
-        <section className="border-t border-dark grid md:grid-cols-2">
+        {/* The rest of this candidate's ballot line, and nothing else. The
+            second way out of here was the field read question by question,
+            which is switched off with the rest of the questionnaire. */}
+        <section className="border-t border-dark">
           <Link
             href={ballotHref}
             className="group px-6 md:px-14 py-6 flex items-center gap-2.5 transition-colors hover:bg-linen-50"
@@ -530,15 +444,6 @@ export default async function CandidatePage({
             <span className="font-sans font-medium text-[1.15rem] tracking-[-0.015em]">
               {ballotLabel}
             </span>
-          </Link>
-          <Link
-            href={`${ELECTION.basePath}/issues`}
-            className="group px-6 md:px-14 py-6 flex items-center justify-between gap-4 border-t md:border-t-0 md:border-l border-border-light transition-colors hover:bg-linen-50"
-          >
-            <span className="font-sans font-medium text-[1.15rem] tracking-[-0.015em]">
-              Where the whole field stands
-            </span>
-            <ArrowRight className="size-4 flex-none text-text-secondary transition-transform group-hover:translate-x-0.5" />
           </Link>
         </section>
       </div>

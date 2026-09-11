@@ -124,6 +124,21 @@ const nextConfig: NextConfig = {
         destination: "/vote",
         permanent: false,
       },
+      // /issues and /mayor are nothing but the candidates' answers, which are
+      // hidden until the questionnaire launches (`questionnaireHidden` in the
+      // election registry). Both pages stay in the repo as built; each lands
+      // on the nearest ballot instead. Temporary, so a 307: a 308 would sit in
+      // a reader's browser and skip the server after launch.
+      {
+        source: "/toronto/vote/2026/issues",
+        destination: "/toronto/vote/2026",
+        permanent: false,
+      },
+      {
+        source: "/toronto/vote/2026/mayor",
+        destination: "/toronto/vote/2026/mayor/candidates",
+        permanent: false,
+      },
       // Toronto's get-involved page is switched off. It stays in the repo but
       // sends people to the election landing instead. The legacy /elections
       // shape gets its own rule so it lands there directly rather than

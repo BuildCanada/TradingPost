@@ -124,23 +124,11 @@ const nextConfig: NextConfig = {
         destination: "/vote",
         permanent: false,
       },
-      // The two pages that exist only to publish the candidates' answers are
-      // switched off until the questionnaire launches — the sibling of
-      // `questionnaireHidden` and `surveyClosed` in the election registry, and
-      // temporary in the same way. Both pages stay in the repo exactly as
-      // built; what comes down is the way to them.
-      //
-      // A redirect rather than an emptied page, because neither page has
-      // anything left when the answers are gone: /issues is the whole field
-      // read question by question, and /mayor is the mayoral field's answers.
-      // The ballot they were read against is still published — every
-      // candidate for mayor at /mayor/candidates, every ward at /wards/:n —
-      // so each lands on the ballot nearest to what it was about rather than
-      // on a page apologising for itself.
-      //
-      // Temporary, so a 307: a permanent redirect would sit in a reader's
-      // browser and skip the server after launch, when these are the pages we
-      // most want them to reach.
+      // /issues and /mayor are nothing but the candidates' answers, which are
+      // hidden until the questionnaire launches (`questionnaireHidden` in the
+      // election registry). Both pages stay in the repo as built; each lands
+      // on the nearest ballot instead. Temporary, so a 307: a 308 would sit in
+      // a reader's browser and skip the server after launch.
       {
         source: "/toronto/vote/2026/issues",
         destination: "/toronto/vote/2026",

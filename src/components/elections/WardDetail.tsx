@@ -199,10 +199,22 @@ export function WardDetail({
               )}
               {councilCandidates.length > 0 && (
                 <CandidateRoster
-                  respondents={respondents}
-                  silent={councilCandidates.filter(
-                    (candidate) => !surveyAnswers?.[candidate.key],
-                  )}
+                  /* One list while the answers are withheld. The split is by
+                     who wrote back, so with nothing to read back everyone
+                     falls into the second half and the ward's whole ballot
+                     sits under "yet to answer our questionnaire" — which they
+                     did answer. Flat, and labelled for what it is. */
+                  respondents={withheld ? councilCandidates : respondents}
+                  silent={
+                    withheld
+                      ? []
+                      : councilCandidates.filter(
+                          (candidate) => !surveyAnswers?.[candidate.key],
+                        )
+                  }
+                  respondentsLabel={
+                    withheld ? "On the ballot" : undefined
+                  }
                   election={election.slug}
                   race="councillor"
                   ward={ward.n}
@@ -387,9 +399,11 @@ function RaceQuestionnaire({
             {roster.length === 0
               ? "No one has filed for this seat yet."
               : withheld
-                ? `${ANSWERS_WITHHELD} On the ballot: ${roster
-                    .map((candidate) => candidate.name)
-                    .join(", ")}.`
+                ? /* Just the notice. The ballot is already above this, as a
+                     list of linked names — repeating it here as a run of
+                     plain text is the same names twice, the second time
+                     worse. */
+                  ANSWERS_WITHHELD
                 : `On the ballot, and yet to respond to us: ${roster
                     .map((candidate) => candidate.name)
                     .join(", ")}.`}

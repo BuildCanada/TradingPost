@@ -9,6 +9,7 @@ import CountdownDays from "@/components/elections/CountdownDays";
 import { surveyRoster } from "@/lib/elections/candidate-answers";
 import { daysUntil } from "@/lib/elections/dates";
 import { rosterSurvey } from "@/lib/elections/survey-answers";
+import { ANSWERS_WITHHELD } from "@/lib/elections/registry";
 import type { CandidateView } from "@/lib/elections/election-data";
 import { ELECTION, getToronto2026 } from "../../data";
 
@@ -66,8 +67,15 @@ export default async function MayoralCandidatesPage() {
   );
   const roster = surveyRoster(view.mayoral, answers);
 
-  const answered = roster.filter((candidate) => candidate.answers);
-  const quiet = roster.filter((candidate) => !candidate.answers);
+  /* One list, not two, while the answers are withheld — see
+     `questionnaireHidden` in the registry. The split here is by whether a
+     candidate wrote back, so with nothing to read back it collapses on its
+     own: `answered` empties and the entire ballot lands under "Yet to
+     respond", which is a scoreboard reading nil-all and every word of it our
+     doing. Flat, the page is what it says it is — everyone running. */
+  const withheld = ELECTION.questionnaireHidden ?? false;
+  const answered = withheld ? [] : roster.filter((candidate) => candidate.answers);
+  const quiet = withheld ? roster : roster.filter((candidate) => !candidate.answers);
   const withdrawn = view.mayoral.filter((candidate) => candidate.withdrawn);
   const sites = roster.filter((candidate) => candidate.website).length;
 
@@ -98,13 +106,16 @@ export default async function MayoralCandidatesPage() {
             {roster.length > 0 && answered.length > 0
               ? `${roster.length} candidates have registered; ${answered.length} of them have told us where they stand.`
               : `${roster.length} candidates have registered.`}
+            {withheld ? ` ${ANSWERS_WITHHELD}` : ""}
           </p>
         </section>
 
         {/* ── Key stats ──────────────────────────────────────── */}
         <section className="grid grid-cols-2 md:grid-cols-4 border-b-2 border-dark">
           <Stat value={roster.length} label="On the ballot" />
-          <Stat value={answered.length} label="Answered us" />
+          {/* A count of the answers, which at nil reads as the claim that
+              nobody gave any. */}
+          {!withheld && <Stat value={answered.length} label="Answered us" />}
           <Stat value={sites} label="With a campaign site" />
           <div className="px-6 py-4 md:px-14 border-b md:border-b-0 border-border-light">
             <CountdownDays
@@ -134,13 +145,17 @@ export default async function MayoralCandidatesPage() {
           </section>
         )}
 
-        {/* ── Yet to respond ─────────────────────────────────── */}
+        {/* ── Yet to respond, or simply the ballot ───────────── */}
         {quiet.length > 0 && (
           <section>
             <GroupHead
               eyebrow="Registered"
-              title="Yet to respond"
-              blurb="On the ballot, and yet to tell us where they stand. We publish answers as they arrive, so this list shrinks through the campaign."
+              title={withheld ? "On the ballot" : "Yet to respond"}
+              blurb={
+                withheld
+                  ? `Every candidate registered for mayor, in surname order. ${ANSWERS_WITHHELD}`
+                  : "On the ballot, and yet to tell us where they stand. We publish answers as they arrive, so this list shrinks through the campaign."
+              }
             />
             <Roster candidates={quiet} />
           </section>

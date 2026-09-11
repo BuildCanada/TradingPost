@@ -203,28 +203,50 @@ function Legend({
   const share = percentOf(total);
 
   return (
-    <ul className="grid min-w-0 list-none gap-2 m-0 p-0">
-      {slices.map((slice) => {
+    /* Ruled, not spaced. A gap alone left four answers reading as one block of
+       prose with numbers down the side — the wordings are full sentences and
+       the long ones wrap, so where one answer stopped and the next began was
+       something the reader worked out from the text rather than saw. A
+       hairline between them says it outright, and costs a line of grey. */
+    <ul className="grid min-w-0 list-none m-0 p-0">
+      {slices.map((slice, i) => {
         const shown = open === slice.key;
         return (
-          <li key={slice.key}>
+          <li
+            key={slice.key}
+            className={i > 0 ? "border-t border-border-light" : ""}
+          >
             <button
               type="button"
               aria-expanded={shown}
               onClick={() => onToggle(slice.key)}
               onFocus={() => onGraze(slice.key)}
               onBlur={() => onGraze(null)}
-              className={`grid w-full cursor-pointer grid-cols-[auto_1fr_auto] items-baseline gap-x-2.5 gap-y-0.5 text-left transition-opacity duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
+              className={`grid w-full cursor-pointer grid-cols-[auto_1fr_auto] items-baseline gap-x-2.5 gap-y-0.5 py-2 text-left transition-opacity duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
                 open && !shown ? "opacity-45" : ""
               }`}
             >
               <span
-                className="size-2.5 translate-y-[0.15em] rounded-full"
+                className="size-2.5 translate-y-[0.25em] rounded-full"
                 style={{ background: slice.color }}
                 aria-hidden="true"
               />
+              {/* THE ANSWER, SET AS AN ANSWER
+
+                  The ward and mayoral cards title each block with the wording
+                  the candidates were shown, in serif at a size that makes it
+                  the biggest thing inside the block. Here the same sentence
+                  was set as body text at 1.02rem — so the one piece of the
+                  card carrying what somebody actually endorsed looked like a
+                  caption, and sat at the same weight as the names in the panel
+                  and the note at the foot.
+
+                  Same treatment as those cards, a step down in size because a
+                  legend row is not a panel title: serif, medium, tracking
+                  pulled in. An answer now reads as an answer wherever in the
+                  tracker a reader meets it. */}
               <span
-                className={`font-serif text-[1.02rem] leading-[1.35] text-dark text-pretty decoration-border-light underline-offset-4 ${
+                className={`font-serif text-[1.12rem] font-medium leading-[1.3] tracking-[-0.015em] text-dark text-pretty decoration-border-light underline-offset-4 ${
                   shown ? "underline" : ""
                 }`}
               >

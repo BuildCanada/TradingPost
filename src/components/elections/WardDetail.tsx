@@ -10,6 +10,7 @@ import {
 } from "./QuestionnaireCards";
 import { QuestionnaireRail } from "./QuestionnaireRail";
 import { SurveyCta } from "./SurveyCta";
+import { ANSWERS_WITHHELD, surveyHref } from "@/lib/elections/registry";
 import { IncumbentBadge } from "./ElectionLanding";
 import { CandidateNameLink } from "./CandidateNameLink";
 import { WardProfileSection, type WardProfile } from "./WardProfile";
@@ -103,6 +104,11 @@ export function WardDetail({
     (candidate) => surveyAnswers?.[candidate.key],
   );
 
+  /* The answers arrive empty either way, so the page cannot tell a quiet field
+     from a withheld one by looking at them — see `questionnaireHidden` in the
+     registry. It has to ask. */
+  const withheld = election.questionnaireHidden ?? false;
+
   return (
     <div className={`${election.themeClass ?? ""} bg-bg text-dark`}>
       <div className="mx-[10px] my-[10px] border border-border-light bg-bg overflow-x-clip">
@@ -186,15 +192,29 @@ export function WardDetail({
                 <p className="font-serif text-[1.08rem] leading-[1.5] text-dark/85 max-w-[64ch] text-pretty">
                   {councilCandidates.length === 0
                     ? "No one has registered in this ward yet."
-                    : "Nobody in this ward has answered yet. These are the questions we asked."}
+                    : withheld
+                      ? ANSWERS_WITHHELD
+                      : "Nobody in this ward has answered yet. These are the questions we asked."}
                 </p>
               )}
               {councilCandidates.length > 0 && (
                 <CandidateRoster
-                  respondents={respondents}
-                  silent={councilCandidates.filter(
-                    (candidate) => !surveyAnswers?.[candidate.key],
-                  )}
+                  /* One list while the answers are withheld. The split is by
+                     who wrote back, so with nothing to read back everyone
+                     falls into the second half and the ward's whole ballot
+                     sits under "yet to answer our questionnaire" — which they
+                     did answer. Flat, and labelled for what it is. */
+                  respondents={withheld ? councilCandidates : respondents}
+                  silent={
+                    withheld
+                      ? []
+                      : councilCandidates.filter(
+                          (candidate) => !surveyAnswers?.[candidate.key],
+                        )
+                  }
+                  respondentsLabel={
+                    withheld ? "On the ballot" : undefined
+                  }
                   election={election.slug}
                   race="councillor"
                   ward={ward.n}
@@ -203,7 +223,12 @@ export function WardDetail({
               )}
             </div>
 
-            <SurveyCta href={`${election.basePath}/survey`} />
+            {/* Absent entirely while the survey is closed. The column beside
+                it is the heading and the ballot, which stand on their own —
+                this was always the ask, not part of the ward's own facts. */}
+            {surveyHref(election) && (
+              <SurveyCta href={surveyHref(election)!} />
+            )}
           </div>
 
           {councilCandidates.length === 0 ? (
@@ -219,6 +244,7 @@ export function WardDetail({
                 surveyAnswers={surveyAnswers}
                 surveyShape={surveyShape}
                 showHeading={showRaceHeadings}
+                withheld={withheld}
                 issuesHref={`${election.basePath}/issues`}
               />
             ))
@@ -316,12 +342,16 @@ function RaceQuestionnaire({
   surveyAnswers,
   surveyShape,
   showHeading,
+  withheld = false,
   issuesHref,
 }: {
   race: RaceView;
   surveyAnswers?: Record<string, CandidateAnswers>;
   surveyShape?: ComparedGroup[];
   showHeading: boolean;
+  /** the answers are being held back, so an empty grid is our doing and not
+   *  a field that stayed quiet — see `questionnaireHidden` in the registry */
+  withheld?: boolean;
   issuesHref?: string;
 }) {
   /* Two lists, not one. The candidates who wrote back are the ones the
@@ -360,15 +390,23 @@ function RaceQuestionnaire({
             />
           </QuestionnaireRail>
         ) : (
-          /* Only two ways to get here now: nobody has filed for the seat, or
-             the questionnaire itself could not be fetched. Either way there is
-             no grid to draw, and the candidates are still worth naming. */
+          /* Nobody has filed for the seat, the questionnaire could not be
+             fetched, or the answers are being held back. Either way there is
+             no grid to draw, and the candidates are still worth naming — but
+             only the first two let us say the field has yet to respond, which
+             is why the third has to be told apart from them. */
           <p className="font-serif text-[1.05rem] leading-[1.5] text-dark/80 max-w-[62ch] text-pretty">
             {roster.length === 0
               ? "No one has filed for this seat yet."
-              : `On the ballot, and yet to respond to us: ${roster
-                  .map((candidate) => candidate.name)
-                  .join(", ")}.`}
+              : withheld
+                ? /* Nothing. The notice is already up beside the ballot at the
+                     top of this section, and a ward with two races would
+                     otherwise print it once per race under the one that
+                     covers them all. */
+                  null
+                : `On the ballot, and yet to respond to us: ${roster
+                    .map((candidate) => candidate.name)
+                    .join(", ")}.`}
           </p>
         )}
       </div>

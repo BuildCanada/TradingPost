@@ -144,6 +144,12 @@ export default async function CandidatePage({
      candidates.ts — which is empty for all but a handful. Theirs is a self
      description and ours is not, so it is attributed rather than merged into
      the same paragraph. */
+  /* The answers come back empty either way, so the page has to ask rather
+     than infer — see `questionnaireHidden` in the registry. The bio survives
+     it: a self-description is not one of the positions being held back, and
+     without it most of these pages have nothing on them. */
+  const withheld = ELECTION.questionnaireHidden ?? false;
+
   const prose = written[candidate.key] ?? [];
   const selfBio = prose.find(
     (entry) => entry.questionId === BIO_QUESTION_ID,
@@ -456,7 +462,16 @@ export default async function CandidatePage({
           <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.6rem,2.6vw,2.1rem)] mb-3">
             {surveyAnswers
               ? `Where ${candidate.name} stands`
-              : "Yet to answer"}
+              : withheld
+                ? /* Held back, which is not the same as never sent — and this
+                     page of all of them must not confuse the two. "Yet to
+                     answer", over a named person's photograph, is a claim
+                     about that person that we would be making for them. The
+                     heading carries it alone: a line under it repeating the
+                     same four words is the eyebrow, the heading and the body
+                     all saying one thing. */
+                  "Candidate survey coming soon"
+                : "Yet to answer"}
           </h2>
 
           {surveyAnswers ? (
@@ -481,7 +496,7 @@ export default async function CandidatePage({
                 />
               </QuestionnaireRail>
             </>
-          ) : (
+          ) : withheld ? null : (
             <p className="font-serif text-[1.05rem] leading-[1.5] text-dark/85 max-w-[62ch] text-pretty">
               {candidate.name} has not returned our questionnaire. We publish
               answers as they arrive, so check back — and{" "}

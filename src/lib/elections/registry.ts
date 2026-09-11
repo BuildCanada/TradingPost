@@ -83,7 +83,78 @@ export type SupportedElection = {
    * opt-in rather than assumed from `basePath`.
    */
   candidateProfiles?: boolean;
+  /**
+   * The region's voter survey is off for now.
+   *
+   * Temporary and deliberately one line: the survey route stops answering and
+   * every invitation to it disappears, while the questions, the submissions
+   * already taken and the code that reads them all stay exactly where they
+   * are. Turning it back on is deleting this flag.
+   *
+   * Set it rather than unpicking the call sites. There are four separate
+   * invitations to the survey across the tracker — the landing page's card,
+   * its closing call to action, the mayoral page and the issues page — plus
+   * every ward page, and a survey withdrawn from three of them is a survey a
+   * reader still finds from the fourth. `surveyHref` below is what they all
+   * ask, so the rule lives in one place and no call site can forget it.
+   */
+  surveyClosed?: boolean;
+  /**
+   * The candidates' questionnaire answers are off for now.
+   *
+   * The sibling of `surveyClosed` and the same bargain: temporary, one line,
+   * and nothing deleted. What comes down is every published answer — the cards
+   * on the ward, mayoral and candidate pages, the whole-field view on /issues,
+   * and the read proxy that serves them to the browser. What stays up is the
+   * ballot: who is running, in which ward, with their campaign site, which is
+   * a fact about the election rather than anything a candidate told us.
+   *
+   * A candidate's own bio stays too, though it arrives in the same response.
+   * It is a self-description rather than a position, and it is the only thing
+   * standing between most candidate pages and an empty one.
+   *
+   * The pages need no empty states written for this: they already have the
+   * ones built for the weeks before anybody had written back — "Nobody in this
+   * ward has answered yet", "No answers from the mayoral field have been
+   * published yet" — and hiding the answers at the source puts every page into
+   * exactly that state.
+   */
+  questionnaireHidden?: boolean;
 };
+
+/**
+ * What a page says where the candidates' answers would be.
+ *
+ * One phrase, in one place, because it appears on the ward pages, the mayoral
+ * page, /issues and every candidate page, and four hand-written versions of it
+ * would be four different accounts of the same fact.
+ *
+ * Once per page. It names what is missing rather than only promising a return,
+ * so on a page that says it twice — in the masthead and again where the cards
+ * would be — it reads as a stutter rather than as a fuller explanation. Each
+ * page keeps it in the one place a reader looks for the thing that is gone.
+ *
+ * What it must not do is reuse the empty states these pages already had for
+ * the weeks before anybody had written back. "Nobody in this ward has answered
+ * yet", printed over a ward whose candidates answered months ago, is a claim
+ * about those candidates and it is ours, not theirs — and on a candidate page
+ * it sits under a named person's photograph.
+ */
+export const ANSWERS_WITHHELD = "Candidate survey coming soon.";
+
+/**
+ * Where this region's voter survey lives, or nothing while it is closed.
+ *
+ * Returning `undefined` rather than a path plus a flag to check is what makes
+ * the closed case hard to get wrong: a caller has nothing to link to, so the
+ * invitation has to disappear rather than being left pointing at a page that
+ * will not answer.
+ */
+export function surveyHref(
+  election: SupportedElection,
+): string | undefined {
+  return election.surveyClosed ? undefined : `${election.basePath}/survey`;
+}
 
 const TORONTO_2026: SupportedElection = {
   slug: "toronto-2026",
@@ -105,6 +176,8 @@ const TORONTO_2026: SupportedElection = {
   wardLookup: true,
   candidateProfiles: true,
   themeClass: "theme-election",
+  surveyClosed: true,
+  questionnaireHidden: true,
 };
 
 const BRAMPTON_2026: SupportedElection = {

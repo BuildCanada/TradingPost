@@ -3,6 +3,7 @@ import { ElectionLanding } from "@/components/elections/ElectionLanding";
 import { WardMap, WardMapDefs } from "@/components/elections/WardMap";
 import { WARD_GEO } from "./wardGeo";
 import { ELECTION, getToronto2026 } from "./data";
+import { surveyHref } from "@/lib/elections/registry";
 import {
   ADVANCE_VOTING_PATH,
   ELECTION_DAY,
@@ -36,7 +37,10 @@ export default async function Toronto2026ElectionPage() {
       // Toronto publishes its poll hours, so the band's headline counter is
       // the live timer from the /toronto hero rather than a whole-day count.
       electionDay={ELECTION_DAY}
-      surveyPath={`${ELECTION.basePath}/survey`}
+      /* Undefined while the survey is closed, which drops both the explore
+         grid's survey card and the closing call to action — ElectionLanding
+         already falls back to the pledge for regions that run no survey. */
+      surveyPath={surveyHref(ELECTION)}
       wardMapDefs={<WardMapDefs geo={WARD_GEO} />}
       renderWardMap={(ward) => (
         <WardMap

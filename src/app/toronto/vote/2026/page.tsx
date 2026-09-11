@@ -32,7 +32,6 @@ export default async function Toronto2026ElectionPage() {
     <ElectionLanding
       election={ELECTION}
       view={view}
-      mayorSurveyPath={`${ELECTION.basePath}/mayor`}
       mayorRosterPath={`${ELECTION.basePath}/mayor/candidates`}
       // Toronto publishes its poll hours, so the band's headline counter is
       // the live timer from the /toronto hero rather than a whole-day count.
@@ -65,31 +64,24 @@ export default async function Toronto2026ElectionPage() {
         ),
         closingBlurb: (
           <>
-            Toronto votes Monday, October 26. Answer the questions we put to the
-            candidates and see which of them line up with you.
+            Toronto votes Monday, October 26. Put your name on the record, then
+            find out who is running in your ward.
           </>
         ),
         /* WHAT IS ONLY HERE
            A card earns its place by going somewhere a reader would not
-           otherwise get to, and by being the thing they came for. What is left
-           is the two questionnaire reads — one race, then every race — with
-           the survey between them; ElectionLanding supplies the mayoral card
-           and the survey card itself.
+           otherwise get to, and by being the thing they came for. Until the
+           questionnaire is published that is the mayoral ballot: fifty-odd
+           names, on a page of their own because the field is too long to
+           print here. ElectionLanding supplies that card off
+           `mayorRosterPath`, so this list is empty rather than carrying the
+           two questionnaire reads it used to — the field read question by
+           question, and the mayoral field's own answers — which are both
+           switched off (see next.config.ts).
 
            Everything else is reachable from the section that owns it, which is
-           where a reader looks for it anyway: the question set is linked from
-           the survey and from every questionnaire page, the pledge from the
-           closing band, and the wards from the ward grid two hundred pixels
-           below. */
-        explore: [
-          {
-            eyebrow: "Every race",
-            title: "Where the candidates stand",
-            blurb:
-              "Mayor and council together, question by question: where the field agrees, and where it splits.",
-            href: `${ELECTION.basePath}/issues`,
-          },
-        ],
+           where a reader looks for it anyway: the pledge from the closing
+           band, and the wards from the ward grid two hundred pixels below. */
         guideLinks: [
           { label: "See all key dates", href: KEY_DATES_PATH },
           { label: "How to vote in Toronto", href: HOW_TO_VOTE_PATH },

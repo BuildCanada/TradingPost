@@ -8,8 +8,6 @@ import { CandidateNameLink } from "@/components/elections/CandidateNameLink";
 import CountdownDays from "@/components/elections/CountdownDays";
 import { surveyRoster } from "@/lib/elections/candidate-answers";
 import { daysUntil } from "@/lib/elections/dates";
-import { rosterSurvey } from "@/lib/elections/survey-answers";
-import { ANSWERS_WITHHELD } from "@/lib/elections/registry";
 import type { CandidateView } from "@/lib/elections/election-data";
 import { ELECTION, getToronto2026 } from "../../data";
 
@@ -27,14 +25,14 @@ import { ELECTION, getToronto2026 } from "../../data";
  *   questions by every column — which answers "what did they say" and never
  *   answers "who is running". A reader who wants the ballot got a grid.
  *
- * ANSWERED FIRST, AND SAID SO
- *   The field splits in two: the candidates who returned our questionnaire and
- *   the candidates who have not. That is the most useful sort available — it
- *   is the difference between a name and a position — and `surveyRoster`
- *   already orders it that way, so the page prints the boundary rather than
- *   leaving the reader to infer it from a missing link. Within each group,
- *   surname order, because the alternative is a ranking nobody asked us to
- *   make.
+ * ONE LIST, IN SURNAME ORDER
+ *   The field used to split in two — the candidates who returned our
+ *   questionnaire and the candidates who had not — which is the most useful
+ *   sort available while those answers are published. They are not, until the
+ *   questionnaire launches, so the split would be a scoreboard reading nil-all
+ *   and every word of it our doing. Flat, the page is what it says it is:
+ *   everyone running, in surname order, because the alternative is a ranking
+ *   nobody asked us to make.
  *
  *   Withdrawn candidates keep a group at the foot rather than vanishing. Some
  *   clerks never drop them, they appear on lists elsewhere, and a reader who
@@ -44,12 +42,12 @@ import { ELECTION, getToronto2026 } from "../../data";
 export const metadata: Metadata = {
   title: "Every candidate for Mayor of Toronto",
   description:
-    "The full field for Mayor of Toronto in the October 26, 2026 election: every registered candidate, their campaign site, and whether they answered our questionnaire.",
+    "The full field for Mayor of Toronto in the October 26, 2026 election: every registered candidate, in surname order, with their campaign site.",
   alternates: { canonical: `${ELECTION.basePath}/mayor/candidates` },
   openGraph: {
     title: "Every candidate for Mayor — Toronto 2026 Election",
     description:
-      "The full field for Mayor of Toronto: who is running, and who has told us where they stand.",
+      "The full field for Mayor of Toronto: everyone registered to run for the city's top job.",
     type: "website",
   },
 };
@@ -57,25 +55,10 @@ export const metadata: Metadata = {
 export default async function MayoralCandidatesPage() {
   const view = await getToronto2026();
 
-  /* Same two-step the questionnaire grid uses: the roster names the field, and
-     the survey fetch is keyed to it, so a response from someone who is not on
-     the ballot cannot put a stranger on this page. */
-  const named = surveyRoster(view.mayoral);
-  const { answers } = await rosterSurvey(
-    ELECTION.slug,
-    new Set(named.map((candidate) => candidate.key)),
-  );
-  const roster = surveyRoster(view.mayoral, answers);
-
-  /* One list, not two, while the answers are withheld — see
-     `questionnaireHidden` in the registry. The split here is by whether a
-     candidate wrote back, so with nothing to read back it collapses on its
-     own: `answered` empties and the entire ballot lands under "Yet to
-     respond", which is a scoreboard reading nil-all and every word of it our
-     doing. Flat, the page is what it says it is — everyone running. */
-  const withheld = ELECTION.questionnaireHidden ?? false;
-  const answered = withheld ? [] : roster.filter((candidate) => candidate.answers);
-  const quiet = withheld ? roster : roster.filter((candidate) => !candidate.answers);
+  /* The ballot, in surname order. `surveyRoster` with no answers to sort by is
+     exactly that — it is the same call the ward pages make, and the ordering
+     is the part of it this page still needs. */
+  const roster = surveyRoster(view.mayoral);
   const withdrawn = view.mayoral.filter((candidate) => candidate.withdrawn);
   const sites = roster.filter((candidate) => candidate.website).length;
 
@@ -102,20 +85,13 @@ export default async function MayoralCandidatesPage() {
           </h1>
           <p className="font-serif text-[1.05rem] leading-[1.5] text-dark/85 max-w-[58ch] text-pretty">
             The one race every Toronto voter votes in, and the longest ballot in
-            the city.{" "}
-            {roster.length > 0 && answered.length > 0
-              ? `${roster.length} candidates have registered; ${answered.length} of them have told us where they stand.`
-              : `${roster.length} candidates have registered.`}
-
+            the city. {roster.length} candidates have registered.
           </p>
         </section>
 
         {/* ── Key stats ──────────────────────────────────────── */}
-        <section className="grid grid-cols-2 md:grid-cols-4 border-b-2 border-dark">
+        <section className="grid grid-cols-2 md:grid-cols-3 border-b-2 border-dark">
           <Stat value={roster.length} label="On the ballot" />
-          {/* A count of the answers, which at nil reads as the claim that
-              nobody gave any. */}
-          {!withheld && <Stat value={answered.length} label="Answered us" />}
           <Stat value={sites} label="With a campaign site" />
           <div className="px-6 py-4 md:px-14 border-b md:border-b-0 border-border-light">
             <CountdownDays
@@ -129,35 +105,15 @@ export default async function MayoralCandidatesPage() {
           </div>
         </section>
 
-        {/* ── Answered ───────────────────────────────────────── */}
-        {answered.length > 0 && (
-          <section>
-            <GroupHead
-              eyebrow="On the record"
-              title="Answered our questionnaire"
-              blurb={`${answered.length} of the ${roster.length} candidates for mayor returned the questionnaire. Every answer is published, question by question.`}
-              action={{
-                label: "See how they answered",
-                href: `${ELECTION.basePath}/mayor`,
-              }}
-            />
-            <Roster candidates={answered} />
-          </section>
-        )}
-
-        {/* ── Yet to respond, or simply the ballot ───────────── */}
-        {quiet.length > 0 && (
+        {/* ── The ballot ────────────────────────────────────── */}
+        {roster.length > 0 && (
           <section>
             <GroupHead
               eyebrow="Registered"
-              title={withheld ? "On the ballot" : "Yet to respond"}
-              blurb={
-                withheld
-                  ? `Every candidate registered for mayor, in surname order. ${ANSWERS_WITHHELD}`
-                  : "On the ballot, and yet to tell us where they stand. We publish answers as they arrive, so this list shrinks through the campaign."
-              }
+              title="On the ballot"
+              blurb="Every candidate registered for mayor, in surname order, with the way to their own campaign where they have published one."
             />
-            <Roster candidates={quiet} />
+            <Roster candidates={roster} />
           </section>
         )}
 
@@ -186,19 +142,13 @@ export default async function MayoralCandidatesPage() {
         </section>
 
         {/* ── Elsewhere ──────────────────────────────────────── */}
-        <section className="border-t border-dark grid md:grid-cols-2">
-          <Link
-            href={`${ELECTION.basePath}/issues`}
-            className="group px-6 md:px-14 py-6 flex items-center justify-between gap-4 transition-colors hover:bg-linen-50"
-          >
-            <span className="font-sans font-medium text-[1.15rem] tracking-[-0.015em]">
-              Where the whole field stands
-            </span>
-            <ArrowRight className="size-4 flex-none text-text-secondary transition-transform group-hover:translate-x-0.5" />
-          </Link>
+        {/* One way on, not two: the other was the field read question by
+            question, which is switched off with the rest of the
+            questionnaire. */}
+        <section className="border-t border-dark">
           <Link
             href={`${ELECTION.basePath}#wards`}
-            className="group px-6 md:px-14 py-6 flex items-center gap-2.5 border-t md:border-t-0 md:border-l border-border-light transition-colors hover:bg-linen-50"
+            className="group px-6 md:px-14 py-6 flex items-center gap-2.5 transition-colors hover:bg-linen-50"
           >
             <ArrowLeft className="size-3.5 text-text-secondary" />
             <span className="font-sans font-medium text-[1.15rem] tracking-[-0.015em]">

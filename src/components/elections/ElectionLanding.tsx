@@ -99,7 +99,6 @@ export function ElectionLanding({
   content,
   wardMapDefs,
   renderWardMap,
-  mayorSurveyPath,
   mayorRosterPath,
   surveyPath,
   electionDay,
@@ -110,14 +109,11 @@ export function ElectionLanding({
   /** poll-open/poll-close instants for election day. Supplied turns the band's
    *  headline counter into the live timer; omitted keeps the days counter. */
   electionDay?: ElectionDayPeriod;
-  /** where the mayoral field's questionnaire grid lives, for the regions that
-   *  have run one — the cards say who is running, that page says what they
-   *  said */
-  mayorSurveyPath?: string;
   /** the full mayoral roster, for a region whose field is too long to print
-   *  here. Set it and this section keeps its heading and hands the list off;
-   *  leave it unset and the section prints every candidate, which is the right
-   *  answer for a field of eight and the wrong one for a field of fifty. */
+   *  here. Set it and this section hands the list off to a card in the explore
+   *  grid; leave it unset and the section prints every candidate, which is the
+   *  right answer for a field of eight and the wrong one for a field of
+   *  fifty. */
   mayorRosterPath?: string;
   /** the voter survey, where the region runs one. It takes the closing call to
    *  action from the pledge: a pledge is a name on a list, where the survey
@@ -132,31 +128,29 @@ export function ElectionLanding({
 }) {
   /* THE MAYORAL RACE, WHERE IT IS A SIGNPOST RATHER THAN A LIST
      A region with a roster page had a whole band of the front page — heading,
-     blurb, count, and two link rows — pointing at two other pages, which is
+     blurb, count, and two link rows — pointing at another page, which is
      exactly what the explore grid is made of. Set as a section of its own it
      pushed the wards a screen further down for no reading a card could not
      carry.
 
-     One card, not two. The other pointed at the roster of every registered
-     candidate, which is a page that exists to be indexed rather than read:
-     fifty-three names and their campaign links, no answers. It is still
-     linked from the mayoral page it belongs to. What a reader on the front
-     page wants from this race is what the field said, so that is the card.
+     One card: the ballot for mayor. A field of fifty-odd names is a page of
+     its own rather than half the city's front page, and who is running is the
+     thing a reader arriving on this page wants from this race.
 
      A region with no roster page keeps its own section below: its cards are
      the candidates themselves, names and campaign links, which is a list
      rather than a pointer and belongs nowhere near a grid of pages. */
-  const mayorCards: ExploreItem[] =
-    mayorRosterPath && mayorSurveyPath
-      ? [
-        {
-          eyebrow: "Mayor",
-          title: "The race for mayor",
-          blurb: "How the candidates for mayor answered our questions.",
-          href: mayorSurveyPath,
-        },
-      ]
-      : [];
+  const mayorCards: ExploreItem[] = mayorRosterPath
+    ? [
+      {
+        eyebrow: "Mayor",
+        title: "Everyone running for mayor",
+        blurb:
+          "The one race every voter in the city votes in, and the longest ballot on the ledger.",
+        href: mayorRosterPath,
+      },
+    ]
+    : [];
   /* The ask, in the middle of the grid rather than only at the foot of the
      page. Everything else here is somewhere to go and read; this is the one
      card that asks the reader for something, and a reader who has just seen
@@ -242,15 +236,6 @@ export function ElectionLanding({
                   Candidates for Mayor
                 </h2>
               </div>
-              {mayorSurveyPath && (
-                <Link
-                  href={mayorSurveyPath}
-                  className="group/answers type-label-sm text-accent hover:underline inline-flex items-center gap-1.5 pb-1.5"
-                >
-                  How they answered our questionnaire
-                  <ArrowRight className="size-3.5 transition-transform group-hover/answers:translate-x-0.5" />
-                </Link>
-              )}
             </div>
 
             <CardGrid min="272px">
@@ -666,11 +651,6 @@ function ExploreSection({
    *  lands here whenever the mayoral cards do */
   anchorCandidates?: boolean;
 }) {
-  /* Read off the cards rather than taken as a prop: the survey card IS the
-     invite, so the blurb and the grid cannot disagree about whether there is
-     one. */
-  const invitesSurvey = items.some((item) => item.tone === "invite");
-
   return (
     <section id="explore" className="border-b-2 border-dark scroll-mt-24">
       {anchorCandidates && (
@@ -684,16 +664,13 @@ function ExploreSection({
         <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.85rem,3vw,2.4rem)] mb-2">
           Explore the election
         </h2>
-        {/* The second half of this is a promise about the survey, so it is
-            only made where there is a survey to make it about. Read under a
-            grid with no survey card in it, "then answer them yourself" sends
-            a reader hunting the page for something that is not on it. */}
+        {/* What the cards below actually go to, and nothing more. This used to
+            open "We put the same questions to every candidate on the ballot" —
+            a promise about answers, which is what the reader then went looking
+            for in a grid that has none of them until the questionnaire is
+            published. */}
         <p className="font-serif text-[1.05rem] leading-[1.45] max-w-[52ch] text-dark/80">
-          We put the same questions to every candidate on the ballot. See how
-          they answered
-          {invitesSurvey
-            ? " — then answer them yourself and find out who lines up with you."
-            : ", question by question and ward by ward."}
+          Every candidate on the ballot, race by race and ward by ward.
         </p>
       </div>
 

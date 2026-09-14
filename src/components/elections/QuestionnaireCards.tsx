@@ -43,12 +43,22 @@ import type { ComparedGroup } from "@/lib/elections/candidate-answers";
  *   as a share of the field.
  *
  * `silent` IS A JUDGEMENT THE PAGE MAKES
- *   A ward passes its non-respondents in, and every card names them: the
- *   field is a dozen people and a reader deciding how to vote is owed the
- *   fact that their ballot line said nothing. The mayoral page passes none,
- *   because forty-four names under each of thirty-four questions is fifteen
- *   hundred names saying one thing that the stats row and the roster page
- *   already say once.
+ *   Nobody who reads a card should have to wonder what the rest of the ballot
+ *   said — but a name repeated under all thirty-odd questions says it thirty
+ *   times and tells a reader once. A ward of one respondent and nine silent
+ *   was printing the same nine names on every card: a hundred and forty
+ *   characters, identical, thirty-three times, and the longest thing in most
+ *   of those cards.
+ *
+ *   So the race pages pass none, and the CandidateRoster over the section
+ *   carries the fact instead — it names the same people, links each to their
+ *   own page, and does it before the reader starts on the questions rather
+ *   than at the foot of each one. What the cards still name is the other
+ *   half of `unanswered`: a candidate who did write back and skipped this
+ *   question. That one is per-question and genuinely news.
+ *
+ *   The survey's own results pass their silent in, having no roster to hand
+ *   the job to.
  */
 
 /** The id a section heading answers to, and the one the rail scrolls at. */
@@ -85,6 +95,8 @@ export function QuestionnaireCards({
   silent,
   issuesHref,
   seats,
+  roles,
+  ballotSize,
   notes = true,
   yourKey,
   idPrefix,
@@ -102,6 +114,12 @@ export function QuestionnaireCards({
    *  QuestionRollCall, and QuestionSplit, which prints it beside the names
    *  behind a segment. Only the city-wide page passes one. */
   seats?: Record<string, Seat>;
+  /** what each candidate is on the ballot — "Incumbent", "Challenger" — keyed
+   *  by candidate key. See QuestionRollCall. */
+  roles?: Record<string, string>;
+  /** how many candidates are on the ballot these cards are drawn from, for
+   *  the line saying how much of it answered each question. */
+  ballotSize?: number;
   /** print each candidate's own words about their answer — see
    *  QuestionRollCall. The city-wide page turns them off. */
   notes?: boolean;
@@ -146,6 +164,16 @@ export function QuestionnaireCards({
           >
             {group.stepTitle}
           </h2>
+          {/* Two to a row from 1166px, both kinds of card.
+
+              The roll call went to one card a row when it was panels of
+              quotes, which needed the width. It is a table of rows now with
+              the writing folded away, so a card is a handful of short lines
+              and two of them sit side by side without crowding — and thirty-
+              three full-width cards was a great deal of scrolling for a page
+              a reader is meant to compare across. The rows inside size
+              themselves against the card rather than the window, so they lay
+              out correctly at half width. */}
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {group.questions.map((question) =>
               chart ? (
@@ -163,6 +191,8 @@ export function QuestionnaireCards({
                   nameTheSilent={respondents.length > 0}
                   headingId={sectionId(question.questionId, idPrefix)}
                   seats={seats}
+                  roles={roles}
+                  ballotSize={ballotSize}
                   notes={notes}
                   yourKey={yourKey}
                 />
@@ -176,7 +206,89 @@ export function QuestionnaireCards({
         issuesHref={issuesHref}
         notes={notes}
         note={answerNote}
+        silentNamedElsewhere={silentNames.length === 0}
       />
+    </div>
+  );
+}
+
+/**
+ * The questionnaire with nobody's answers on it — the questions alone.
+ *
+ * For a ward where not one candidate wrote back, which is eight of Toronto's
+ * twenty-five. The cards above still draw in that case, because the questions
+ * survive without answers (`comparedQuestions` falls back to the shape), and
+ * what a reader got was thirty-four bordered articles each containing one
+ * sentence: "No answers to this one yet." Nine screens of chrome to say once,
+ * thirty-four times over, what the heading above them had already said.
+ *
+ * So the cards come off and the questions stay. Nothing is withheld by this:
+ * an unanswered question has no candidate's words in it to withhold, and every
+ * question still prints in full, in the questionnaire's own order, under its
+ * own section heading. What goes is the card around each one.
+ *
+ * Two columns, which the cards could never be: these are one- and two-line
+ * sentences that `break-inside-avoid` keeps whole, and reading a plain list
+ * down one column and back up the next is what a list of questions is for.
+ * The cards carry answers a reader compares across, and column order would
+ * have shuffled the questionnaire.
+ */
+export function QuestionnaireOutline({
+  groups,
+  issuesHref,
+  idPrefix,
+}: {
+  groups: ComparedGroup[];
+  /** the city-wide read. On a ward where nobody answered it is the only thing
+   *  on the page a reader can go on, so it is worth reaching in a screen
+   *  rather than past thirty-four blanks. */
+  issuesHref?: string;
+  idPrefix?: string;
+}) {
+  return (
+    <div className="grid gap-10">
+      {groups.map((group) => (
+        <section key={group.stepId} className="grid gap-3 scroll-mt-24">
+          {/* The same heading as a section of cards, because it is the same
+              section — a reader moving between a ward that answered and one
+              that did not should not have to learn a second page. */}
+          <h2
+            id={sectionId(group.stepId, idPrefix)}
+            className="scroll-mt-24 border-b border-border-light pb-2 font-sans font-medium leading-none tracking-[-0.03em] text-[1.8rem]"
+          >
+            {group.stepTitle}
+          </h2>
+          <ul className="list-none m-0 p-0 lg:columns-2 lg:gap-x-12">
+            {group.questions.map((question) => (
+              /* The id a card would have carried, so a link written when this
+                 ward had answers — or to a ward that has them — still lands on
+                 its question here. */
+              <li
+                key={question.questionId}
+                id={sectionId(question.questionId, idPrefix)}
+                className="scroll-mt-24 break-inside-avoid border-b border-border-light py-2.5 font-serif text-[1.05rem] leading-[1.45] text-text-secondary text-pretty"
+              >
+                {question.question}
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+
+      {/* No note on how to read the answers: there are none. The sentence the
+          cards carry — which options are not shown, who sits on no option —
+          is about a comparison this page is not making. */}
+      {issuesHref && (
+        <div className="border-t border-border-light pt-4">
+          <Link
+            href={issuesHref}
+            className="type-label-sm inline-flex items-center gap-1.5 text-accent transition-colors hover:text-dark"
+          >
+            How the whole city answered
+            <ArrowRight className="size-3.5" />
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
@@ -188,9 +300,19 @@ function WardAnswerNote({
   issuesHref,
   notes,
   note,
+  silentNamedElsewhere,
 }: {
   issuesHref?: string;
   notes?: boolean;
+  /**
+   * The cards are not naming the candidates who never wrote back, because a
+   * roster above them already has. True where the caller passes no `silent`
+   * and stands a CandidateRoster over the section — the ward pages and the
+   * mayoral one. The survey's own results have neither, so they keep naming
+   * the silent on each card and this sentence would be a direction to
+   * somewhere that is not there.
+   */
+  silentNamedElsewhere?: boolean;
   /** an override for the sentence — see `answerNote` */
   note?: ReactNode;
   /** the reader's own row, where they have answered the same questionnaire —
@@ -212,6 +334,9 @@ function WardAnswerNote({
             this ward picked are not shown, and a candidate who answered in
             their own words sits on no option.
             {notes ? " Notes are the candidates’ own words." : ""}
+            {silentNamedElsewhere
+              ? " Candidates who have not returned the questionnaire are named at the top of this section."
+              : ""}
           </>
         )}
       </p>

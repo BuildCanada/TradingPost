@@ -1,38 +1,50 @@
+import { MessageSquareText } from "lucide-react";
+
 import { rollCall } from "@/lib/elections/candidate-answers";
+import { lastName } from "@/lib/elections/names";
 import { EMPTY, optionColors } from "@/lib/elections/option-colors";
 import type {
   ComparedQuestion,
   RollCallName,
 } from "@/lib/elections/candidate-answers";
 
-/* One question as a card, with the field sorted into the answers they gave.
+/* One question as a card: the candidates down it, and what each of them said.
  *
  * FORM
- *   The answer leads and the candidates sit inside it. That is the inversion
- *   the ward page needed: the grid it replaces gave every candidate a column
- *   and every question a row, which reads "what did this one person say" and
- *   makes the comparison — the thing the page is for — something a reader has
- *   to assemble across a sideways drag.
+ *   A row a candidate, in surname order, and the answer beside them. The two
+ *   things a reader does here are run down the names looking for one person,
+ *   and run down the answers looking for the split — so both are columns, and
+ *   a candidate sits in the same place on all thirty-three cards.
  *
- *   Grouped, the comparison is the layout. Three panels is a three-way split
- *   and one panel is a field that agrees, without a number, a chart, or a
- *   click. Nothing is behind a disclosure here for the same reason: a question
- *   whose answers are collapsed is a question the reader has to open to
- *   compare, which is the failure being fixed.
+ *   This replaced a panel per answer with the people who gave it inside it.
+ *   That read the split well and a single candidate badly: finding one
+ *   person's position meant scanning every panel for their name, and the name
+ *   landed somewhere different on every card. The split is still readable — it
+ *   is the answer column, in the option's own colour, read downwards — and the
+ *   whole-field version of it is what /issues draws.
  *
- * WHY A PANEL PER ANSWER, AND A NAME PLATE PER CANDIDATE
- *   The first pass drew the groups as a left rule against a flat list of
- *   surnames, and the two things a reader has to pick out — which answer, and
- *   who gave it — were both just runs of text at slightly different weights.
- *   So an answer is now an enclosed, tinted block that a reader can see the
- *   edges of, and a candidate is a plate with their own border inside it. Both
- *   become objects you can count at a glance rather than sentences to read.
+ * THE ANSWER IN FULL
+ *   The column prints the answer as it was put to the candidates, not a
+ *   handle for it. Most of these run to a phrase and some to ninety
+ *   characters, so it is a block that wraps rather than a pill that cannot.
+ *   On a page whose whole job is what a candidate said, the reader gets the
+ *   sentence they actually endorsed.
  *
- *   Names in full, never the surname. This page names the same handful of
- *   people thirty times over, which is the usual argument for cutting them
- *   down — but a surname is exactly what fails when the field is unfamiliar,
- *   and it fails worst on the names most likely to be misread ("Walied
- *   Khogali Ali" is not "Ali", and "Peter De Marco" is not "Marco").
+ * THE WRITING OPENS
+ *   What a candidate wrote about their answer is behind the row rather than
+ *   under it. It is the one thing on this card that is not simply printed,
+ *   and it is what makes a table of thirty-three questions readable at all: a
+ *   ward's respondents write a paragraph each. `<details>`, so it opens with
+ *   JavaScript off and the card stays a server component. A candidate who
+ *   wrote nothing gets no control, because an arrow onto nothing is worse
+ *   than no arrow.
+ *
+ * ONLY THE PEOPLE WHO ANSWERED
+ *   A candidate who never returned the questionnaire has no row. A ward of
+ *   ten with one respondent would otherwise be nine identical "did not
+ *   respond" rows on each of thirty-three cards, and they are already named
+ *   and linked once in the roster over the section. The line under the
+ *   question says how many of the ballot the rows account for.
  *
  * COLOUR
  *   Option position, from the ramps in lib/elections/option-colors — the same
@@ -48,6 +60,8 @@ export function QuestionRollCall({
   silent = [],
   nameTheSilent = true,
   seats,
+  roles,
+  ballotSize,
   notes = true,
   yourKey,
   headingId,
@@ -64,6 +78,17 @@ export function QuestionRollCall({
    *  ballot line the reader can act on — and it is also what splits a panel
    *  of thirty plates into the two races a voter actually holds. */
   seats?: Record<string, Seat>;
+  /** what each candidate is on this ballot — "Incumbent", "Challenger" —
+   *  keyed by candidate key. Toronto's council races are non-partisan, so
+   *  there is no party to print under a name and this is the only standing a
+   *  candidate has. Optional: a caller with nothing to say leaves the second
+   *  line off the row rather than filling it. */
+  roles?: Record<string, string>;
+  /** how many candidates are on the ballot this table is drawn from, for the
+   *  line that says how much of it answered. Only respondents get a row, so
+   *  without it a reader cannot tell a ward where everyone answered from one
+   *  where two people did. Omitted, the line is not printed. */
+  ballotSize?: number;
   /** print what each candidate wrote about their own answer.
    *
    *  A ward's four respondents leave four notes under a question and every
@@ -98,69 +123,130 @@ export function QuestionRollCall({
 
   const empty = groups.length === 0 && verbatim.length === 0;
 
+  /* One row a candidate, in surname order, whatever they answered.
+
+     The card used to be the other way up: a panel per answer with the people
+     who gave it inside it. That reads the split at a glance, and it reads a
+     single candidate badly — to find out what one person said you scanned
+     every panel until you found their name, and the name you were looking for
+     sat in a different place on all thirty-three cards. A row apiece puts
+     every candidate in the same place on every card, and the answer beside
+     them in the same column, so a reader can run down either. */
+  const rows: AnswerRow[] = [
+    ...groups.flatMap((group) =>
+      group.candidates.map((candidate) => ({
+        ...candidate,
+        option: group.option,
+        answerLabel: group.detail || group.label,
+      })),
+    ),
+    /* On no option, because none of them fit what they wrote. The column says
+       so and their words are under it, rather than a choice they did not
+       make. */
+    ...verbatim.map((candidate) => ({
+      ...candidate,
+      option: null,
+      answerLabel: "In their own words",
+    })),
+  ].sort(
+    (a, b) =>
+      lastName(a.name).localeCompare(lastName(b.name)) ||
+      a.name.localeCompare(b.name),
+  );
+
   return (
-    /* A column rather than a grid, so the "did not answer" foot can take
-       `mt-auto` and sit on the bottom edge. Cards in a row stretch to the
-       tallest of them, and with the foot floating directly under whatever
-       content each card happened to have, the same line landed at a different
-       height in every card — the one piece of every card that says the same
-       thing was the piece a reader could never find twice in the same place. */
-    <article className="flex flex-col gap-4 border border-border-light p-6 md:p-7">
-      <h3
-        id={headingId}
-        className="scroll-mt-24 font-sans font-medium leading-[1.2] tracking-[-0.025em] text-[1.45rem] text-dark text-pretty"
-      >
-        {question.question}
-      </h3>
+    /* `@container`, because the rows have to size against the card and not
+       against the window. The cards sit two to a row on a wide screen, so a
+       1440px viewport gives a card about 460 pixels of inside — and a row
+       template keyed to the viewport would lay out three columns for a
+       thousand pixels in a card that has half that, leaving the name a
+       sliver. Asking the card how wide it is gets it right at both widths. */
+    /* `content-start` is load-bearing, not tidiness.
+
+       Two cards to a row means both are stretched to the height of the taller
+       one, and a grid container's `align-content` defaults to `normal`, which
+       behaves as `stretch`: its auto-sized rows grow to absorb whatever extra
+       height they are given. So opening a row in one card stretched its
+       neighbour, and the neighbour's heading, table and foot slid apart to
+       fill the space — a reader opening one answer watched an unrelated card
+       rearrange itself. Pinned to the start, the rows keep their own heights
+       and the slack collects at the bottom of the card where nobody sees it.
+
+       The card was `flex flex-col` before it was a table, which is why this
+       never showed: a column flex container leaves its children alone. */
+    <article className="@container grid content-start gap-5 border border-border-light p-6 md:p-7">
+      <div className="grid content-start gap-1.5">
+        <h3
+          id={headingId}
+          /* Smaller on a phone. Twenty-three pixels is a page heading, and
+             this is one of thirty-three card headings on a narrow screen. */
+          className="scroll-mt-24 font-sans font-medium leading-[1.2] tracking-[-0.025em] text-[1.2rem] text-dark text-balance wide:text-[1.45rem]"
+        >
+          {question.question}
+        </h3>
+
+        {/* How much of the ballot is in the table under this.
+ 
+            Only the candidates who answered get a row, so without this line a
+            reader has no way to tell a ward where everyone answered from one
+            where two people did — the table looks the same, just shorter. It
+            is the one denominator on the card and it earns its place by
+            saying what is missing from the rows below it. */}
+        {ballotSize !== undefined && ballotSize > 0 && (
+          <p className="type-caption text-text-muted">
+            {rows.length} of {ballotSize}{" "}
+            {ballotSize === 1 ? "candidate" : "candidates"} responded
+          </p>
+        )}
+      </div>
 
       {empty ? (
         <p className="type-caption text-text-muted">
           No answers to this one yet.
         </p>
       ) : (
-        <ul className="grid list-none gap-3 m-0 p-0">
-          {groups.map((group) => (
-            <AnswerPanel
-              key={group.option}
-              color={hue(group.option)}
-              label={group.label}
-              detail={group.detail}
-              candidates={group.candidates}
-              seats={seats}
-              notes={notes}
-              yourKey={yourKey}
-            />
-          ))}
+        <div className="grid content-start">
+          {/* The column heads, once per card. They are what makes the two
+              runs read as columns rather than as a name with something after
+              it — and the third says the rows open, which an arrow alone
+              leaves a reader to discover. */}
+          <div className="hidden @sm:grid @sm:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_1rem] @2xl:grid-cols-[minmax(0,1fr)_minmax(0,22rem)_1rem] items-end gap-x-4 border-b border-border-light pb-2 type-label-sm text-text-muted">
+            <span>Candidate</span>
+            <span className="@sm:text-right">Answer</span>
+            <span />
+          </div>
 
-          {/* On no option, because none of them fit what they wrote. Their own
-              words are the whole of what they said here, so they are printed
-              rather than summarised away. */}
-          {verbatim.length > 0 && (
-            <AnswerPanel
-              color={EMPTY}
-              label="In their own words"
-              muted
-              candidates={verbatim}
-              seats={seats}
-              notes={notes}
-              yourKey={yourKey}
-            />
-          )}
-        </ul>
+          <ul className="grid content-start list-none m-0 p-0">
+            {rows.map((row) => (
+              <AnswerRow
+                key={row.key}
+                row={row}
+                color={row.option === null ? EMPTY : hue(row.option)}
+                muted={row.option === null}
+                seat={seats?.[row.key]?.label}
+                role={roles?.[row.key]}
+                notes={notes}
+                you={row.key === yourKey}
+              />
+            ))}
+          </ul>
+        </div>
       )}
 
-      {/* One line, not a plate each. A ward can have ten registered candidates
-          and two respondents, and a plate per silent name per question is
-          three hundred cells of nothing — the grid's problem, restated. Named
-          all the same, on every question: a reader deciding how to vote is
-          owed the fact that their ballot line said nothing.
+      {/* One line, not a row each. A row per absent name per question is
+          three hundred cells of nothing — the grid's problem, restated.
 
-          Unless nobody answered anything, which `nameTheSilent` turns off.
-          Then the line is the whole ballot, thirty times over, and it says
-          nothing the "No answers to this one yet." above it did not — the
-          roster at the top of the section is where those names belong. */}
+          Who is on this line depends on what the caller passed as `silent`.
+          The race pages pass none, so it is the respondents who skipped this
+          particular question: people who did write back, and did not answer
+          this. That is per-question and worth a line. The ones who never
+          wrote back at all are named once by the roster over the section,
+          which links them too.
+
+          `nameTheSilent` turns the line off entirely where nobody answered
+          anything, for callers that do pass a `silent` list. */}
       {unanswered.length > 0 && (
-        <p className="type-caption mt-auto border-t border-border-light pt-3 text-text-muted text-pretty">
+        <p className="type-caption border-t border-border-light pt-3 text-text-muted text-pretty">
           <span className="type-label-sm">Did not answer</span>{" "}
           {unanswered.map((candidate) => candidate.name).join(" · ")}
         </p>
@@ -172,258 +258,147 @@ export function QuestionRollCall({
 /** A candidate's ballot line: which race, and the seat within it. */
 export type Seat = {
   race: "mayor" | "councillor";
-  /** how the seat prints on a plate — "Ward 9". Mayoral candidates carry
-   *  none: the run they sit in is already headed "For mayor". */
+  /** how the seat prints on a row — "Ward 9". Mayoral candidates carry none:
+   *  the race they sit in is already the page. */
   label?: string;
 };
 
-/* One answer, enclosed, with everyone who gave it inside it.
+/** One candidate's answer to one question, as the table wants it. */
+type AnswerRow = RollCallName & {
+  /** their own words, where they answered in them rather than on an option */
+  answer?: string;
+  /** which option they picked, or null for an answer in their own words */
+  option: number | null;
+  /** the answer as it was put to them, which is what the column prints */
+  answerLabel: string;
+};
+
+/*
+ * One row: who, what they answered, and what they wrote about it.
  *
- * The tint is the option's own hue at 7% — enough for the block to have an
- * inside and an outside at a glance, light enough that the names on top of it
- * are still the darkest thing in the card. */
-function AnswerPanel({
+ * The writing opens rather than printing, which is the one thing here that
+ * hides anything, and it is worth it: a ward's respondents write a paragraph
+ * each, and thirty-three cards of paragraphs is the page this table replaced.
+ * `<details>` and not a script — the row opens with JavaScript off, it is
+ * keyboard-operable for free, and the card stays a server component.
+ *
+ * A candidate who wrote nothing gets no control. An arrow that opens onto
+ * nothing is worse than no arrow.
+ */
+function AnswerRow({
+  row,
   color,
-  label,
-  detail,
-  candidates,
-  seats,
-  notes = true,
-  yourKey,
-  muted = false,
+  muted,
+  seat,
+  role,
+  notes,
+  you,
 }: {
+  row: AnswerRow;
   color: string;
-  label: string;
-  detail?: string | null;
-  candidates: (RollCallName & { answer?: string })[];
-  seats?: Record<string, Seat>;
-  notes?: boolean;
-  yourKey?: string;
-  /** the "own words" panel, which is a caveat rather than an option */
+  /** an answer on no option — set in the empty hue, and named rather than
+   *  coloured in as a choice */
   muted?: boolean;
+  seat?: string;
+  /** Incumbent, Challenger — what they are on this ballot. Toronto's council
+   *  races carry no party, so this is the only standing a name has. */
+  role?: string;
+  notes: boolean;
+  /** the reader's own row, on the survey results */
+  you?: boolean;
 }) {
-  /* The reader comes out of the run and sits above it.
+  const words = row.answer || (notes ? row.note : null);
 
-     Filed by surname among the candidates, "You" is one plate in a line of a
-     dozen, and the reader has to scan every panel on the card to find out
-     which one they are in — on a page whose entire question is "where am I",
-     that is the one thing that should never need looking for. Lifted to the
-     top of the block it is the first thing under the answer, in the same
-     place in every panel, so the panel a reader belongs to announces itself
-     before they read a single name. */
-  const you = yourKey
-    ? candidates.find((candidate) => candidate.key === yourKey)
-    : undefined;
-  const field = you
-    ? candidates.filter((candidate) => candidate.key !== yourKey)
-    : candidates;
+  const body = (
+    <>
+      <span className="col-start-1 row-start-1 grid content-start gap-0.5">
+        <span className="font-sans font-medium leading-[1.3] tracking-[-0.01em] text-[0.95rem] text-dark">
+          {row.name}
+        </span>
+        {(seat || role) && (
+          <span className="type-label-sm text-text-muted">
+            {[seat, role].filter(Boolean).join(" · ")}
+          </span>
+        )}
+      </span>
 
-  /* Mayor first — one seat, and the race the whole city votes in. Both runs
-     keep the surname order they arrived in. */
-  const races = (["mayor", "councillor"] as const)
-    .map(
-      (race) =>
-        [
-          race,
-          field.filter((candidate) => seats?.[candidate.key]?.race === race),
-        ] as const,
-    )
-    .filter(([, named]) => named.length > 0);
+      {/* The answer as it was put to the candidates, in full. Most of these
+          are a phrase and not a word — "Concentrate growth on major streets
+          and near rapid transit" — so it is a block that wraps rather than a
+          pill that cannot, set in the option's own hue so the column can be
+          read down as a split. */}
+      <span
+        className={`col-span-2 row-start-2 justify-self-start @sm:col-span-1 @sm:col-start-2 @sm:row-start-1 @sm:justify-self-end rounded-[3px] px-2 py-1 font-sans text-[0.9rem] leading-[1.3] tracking-[-0.01em] text-pretty ${
+          muted ? "italic" : "font-medium"
+        }`}
+        style={{
+          background: `color-mix(in oklab, ${color} 14%, transparent)`,
+          color: muted
+            ? "var(--color-text-muted)"
+            : `color-mix(in oklab, ${color} 72%, var(--color-dark))`,
+        }}
+      >
+        {row.answerLabel}
+      </span>
+    </>
+  );
+
+  /* Stacked on a narrow screen and in columns from `cards` (612px) up: the
+     answer runs to ninety characters on some questions, and beside a name in
+     four hundred pixels that is a column of two or three words a line. */
+  const grid =
+    "grid grid-cols-[minmax(0,1fr)_1rem] gap-x-3 gap-y-1 @sm:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_1rem] @2xl:grid-cols-[minmax(0,1fr)_minmax(0,22rem)_1rem] @sm:items-start @sm:gap-x-4";
 
   return (
     <li
-      className="grid gap-2.5 border-l-[3px] p-3.5 pl-4"
-      style={{
-        borderColor: color,
-        background: `color-mix(in oklab, ${color} 8%, transparent)`,
-      }}
+      className={`border-b border-border-light last:border-b-0 ${
+        you ? "bg-bg-alt" : ""
+      }`}
     >
-      {/* The answer as it was put to the candidates, in full.
+      {words ? (
+        <details className="answer-reveal group">
+          <summary
+            className={`${grid} cursor-pointer list-none py-2 [&::-webkit-details-marker]:hidden`}
+          >
+            {body}
+            {/* Not a chevron. The icon only appears on rows that have
+                something behind them, so it can say what that something is —
+                the candidate wrote about this answer — instead of only that
+                the row opens.
 
-          The questionnaire gives most options a short handle and the real
-          wording underneath — "Public delivery" over "Build or finance
-          substantially more affordable and supportive housing" — and this
-          panel used to title itself with the handle and print the wording as
-          a caption below. That is a summary of the answer standing where the
-          answer should be, and on a page whose whole job is what a candidate
-          said, the reader gets the sentence they actually endorsed. Options
-          with no expansion ("Yes") are already their own full wording.
+                Lines of text in a bubble — a picture of the thing it opens
+                onto. All three inner strokes are straight rules, so it holds
+                together at sixteen pixels where a glyph built from small
+                curled quote marks would not.
 
-          Set like a title all the same: the biggest thing inside the block,
-          in serif rather than the question's sans, so the two read as heading
-          and sub-heading instead of competing at one size. */}
-      <p
-        className={`leading-[1.25] text-pretty ${
-          muted
-            ? "type-label-sm text-text-muted"
-            : "font-serif text-[1.28rem] font-medium tracking-[-0.015em] text-dark"
-        }`}
-      >
-        {detail || label}
-      </p>
+                It darkens rather than turns: this is not a chevron and
+                rotating it would only make it unrecognisable. */}
+            <MessageSquareText
+              /* Held to the first line of the answer beside it, which is
+                 the thing it actually sits next to — not to the row, and not
+                 to the name in the column before it.
 
-      {/* BY RACE, WHERE THERE IS MORE THAN ONE
-
-          A ward panel is one run of plates: everyone in it is running for the
-          same seat, so a heading over them would say what the page says. The
-          city-wide page puts thirty-odd plates in a panel drawn from two
-          ballot lines a voter holds separately — the mayor they get one vote
-          for, and the councillor they get one vote for — and undivided, the
-          two are a single wall of names in which the handful that matter to
-          any one reader are hidden. Split, a panel answers "did the mayoral
-          field agree with my councillor" without being read end to end.
-
-          Only where both races are actually present: a panel that happens to
-          be all councillors gets no heading, because a heading over the whole
-          of something is not a division. */}
-      {you && (
-        <Plates
-          candidates={[you]}
-          seats={seats}
-          notes={notes}
-          color={color}
-          yourKey={yourKey}
-        />
-      )}
-
-      {races.length > 1 ? (
-        <div className="grid gap-2.5">
-          {races.map(([race, named]) => (
-            <div key={race} className="grid gap-1.5">
-              <p className="type-label-sm text-text-muted">
-                {race === "mayor" ? "For mayor" : "For council"}
-              </p>
-              <Plates
-                candidates={named}
-                seats={seats}
-                notes={notes}
-                color={color}
-                yourKey={yourKey}
-              />
-            </div>
-          ))}
-        </div>
+                 The row is as tall as the answer, and an answer can wrap to
+                 three lines, so centring dropped the icon down the row away
+                 from its own candidate. But the answer's first line starts
+                 four pixels down inside the badge's own padding, so matching
+                 the name instead left the icon sitting high. Six pixels puts
+                 the middle of the icon on the middle of that first line, and
+                 on a single-line answer — which is most of them — that is
+                 the middle of the badge as well. */
+              className="col-start-2 row-start-1 mt-[2px] size-4 self-start justify-self-end text-text-muted transition-colors duration-150 group-open:text-dark @sm:col-start-3 @sm:mt-1.5"
+              aria-hidden="true"
+            />
+          </summary>
+          <p className="pb-3 font-serif text-[1.02rem] leading-[1.5] text-text-secondary text-pretty @sm:max-w-[68ch]">
+            {row.answer && <>&ldquo;{row.answer}&rdquo;</>}
+            {row.answer && notes && row.note && " "}
+            {notes && row.note}
+          </p>
+        </details>
       ) : (
-        field.length > 0 && (
-          <Plates
-            candidates={field}
-            seats={seats}
-            notes={notes}
-            color={color}
-            yourKey={yourKey}
-          />
-        )
+        <div className={`${grid} py-2`}>{body}</div>
       )}
     </li>
-  );
-}
-
-/* One run of candidates.
- *
- * Not a row of plates and a stack of notes under it: split in two, a candidate
- * who explained their answer got their plate printed twice, which is the
- * repetition the plates were meant to end.
- *
- * So each candidate appears once. The ones who only picked the option flow
- * inline as plates; the ones who wrote something take a line of their own,
- * with their words set underneath their plate — a plate is a label and a
- * sentence is not, and running the two along one line makes the plate read as
- * the first few words of the sentence. A candidate who took the trouble to
- * explain has left the most useful thing on the page, so it prints in the
- * open: a note behind a disclosure is a note nobody reads.
- *
- * Those written lines are ruled off from each other. Stacked, a plate, a
- * paragraph, a plate and a paragraph run together into one column of prose
- * with names in it, and the reader has to work out where one candidate stops
- * and the next starts from the shape of the text. A hairline above each one
- * after the first says it instead — faint enough to stay out of the way of
- * the tinted panel it sits in, present enough that the block reads as a list
- * of people rather than a passage. */
-function Plates({
-  candidates,
-  seats,
-  notes,
-  color,
-  yourKey,
-}: {
-  candidates: (RollCallName & { answer?: string })[];
-  seats?: Record<string, Seat>;
-  notes: boolean;
-  color: string;
-  yourKey?: string;
-}) {
-  return (
-    <ul className="flex list-none flex-wrap items-baseline gap-1.5 m-0 p-0">
-      {candidates.map((candidate, index) => {
-        const note = notes ? candidate.note : null;
-        const words = candidate.answer || note;
-        /* Not on the first entry in the run: a rule above the opening line
-           divides the names from the answer they are filed under, which is
-           the one break the panel already makes with its own heading. */
-        const ruled = Boolean(words) && index > 0;
-        return (
-          <li
-            key={candidate.key}
-            className={`${words ? "basis-full" : ""} ${
-              ruled ? "mt-1 border-t border-border-light pt-2.5" : ""
-            }`}
-          >
-            <NamePlate
-              name={candidate.name}
-              seat={seats?.[candidate.key]?.label}
-              color={color}
-              you={candidate.key === yourKey}
-            />
-            {words && (
-              <p className="mt-1.5 font-serif text-[1.02rem] leading-[1.5] text-text-secondary text-pretty">
-                {candidate.answer && <>&ldquo;{candidate.answer}&rdquo;</>}
-                {candidate.answer && note && " "}
-                {note}
-              </p>
-            )}
-          </li>
-        );
-      })}
-    </ul>
-  );
-}
-
-/* A candidate, as an object rather than a word: their own border on the card's
-   own background, so a name lifts off the tinted panel behind it. */
-function NamePlate({
-  name,
-  seat,
-  color,
-  you = false,
-}: {
-  name: string;
-  seat?: string;
-  color: string;
-  /** the reader's own plate — filled in the option's hue rather than outlined
-   *  in it, so the one plate they are looking for is the one plate that is a
-   *  solid block of colour in a panel of outlines. */
-  you?: boolean;
-}) {
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 border px-2 py-1 align-middle font-sans text-[0.9rem] leading-none tracking-[-0.01em] ${
-        you ? "font-semibold text-bg" : "bg-bg font-medium text-dark"
-      }`}
-      style={
-        you
-          ? { background: color, borderColor: color }
-          : { borderColor: `color-mix(in oklab, ${color} 45%, transparent)` }
-      }
-    >
-      <span
-        className="size-1.5 flex-none rounded-full"
-        style={{ background: you ? "var(--color-bg)" : color }}
-        aria-hidden="true"
-      />
-      {name}
-      {seat && (
-        <span className="font-normal text-text-muted">{seat}</span>
-      )}
-    </span>
   );
 }

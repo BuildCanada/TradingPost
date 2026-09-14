@@ -575,3 +575,40 @@ body {
 .memo-print-logo {
   filter: invert(1);
 }
+
+/* ─── Expandable candidate answers ───
+   The questionnaire rows on the ward and mayoral pages are <details>, so what
+   a candidate wrote opens in place. Native <details> snaps, which on a card of
+   fourteen rows gives no sense of which row grew — the page just jumps.
+
+   Animated with `::details-content` rather than a script, so the rows stay
+   server-rendered and still work with JavaScript off. `interpolate-size` is
+   what makes a transition to `block-size: auto` possible at all; it is set
+   here rather than on :root because it inherits, and enabling keyword
+   interpolation for the whole document would quietly change every other
+   transition that lands on an intrinsic size.
+
+   Browsers without `::details-content` ignore all of this and open the way
+   they always did. */
+.answer-reveal {
+  interpolate-size: allow-keywords;
+}
+
+.answer-reveal::details-content {
+  block-size: 0;
+  overflow: hidden;
+}
+
+.answer-reveal[open]::details-content {
+  block-size: auto;
+}
+
+/* The global reduced-motion rule reaches `*`, `::before` and `::after`, which
+   does not include `::details-content` — so this one guards itself. */
+@media (prefers-reduced-motion: no-preference) {
+  .answer-reveal::details-content {
+    transition:
+      block-size 220ms ease,
+      content-visibility 220ms allow-discrete;
+  }
+}

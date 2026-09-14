@@ -135,7 +135,6 @@ const TORONTO_2026: SupportedElection = {
   wardLookup: true,
   candidateProfiles: true,
   themeClass: "theme-election",
-  surveyClosed: true,
 };
 
 const BRAMPTON_2026: SupportedElection = {

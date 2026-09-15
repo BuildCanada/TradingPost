@@ -132,17 +132,32 @@ export default async function IssuesPage() {
 
         {/* ── Hero ───────────────────────────────────────────── */}
         <section className="px-6 py-8 md:px-14 md:py-10 border-b-2 border-dark">
-          <p className="type-label text-accent mb-3.5">The whole field</p>
-          <h1 className="font-sans font-medium leading-[0.98] tracking-[-0.04em] text-[clamp(2.25rem,4.5vw,3.75rem)] max-w-[17ch] text-balance mb-4">
-            Where the candidates stand
-          </h1>
-          <p className="font-serif text-[1.05rem] leading-[1.5] text-dark/85 max-w-[58ch] text-pretty">
-            The same {questionCount} questions, put to everyone
-            running for mayor and for council. Read across the whole field, the
-            answers show what no single ballot can: what Toronto&rsquo;s next
-            council already agrees on, and what it will spend four years
-            fighting over.
-          </p>
+          {/* The ask beside the title rather than only at the foot of the
+              page. This page is thirty-three cards long and a reader who
+              stops halfway never reaches the band at the bottom — and the
+              question it asks, where do you stand, is the one the whole page
+              is trying to provoke. Beside the heading is the slot SurveyCta
+              was drawn for, which is how it sits on the ward pages too. */}
+          <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-12">
+            <div>
+              <p className="type-label text-accent mb-3.5">The whole field</p>
+              <h1 className="font-sans font-medium leading-[0.98] tracking-[-0.04em] text-[clamp(2.25rem,4.5vw,3.75rem)] max-w-[17ch] text-balance mb-4">
+                Where the candidates stand
+              </h1>
+              <p className="font-serif text-[1.05rem] leading-[1.5] text-dark/85 max-w-[58ch] text-pretty">
+                The same {questionCount} questions, put to everyone
+                running for mayor and for council. Read across the whole field,
+                the answers show what no single ballot can: what
+                Toronto&rsquo;s next council already agrees on, and what it
+                will spend four years fighting over.
+              </p>
+            </div>
+
+            {/* Nothing here while the survey is closed — `surveyHref` returns
+                no path to link, so the column collapses and the title keeps
+                the full width. */}
+            {surveyInvite && <SurveyCta href={surveyInvite} />}
+          </div>
         </section>
 
         {/* ── Key stats ──────────────────────────────────────── */}

@@ -2,30 +2,32 @@
 
 import { useState } from "react";
 
-import { OptionBar, percentOf } from "@/components/charts/trilemma";
+import { OptionPie, percentOf } from "@/components/charts/trilemma";
 
-/* The interactive half of a QuestionSplit card: the band, the legend, and the
+/* The interactive half of a QuestionSplit card: the pie, the legend, and the
  * panel of names behind each of them.
  *
- * THE CHART IS OptionBar, FROM THE CHARTS PACKAGE
- *   This was a hand-drawn donut first, and a donut is the wrong chart for this
- *   page twice over. The page's work is done across thirty-odd cards at once —
- *   where does the field agree, where does it split — and a share read as a
- *   length against a common left edge can be compared between cards, where an
- *   angle cannot. And a good many of the questions are a straight Yes/No,
- *   which is the case a pie serves worst: 72/28 is plain in a band and a
- *   judgement call in a circle.
+ * THE CHART IS OptionPie, AND THIS IS THE SECOND TIME ROUND
+ *   It was a hand-drawn donut first. That was replaced by OptionBar, a single
+ *   100% band, on an argument this file used to make at length and which has
+ *   not stopped being true: the page's work is done across thirty-odd cards at
+ *   once — where does the field agree, where does it split — and a share read
+ *   as a length against a common left edge can be compared between cards,
+ *   where an angle cannot. Twenty-six of the thirty-three questions are also
+ *   an ordered scale, yes / yes-with-conditions / no, which a band keeps in
+ *   order along its length. Five more have two options, where a pie is two
+ *   slices and a number would have done.
  *
- *   OptionBar already draws exactly this — "one question's answers as a single
- *   100% band" — with the fade-all-but-one behaviour the legend needs, so the
- *   only thing here is the legend and the panel behind it.
+ *   It is a pie again because that was the call. Recorded rather than argued
+ *   so that whoever weighs it next has the reasoning in front of them instead
+ *   of rediscovering it: OptionBar is still exported and still takes these
+ *   exact props, so going back is this component's import and its figure.
  *
- * THE BAND CARRIES NO NUMBERS
- *   `showCounts` and `showLabels` are both off. The legend sits directly under
- *   the bar with every option's wording, count and share on it, so a segment
- *   printing its own share is the same figure twice, a centimetre apart — and
- *   the option names cannot fit under a narrow segment anyway, which is why
- *   OptionBar drops them. The bar is the shape; the legend is the key.
+ * THE PIE CARRIES NO NUMBERS
+ *   The legend sits directly under it with every option's wording, count and
+ *   share on it, so a slice printing its own share is the same figure twice, a
+ *   centimetre apart — and an option wording here runs to ninety characters,
+ *   which no slice can hold. The pie is the shape; the legend is the key.
  *
  * WHY THE NAMES ARE BEHIND SOMETHING
  *   This page put every name under every question and the names were the
@@ -70,7 +72,9 @@ import { OptionBar, percentOf } from "@/components/charts/trilemma";
  */
 
 /** The band's height, and so where the panel of names hangs from. */
-const BAR = 32;
+/* The pie's drawn size. The names panel is positioned off it, so the two are
+   one constant rather than two that can drift. */
+const PIE = 148;
 
 export type SplitSlice = {
   key: string;
@@ -146,19 +150,22 @@ export function QuestionSplitFigure({
          be. */
       onMouseLeave={close}
     >
-      <OptionBar
-        options={slices.map((slice) => slice.label)}
-        counts={slices.map((slice) => slice.names.length)}
-        colors={slices.map((slice) => slice.color)}
-        onSegmentEnter={(i) => graze(slices[i].key)}
-        onSegmentLeave={() => graze(null)}
-        /* -1 from findIndex is "no option", which OptionBar spells null. */
-        highlight={highlight < 0 ? null : highlight}
-        height={BAR}
-        responsive
-        showCounts={false}
-        label={question}
-      />
+      {/* Centred, because a pie has no left edge to align to the way the bar
+          did — set flush left in a card this wide it read as an ornament
+          beside the legend rather than the figure the legend keys. */}
+      <div className="flex justify-center">
+        <OptionPie
+          options={slices.map((slice) => slice.label)}
+          counts={slices.map((slice) => slice.names.length)}
+          colors={slices.map((slice) => slice.color)}
+          onSegmentEnter={(i) => graze(slices[i].key)}
+          onSegmentLeave={() => graze(null)}
+          /* -1 from findIndex is "no option", which the pie spells null. */
+          highlight={highlight < 0 ? null : highlight}
+          size={PIE}
+          label={question}
+        />
+      </div>
 
       <Legend
         slices={slices}
@@ -294,7 +301,7 @@ function Names({ slice, onDismiss }: { slice: SplitSlice; onDismiss: () => void 
   return (
     <div
       className="absolute inset-x-0 z-20 max-h-[14rem] overflow-y-auto border border-dark bg-bg p-3 shadow-[0_6px_20px_rgba(0,0,0,0.1)]"
-      style={{ top: `calc(${BAR}px + 0.75rem)` }}
+      style={{ top: `calc(${PIE}px + 0.75rem)` }}
       /* The legend row that would let a latched panel go is underneath this,
          so the panel itself is the way out. Harmless on a panel opened by
          hover, which the pointer never reaches. */

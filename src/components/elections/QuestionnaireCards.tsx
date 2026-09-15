@@ -174,7 +174,20 @@ export function QuestionnaireCards({
               a reader is meant to compare across. The rows inside size
               themselves against the card rather than the window, so they lay
               out correctly at half width. */}
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <div
+            className={`grid grid-cols-1 gap-4 lg:grid-cols-2 ${
+              /* A third column for the charts, and only for them. A band and a
+                 legend read fine narrow, where a roll call is a table whose
+                 answer column already runs to ninety characters.
+
+                 From 1280 rather than from 1166, because the scroll rail
+                 arrives at 1200 and takes 268 pixels with it: splitting three
+                 ways at 1166 would hand the cards their narrowest width at the
+                 moment they multiplied. At 1280 a card is about 280 pixels,
+                 at 1440 about 336. */
+              chart ? "xl:grid-cols-3" : ""
+            }`}
+          >
             {group.questions.map((question) =>
               chart ? (
                 <QuestionSplit

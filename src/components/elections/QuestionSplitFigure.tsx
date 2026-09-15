@@ -122,7 +122,21 @@ export function QuestionSplitFigure({
 
   return (
     <div
-      className="relative flex flex-col gap-3"
+      /* `@container` so the names panel can size its columns against the card
+         instead of the window — but it carries a cost worth naming: a
+         container is `contain: layout`, which makes this a stacking context
+         where a bare `position: relative` was not. The panel's own `z-20`
+         used to lift it above everything on the page; scoped to this figure
+         it only orders it against its siblings here, and the card below —
+         later in the tree, and exactly what the panel opens over — would
+         paint on top of it.
+
+         So the whole figure lifts while a panel is open. Only while: left
+         permanently raised, thirty-three of these would stack in tree order
+         for no reason. */
+      className={`@container relative flex flex-col gap-3 ${
+        open ? "z-30" : ""
+      }`}
       onKeyDown={(event) => {
         if (event.key === "Escape") close();
       }}
@@ -291,21 +305,29 @@ function Names({ slice, onDismiss }: { slice: SplitSlice; onDismiss: () => void 
           ? "1 candidate"
           : `${slice.names.length} candidates`}
       </p>
-      {/* Columns, because a segment can hold forty people: in one run they are
-          a list taller than anything this panel can be allowed to be. Three
-          columns puts forty names in fourteen rows.
+      {/* A grid, not CSS columns. A segment can hold forty people and the
+          panel is capped at fourteen rem, and multi-column laid out inside a
+          capped box does not grow downwards — it fragments sideways, opening a
+          fourth and fifth column past the panel's right edge. So the overflow
+          ran horizontally while the scrolling was vertical, and the names in
+          those columns could not be reached at all. A grid fills rows
+          downwards, which is the direction this box scrolls.
+
+          How many columns is a question about the panel's width and not the
+          window's: these cards sit two to a row on a wide screen, so the panel
+          is about four hundred and sixty pixels there and a viewport-keyed
+          third column would have squeezed every name onto two lines. Hence the
+          container query on the figure.
 
           Set small. A name here is a thing the reader scans for rather than
-          reads — they are looking for one they know, or counting how many of
-          a slice they recognise — and forty of them is a block that has to sit
-          under the chart without becoming the card. Smaller also buys the
-          columns their width back, which is what keeps a long name on one
-          line. */}
-      <ul className="mt-1.5 list-none gap-1 m-0 p-0 columns-2 sm:columns-3">
+          reads — they are looking for one they know, or counting how many of a
+          slice they recognise — and forty of them is a block that has to sit
+          under the chart without becoming the card. */}
+      <ul className="mt-1.5 grid grid-cols-1 gap-x-4 gap-y-1 list-none m-0 p-0 @xs:grid-cols-2 @2xl:grid-cols-3">
         {slice.names.map((candidate) => (
           <li
             key={candidate.key}
-            className="break-inside-avoid pb-1 font-sans text-[0.84rem] leading-[1.35] text-dark"
+            className="font-sans text-[0.84rem] leading-[1.35] text-dark"
           >
             {candidate.name}
             {candidate.seat && (

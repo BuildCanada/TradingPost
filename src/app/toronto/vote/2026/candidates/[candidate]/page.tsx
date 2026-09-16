@@ -166,6 +166,8 @@ export default async function CandidatePage({
       name: candidate.name,
       website: candidate.website,
       bio: candidate.bio || undefined,
+      image: candidate.image,
+      initials: candidate.initials,
     },
   ];
   const groups = surveyAnswers
@@ -472,6 +474,14 @@ export default async function CandidatePage({
                   respondents={roster}
                   silent={[]}
                   issuesHref={`${ELECTION.basePath}/issues`}
+                  /* Printed, not hidden behind a disclosure. That control
+                     is there to keep a field of four legible across
+                     thirty-three cards; here the field is one person, so
+                     every card holds a single row and there is no split to
+                     read down it. What the card has to say IS the writing,
+                     and a control whose only use is to hide the thing this
+                     URL was opened for is not one worth printing. */
+                  printWriting
                   answerNote={
                     `Each card is one question, with ${candidate.name} filed ` +
                     "under the answer they gave and their own words underneath " +

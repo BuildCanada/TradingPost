@@ -71,6 +71,12 @@ export type GridCandidate = {
   /** a line about who they are, where we have one — hand-maintained, and for
    *  most of a ballot we do not */
   bio?: string;
+  /** their photograph, where we hold one — 44 of Toronto's 388 registrants.
+   *  The questionnaire's rows print it beside the name; the grid does not. */
+  image?: string;
+  /** the monogram that stands in for a missing photograph. Optional because a
+   *  caller that prints no portrait has no use for it. */
+  initials?: string;
 };
 
 export function SurveyGrid({

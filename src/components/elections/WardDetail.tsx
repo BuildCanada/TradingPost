@@ -1,7 +1,7 @@
 import Link from "next/link";
-import Image from "next/image";
 import type { ReactNode } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { CandidatePortrait } from "./CandidatePortrait";
 import CountdownDays from "./CountdownDays";
 import { CandidateRoster } from "./CandidateRoster";
 import {
@@ -468,19 +468,7 @@ function CouncilCandidate({
       }`}
     >
       <div className="flex gap-5 sm:gap-7 items-center">
-        <div className="flex-none size-16 bg-dark relative overflow-hidden flex items-center justify-center font-sans font-medium text-[1.35rem] tracking-[-0.02em] text-bg">
-          {candidate.image ? (
-            <Image
-              src={candidate.image}
-              alt={candidate.name}
-              fill
-              sizes="64px"
-              className="object-cover object-center"
-            />
-          ) : (
-            candidate.initials
-          )}
-        </div>
+        <CandidatePortrait candidate={candidate} size="lg" />
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-3.5 flex-wrap">
             <h3

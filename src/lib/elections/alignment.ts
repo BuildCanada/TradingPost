@@ -204,10 +204,23 @@ export function comparableQuestions(
  *   same way `comparableQuestions` excludes them. `about-you` is NOT excluded
  *   here, unlike there: a candidate's bio is the one thing in that step which
  *   is a public statement rather than a fact about a private person.
+ *
+ * FOLLOW-UPS ARE NOT PROSE
+ *   A textarea placed after a choice question in the same step belongs to that
+ *   question — "If you selected “Ward commitment,” state one numerical target
+ *   and a deadline" is unreadable anywhere but under the answer it qualifies,
+ *   and it printed under the bio, where it read as a stray instruction to the
+ *   candidate. Those are handed to the choice question instead
+ *   (`followUpQuestions`), leaving this to the standalone prose it was written
+ *   for.
  */
 export function writtenQuestions(
   survey: Survey,
 ): { question: SurveyQuestion; stepId: string; stepTitle: string }[] {
+  const followUps = new Set(
+    [...followUpQuestions(survey).values()].map((question) => question.id),
+  );
+
   return survey.steps.flatMap((step) =>
     CONSENT_STEPS.has(step.id)
       ? []
@@ -215,7 +228,8 @@ export function writtenQuestions(
           .filter(
             (question) =>
               question.type === "textarea" &&
-              !NON_POLICY_QUESTIONS.has(question.id),
+              !NON_POLICY_QUESTIONS.has(question.id) &&
+              !followUps.has(question.id),
           )
           .map((question) => ({
             question,
@@ -223,6 +237,47 @@ export function writtenQuestions(
             stepTitle: step.title,
           })),
   );
+}
+
+/**
+ * The textareas that ask a respondent to expand on the choice they just made,
+ * keyed by the id of the question they expand on.
+ *
+ * Read off position rather than off a field in the schema, because there is no
+ * such field: the CMS has one flat list of questions per step, and a follow-up
+ * is a textarea authored directly beneath the question it follows. So the rule
+ * is exactly that — a textarea takes the nearest choice question above it in
+ * its own step, and a textarea with no choice question above it (a step of
+ * pure prose, like `about-you`) is standalone and belongs to nobody.
+ *
+ * Only the last textarea under a question wins, which is the only sane reading
+ * of two in a row and has never happened.
+ */
+export function followUpQuestions(survey: Survey): Map<string, SurveyQuestion> {
+  const followUps = new Map<string, SurveyQuestion>();
+
+  for (const step of survey.steps) {
+    if (NON_POLICY_STEPS.has(step.id)) continue;
+
+    let previous: SurveyQuestion | null = null;
+    for (const question of step.questions) {
+      if (
+        CHOICE_TYPES.has(question.type) &&
+        !NON_POLICY_QUESTIONS.has(question.id) &&
+        (question.options?.length ?? 0) > 0
+      ) {
+        previous = question;
+      } else if (
+        question.type === "textarea" &&
+        !NON_POLICY_QUESTIONS.has(question.id) &&
+        previous
+      ) {
+        followUps.set(previous.id, question);
+      }
+    }
+  }
+
+  return followUps;
 }
 
 /**

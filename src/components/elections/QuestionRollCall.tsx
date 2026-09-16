@@ -1,5 +1,7 @@
 import { MessageSquareText } from "lucide-react";
 
+import { CandidatePortrait } from "./CandidatePortrait";
+
 import { rollCall } from "@/lib/elections/candidate-answers";
 import { lastName } from "@/lib/elections/names";
 import { EMPTY, optionColors } from "@/lib/elections/option-colors";
@@ -55,14 +57,29 @@ import type {
  *   three-way one at a glance.
  */
 
+/* The row template, shared by the column heads and every row under them so
+   the two line up.
+
+   The trailing `1rem` is the disclosure icon's column. A card that prints its
+   writing has no icon, so it drops the column rather than keeping a gutter
+   that nothing will ever sit in — which is also what puts the answer against
+   the right edge of the card instead of a rem short of it. */
+const COLUMNS = {
+  open: "grid-cols-[minmax(0,1fr)_1rem] @sm:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_1rem] @2xl:grid-cols-[minmax(0,1fr)_minmax(0,22rem)_1rem]",
+  printed:
+    "grid-cols-[minmax(0,1fr)] @sm:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)] @2xl:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]",
+} as const;
+
 export function QuestionRollCall({
   question,
   silent = [],
   nameTheSilent = true,
   seats,
   roles,
+  portraits,
   ballotSize,
   notes = true,
+  printWriting = false,
   yourKey,
   headingId,
 }: {
@@ -84,6 +101,17 @@ export function QuestionRollCall({
    *  candidate has. Optional: a caller with nothing to say leaves the second
    *  line off the row rather than filling it. */
   roles?: Record<string, string>;
+  /** each candidate's photograph and monogram, keyed by candidate key.
+   *
+   *  A face is the fastest way to find one person in a list of thirty, and
+   *  this table is the one place on the site that named candidates without
+   *  showing them — the ward cards, the mayoral field and a candidate's own
+   *  page all print the plate already.
+   *
+   *  We hold a photograph for 44 of Toronto's 388 registrants, so on most
+   *  rows this is the monogram; see CandidatePortrait for why that is a plate
+   *  and not a blank. A caller that passes nothing gets the rows unchanged. */
+  portraits?: Record<string, { name: string; image?: string; initials?: string }>;
   /** how many candidates are on the ballot this table is drawn from, for the
    *  line that says how much of it answered. Only respondents get a row, so
    *  without it a reader cannot tell a ward where everyone answered from one
@@ -103,6 +131,20 @@ export function QuestionRollCall({
    *  either way: it is the whole of what they said, and dropping it would
    *  leave a plate under a heading with nothing behind it. */
   notes?: boolean;
+  /** print each row's writing outright instead of putting it behind a
+   *  disclosure.
+   *
+   *  The disclosure earns its place on a page with a field in it: a ward's
+   *  four respondents write a paragraph each, and thirty-three cards of
+   *  paragraphs is the page this table replaced. A candidate's own page has a
+   *  field of one — there is no split to read down and nothing to compare, so
+   *  the writing is the whole of what the card has to say.
+   *
+   *  So it is printed, not opened: no `<details>`, no summary, no icon. An
+   *  open disclosure on every row is a control whose only remaining use is to
+   *  hide the thing the reader came for, and thirty-three of them are
+   *  thirty-three ways to make the page worse. */
+  printWriting?: boolean;
   /** the reader's own answers, filed among the candidates' — the survey
    *  results page passes themselves through the same pivot as everyone else,
    *  so "who agreed with me" is a plate sitting in the same block rather than
@@ -210,10 +252,14 @@ export function QuestionRollCall({
               runs read as columns rather than as a name with something after
               it — and the third says the rows open, which an arrow alone
               leaves a reader to discover. */}
-          <div className="hidden @sm:grid @sm:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_1rem] @2xl:grid-cols-[minmax(0,1fr)_minmax(0,22rem)_1rem] items-end gap-x-4 border-b border-border-light pb-2 type-label-sm text-text-muted">
+          <div
+            className={`hidden @sm:grid ${
+              printWriting ? COLUMNS.printed : COLUMNS.open
+            } items-end gap-x-4 border-b border-border-light pb-2 type-label-sm text-text-muted`}
+          >
             <span>Candidate</span>
             <span className="@sm:text-right">Answer</span>
-            <span />
+            {!printWriting && <span />}
           </div>
 
           <ul className="grid content-start list-none m-0 p-0">
@@ -225,7 +271,9 @@ export function QuestionRollCall({
                 muted={row.option === null}
                 seat={seats?.[row.key]?.label}
                 role={roles?.[row.key]}
+                portrait={portraits?.[row.key]}
                 notes={notes}
+                printWriting={printWriting}
                 you={row.key === yourKey}
               />
             ))}
@@ -291,7 +339,9 @@ function AnswerRow({
   muted,
   seat,
   role,
+  portrait,
   notes,
+  printWriting,
   you,
 }: {
   row: AnswerRow;
@@ -303,23 +353,41 @@ function AnswerRow({
   /** Incumbent, Challenger — what they are on this ballot. Toronto's council
    *  races carry no party, so this is the only standing a name has. */
   role?: string;
+  /** their face, or the monogram standing in for it — see CandidatePortrait */
+  portrait?: { name: string; image?: string; initials?: string };
   notes: boolean;
+  /** print the writing rather than hiding it — see `printWriting` above */
+  printWriting?: boolean;
   /** the reader's own row, on the survey results */
   you?: boolean;
 }) {
-  const words = row.answer || (notes ? row.note : null);
+  /* What opens behind the row. The follow-up counts as much as a note: it is
+     an answer the questionnaire asked for, under the question that asked it.
+     `notes` gates both — the city-wide page files names and leaves the writing
+     to the pages whose field is small enough to read it. */
+  const followUp = notes ? row.followUp : null;
+  const words = row.answer || (notes ? row.note : null) || followUp;
 
   const body = (
     <>
-      <span className="col-start-1 row-start-1 grid content-start gap-0.5">
-        <span className="font-sans font-medium leading-[1.3] tracking-[-0.01em] text-[0.95rem] text-dark">
-          {row.name}
-        </span>
-        {(seat || role) && (
-          <span className="type-label-sm text-text-muted">
-            {[seat, role].filter(Boolean).join(" · ")}
+      {/* The plate and the name are one cell, so the name column stays a
+          column: the plate is a fixed 28px and the name takes what is left,
+          whatever the row's second line says. `items-start` rather than
+          centred — a row with a seat under the name is two lines tall, and
+          centring floated the plate between them instead of keeping it level
+          with the name it belongs to. */}
+      <span className="col-start-1 row-start-1 flex items-start gap-2.5">
+        {portrait && <CandidatePortrait candidate={portrait} size="sm" />}
+        <span className="grid content-start gap-0.5 min-w-0">
+          <span className="font-sans font-medium leading-[1.3] tracking-[-0.01em] text-[0.95rem] text-dark">
+            {row.name}
           </span>
-        )}
+          {(seat || role) && (
+            <span className="type-label-sm text-text-muted">
+              {[seat, role].filter(Boolean).join(" · ")}
+            </span>
+          )}
+        </span>
       </span>
 
       {/* The answer as it was put to the candidates, in full. Most of these
@@ -328,7 +396,12 @@ function AnswerRow({
           pill that cannot, set in the option's own hue so the column can be
           read down as a split. */}
       <span
-        className={`col-span-2 row-start-2 justify-self-start @sm:col-span-1 @sm:col-start-2 @sm:row-start-1 @sm:justify-self-end rounded-[3px] px-2 py-1 font-sans text-[0.9rem] leading-[1.3] tracking-[-0.01em] text-pretty ${
+        /* Narrow, the row stacks and the answer takes the whole width under
+           the name — which on a disclosure row means spanning the icon's
+           column too. A printed row has no icon column to span. */
+        className={`${
+          printWriting ? "col-span-1" : "col-span-2"
+        } row-start-2 justify-self-start @sm:col-span-1 @sm:col-start-2 @sm:row-start-1 @sm:justify-self-end rounded-[3px] px-2 py-1 font-sans text-[0.9rem] leading-[1.3] tracking-[-0.01em] text-pretty ${
           muted ? "italic" : "font-medium"
         }`}
         style={{
@@ -346,8 +419,56 @@ function AnswerRow({
   /* Stacked on a narrow screen and in columns from `cards` (612px) up: the
      answer runs to ninety characters on some questions, and beside a name in
      four hundred pixels that is a column of two or three words a line. */
-  const grid =
-    "grid grid-cols-[minmax(0,1fr)_1rem] gap-x-3 gap-y-1 @sm:grid-cols-[minmax(0,1fr)_minmax(0,1.5fr)_1rem] @2xl:grid-cols-[minmax(0,1fr)_minmax(0,22rem)_1rem] @sm:items-start @sm:gap-x-4";
+  const grid = `grid ${
+    printWriting ? COLUMNS.printed : COLUMNS.open
+  } gap-x-3 gap-y-1 @sm:items-start @sm:gap-x-4`;
+
+  /* What the row has to say, once — printed under an open row and behind a
+     closed one, so the two arrangements can never drift apart. */
+  const writing = words ? (
+    <>
+      {(row.answer || (notes && row.note)) && (
+        <p className="pb-3 font-serif text-[1.02rem] leading-[1.5] text-text-secondary text-pretty @sm:max-w-[68ch]">
+          {row.answer && <>&ldquo;{row.answer}&rdquo;</>}
+          {row.answer && notes && row.note && " "}
+          {notes && row.note}
+        </p>
+      )}
+
+      {/* The follow-up, under its own prompt. Without the prompt the answer
+          to it is a number with nothing to measure — "12000" — and the prompt
+          is the question the candidate was actually answering, so it is
+          printed rather than paraphrased. */}
+      {followUp && (
+        <div className="pb-3 grid gap-1 @sm:max-w-[68ch]">
+          <span className="type-label-sm text-text-muted text-pretty">
+            {followUp.question}
+          </span>
+          <span className="font-serif text-[1.02rem] leading-[1.5] text-text-secondary text-pretty">
+            {followUp.text}
+          </span>
+        </div>
+      )}
+    </>
+  ) : null;
+
+  /* Printed. No `<details>`, no summary, no icon — the row is a name, an
+     answer and what they wrote about it, in that order.
+
+     The plate keeps the same grid as a disclosure row so it lines up under
+     the card's column heads, and the writing sits below it at full width. */
+  if (writing && printWriting) {
+    return (
+      <li
+        className={`border-b border-border-light last:border-b-0 ${
+          you ? "bg-bg-alt" : ""
+        }`}
+      >
+        <div className={`${grid} py-2`}>{body}</div>
+        {writing}
+      </li>
+    );
+  }
 
   return (
     <li
@@ -355,7 +476,7 @@ function AnswerRow({
         you ? "bg-bg-alt" : ""
       }`}
     >
-      {words ? (
+      {writing ? (
         <details className="answer-reveal group">
           <summary
             className={`${grid} cursor-pointer list-none py-2 [&::-webkit-details-marker]:hidden`}
@@ -390,11 +511,7 @@ function AnswerRow({
               aria-hidden="true"
             />
           </summary>
-          <p className="pb-3 font-serif text-[1.02rem] leading-[1.5] text-text-secondary text-pretty @sm:max-w-[68ch]">
-            {row.answer && <>&ldquo;{row.answer}&rdquo;</>}
-            {row.answer && notes && row.note && " "}
-            {notes && row.note}
-          </p>
+          {writing}
         </details>
       ) : (
         <div className={`${grid} py-2`}>{body}</div>

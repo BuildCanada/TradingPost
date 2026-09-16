@@ -1,10 +1,10 @@
-import Image from "next/image";
 import Link from "next/link";
 import { Suspense, type ReactNode } from "react";
 import { ArrowRight } from "lucide-react";
 import CountdownDays from "./CountdownDays";
 import LiveCountdown from "./LiveCountdown";
 import { CandidateNameLink } from "./CandidateNameLink";
+import { CandidatePortrait } from "./CandidatePortrait";
 import { PledgeButton } from "./PledgeButton";
 import { SurveyCta } from "./SurveyCta";
 import { ResidencyModal } from "./ResidencyModal";
@@ -828,19 +828,7 @@ function MayoralCard({
 }) {
   return (
     <div className="bg-bg flex gap-4 items-center px-6 py-5 border-b border-r border-border-light">
-      <div className="flex-none size-12 bg-dark relative overflow-hidden flex items-center justify-center font-sans font-medium text-[1rem] tracking-[-0.02em] text-bg">
-        {candidate.image ? (
-          <Image
-            src={candidate.image}
-            alt={candidate.name}
-            fill
-            sizes="48px"
-            className="object-cover object-center"
-          />
-        ) : (
-          candidate.initials
-        )}
-      </div>
+      <CandidatePortrait candidate={candidate} size="md" />
       {/* The name is the link. It used to be plain text with "Campaign site"
           on the line beneath it, which spent a second line saying that the
           thing above it led somewhere — and led off the site. */}

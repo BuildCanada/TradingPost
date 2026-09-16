@@ -15,11 +15,16 @@
 // carry it: most wards have one or two respondents, where a per-ward count
 // says only that the candidate agrees with themselves.
 
-import { comparableQuestions, isYesNoScale, writtenQuestions } from "./alignment";
+import {
+  comparableQuestions,
+  followUpQuestions,
+  isYesNoScale,
+  writtenQuestions,
+} from "./alignment";
 import type { CandidateSurveyResponse } from "./alignment";
 import { nameKey } from "./election-data";
 import { lastName } from "./names";
-import type { Survey } from "./survey";
+import type { Survey, SurveyQuestion } from "./survey";
 
 export type CandidateAnswer = {
   questionId: string;
@@ -50,6 +55,16 @@ export type CandidateAnswer = {
   /** true when `answer` is the candidate's own words rather than an option */
   verbatim: boolean;
   explanation?: string;
+  /**
+   * The questionnaire's own follow-up to this question, where it had one and
+   * the candidate filled it in — "If you selected “Ward commitment,” state one
+   * numerical target and a deadline", and the target they stated.
+   *
+   * Kept apart from `explanation`, which is unprompted reasoning. This was
+   * asked for, so it prints under the question that asked — which is the only
+   * place it means anything.
+   */
+  followUp?: { question: string; text: string };
 };
 
 export type AnswerGroup = {
@@ -94,9 +109,12 @@ export function candidateAnswers(
     responses.map((response) => [response.candidateName, []]),
   );
 
+  const followUps = followUpQuestions(survey);
+
   for (const { question, stepId, stepTitle } of comparableQuestions(survey)) {
     const options = question.options ?? [];
     const counts = options.map(() => 0);
+    const followUp = followUps.get(question.id);
 
     // First pass: the field's split, so every candidate's chart is drawn
     // against the same denominator.
@@ -125,6 +143,7 @@ export function candidateAnswers(
           pick.index === -1 ? pick.raw : (options[pick.index]?.label ?? pick.raw),
         verbatim: pick.index === -1,
         explanation: response.explanations?.[question.id],
+        followUp: followUpAnswer(followUp, response),
       };
 
       const last = groups.at(-1);
@@ -145,6 +164,23 @@ export function candidateAnswers(
       };
     })
     .filter((entry) => entry.answered > 0);
+}
+
+/** What a candidate wrote in a question's follow-up box, where there is one
+ *  and they wrote in it. The text is stored under the follow-up's own id, in
+ *  `answers` — it is an answer like any other — and mirrored into
+ *  `explanations` by the CMS, so either will do and `answers` is the original. */
+function followUpAnswer(
+  question: SurveyQuestion | undefined,
+  response: CandidateSurveyResponse,
+): { question: string; text: string } | undefined {
+  if (!question) return undefined;
+  const text = (
+    response.answers[question.id] ??
+    response.explanations?.[question.id] ??
+    ""
+  ).trim();
+  return text ? { question: question.label, text } : undefined;
 }
 
 /** Keyed by `nameKey`, ready to look up against a roster `CandidateView.key`. */
@@ -373,6 +409,9 @@ export type RollCallName = {
   name: string;
   /** their own words about why, where they wrote any */
   note: string | null;
+  /** the questionnaire's follow-up to this question and their answer to it,
+   *  where it asked one and they filled it in */
+  followUp: { question: string; text: string } | null;
 };
 
 /** One answer, and everyone who gave it. */
@@ -420,6 +459,7 @@ export function rollCall(
     key: cell.key,
     name: cell.candidateName,
     note: cell.answer?.explanation?.trim() || null,
+    followUp: cell.answer?.followUp ?? null,
   });
 
   /* Surname order inside every group, so a candidate sits in the same relative
@@ -454,6 +494,7 @@ export function rollCall(
       key: candidate.key,
       name: candidate.name,
       note: null,
+      followUp: null,
     })),
   ].sort(
     (a, b) =>

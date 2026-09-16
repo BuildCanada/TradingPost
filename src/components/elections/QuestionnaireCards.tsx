@@ -98,6 +98,7 @@ export function QuestionnaireCards({
   roles,
   ballotSize,
   notes = true,
+  printWriting = false,
   yourKey,
   idPrefix,
   answerNote,
@@ -123,6 +124,11 @@ export function QuestionnaireCards({
   /** print each candidate's own words about their answer — see
    *  QuestionRollCall. The city-wide page turns them off. */
   notes?: boolean;
+  /** print each row's writing outright rather than putting it behind a
+   *  disclosure. A candidate's own page passes it: with a field of one there
+   *  is no split to read down, and the writing is the whole of what a card
+   *  says. See `printWriting` in QuestionRollCall. */
+  printWriting?: boolean;
   /** the reader's own row, where they have answered the same questionnaire —
    *  see QuestionRollCall. */
   yourKey?: string;
@@ -146,6 +152,25 @@ export function QuestionnaireCards({
     key: candidate.key,
     name: candidate.name,
   }));
+
+  /* Faces for the rows, keyed the way `seats` and `roles` are. Built here
+     rather than asked of the caller: every page already hands this component
+     its whole roster, and the portrait is two fields of it. Where a roster
+     carries neither a photograph nor a monogram — the city-wide page, whose
+     names come from the responses and not from the ballot — the map is empty
+     and the rows print as they always did. */
+  const portraits = Object.fromEntries(
+    [...respondents, ...silent]
+      .filter((candidate) => candidate.image || candidate.initials)
+      .map((candidate) => [
+        candidate.key,
+        {
+          name: candidate.name,
+          image: candidate.image,
+          initials: candidate.initials,
+        },
+      ]),
+  );
 
   return (
     /* Sections sit well apart. The cards inside one are a gap-4 grid, so a
@@ -205,8 +230,10 @@ export function QuestionnaireCards({
                   headingId={sectionId(question.questionId, idPrefix)}
                   seats={seats}
                   roles={roles}
+                  portraits={portraits}
                   ballotSize={ballotSize}
                   notes={notes}
+                  printWriting={printWriting}
                   yourKey={yourKey}
                 />
               ),

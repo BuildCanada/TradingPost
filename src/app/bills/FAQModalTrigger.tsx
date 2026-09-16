@@ -53,7 +53,7 @@ export default function FAQModalTrigger() {
       <button
         ref={buttonRef}
         type="button"
-        className="mt-3 inline-block cursor-pointer text-xs underline text-text-secondary hover:text-dark"
+        className="type-label cursor-pointer text-text-secondary underline underline-offset-4 hover:text-accent"
         onClick={openModal}
       >
         FAQ
@@ -73,7 +73,7 @@ export default function FAQModalTrigger() {
             aria-modal="true"
             aria-labelledby="faq-title"
             tabIndex={-1}
-            className={`relative z-10 w-full max-w-2xl border border-border-light bg-white p-5 shadow-xl outline-none transition-all duration-200 ease-out ${
+            className={`relative z-10 max-h-[85vh] w-full max-w-2xl overflow-y-auto border border-border-light bg-bg p-6 shadow-xl outline-none transition-all duration-200 ease-out ${
               visible
                 ? "opacity-100 translate-y-0 scale-100"
                 : "opacity-0 translate-y-2 scale-95"
@@ -86,30 +86,30 @@ export default function FAQModalTrigger() {
               <button
                 type="button"
                 aria-label="Close"
-                className="ml-3 text-text-secondary hover:text-dark"
+                className="ml-3 cursor-pointer text-text-secondary hover:text-accent"
                 onClick={closeModal}
               >
                 ✕
               </button>
             </div>
 
-            <div className="mt-4 text-sm leading-6">
-              <h3 className="font-semibold">Why did you build this?</h3>
-              <p className="text-text-secondary mt-1">
+            <div className="mt-5">
+              <h3 className="type-h4 text-dark">Why did you build this?</h3>
+              <p className="type-default mt-1.5 text-text-secondary">
                 We built this tool so that Canadians could easily understand
                 parliamentary bills and how they align with a pro-growth stance.
               </p>
 
-              <h3 className="font-semibold mt-4">
+              <h3 className="type-h4 mt-6 text-dark">
                 Where does the bill data come from?
               </h3>
-              <p className="text-text-secondary mt-1">
+              <p className="type-default mt-1.5 text-text-secondary">
                 We are powered by{" "}
                 <a
                   href="https://civicsproject.org"
                   target="_blank"
                   rel="noreferrer"
-                  className="underline"
+                  className="text-accent underline"
                 >
                   The Civics Project
                 </a>
@@ -117,32 +117,32 @@ export default function FAQModalTrigger() {
                 parliamentary data feeds.
               </p>
 
-              <h3 className="font-semibold mt-4">
+              <h3 className="type-h4 mt-6 text-dark">
                 How do you determine a bill&apos;s judgement?
               </h3>
-              <p className="text-text-secondary mt-1">
+              <p className="type-default mt-1.5 text-text-secondary">
                 Each bill is evaluated against a set of pro-growth principles
                 using an LLM. The LLM uses these principles to make a judgement
                 on the bill. We show all of this, including the principles,
                 evaluation and rationale, on the bill&apos;s page.
               </p>
 
-              <h3 className="font-semibold mt-4">
+              <h3 className="type-h4 mt-6 text-dark">
                 Was this tool created to vote on bills?
               </h3>
-              <p className="text-text-secondary mt-1">
+              <p className="type-default mt-1.5 text-text-secondary">
                 No. This tool was created to help Canadians better understand
                 bills and their economic impact. It is meant to be educational
                 and informative.
               </p>
 
-              <h3 className="font-semibold mt-4">
+              <h3 className="type-h4 mt-6 text-dark">
                 What prompt do you use to evaluate the bills?
               </h3>
-              <p className="text-text-secondary mt-1">
+              <p className="type-default mt-1.5 text-text-secondary">
                 This project, including the prompt, is open sourced on{" "}
                 <a
-                  className="underline"
+                  className="text-accent underline"
                   href="https://github.com/BuildCanada/BillsTracker/blob/main/src/prompt/summary-and-vote-prompt.ts"
                   target="_blank"
                   rel="noreferrer"
@@ -152,12 +152,12 @@ export default function FAQModalTrigger() {
                 .
               </p>
 
-              <h3 className="font-semibold mt-4">How can I contribute?</h3>
-              <p className="text-text-secondary mt-1">
+              <h3 className="type-h4 mt-6 text-dark">How can I contribute?</h3>
+              <p className="type-default mt-1.5 text-text-secondary">
                 This is a work in progress and we would love help from others.
                 Join us on{" "}
                 <a
-                  className="underline"
+                  className="text-accent underline"
                   href="https://discord.gg/VmbBSXKMve"
                   target="_blank"
                   rel="noreferrer"
@@ -167,10 +167,10 @@ export default function FAQModalTrigger() {
                 .
               </p>
 
-              <h3 className="font-semibold mt-4">How can I get in touch?</h3>
-              <p className="text-text-secondary mt-1">
+              <h3 className="type-h4 mt-6 text-dark">How can I get in touch?</h3>
+              <p className="type-default mt-1.5 text-text-secondary">
                 You can reach out to us at{" "}
-                <a className="underline" href="mailto:hi@buildcanada.com">
+                <a className="text-accent underline" href="mailto:hi@buildcanada.com">
                   hi@buildcanada.com
                 </a>
               </p>

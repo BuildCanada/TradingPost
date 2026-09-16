@@ -9,7 +9,7 @@ import {
 } from "@/components/elections/QuestionnaireCards";
 import { QuestionnaireRail } from "@/components/elections/QuestionnaireRail";
 import { SurveyCta } from "@/components/elections/SurveyCta";
-import { ANSWERS_WITHHELD, surveyHref } from "@/lib/elections/registry";
+import { surveyHref } from "@/lib/elections/registry";
 import CountdownDays from "@/components/elections/CountdownDays";
 import {
   byCandidateKey,
@@ -68,18 +68,11 @@ export const metadata: Metadata = {
 };
 
 export default async function MayorPage() {
-  const [view, survey, published] = await Promise.all([
+  const [view, survey, responses] = await Promise.all([
     getToronto2026(),
     fetchSurvey(ELECTION.slug, CANDIDATE_QUESTIONNAIRE_SLUG).catch(() => null),
     fetchCandidateResponses(ELECTION.slug),
   ]);
-
-  /* Held back at the top of the page rather than at each place that draws
-     them — see `questionnaireHidden` in the registry. Everything downstream is
-     derived from this array, so emptying it here is what guarantees no answer
-     reaches the markup by a route nobody remembered to check. */
-  const withheld = ELECTION.questionnaireHidden ?? false;
-  const responses = withheld ? [] : published;
 
   /* The ballot line, and the part of it that wrote back.
 
@@ -135,11 +128,9 @@ export default async function MayorPage() {
             How the mayoral field answered
           </h1>
           <p className="font-serif text-[1.05rem] leading-[1.5] text-dark/85 max-w-[58ch] text-pretty">
-            {withheld
-              ? `${registered} candidates have registered for the race. The ballot is below.`
-              : mayoral.length > 0
-                ? `${mayoral.length} of the ${registered} candidates for mayor returned our questionnaire. Their answers, question by question — the mayoral field on each one.`
-                : `No one running for mayor has answered our questionnaire yet. ${registered} candidates have registered for the race.`}
+            {mayoral.length > 0
+              ? `${mayoral.length} of the ${registered} candidates for mayor returned our questionnaire. Their answers, question by question — the mayoral field on each one.`
+              : `No one running for mayor has answered our questionnaire yet. ${registered} candidates have registered for the race.`}
           </p>
           <Link
             href={`${ELECTION.basePath}/mayor/candidates`}
@@ -151,18 +142,10 @@ export default async function MayorPage() {
         </section>
 
         {/* ── Key stats ──────────────────────────────────────── */}
-        {/* Two of these four count the answers, and while those are withheld
-            both would read zero — which is not a smaller version of the truth,
-            it is a different claim: that nobody answered. So the row drops to
-            what it can still say honestly, the ballot and the clock. */}
-        <section
-          className={`grid grid-cols-2 border-b-2 border-dark ${
-            withheld ? "md:grid-cols-2" : "md:grid-cols-4"
-          }`}
-        >
-          {!withheld && <Stat value={mayoral.length} label="Answered us" />}
+        <section className="grid grid-cols-2 md:grid-cols-4 border-b-2 border-dark">
+          <Stat value={mayoral.length} label="Answered us" />
           <Stat value={registered} label="On the ballot" />
-          {!withheld && <Stat value={questionCount} label="Policy questions" />}
+          <Stat value={questionCount} label="Policy questions" />
           <div className="px-6 py-4 md:px-14 border-b md:border-b-0 border-border-light">
             <CountdownDays
               initialDays={daysUntil(ELECTION.electionDateIso)}
@@ -176,24 +159,7 @@ export default async function MayorPage() {
         </section>
 
         {/* ── The field, question by question ────────────────── */}
-        {/* The ballot outlives the answers. A page about the mayoral race that
-            names nobody in it is no use to a reader who came with a name in
-            mind, and who is running is a fact about the election rather than
-            anything a candidate told us. */}
-        {withheld ? (
-          <section className="px-6 md:px-14 py-9 md:py-11 border-b-2 border-dark grid gap-9">
-            <p className="font-serif text-[1.05rem] leading-[1.5] text-dark/80 max-w-[58ch] text-pretty">
-              {ANSWERS_WITHHELD}
-            </p>
-            <CandidateRoster
-              respondents={roster}
-              silent={[]}
-              election={ELECTION.slug}
-              race="mayor"
-              respondentsLabel={`On the ballot for mayor · ${registered} candidates`}
-            />
-          </section>
-        ) : groups.length > 0 && mayoral.length > 0 ? (
+        {groups.length > 0 && mayoral.length > 0 ? (
           <section className="px-6 md:px-14 py-9 md:py-11 border-b-2 border-dark grid gap-9">
             {/* THE WHOLE BALLOT, ONCE
 
@@ -221,6 +187,17 @@ export default async function MayorPage() {
                 groups={groups}
                 respondents={mayoral}
                 silent={[]}
+                /* Only the sitting mayor gets a line under their name. The
+                   other mayoral tags — "Declared", "Exploratory" — say where
+                   a campaign is in its own life rather than what the reader
+                   is choosing between, and printed under fourteen names on
+                   thirty-three cards they would be noise. */
+                roles={Object.fromEntries(
+                  ballot
+                    .filter((candidate) => candidate.tag === "Incumbent")
+                    .map((candidate) => [candidate.key, "Incumbent"]),
+                )}
+                ballotSize={registered}
                 issuesHref={`${ELECTION.basePath}/issues`}
               />
             </QuestionnaireRail>
@@ -255,18 +232,14 @@ export default async function MayorPage() {
 
         {/* ── Method ─────────────────────────────────────────── */}
         <section className="px-6 md:px-14 py-4 border-t border-border-light grid gap-2">
-          {/* How to read cards that are not on the page is not method, it
-              is noise. */}
-          {!withheld && (
-            <p className="type-label-sm text-text-muted max-w-[80ch] text-pretty">
-              Every bar is the mayoral field that answered, one cell per
-              candidate: filled with the option that candidate picked, hollow
-              where they did not answer that question. Candidates who never
-              returned the questionnaire are not in these counts — they are on
-              the roster. Open a card for the names behind the bars and what
-              each of them wrote, published verbatim.
-            </p>
-          )}
+          <p className="type-label-sm text-text-muted max-w-[80ch] text-pretty">
+            Every bar is the mayoral field that answered, one cell per
+            candidate: filled with the option that candidate picked, hollow
+            where they did not answer that question. Candidates who never
+            returned the questionnaire are not in these counts — they are on the
+            roster. Open a card for the names behind the bars and what each of
+            them wrote, published verbatim.
+          </p>
           <p className="type-label-sm text-text-muted max-w-[80ch] text-pretty">
             Registered candidates come from the City Clerk&rsquo;s list, less
             anyone who has withdrawn. The field is not final until nominations

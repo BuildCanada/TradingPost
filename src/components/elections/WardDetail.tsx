@@ -1,11 +1,28 @@
 import Link from "next/link";
-import Image from "next/image";
 import type { ReactNode } from "react";
 import { ArrowLeft, ArrowRight } from "lucide-react";
+import { CandidatePortrait } from "./CandidatePortrait";
 import CountdownDays from "./CountdownDays";
+import { CandidateRoster } from "./CandidateRoster";
+import {
+  QuestionnaireCards,
+  QuestionnaireOutline,
+  questionnaireHeadings,
+} from "./QuestionnaireCards";
+import { QuestionnaireRail } from "./QuestionnaireRail";
+import { SurveyCta } from "./SurveyCta";
+import { surveyHref } from "@/lib/elections/registry";
 import { IncumbentBadge } from "./ElectionLanding";
 import { CandidateNameLink } from "./CandidateNameLink";
 import { WardProfileSection, type WardProfile } from "./WardProfile";
+import {
+  comparedQuestions,
+  surveyRoster,
+} from "@/lib/elections/candidate-answers";
+import type {
+  CandidateAnswers,
+  ComparedGroup,
+} from "@/lib/elections/candidate-answers";
 import { daysUntil } from "@/lib/elections/dates";
 import type { SupportedElection } from "@/lib/elections/registry";
 import type {
@@ -29,6 +46,8 @@ export function WardDetail({
   nominationCloseLabel,
   wardMapDefs,
   wardMap,
+  surveyAnswers,
+  surveyShape,
   profile,
 }: {
   election: SupportedElection;
@@ -39,6 +58,19 @@ export function WardDetail({
   wardMapDefs?: ReactNode;
   /** this region's locator map for this ward, when it has ward geometry */
   wardMap?: ReactNode;
+  /**
+   * Published questionnaire answers for this ward's candidates, keyed by
+   * `nameKey`. A candidate with no entry simply shows no answers — for most of
+   * the campaign that is most of them.
+   */
+  surveyAnswers?: Record<string, CandidateAnswers>;
+  /**
+   * The questionnaire's questions with nobody's answers on them, used where a
+   * ward's whole field stayed quiet — there are no returned questionnaires to
+   * read the questions off, and a ward of non-respondents still deserves to
+   * show which questions they did not answer.
+   */
+  surveyShape?: ComparedGroup[];
   /**
    * What this ward is, above the race to represent it — a short brief and the
    * Census statistics behind it. Only regions that maintain ward profiles
@@ -54,6 +86,24 @@ export function WardDetail({
   // With one council race the heading would only repeat the page title, so the
   // grid runs straight under it — which is how Toronto's page has always read.
   const showRaceHeadings = councilRaces.length > 1;
+
+  /* The whole council ballot, and the part of it that wrote back.
+
+     The questionnaire grid is the ward's candidate list now — there is no
+     separate roster of cards above it to agree or disagree with. So its
+     columns are every candidate still standing, and one we never heard from is
+     a column that says exactly that, which is more use to a voter than a name
+     quietly left out of the comparison.
+
+     Withdrawn candidates are the exception, and are dropped: they cannot be
+     voted for, so a column of theirs is a column of a ballot line that does
+     not exist, and in a grid this wide every column costs the reader a drag. */
+  const councilCandidates = councilRaces
+    .flatMap((race) => race.candidates)
+    .filter((candidate) => !candidate.withdrawn);
+  const respondents = councilCandidates.filter(
+    (candidate) => surveyAnswers?.[candidate.key],
+  );
 
   return (
     <div className={`${election.themeClass ?? ""} bg-bg text-dark`}>
@@ -117,53 +167,75 @@ export function WardDetail({
           </div>
         </section>
 
-        {/* ── Council candidates ─────────────────────────────── */}
-        {/* The ward's ballot, one card a candidate: who is standing, whether
-            they hold the seat, and the way to their own campaign. That is a
-            fact about the election rather than anything a candidate told us,
-            so it is what the page is made of until the questionnaire is
-            published. */}
-        <section id="candidates">
-          <div className="px-6 md:px-14 pt-11 pb-2">
-            <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.75rem,3vw,2.5rem)]">
-              Candidates
-            </h2>
+        {/* ── Questionnaire ──────────────────────────────────── */}
+        <section id="questionnaire">
+          {/* The heading, what it amounts to, and the ballot it is about —
+              one column, with the survey beside it. The ballot used to sit in
+              a band of its own under this one, which left the heading's column
+              as a line of type and a sentence against a survey card three
+              times its height: a rectangle of nothing exactly where the names
+              a reader came for should have been. */}
+          <div className="px-6 md:px-14 pt-11 pb-7 grid gap-8 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-12">
+            <div className="grid content-start gap-5">
+              <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.75rem,3vw,2.5rem)] max-w-[24ch] text-balance">
+                Know Your Candidates
+              </h2>
+              {/* Only the empty states get a sentence. Where candidates have
+                  answered, the roster underneath names both halves of the
+                  ballot — "2 of 11 answered" was the same count, spelled out,
+                  immediately above the list it was counting. */}
+              {respondents.length === 0 && (
+                <p className="font-serif text-[1.08rem] leading-[1.5] text-dark/85 max-w-[64ch] text-pretty">
+                  {councilCandidates.length === 0
+                    ? "No one has registered in this ward yet."
+                    : "Nobody in this ward has answered yet. These are the questions we asked."}
+                </p>
+              )}
+              {councilCandidates.length > 0 && (
+                <CandidateRoster
+                  respondents={respondents}
+                  silent={councilCandidates.filter(
+                    (candidate) => !surveyAnswers?.[candidate.key],
+                  )}
+                  election={election.slug}
+                  race="councillor"
+                  ward={ward.n}
+                  wardName={ward.name}
+                />
+              )}
+            </div>
+
+            {/* Absent entirely while the survey is closed. The column beside
+                it is the heading and the ballot, which stand on their own —
+                this was always the ask, not part of the ward's own facts. */}
+            {surveyHref(election) && (
+              <SurveyCta href={surveyHref(election)!} />
+            )}
           </div>
 
-          {councilRaces.length === 0 && (
+          {councilCandidates.length === 0 ? (
             <EmptyRace
               wardName={ward.name}
               nominationCloseLabel={nominationCloseLabel}
             />
+          ) : (
+            councilRaces.map((race) => (
+              <RaceQuestionnaire
+                key={race.id}
+                race={race}
+                surveyAnswers={surveyAnswers}
+                surveyShape={surveyShape}
+                showHeading={showRaceHeadings}
+                issuesHref={`${election.basePath}/issues`}
+              />
+            ))
           )}
-
-          {councilRaces.map((race) => (
-            <div key={race.id}>
-              {showRaceHeadings && <RaceHeading race={race} />}
-              {race.candidates.length === 0 ? (
-                <EmptyRace
-                  wardName={ward.name}
-                  nominationCloseLabel={nominationCloseLabel}
-                />
-              ) : (
-                race.candidates.map((cand) => (
-                  <CouncilCandidate
-                    key={cand.key}
-                    candidate={cand}
-                    election={election.slug}
-                    ward={ward.n}
-                    wardName={ward.name}
-                  />
-                ))
-              )}
-            </div>
-          ))}
 
           <div className="px-6 md:px-14 py-4 border-t border-border-light grid gap-2.5">
             <p className="type-label-sm text-text-muted">
-              Registered candidates from the City Clerk&rsquo;s list. The field
-              is not final until nominations close
-              {nominationCloseLabel ? ` on ${nominationCloseLabel}` : ""}.
+              Registered candidates from the City Clerk&rsquo;s list, less
+              anyone who has withdrawn. The field is not final until nominations
+              close{nominationCloseLabel ? ` on ${nominationCloseLabel}` : ""}.
             </p>
           </div>
         </section>
@@ -234,6 +306,110 @@ export function WardDetail({
   );
 }
 
+/**
+ * One race's questionnaire, question by question.
+ *
+ * One per race rather than one for the ward, because a ward can elect more
+ * than one councillor — Brampton's wards elect a city and a regional
+ * councillor — and two rival fields read together would compare candidates who
+ * are not running against each other.
+ *
+ * A race nobody answered has no questions to draw, since the questions come
+ * from the returned questionnaires. That case still names the candidates: they
+ * are on the ballot, and the page is now the only place that says so.
+ */
+function RaceQuestionnaire({
+  race,
+  surveyAnswers,
+  surveyShape,
+  showHeading,
+  issuesHref,
+}: {
+  race: RaceView;
+  surveyAnswers?: Record<string, CandidateAnswers>;
+  surveyShape?: ComparedGroup[];
+  showHeading: boolean;
+  issuesHref?: string;
+}) {
+  /* Only the candidates who wrote back, because they are the only ones the
+     questions can group. The rest are named once, in the roster over this
+     section, which links each of them as well — a ward's dozen registrants
+     carried down thirty questions is three hundred cells of "did not
+     respond", and the reader learns it from the first. */
+  const roster = surveyRoster(
+    race.candidates.map((candidate) => ({
+      ...candidate,
+      // "" for most of the ballot; the grid only draws the row when something
+      // in it is non-empty, so pass through rather than filtering here.
+      bio: candidate.bio || undefined,
+    })),
+    surveyAnswers,
+  );
+  const answered = roster.filter((candidate) => candidate.answers);
+  const groups = comparedQuestions(
+    answered.map((candidate) => candidate.answers!),
+    answered,
+    surveyShape,
+  );
+
+  return (
+    <div>
+      {showHeading && <RaceHeading race={race} />}
+      <div className="px-6 md:px-14 pb-10">
+        {groups.length > 0 && answered.length > 0 ? (
+          <QuestionnaireRail headings={questionnaireHeadings(groups)}>
+            <QuestionnaireCards
+              groups={groups}
+              respondents={answered}
+              /* None: the roster at the top of this section has already named
+                 everyone who did not write back, and linked them. A card that
+                 named them too would print the same list under every question
+                 — see `silent` in QuestionnaireCards. */
+              silent={[]}
+              /* Only the sitting councillor is named as anything. Toronto's
+                 council races carry no party, so "Challenger" is what every
+                 candidate is who is not the incumbent — under six names on
+                 thirty-three cards that is two hundred printings of a word
+                 that tells the reader nothing about any of them. Where the
+                 incumbent is not standing, as here in Ward 13, it would have
+                 labelled the whole field. So: the badge the roster gives, on
+                 the one person it means something about. */
+              roles={Object.fromEntries(
+                race.candidates
+                  .filter((candidate) => candidate.tag === "Incumbent")
+                  .map((candidate) => [candidate.key, "Incumbent"]),
+              )}
+              ballotSize={roster.length}
+              issuesHref={issuesHref}
+            />
+          </QuestionnaireRail>
+        ) : groups.length > 0 ? (
+          /* Not one candidate in this ward wrote back — eight of Toronto's
+             twenty-five. The questions survive without them, and are worth
+             showing: the heading above has just said these are the questions
+             we asked, and this is them. As a list, though. Thirty-four cards
+             each holding "No answers to this one yet." is the same sentence
+             thirty-four times inside thirty-four borders. */
+          <QuestionnaireRail headings={questionnaireHeadings(groups)}>
+            <QuestionnaireOutline groups={groups} issuesHref={issuesHref} />
+          </QuestionnaireRail>
+        ) : (
+          /* Only two ways to get here now: nobody has filed for the seat, or
+             the questionnaire itself could not be fetched. Either way there is
+             no grid to draw, and the candidates are still worth naming. */
+          <p className="font-serif text-[1.05rem] leading-[1.5] text-dark/80 max-w-[62ch] text-pretty">
+            {roster.length === 0
+              ? "No one has filed for this seat yet."
+              : `On the ballot, and yet to respond to us: ${roster
+                  .map((candidate) => candidate.name)
+                  .join(", ")}.`}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function RaceHeading({ race }: { race: RaceView }) {
   return (
     <div className="px-6 md:px-14 pt-8 pb-3 border-t border-border-light flex justify-between items-end gap-5 flex-wrap">
@@ -270,8 +446,8 @@ function EmptyRace({
   );
 }
 
-/* A candidate card — one per candidate, in both the council and the
-   school-board races. */
+/* A candidate card, which only the school-board races use now: the council
+   ballot is the questionnaire grid, and trustees have no questionnaire. */
 function CouncilCandidate({
   candidate,
   election,
@@ -292,19 +468,7 @@ function CouncilCandidate({
       }`}
     >
       <div className="flex gap-5 sm:gap-7 items-center">
-        <div className="flex-none size-16 bg-dark relative overflow-hidden flex items-center justify-center font-sans font-medium text-[1.35rem] tracking-[-0.02em] text-bg">
-          {candidate.image ? (
-            <Image
-              src={candidate.image}
-              alt={candidate.name}
-              fill
-              sizes="64px"
-              className="object-cover object-center"
-            />
-          ) : (
-            candidate.initials
-          )}
-        </div>
+        <CandidatePortrait candidate={candidate} size="lg" />
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-3.5 flex-wrap">
             <h3

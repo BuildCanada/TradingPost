@@ -295,17 +295,23 @@ export default async function WhenIsTheTorontoElectionPage() {
               people to — but leaving it out of a section that compares methods
               would tell a reader who cannot get to a voting place that they
               have run out of options, which is false. */}
-          <p className="px-6 md:px-14 py-8 border-t border-border-light font-serif text-[1.05rem] leading-[1.5] text-text-secondary max-w-[62ch]">
-            There is a fourth way. If you can&rsquo;t get to a voting place
-            yourself, you can appoint another eligible Toronto voter as your
-            proxy &mdash; the form is certified by the City Clerk up to 4:30
-            p.m. on election day, and on election day itself only at Toronto
-            City Hall.{" "}
-            <InlineLink href={HOW_TO_VOTE_PATH}>
-              How voting by proxy works
-            </InlineLink>
-            .
-          </p>
+          {/* The rule and the gutters ride on the wrapper, the measure on the
+              paragraph. Together on one element, `max-w-[62ch]` bounded the
+              box the border belongs to, so the line closing the three-way grid
+              above stopped two thirds of the way across the page. */}
+          <div className="px-6 md:px-14 py-8 border-t border-border-light">
+            <p className="font-serif text-[1.05rem] leading-[1.5] text-text-secondary max-w-[62ch]">
+              There is a fourth way. If you can&rsquo;t get to a voting place
+              yourself, you can appoint another eligible Toronto voter as your
+              proxy &mdash; the form is certified by the City Clerk up to 4:30
+              p.m. on election day, and on election day itself only at Toronto
+              City Hall.{" "}
+              <InlineLink href={HOW_TO_VOTE_PATH}>
+                How voting by proxy works
+              </InlineLink>
+              .
+            </p>
+          </div>
         </section>
 
         {/* ── Who's on the ballot ──────────────────────────────── */}

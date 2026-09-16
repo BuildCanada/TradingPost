@@ -2,30 +2,32 @@
 
 import { useState } from "react";
 
-import { OptionBar, percentOf } from "@/components/charts/trilemma";
+import { OptionPie, percentOf } from "@/components/charts/trilemma";
 
-/* The interactive half of a QuestionSplit card: the band, the legend, and the
+/* The interactive half of a QuestionSplit card: the pie, the legend, and the
  * panel of names behind each of them.
  *
- * THE CHART IS OptionBar, FROM THE CHARTS PACKAGE
- *   This was a hand-drawn donut first, and a donut is the wrong chart for this
- *   page twice over. The page's work is done across thirty-odd cards at once —
- *   where does the field agree, where does it split — and a share read as a
- *   length against a common left edge can be compared between cards, where an
- *   angle cannot. And a good many of the questions are a straight Yes/No,
- *   which is the case a pie serves worst: 72/28 is plain in a band and a
- *   judgement call in a circle.
+ * THE CHART IS OptionPie, AND THIS IS THE SECOND TIME ROUND
+ *   It was a hand-drawn donut first. That was replaced by OptionBar, a single
+ *   100% band, on an argument this file used to make at length and which has
+ *   not stopped being true: the page's work is done across thirty-odd cards at
+ *   once — where does the field agree, where does it split — and a share read
+ *   as a length against a common left edge can be compared between cards,
+ *   where an angle cannot. Twenty-six of the thirty-three questions are also
+ *   an ordered scale, yes / yes-with-conditions / no, which a band keeps in
+ *   order along its length. Five more have two options, where a pie is two
+ *   slices and a number would have done.
  *
- *   OptionBar already draws exactly this — "one question's answers as a single
- *   100% band" — with the fade-all-but-one behaviour the legend needs, so the
- *   only thing here is the legend and the panel behind it.
+ *   It is a pie again because that was the call. Recorded rather than argued
+ *   so that whoever weighs it next has the reasoning in front of them instead
+ *   of rediscovering it: OptionBar is still exported and still takes these
+ *   exact props, so going back is this component's import and its figure.
  *
- * THE BAND CARRIES NO NUMBERS
- *   `showCounts` and `showLabels` are both off. The legend sits directly under
- *   the bar with every option's wording, count and share on it, so a segment
- *   printing its own share is the same figure twice, a centimetre apart — and
- *   the option names cannot fit under a narrow segment anyway, which is why
- *   OptionBar drops them. The bar is the shape; the legend is the key.
+ * THE PIE CARRIES NO NUMBERS
+ *   The legend sits directly under it with every option's wording, count and
+ *   share on it, so a slice printing its own share is the same figure twice, a
+ *   centimetre apart — and an option wording here runs to ninety characters,
+ *   which no slice can hold. The pie is the shape; the legend is the key.
  *
  * WHY THE NAMES ARE BEHIND SOMETHING
  *   This page put every name under every question and the names were the
@@ -70,7 +72,9 @@ import { OptionBar, percentOf } from "@/components/charts/trilemma";
  */
 
 /** The band's height, and so where the panel of names hangs from. */
-const BAR = 32;
+/* The pie's drawn size. The names panel is positioned off it, so the two are
+   one constant rather than two that can drift. */
+const PIE = 148;
 
 export type SplitSlice = {
   key: string;
@@ -122,7 +126,21 @@ export function QuestionSplitFigure({
 
   return (
     <div
-      className="relative flex flex-col gap-3"
+      /* `@container` so the names panel can size its columns against the card
+         instead of the window — but it carries a cost worth naming: a
+         container is `contain: layout`, which makes this a stacking context
+         where a bare `position: relative` was not. The panel's own `z-20`
+         used to lift it above everything on the page; scoped to this figure
+         it only orders it against its siblings here, and the card below —
+         later in the tree, and exactly what the panel opens over — would
+         paint on top of it.
+
+         So the whole figure lifts while a panel is open. Only while: left
+         permanently raised, thirty-three of these would stack in tree order
+         for no reason. */
+      className={`@container relative flex flex-col gap-3 ${
+        open ? "z-30" : ""
+      }`}
       onKeyDown={(event) => {
         if (event.key === "Escape") close();
       }}
@@ -132,19 +150,22 @@ export function QuestionSplitFigure({
          be. */
       onMouseLeave={close}
     >
-      <OptionBar
-        options={slices.map((slice) => slice.label)}
-        counts={slices.map((slice) => slice.names.length)}
-        colors={slices.map((slice) => slice.color)}
-        onSegmentEnter={(i) => graze(slices[i].key)}
-        onSegmentLeave={() => graze(null)}
-        /* -1 from findIndex is "no option", which OptionBar spells null. */
-        highlight={highlight < 0 ? null : highlight}
-        height={BAR}
-        responsive
-        showCounts={false}
-        label={question}
-      />
+      {/* Centred, because a pie has no left edge to align to the way the bar
+          did — set flush left in a card this wide it read as an ornament
+          beside the legend rather than the figure the legend keys. */}
+      <div className="flex justify-center">
+        <OptionPie
+          options={slices.map((slice) => slice.label)}
+          counts={slices.map((slice) => slice.names.length)}
+          colors={slices.map((slice) => slice.color)}
+          onSegmentEnter={(i) => graze(slices[i].key)}
+          onSegmentLeave={() => graze(null)}
+          /* -1 from findIndex is "no option", which the pie spells null. */
+          highlight={highlight < 0 ? null : highlight}
+          size={PIE}
+          label={question}
+        />
+      </div>
 
       <Legend
         slices={slices}
@@ -280,7 +301,7 @@ function Names({ slice, onDismiss }: { slice: SplitSlice; onDismiss: () => void 
   return (
     <div
       className="absolute inset-x-0 z-20 max-h-[14rem] overflow-y-auto border border-dark bg-bg p-3 shadow-[0_6px_20px_rgba(0,0,0,0.1)]"
-      style={{ top: `calc(${BAR}px + 0.75rem)` }}
+      style={{ top: `calc(${PIE}px + 0.75rem)` }}
       /* The legend row that would let a latched panel go is underneath this,
          so the panel itself is the way out. Harmless on a panel opened by
          hover, which the pointer never reaches. */
@@ -291,21 +312,29 @@ function Names({ slice, onDismiss }: { slice: SplitSlice; onDismiss: () => void 
           ? "1 candidate"
           : `${slice.names.length} candidates`}
       </p>
-      {/* Columns, because a segment can hold forty people: in one run they are
-          a list taller than anything this panel can be allowed to be. Three
-          columns puts forty names in fourteen rows.
+      {/* A grid, not CSS columns. A segment can hold forty people and the
+          panel is capped at fourteen rem, and multi-column laid out inside a
+          capped box does not grow downwards — it fragments sideways, opening a
+          fourth and fifth column past the panel's right edge. So the overflow
+          ran horizontally while the scrolling was vertical, and the names in
+          those columns could not be reached at all. A grid fills rows
+          downwards, which is the direction this box scrolls.
+
+          How many columns is a question about the panel's width and not the
+          window's: these cards sit two to a row on a wide screen, so the panel
+          is about four hundred and sixty pixels there and a viewport-keyed
+          third column would have squeezed every name onto two lines. Hence the
+          container query on the figure.
 
           Set small. A name here is a thing the reader scans for rather than
-          reads — they are looking for one they know, or counting how many of
-          a slice they recognise — and forty of them is a block that has to sit
-          under the chart without becoming the card. Smaller also buys the
-          columns their width back, which is what keeps a long name on one
-          line. */}
-      <ul className="mt-1.5 list-none gap-1 m-0 p-0 columns-2 sm:columns-3">
+          reads — they are looking for one they know, or counting how many of a
+          slice they recognise — and forty of them is a block that has to sit
+          under the chart without becoming the card. */}
+      <ul className="mt-1.5 grid grid-cols-1 gap-x-4 gap-y-1 list-none m-0 p-0 @xs:grid-cols-2 @2xl:grid-cols-3">
         {slice.names.map((candidate) => (
           <li
             key={candidate.key}
-            className="break-inside-avoid pb-1 font-sans text-[0.84rem] leading-[1.35] text-dark"
+            className="font-sans text-[0.84rem] leading-[1.35] text-dark"
           >
             {candidate.name}
             {candidate.seat && (

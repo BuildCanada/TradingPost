@@ -1,9 +1,8 @@
 // The questionnaire, fetched once and cut to a roster.
 //
 // Both the ward pages and the mayoral page draw the same grid from the same
-// two York Factory resources, and both need the same two things out of them:
-// the answers belonging to the candidates on the page, and the shape of the
-// questionnaire itself for the case where none of them wrote back.
+// two York Factory resources, and both need the same thing out of them: the
+// answers belonging to the candidates on the page.
 //
 // Both halves are publish-gated, so an empty result is the normal case for
 // most of the campaign — not a failure. The questionnaire is a nice-to-have on
@@ -16,9 +15,7 @@ import {
   byCandidateKey,
   candidateAnswers,
   candidateWriting,
-  questionnaireShape,
   type CandidateAnswers,
-  type ComparedGroup,
   type WrittenAnswer,
 } from "./candidate-answers";
 import {
@@ -30,17 +27,13 @@ import { fetchSurvey } from "./survey";
 export type RosterSurvey = {
   /** the roster's own answers, keyed by `nameKey` */
   answers: Record<string, CandidateAnswers>;
-  /** every question, with nobody attached — the grid's shape when the whole
-   *  roster stayed quiet */
-  shape: ComparedGroup[];
   /** the roster's free-text answers, keyed by `nameKey`. The choices are what
    *  a grid can compare; this is what the candidates wrote. */
   written: Record<string, WrittenAnswer[]>;
 };
 
 /**
- * Every published answer belonging to `candidateKeys`, plus the questionnaire's
- * shape.
+ * Every published answer belonging to `candidateKeys`.
  *
  * Answers we cannot match to a candidate on the roster are dropped. The join is
  * on name, and a response we cannot place is one we must not attribute.
@@ -67,7 +60,6 @@ export async function rosterSurvey(
 
     return {
       answers: byCandidateKey(entries),
-      shape: questionnaireShape(survey, responses),
       /* Narrowed to the roster on the same rule the answers are: prose we
          cannot place on a candidate is prose we must not attribute. */
       written: Object.fromEntries(
@@ -75,6 +67,6 @@ export async function rosterSurvey(
       ),
     };
   } catch {
-    return { answers: {}, shape: [], written: {} };
+    return { answers: {}, written: {} };
   }
 }

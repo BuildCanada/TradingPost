@@ -46,7 +46,7 @@ export default async function WardDetailPage({
   const candidateKeys = new Set(
     data.councilRaces.flatMap((race) => race.candidates.map((c) => c.key)),
   );
-  const { answers: surveyAnswers, shape: surveyShape } = await rosterSurvey(
+  const { answers: surveyAnswers } = await rosterSurvey(
     ELECTION.slug,
     candidateKeys,
   );
@@ -57,7 +57,6 @@ export default async function WardDetailPage({
       data={data}
       nominationCloseLabel={view.nominationCloseLabel}
       surveyAnswers={surveyAnswers}
-      surveyShape={surveyShape}
       profile={
         wardProfile(
           data.ward.n,

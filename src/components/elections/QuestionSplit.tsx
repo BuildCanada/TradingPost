@@ -2,7 +2,6 @@ import { rollCall } from "@/lib/elections/candidate-answers";
 import { EMPTY, optionColors } from "@/lib/elections/option-colors";
 import { QuestionSplitFigure } from "./QuestionSplitFigure";
 import type { SplitSlice } from "./QuestionSplitFigure";
-import type { Seat } from "./QuestionRollCall";
 import type { ComparedQuestion } from "@/lib/elections/candidate-answers";
 
 /* One question as a card, read as a share of the field rather than a roll call.
@@ -36,11 +35,11 @@ import type { ComparedQuestion } from "@/lib/elections/candidate-answers";
  *   Behind the legend rows, one option at a time — see QuestionSplitFigure.
  *   Hidden, they stop crowding out the split; reachable, the reader can still
  *   check who is in a segment, which is the difference between a chart and a
- *   chart you have to take on trust. Each name carries the seat it is running
- *   for, because a name on a city-wide page is only useful once the reader
- *   knows whether it is on their ballot. What they WROTE stays on the ward and
- *   mayoral pages: a note is a paragraph, and a panel of thirty paragraphs is
- *   the page this card was drawn to get away from.
+ *   chart you have to take on trust. Names alone — the seat each is running
+ *   for rode beside them once and cost more width than it paid for; see
+ *   `named`. What they WROTE stays on the ward and mayoral pages: a note is a
+ *   paragraph, and a panel of thirty paragraphs is the page this card was
+ *   drawn to get away from.
  *
  * COLOUR
  *   The same ramps as everywhere else in the tracker (lib/elections/
@@ -52,13 +51,9 @@ import type { ComparedQuestion } from "@/lib/elections/candidate-answers";
 
 export function QuestionSplit({
   question,
-  seats,
   headingId,
 }: {
   question: ComparedQuestion;
-  /** the seat each candidate is running for, keyed by candidate key — printed
-   *  beside their name in the panel behind a segment. */
-  seats?: Record<string, Seat>;
   /** the id the scroll rail scrolls to — see QuestionRollCall */
   headingId?: string;
 }) {
@@ -66,15 +61,16 @@ export function QuestionSplit({
 
   const colors = optionColors(question.options.length, question.ordinal);
 
+  /* Name only. This card took a `seats` map once and printed "· Ward 17" or
+     "· For mayor" after every name in the panel, on the argument that a name
+     on a city-wide page is only useful once the reader knows whether it is on
+     their ballot. True, and still the wrong place for it: the suffix is
+     longer than most of the names it trails, it set the width of every column
+     in the panel, and the panel is a list of fifty the reader scans for one
+     they recognise. The ward pages are where a name is matched to a ballot. */
   const named = (candidate: { key: string; name: string }) => ({
     key: candidate.key,
     name: candidate.name,
-    /* Mayoral candidates carry no label of their own — a ward number is the
-       thing that tells a reader whether a name is on their ballot, and "For
-       mayor" has to be spelled out rather than left blank beside it. */
-    seat: seats?.[candidate.key]
-      ? (seats[candidate.key].label ?? "For mayor")
-      : undefined,
   });
 
   const slices: SplitSlice[] = groups.map((group) => ({
@@ -104,9 +100,16 @@ export function QuestionSplit({
 
   return (
     <article className="flex flex-col gap-4 border border-border-light p-6 md:p-7">
+      {/* Smaller than a card heading usually runs, and smaller than it was.
+          A question here is a line of up to ninety characters over a card
+          three to a row, so at 1.45rem it took three and four lines and the
+          page read as a stack of headlines with charts attached. The chart is
+          what the reader is scanning; the question is what tells them which
+          chart it is. Close to the roll-call card's own base size, so the two
+          kinds of card sit at one scale where a reader meets both. */}
       <h3
         id={headingId}
-        className="scroll-mt-24 font-sans font-medium leading-[1.2] tracking-[-0.025em] text-[1.45rem] text-dark text-pretty"
+        className="scroll-mt-24 font-sans font-medium leading-[1.2] tracking-[-0.025em] text-[1.25rem] text-dark text-pretty"
       >
         {question.question}
       </h3>

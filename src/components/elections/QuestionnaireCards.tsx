@@ -112,8 +112,10 @@ export function QuestionnaireCards({
   /** the whole city's answers, where this election has that page */
   issuesHref?: string;
   /** the seat each candidate is running for, keyed by candidate key — see
-   *  QuestionRollCall, and QuestionSplit, which prints it beside the names
-   *  behind a segment. Only the city-wide page passes one. */
+   *  QuestionRollCall. The split cards took this too and printed it beside
+   *  every name in the panel behind a segment; they no longer do, so on the
+   *  city-wide page this now reaches nothing. Kept because the same component
+   *  draws the roll-call pages, which do print it. */
   seats?: Record<string, Seat>;
   /** what each candidate is on the ballot — "Incumbent", "Challenger" — keyed
    *  by candidate key. See QuestionRollCall. */
@@ -218,7 +220,6 @@ export function QuestionnaireCards({
                 <QuestionSplit
                   key={question.questionId}
                   question={question}
-                  seats={seats}
                   headingId={sectionId(question.questionId, idPrefix)}
                 />
               ) : (

@@ -53,11 +53,13 @@ import { OptionPie, percentOf } from "@/components/charts/trilemma";
  *   open, focus opens one, Escape and leaving the figure close it. What they
  *   no longer do is open on hover.
  *
- * THE PANEL IS BOUNDED, AND IT DOES TAKE THE POINTER
- *   It hangs under the band and lies across the legend rows, so left
- *   unbounded a forty-name segment ran past the foot of its own card and over
- *   the cards below — which stayed laid out as though nothing were there. It
- *   is capped and scrolls.
+ * THE PANEL IS A POPOVER, AND IT DOES TAKE THE POINTER
+ *   It hangs under the pie and lies across the legend rows, and a slice on
+ *   the city-wide page can hold fifty-five names — so it runs past the foot of
+ *   its own card and over the cards below, which stay laid out as though
+ *   nothing were there. That is what an overlay is; it is bounded by the
+ *   window rather than by a guess at how many names is too many, and it leads
+ *   with the answer it is the evidence for. See `Names`.
  *
  *   Scrolling means it has to take the pointer, and there was a spell when it
  *   could not: back when the legend rows opened on hover, the panel covering
@@ -279,58 +281,89 @@ function Legend({
   );
 }
 
-/* Who gave this answer, set just below the band.
+/* Who gave this answer, set just below the pie.
  *
  * Over the card rather than in the flow of it: a panel that pushed the legend
  * down would move the rows out from under the reader as it opened, and shift
  * every card beneath it on the page.
  *
- * The top offset is the band's own height and the gap under it, so the panel
- * meets the bottom of the bar whichever option opened it.
+ * The top offset is the pie's own height and the gap under it, so the panel
+ * meets the bottom of the chart whichever option opened it.
  *
- * And capped, because an overlay in nobody's layout is an overlay that will
- * happily run over the card below it: a segment can hold forty people, which
- * at two columns on a phone is twenty rows and taller than the card it
- * belongs to. Fourteen rem holds the common cases outright and scrolls the
- * rest.
+ * IT LEADS WITH THE ANSWER
+ *   The panel used to open on a count — "38 candidates" — and nothing else.
+ *   Which thirty-eight, of the three or four splits on the card, was a fact
+ *   the reader had to hold from the row they clicked, and on a pie they may
+ *   have come from a slice rather than a row: a wedge of colour carries no
+ *   wording at all. So the wording the candidates were shown is the first
+ *   thing in the panel, set the way the legend sets it and dotted in the
+ *   slice's own colour, and the count sits under it as the caption it is.
+ *
+ * IT IS AS TALL AS IT CAN BE
+ *   The cap was fourteen rem, which held about ten names of a slice that on
+ *   the city-wide page runs to fifty-five: the rest were behind a scrollbar
+ *   inside an overlay, which is a place readers do not look. The panel now
+ *   takes the height it needs up to forty-six rem — what fifty-five names
+ *   come to in two columns, with the heading over them — and stops there or
+ *   at three-quarters of the window, whichever comes first, so it can never
+ *   run off the screen it opened on.
+ *
+ *   It can and does run over the cards below, which stay laid out as though
+ *   nothing were there. That is what an overlay is, and it is why the figure
+ *   lifts to `z-30` while a panel is open: what the reader sees is a popover
+ *   above the page, held open only as long as the pointer stays in the figure.
+ *
+ *   The heading is outside the scroller rather than sticky inside it, so the
+ *   answer stays put while fifty names move under it.
  *
  * Names as plain text, not as the bordered plates the ward pages use. A plate
- * is an object a reader counts in a field of four or five; forty of them in a
+ * is an object a reader counts in a field of four or five; fifty of them in a
  * panel is a mosaic, and the count is already at the top of the panel. */
 function Names({ slice, onDismiss }: { slice: SplitSlice; onDismiss: () => void }) {
   return (
     <div
-      className="absolute inset-x-0 z-20 max-h-[14rem] overflow-y-auto border border-dark bg-bg p-3 shadow-[0_6px_20px_rgba(0,0,0,0.1)]"
+      className="absolute inset-x-0 z-20 flex max-h-[min(75vh,46rem)] flex-col border border-dark bg-bg shadow-[0_6px_20px_rgba(0,0,0,0.1)]"
       style={{ top: `calc(${PIE}px + 0.75rem)` }}
       /* The legend row that would let a latched panel go is underneath this,
          so the panel itself is the way out. Harmless on a panel opened by
          hover, which the pointer never reaches. */
       onClick={onDismiss}
     >
-      <p className="type-label-sm text-text-muted">
-        {slice.names.length === 1
-          ? "1 candidate"
-          : `${slice.names.length} candidates`}
-      </p>
-      {/* A grid, not CSS columns. A segment can hold forty people and the
-          panel is capped at fourteen rem, and multi-column laid out inside a
-          capped box does not grow downwards — it fragments sideways, opening a
-          fourth and fifth column past the panel's right edge. So the overflow
-          ran horizontally while the scrolling was vertical, and the names in
-          those columns could not be reached at all. A grid fills rows
-          downwards, which is the direction this box scrolls.
+      <div className="flex-none border-b border-border-light p-3">
+        <p className="grid grid-cols-[auto_1fr] items-baseline gap-x-2.5 font-serif text-[1.05rem] font-medium leading-[1.3] tracking-[-0.015em] text-dark text-pretty">
+          <span
+            className="size-2.5 translate-y-[0.25em] rounded-full"
+            style={{ background: slice.color }}
+            aria-hidden="true"
+          />
+          {slice.label}
+        </p>
+        <p className="type-label-sm mt-1.5 pl-[1.25rem] text-text-muted">
+          {slice.names.length === 1
+            ? "1 candidate"
+            : `${slice.names.length} candidates`}
+        </p>
+      </div>
+
+      {/* A grid, not CSS columns. A segment can hold fifty people and the
+          panel is capped, and multi-column laid out inside a capped box does
+          not grow downwards — it fragments sideways, opening a fourth and
+          fifth column past the panel's right edge. So the overflow ran
+          horizontally while the scrolling was vertical, and the names in those
+          columns could not be reached at all. A grid fills rows downwards,
+          which is the direction this box scrolls.
 
           How many columns is a question about the panel's width and not the
-          window's: these cards sit two to a row on a wide screen, so the panel
-          is about four hundred and sixty pixels there and a viewport-keyed
+          window's: these cards sit two and three to a row on a wide screen, so
+          the panel is around four hundred pixels there and a viewport-keyed
           third column would have squeezed every name onto two lines. Hence the
           container query on the figure.
 
           Set small. A name here is a thing the reader scans for rather than
           reads — they are looking for one they know, or counting how many of a
-          slice they recognise — and forty of them is a block that has to sit
+          slice they recognise — and fifty of them is a block that has to sit
           under the chart without becoming the card. */}
-      <ul className="mt-1.5 grid grid-cols-1 gap-x-4 gap-y-1 list-none m-0 p-0 @xs:grid-cols-2 @2xl:grid-cols-3">
+      <ul className="grid min-h-0 grid-cols-1 gap-x-4 gap-y-1 overflow-y-auto list-none m-0 p-3 @xs:grid-cols-2 @2xl:grid-cols-3">
         {slice.names.map((candidate) => (
           <li
             key={candidate.key}

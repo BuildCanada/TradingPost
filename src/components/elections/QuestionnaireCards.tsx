@@ -112,8 +112,10 @@ export function QuestionnaireCards({
   /** the whole city's answers, where this election has that page */
   issuesHref?: string;
   /** the seat each candidate is running for, keyed by candidate key — see
-   *  QuestionRollCall, and QuestionSplit, which prints it beside the names
-   *  behind a segment. Only the city-wide page passes one. */
+   *  QuestionRollCall. The split cards took this too and printed it beside
+   *  every name in the panel behind a segment; they no longer do, so on the
+   *  city-wide page this now reaches nothing. Kept because the same component
+   *  draws the roll-call pages, which do print it. */
   seats?: Record<string, Seat>;
   /** what each candidate is on the ballot — "Incumbent", "Challenger" — keyed
    *  by candidate key. See QuestionRollCall. */
@@ -218,7 +220,6 @@ export function QuestionnaireCards({
                 <QuestionSplit
                   key={question.questionId}
                   question={question}
-                  seats={seats}
                   headingId={sectionId(question.questionId, idPrefix)}
                 />
               ) : (
@@ -248,87 +249,6 @@ export function QuestionnaireCards({
         note={answerNote}
         silentNamedElsewhere={silentNames.length === 0}
       />
-    </div>
-  );
-}
-
-/**
- * The questionnaire with nobody's answers on it — the questions alone.
- *
- * For a ward where not one candidate wrote back, which is eight of Toronto's
- * twenty-five. The cards above still draw in that case, because the questions
- * survive without answers (`comparedQuestions` falls back to the shape), and
- * what a reader got was thirty-four bordered articles each containing one
- * sentence: "No answers to this one yet." Nine screens of chrome to say once,
- * thirty-four times over, what the heading above them had already said.
- *
- * So the cards come off and the questions stay. Nothing is withheld by this:
- * an unanswered question has no candidate's words in it to withhold, and every
- * question still prints in full, in the questionnaire's own order, under its
- * own section heading. What goes is the card around each one.
- *
- * Two columns, which the cards could never be: these are one- and two-line
- * sentences that `break-inside-avoid` keeps whole, and reading a plain list
- * down one column and back up the next is what a list of questions is for.
- * The cards carry answers a reader compares across, and column order would
- * have shuffled the questionnaire.
- */
-export function QuestionnaireOutline({
-  groups,
-  issuesHref,
-  idPrefix,
-}: {
-  groups: ComparedGroup[];
-  /** the city-wide read. On a ward where nobody answered it is the only thing
-   *  on the page a reader can go on, so it is worth reaching in a screen
-   *  rather than past thirty-four blanks. */
-  issuesHref?: string;
-  idPrefix?: string;
-}) {
-  return (
-    <div className="grid gap-10">
-      {groups.map((group) => (
-        <section key={group.stepId} className="grid gap-3 scroll-mt-24">
-          {/* The same heading as a section of cards, because it is the same
-              section — a reader moving between a ward that answered and one
-              that did not should not have to learn a second page. */}
-          <h2
-            id={sectionId(group.stepId, idPrefix)}
-            className="scroll-mt-24 border-b border-border-light pb-2 font-sans font-medium leading-none tracking-[-0.03em] text-[1.8rem]"
-          >
-            {group.stepTitle}
-          </h2>
-          <ul className="list-none m-0 p-0 lg:columns-2 lg:gap-x-12">
-            {group.questions.map((question) => (
-              /* The id a card would have carried, so a link written when this
-                 ward had answers — or to a ward that has them — still lands on
-                 its question here. */
-              <li
-                key={question.questionId}
-                id={sectionId(question.questionId, idPrefix)}
-                className="scroll-mt-24 break-inside-avoid border-b border-border-light py-2.5 font-serif text-[1.05rem] leading-[1.45] text-text-secondary text-pretty"
-              >
-                {question.question}
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
-
-      {/* No note on how to read the answers: there are none. The sentence the
-          cards carry — which options are not shown, who sits on no option —
-          is about a comparison this page is not making. */}
-      {issuesHref && (
-        <div className="border-t border-border-light pt-4">
-          <Link
-            href={issuesHref}
-            className="type-label-sm inline-flex items-center gap-1.5 text-accent transition-colors hover:text-dark"
-          >
-            How the whole city answered
-            <ArrowRight className="size-3.5" />
-          </Link>
-        </div>
-      )}
     </div>
   );
 }

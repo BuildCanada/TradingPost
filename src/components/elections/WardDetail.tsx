@@ -6,7 +6,6 @@ import CountdownDays from "./CountdownDays";
 import { CandidateRoster } from "./CandidateRoster";
 import {
   QuestionnaireCards,
-  QuestionnaireOutline,
   questionnaireHeadings,
 } from "./QuestionnaireCards";
 import { QuestionnaireRail } from "./QuestionnaireRail";
@@ -19,10 +18,7 @@ import {
   comparedQuestions,
   surveyRoster,
 } from "@/lib/elections/candidate-answers";
-import type {
-  CandidateAnswers,
-  ComparedGroup,
-} from "@/lib/elections/candidate-answers";
+import type { CandidateAnswers } from "@/lib/elections/candidate-answers";
 import { daysUntil } from "@/lib/elections/dates";
 import type { SupportedElection } from "@/lib/elections/registry";
 import type {
@@ -47,7 +43,6 @@ export function WardDetail({
   wardMapDefs,
   wardMap,
   surveyAnswers,
-  surveyShape,
   profile,
 }: {
   election: SupportedElection;
@@ -64,13 +59,6 @@ export function WardDetail({
    * the campaign that is most of them.
    */
   surveyAnswers?: Record<string, CandidateAnswers>;
-  /**
-   * The questionnaire's questions with nobody's answers on them, used where a
-   * ward's whole field stayed quiet — there are no returned questionnaires to
-   * read the questions off, and a ward of non-respondents still deserves to
-   * show which questions they did not answer.
-   */
-  surveyShape?: ComparedGroup[];
   /**
    * What this ward is, above the race to represent it — a short brief and the
    * Census statistics behind it. Only regions that maintain ward profiles
@@ -180,15 +168,14 @@ export function WardDetail({
               <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.75rem,3vw,2.5rem)] max-w-[24ch] text-balance">
                 Know Your Candidates
               </h2>
-              {/* Only the empty states get a sentence. Where candidates have
-                  answered, the roster underneath names both halves of the
+              {/* Only an empty ballot gets a sentence here. Where candidates
+                  have answered, the roster underneath names both halves of the
                   ballot — "2 of 11 answered" was the same count, spelled out,
-                  immediately above the list it was counting. */}
-              {respondents.length === 0 && (
+                  immediately above the list it was counting. Where none have,
+                  the questionnaire below says so in its own voice. */}
+              {councilCandidates.length === 0 && (
                 <p className="font-serif text-[1.08rem] leading-[1.5] text-dark/85 max-w-[64ch] text-pretty">
-                  {councilCandidates.length === 0
-                    ? "No one has registered in this ward yet."
-                    : "Nobody in this ward has answered yet. These are the questions we asked."}
+                  No one has registered in this ward yet.
                 </p>
               )}
               {councilCandidates.length > 0 && (
@@ -201,6 +188,11 @@ export function WardDetail({
                   race="councillor"
                   ward={ward.n}
                   wardName={ward.name}
+                  /* "Also on the ballot" needs something to be also to. With
+                     nobody answering, this list is the ballot. */
+                  silentLabel={
+                    respondents.length === 0 ? "On the ballot" : undefined
+                  }
                 />
               )}
             </div>
@@ -224,7 +216,6 @@ export function WardDetail({
                 key={race.id}
                 race={race}
                 surveyAnswers={surveyAnswers}
-                surveyShape={surveyShape}
                 showHeading={showRaceHeadings}
                 issuesHref={`${election.basePath}/issues`}
               />
@@ -314,20 +305,18 @@ export function WardDetail({
  * councillor — and two rival fields read together would compare candidates who
  * are not running against each other.
  *
- * A race nobody answered has no questions to draw, since the questions come
- * from the returned questionnaires. That case still names the candidates: they
- * are on the ballot, and the page is now the only place that says so.
+ * A race nobody answered draws no questions at all — see `NoResponses`. The
+ * candidates are still named, in the roster above this section: they are on
+ * the ballot, and the page is now the only place that says so.
  */
 function RaceQuestionnaire({
   race,
   surveyAnswers,
-  surveyShape,
   showHeading,
   issuesHref,
 }: {
   race: RaceView;
   surveyAnswers?: Record<string, CandidateAnswers>;
-  surveyShape?: ComparedGroup[];
   showHeading: boolean;
   issuesHref?: string;
 }) {
@@ -349,14 +338,19 @@ function RaceQuestionnaire({
   const groups = comparedQuestions(
     answered.map((candidate) => candidate.answers!),
     answered,
-    surveyShape,
   );
 
   return (
     <div>
       {showHeading && <RaceHeading race={race} />}
       <div className="px-6 md:px-14 pb-10">
-        {groups.length > 0 && answered.length > 0 ? (
+        {roster.length === 0 ? (
+          <p className="font-serif text-[1.05rem] leading-[1.5] text-dark/80 max-w-[62ch] text-pretty">
+            No one has filed for this seat yet.
+          </p>
+        ) : answered.length === 0 || groups.length === 0 ? (
+          <NoResponses issuesHref={issuesHref} />
+        ) : (
           <QuestionnaireRail headings={questionnaireHeadings(groups)}>
             <QuestionnaireCards
               groups={groups}
@@ -383,29 +377,37 @@ function RaceQuestionnaire({
               issuesHref={issuesHref}
             />
           </QuestionnaireRail>
-        ) : groups.length > 0 ? (
-          /* Not one candidate in this ward wrote back — eight of Toronto's
-             twenty-five. The questions survive without them, and are worth
-             showing: the heading above has just said these are the questions
-             we asked, and this is them. As a list, though. Thirty-four cards
-             each holding "No answers to this one yet." is the same sentence
-             thirty-four times inside thirty-four borders. */
-          <QuestionnaireRail headings={questionnaireHeadings(groups)}>
-            <QuestionnaireOutline groups={groups} issuesHref={issuesHref} />
-          </QuestionnaireRail>
-        ) : (
-          /* Only two ways to get here now: nobody has filed for the seat, or
-             the questionnaire itself could not be fetched. Either way there is
-             no grid to draw, and the candidates are still worth naming. */
-          <p className="font-serif text-[1.05rem] leading-[1.5] text-dark/80 max-w-[62ch] text-pretty">
-            {roster.length === 0
-              ? "No one has filed for this seat yet."
-              : `On the ballot, and yet to respond to us: ${roster
-                  .map((candidate) => candidate.name)
-                  .join(", ")}.`}
-          </p>
         )}
       </div>
+    </div>
+  );
+}
+
+/* A race whose whole field stayed quiet — eight of Toronto's twenty-five
+   wards on the day this was written.
+
+   This used to print the questionnaire's thirty-odd questions with nobody's
+   answers on them, on the argument that a ward of non-respondents still
+   deserved to see what it was they did not answer. What it produced was nine
+   screens of questions burying the one thing the section had to report. The
+   questions are not the ward's news; the silence is. So the finding stands on
+   its own, and the reader who wants the questions can have them from the
+   city-wide read, which also has answers on them. */
+function NoResponses({ issuesHref }: { issuesHref?: string }) {
+  return (
+    <div className="border-t border-border-light py-14 md:py-16">
+      <p className="font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.6rem,3vw,2.25rem)]">
+        No candidate has responded
+      </p>
+      {issuesHref && (
+        <Link
+          href={issuesHref}
+          className="type-label-sm mt-6 inline-flex items-center gap-1.5 text-accent transition-colors hover:text-dark"
+        >
+          How the whole city answered
+          <ArrowRight className="size-3.5" />
+        </Link>
+      )}
     </div>
   );
 }

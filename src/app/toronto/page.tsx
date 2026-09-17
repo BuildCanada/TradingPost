@@ -11,6 +11,7 @@ import { breakdown, msUntil, periodTiming } from "@/lib/elections/dates";
 import { isDaylight } from "@/lib/daylight";
 import { ELECTION } from "./vote/2026/data";
 import { STAGE_ONE } from "./vote/survey-questions/questions";
+import { SURVEY_PATH } from "./vote/survey-questions/path";
 import { WARD_GEO, WARD_SHAPES } from "./vote/2026/wardGeo";
 import {
   ELECTION_DAY,
@@ -304,17 +305,10 @@ function ElectionCardsSection() {
           </ElectionCard>
 
           <ElectionCard
-            /* Points at the signup rather than the survey page for now: the
-               questions are written but the answers aren't in, so the card
-               sells being told when they are. Swap this back to
-               href={SURVEY_PATH} at launch.
-  
-               Pitched as the reader's own comparison, not as our research: the
+            /* Pitched as the reader's own comparison, not as our research: the
                questions only matter to a voter because answering them yourself
-               is what sorts the field. This is the one card whose action is a
-               signup rather than a link, so it is also the one that needs a
-               line of copy to say what it does. */
-            modalHeadline="Be first to compare your views with the candidates’"
+               is what sorts the field. */
+            href={SURVEY_PATH}
             title="Compare your views to the candidates"
             cta="Compare your views"
             className="bg-bg-alt text-dark"

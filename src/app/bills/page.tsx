@@ -225,7 +225,6 @@ export default async function Home({
     <div className="mx-[10px] my-[10px] border border-border-light bg-bg">
       <PageHeader
         title={<>Bills &mdash; The 45th Parliament</>}
-        description="Every federal bill before the House and the Senate, summarized and weighed against a pro-growth standard."
         action={<FAQModalTrigger />}
       />
       <BillExplorer bills={bills} />

@@ -4,8 +4,6 @@
  *
  *   pnpm eval:bills                 # run all fixtures (cached where possible)
  *   pnpm eval:bills --refresh       # bypass cache, re-call the API
- *   pnpm eval:bills --only=social   # only the social-issue classifier
- *   pnpm eval:bills --only=analysis # only summarizeBillText
  *   pnpm eval:bills --grep=tax      # only fixtures whose id includes "tax"
  *   pnpm eval:bills --fallback      # force no-key fallback path (0 tokens)
  *
@@ -13,10 +11,6 @@
  * consistency are reported but never gate the run (they are probabilistic).
  */
 import { summarizeBillText } from "@/app/bills/services/billApi";
-import {
-  socialIssueGrader,
-  SOCIAL_ISSUE_GRADER_PROMPT,
-} from "@/app/bills/services/social-issue-grader";
 import { SUMMARY_AND_VOTE_PROMPT } from "@/app/bills/prompt/summary-and-vote-prompt";
 import { FIXTURES, loadFixtureText } from "./fixtures/bills";
 import { checkAnalysis } from "./checks/analysis-checks";
@@ -29,7 +23,6 @@ function parseArgs(argv: string[]) {
   return {
     refresh: argv.includes("--refresh"),
     fallback: argv.includes("--fallback"),
-    only: get("only") as "social" | "analysis" | undefined,
     grep: get("grep"),
   };
 }
@@ -49,9 +42,6 @@ async function main() {
       "Set the key for a real eval, or pass --fallback to exercise fallbacks intentionally.\n",
     );
   }
-
-  const runAnalysis = args.only !== "social";
-  const runSocial = args.only !== "analysis";
 
   const fixtures = FIXTURES.filter(
     (f) => !args.grep || f.id.includes(args.grep),
@@ -73,57 +63,35 @@ async function main() {
       cached: false,
       fallback: args.fallback,
     };
-    let analysisAbstain: boolean | undefined;
-    let socialResult: boolean | undefined;
+    // One call answers both the judgment and the social-issue question; the
+    // separate grader that used to answer it again (and disagree) is gone.
+    const { value: analysis, cached } = args.fallback
+      ? {
+          value: await summarizeBillText(text, { bypassCap: true }),
+          cached: false,
+        }
+      : await runCached(
+          "analysis",
+          text,
+          SUMMARY_AND_VOTE_PROMPT,
+          () => summarizeBillText(text, { bypassCap: true }),
+          { refresh: args.refresh, stats },
+        );
 
-    if (runAnalysis) {
-      // In fallback mode the result is deterministic and free — skip the cache.
-      const { value: analysis, cached } = args.fallback
-        ? { value: await summarizeBillText(text, { bypassCap: true }), cached: false }
-        : await runCached(
-            "analysis",
-            text,
-            SUMMARY_AND_VOTE_PROMPT,
-            () => summarizeBillText(text, { bypassCap: true }),
-            { refresh: args.refresh, stats },
-          );
-      report.cached = cached;
-      report.checks = checkAnalysis(analysis);
-      analysisAbstain = analysis.final_judgment === "abstain";
-      report.judgment = {
-        actual: analysis.final_judgment,
-        expected: f.expected.finalJudgment,
-        match: f.expected.finalJudgment
-          ? analysis.final_judgment === f.expected.finalJudgment
-          : undefined,
-      };
-    }
-
-    if (runSocial) {
-      const { value: social } = args.fallback
-        ? { value: await socialIssueGrader(text) }
-        : await runCached(
-            "social",
-            text,
-            SOCIAL_ISSUE_GRADER_PROMPT,
-            () => socialIssueGrader(text),
-            { refresh: args.refresh, stats },
-          );
-      socialResult = social;
-      report.social = {
-        actual: social,
-        expected: f.expected.isSocialIssue,
-        match: social === f.expected.isSocialIssue,
-      };
-    }
-
-    if (analysisAbstain !== undefined && socialResult !== undefined) {
-      report.consistency = {
-        analysisAbstain,
-        socialIssue: socialResult,
-        agree: analysisAbstain === socialResult,
-      };
-    }
+    report.cached = cached;
+    report.checks = checkAnalysis(analysis);
+    report.judgment = {
+      actual: analysis.final_judgment,
+      expected: f.expected.finalJudgment,
+      match: f.expected.finalJudgment
+        ? analysis.final_judgment === f.expected.finalJudgment
+        : undefined,
+    };
+    report.social = {
+      actual: analysis.isSocialIssue,
+      expected: f.expected.isSocialIssue,
+      match: analysis.isSocialIssue === f.expected.isSocialIssue,
+    };
 
     reports.push(report);
   }

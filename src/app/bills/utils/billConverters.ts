@@ -1,14 +1,5 @@
 import type { BillDocument } from "@/app/bills/models/Bill";
 import type { ApiBillDetail } from "@/app/bills/services/billApi";
-import {
-  summarizeBillText,
-  fetchBillMarkdown,
-  onBillNotInDatabase,
-  type BillAnalysis,
-} from "@/app/bills/services/billApi";
-import { socialIssueGrader } from "@/app/bills/services/social-issue-grader";
-import { notifyNewBillAnalysis } from "@/app/bills/services/slack-notifier";
-import { lookupBillInDB } from "@/app/bills/server/get-bill-by-id-from-db";
 
 // Unified bill data structure
 export interface UnifiedBill {
@@ -47,6 +38,11 @@ export interface UnifiedBill {
   needs_more_info?: boolean;
   missing_details?: string[];
   steel_man?: string;
+  /** When this verdict was computed, and from which bill text. */
+  analysisGeneratedAt?: Date;
+  analysisSourceRef?: string;
+  /** True when no analysis exists yet — the refresh sweep has not reached it. */
+  analysisPending?: boolean;
 }
 
 // Convert Build Canada DB bill to unified format
@@ -100,13 +96,28 @@ export function fromBuildCanadaDbBill(bill: BillDocument): UnifiedBill {
       ? [...bill.missing_details]
       : undefined,
     steel_man: bill.steel_man,
+    analysisGeneratedAt: bill.analysisGeneratedAt,
+    analysisSourceRef: bill.analysisSourceRef,
+    analysisPending: !bill.analysisGeneratedAt && !bill.summary,
   };
 }
 
 // Convert Civics Project API bill to unified format
-export async function fromCivicsProjectApiBill(
-  bill: ApiBillDetail,
-): Promise<UnifiedBill> {
+/**
+ * Shape a Civics Project API bill into the unified structure.
+ *
+ * Pure: no LLM call, no database write, no Slack post. Analysis is owned by the
+ * refresh sweep (`services/refresh.ts`), which runs on a schedule rather than
+ * inside whichever visitor happened to open an un-analyzed bill first. That
+ * visitor used to pay for two `gpt-5` calls at `reasoning.effort: "high"`
+ * inside their page render — the cost the "July 14 incident" guard was holding
+ * back by a single boolean.
+ *
+ * A bill the sweep has not reached yet comes back with `analysisPending: true`
+ * and no verdict, which the page renders as "Analysis pending" over the bill's
+ * real facts.
+ */
+export function fromCivicsProjectApiBill(bill: ApiBillDetail): UnifiedBill {
   const latestStageDate =
     bill.stages && bill.stages.length > 0
       ? bill.stages[bill.stages.length - 1].date
@@ -116,179 +127,11 @@ export async function fromCivicsProjectApiBill(
       ? bill.stages[bill.stages.length - 1].house
       : undefined;
 
-  let billMarkdown: string | null = null;
-
-  const latestBillSource =
-    bill.source || (bill.billTexts?.[0] as { url?: string })?.url;
-
-  if (latestBillSource) {
-    billMarkdown = await fetchBillMarkdown(latestBillSource);
-  }
-
-  // Check if we need to regenerate summary based on source changes from Civics Project API
-  let analysis: BillAnalysis = {
-    summary: bill.header || "",
-    tenet_evaluations: [
-      {
-        id: 1,
-        title: "Canada should aim to be the world's most prosperous country",
-        alignment: "neutral",
-        explanation: "Not analyzed",
-      },
-      {
-        id: 2,
-        title:
-          "Promote economic freedom, ambition, and breaking from bureaucratic inertia",
-        alignment: "neutral",
-        explanation: "Not analyzed",
-      },
-      {
-        id: 3,
-        title: "Drive national productivity and global competitiveness",
-        alignment: "neutral",
-        explanation: "Not analyzed",
-      },
-      {
-        id: 4,
-        title: "Grow exports of Canadian products and resources",
-        alignment: "neutral",
-        explanation: "Not analyzed",
-      },
-      {
-        id: 5,
-        title: "Encourage investment, innovation, and resource development",
-        alignment: "neutral",
-        explanation: "Not analyzed",
-      },
-      {
-        id: 6,
-        title:
-          "Deliver better public services at lower cost (government efficiency)",
-        alignment: "neutral",
-        explanation: "Not analyzed",
-      },
-      {
-        id: 7,
-        title: "Reform taxes to incentivize work, risk-taking, and innovation",
-        alignment: "neutral",
-        explanation: "Not analyzed",
-      },
-      {
-        id: 8,
-        title: "Focus on large-scale prosperity, not incrementalism",
-        alignment: "neutral",
-        explanation: "Not analyzed",
-      },
-    ],
-    final_judgment: "abstain",
-    rationale: undefined,
-    needs_more_info: false,
-    missing_details: [],
-    steel_man: "Not analyzed",
-  };
-
-  // LLM summarization is fail-safe: it may only run when the DB is confirmed
-  // reachable AND the bill is genuinely new or its source text actually
-  // changed. An unavailable DB (missing MONGO_URI, connection error) must
-  // never be treated as "bill not found" — that turns every page view into an
-  // OpenAI call (July 14 incident).
-  const dbLookup = await lookupBillInDB(bill.billID);
-  const existingBill = dbLookup.status === "found" ? dbLookup.bill : null;
-  const dbAvailable = dbLookup.status !== "unavailable";
-
-  if (existingBill) {
-    analysis = {
-      summary: existingBill.summary,
-      tenet_evaluations:
-        existingBill.tenet_evaluations || analysis.tenet_evaluations,
-      final_judgment: (() => {
-        const raw = String(existingBill.final_judgment || "")
-          .trim()
-          .toLowerCase();
-        if (raw === "yes" || raw === "no") return raw as "yes" | "no";
-        // Treat legacy "neutral" and any unknown value as "abstain"
-        if (raw === "abstain" || raw === "neutral") return "abstain";
-        return analysis.final_judgment;
-      })(),
-      rationale: existingBill.rationale || analysis.rationale,
-      needs_more_info: existingBill.needs_more_info || analysis.needs_more_info,
-      missing_details: existingBill.missing_details || analysis.missing_details,
-      steel_man: existingBill.steel_man || analysis.steel_man,
-    };
-  }
-
-  const billTextsCount = Array.isArray(bill.billTexts)
-    ? bill.billTexts.length
-    : 0;
-  const sourceChanged = existingBill
-    ? (existingBill.source || null) !== (bill.source || null)
-    : false;
-  const countChanged = existingBill
-    ? existingBill.billTextsCount !== billTextsCount
-    : false;
-  const shouldRegenerate =
-    dbAvailable &&
-    (dbLookup.status === "not-found" || sourceChanged || countChanged);
-
-  let generatedNewAnalysis = false;
-  if (shouldRegenerate && billMarkdown) {
-    console.log(
-      `Regenerating analysis for ${bill.billID} (${
-        existingBill ? "source changed" : "new bill"
-      })`,
-    );
-    analysis = await summarizeBillText(billMarkdown);
-    generatedNewAnalysis = true;
-  } else if (existingBill) {
-    console.log(
-      `Using existing analysis for ${bill.billID} (source unchanged)`,
-    );
-  }
-
-  // Only classify if missing (new bill or classification absent). Avoid calling otherwise.
-  let isSocialIssueFinal: boolean =
-    typeof existingBill?.isSocialIssue === "boolean"
-      ? ((existingBill as BillDocument).isSocialIssue as boolean)
-      : false;
-  if (
-    dbAvailable &&
-    (existingBill === null || typeof existingBill.isSocialIssue !== "boolean")
-  ) {
-    isSocialIssueFinal = await socialIssueGrader(
-      billMarkdown || analysis.summary || bill.header || bill.title,
-    );
-  }
-
-  // A fallback analysis (no OpenAI key, parse failure, API error) must never
-  // overwrite stored data or ping Slack.
-  const analysisUsable = !generatedNewAnalysis || !analysis.isFallback;
-
-  if (dbAvailable && analysisUsable) {
-    await onBillNotInDatabase({
-      billId: bill.billID,
-      source: bill.source,
-      markdown: billMarkdown,
-      bill,
-      analysis,
-      billTextsCount,
-      isSocialIssue: isSocialIssueFinal,
-    });
-  }
-
-  if (generatedNewAnalysis && analysisUsable) {
-    await notifyNewBillAnalysis({
-      billId: bill.billID,
-      title: bill.title,
-      shortTitle: bill.shortTitle,
-      analysis,
-    });
-  }
-
   return {
     billId: bill.billID,
     title: bill.title,
     short_title: bill.shortTitle,
-    summary: analysis.summary,
+    summary: bill.header || "",
     status: bill.status,
     stages: bill.stages
       ? bill.stages.map((stage) => ({
@@ -306,14 +149,8 @@ export async function fromCivicsProjectApiBill(
     genres: bill.genres,
     parliamentNumber: bill.parliamentNumber,
     sessionNumber: bill.sessionNumber,
-    fullTextMarkdown: billMarkdown,
-    question_period_questions: analysis.question_period_questions,
-    // Include analysis data
-    tenet_evaluations: analysis.tenet_evaluations,
-    final_judgment: analysis.final_judgment,
-    rationale: analysis.rationale,
-    needs_more_info: analysis.needs_more_info,
-    missing_details: analysis.missing_details,
-    steel_man: analysis.steel_man,
+    fullTextMarkdown: null,
+    final_judgment: "abstain",
+    analysisPending: true,
   };
 }

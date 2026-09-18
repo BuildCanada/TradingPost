@@ -31,6 +31,9 @@ import {
 } from "@/app/bills/consts/general";
 import { BillShare } from "@/app/bills/components/BillDetail/BillShare";
 import { shouldShowDetermination } from "@/app/bills/utils/should-show-determination/should-show-determination.util";
+import { applyApiFacts } from "@/app/bills/utils/merge-bill";
+import { BillProvenance } from "@/app/bills/components/BillDetail/BillProvenance";
+import { BillSteelMan } from "@/app/bills/components/BillDetail/BillSteelMan";
 
 // Next.js requires route segment configs to be literal values (not imported constants)
 export const revalidate = 120; // seconds - cache individual bill pages
@@ -61,18 +64,24 @@ export default async function BillDetail({ params }: Params) {
     env.NODE_ENV === "production"
       ? BUILD_CANADA_URL
       : origin || BUILD_CANADA_URL;
-  // Try database first, then fallback to API
-  const dbBill = await getBillByIdFromDB(id);
-  let unifiedBill: UnifiedBill | null = null;
+  // The stored analysis and the API's current facts are independent reads, so
+  // fetch them together. The API call is allowed to fail — a Civics outage
+  // should cost the page its freshest status, not the whole page.
+  const [dbBill, apiBill] = await Promise.all([
+    getBillByIdFromDB(id),
+    getBillFromCivicsProjectApi(id).catch((error) => {
+      console.error(`[bills] Civics fetch failed for ${id}:`, error);
+      return null;
+    }),
+  ]);
 
-  if (dbBill) {
-    unifiedBill = fromBuildCanadaDbBill(dbBill);
-  } else {
-    const apiBill = await getBillFromCivicsProjectApi(id);
-    if (apiBill) {
-      unifiedBill = await fromCivicsProjectApiBill(apiBill);
-    }
-  }
+  const apiUnified = apiBill ? fromCivicsProjectApiBill(apiBill) : null;
+  // Facts from the API, verdict from the database — the same precedence the
+  // list page applies, so the two pages can no longer disagree about a bill's
+  // status or stages.
+  const unifiedBill: UnifiedBill | null = dbBill
+    ? applyApiFacts(fromBuildCanadaDbBill(dbBill), apiUnified)
+    : apiUnified;
 
   if (!unifiedBill) {
     return (
@@ -135,6 +144,8 @@ export default async function BillDetail({ params }: Params) {
               shouldDisplay: shouldDisplayDetermination,
             }}
           />
+          <BillProvenance bill={unifiedBill} />
+          {shouldDisplayDetermination && <BillSteelMan bill={unifiedBill} />}
           {shouldDisplayDetermination &&
             unifiedBill.question_period_questions &&
             unifiedBill.question_period_questions.length > 0 && (

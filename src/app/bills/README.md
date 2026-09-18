@@ -22,8 +22,12 @@ Every analyzed bill produces a `BillAnalysis` (see `services/billApi.ts`) with:
 - **`final_judgment`** — `yes | no | abstain`.
 - **`question_period_questions`** — exactly 3 critical MP-style questions (no
   "Mr./Madam Speaker" prefix).
-- **`rationale`**, `short_title`, `needs_more_info`, `missing_details`, and
-  `steel_man` (an editorially-maintained field, not LLM-generated — see below).
+- **`steel_man`** — the strongest good-faith case *against* the judgment just
+  given, rendered on the bill page under "The other side".
+- **`isSocialIssue`** — whether the bill is primarily a social/rights/identity
+  issue. When true the judgment is forced to `abstain`: Builder MP weighs bills
+  on economic tenets and takes no position on social questions.
+- **`rationale`**, `short_title`, `needs_more_info`, `missing_details`.
 
 ### Build Canada's tenets
 
@@ -43,42 +47,72 @@ barriers → align; protectionism, new red tape, or large redistributive spendin
 → conflict) so borderline judgments stay consistent. These tenets and signals
 track Build Canada's documented positions at [buildcanada.com](https://www.buildcanada.com).
 
-### The two LLM touchpoints
+### The LLM touchpoint
 
-- **`summarizeBillText`** (`services/billApi.ts`) — the main analysis pass
-  (`gpt-5`, high reasoning effort). Produces the full `BillAnalysis` above.
-- **`socialIssueGrader`** (`services/social-issue-grader.ts`) — a small binary
-  classifier: is the bill *primarily* a social/rights/identity/culture issue?
-  When yes, the app treats the bill as out of the economic-tenet scope and
-  the judgment is `abstain`.
+**`summarizeBillText`** (`services/billApi.ts`) is the only LLM call: one
+`gpt-5` pass at high reasoning effort producing the whole `BillAnalysis`,
+including `is_social_issue`. It uses **OpenAI Structured Outputs** against
+`prompt/analysis-schema.ts`, so the shape is guaranteed — no markdown fence to
+strip, no enum to re-case, no parse fallback. The prompt carries the judgment;
+the schema carries the format.
 
-Both functions degrade gracefully to deterministic fallback output when
-`OPENAI_API_KEY` is unset (they never throw).
+`fromRawAnalysis` then applies the one rule the prompt states but cannot enforce
+on itself: a bill that is primarily a social issue abstains, whatever judgment
+the model reached.
 
-> **Note on `steel_man`:** it is a persisted, human-editable field (admin edit
-> page), **not** produced by the analysis prompt. `summarizeBillText` correctly
-> leaves it empty; editors fill it in. The eval suite deliberately does not
-> assert it.
+The function degrades gracefully to deterministic fallback output when
+`OPENAI_API_KEY` is unset (it never throws). A fallback carries `isFallback` and
+is never persisted or posted to Slack.
 
 ## Data flow
 
+Analysis happens on a schedule, never inside a page render.
+
 ```
-Civics Project API ──► getBillFromCivicsProjectApi ──► fetchBillMarkdown (xml→md)
-                                                            │
-                                summarizeBillText + socialIssueGrader (LLM)
-                                                            │
-                                     onBillNotInDatabase → persist to MongoDB
-                                                            │
-        page.tsx / [id]/page.tsx ◄── getUnifiedBillById ◄── Bill model
+      ┌─ src/instrumentation.ts (interval)  ─┐
+      │                                      ├─► refreshBills()  [Mongo lease]
+      └─ POST /bills/api/refresh (secret)   ─┘          │
+                                                        ├─ every bill: updateBillFacts
+                                                        │    (status, stages, sponsor)
+                                                        └─ changed/new only, up to budget:
+                                                             fetchBillMarkdown (xml→md)
+                                                             summarizeBillText (LLM)
+                                                             saveBillAnalysis → MongoDB
+                                                             notifyNewBillAnalysis → Slack
+
+  page.tsx ──────────┐
+                     ├─► mergeBillLists / applyApiFacts ──► API facts + stored verdict
+  [id]/page.tsx ─────┘
 ```
 
-- **List page** (`page.tsx` → `BillExplorer.tsx`) reads analyzed bills from the
-  DB and renders filterable cards.
-- **Detail page** (`[id]/page.tsx`) renders the summary, per-tenet breakdown
-  (`components/BillDetail/BillTenets.tsx`), judgment badge
-  (`components/Judgement/`), and QP questions.
-- Analyzed results are cached in **MongoDB** (`models/Bill.ts`) so a bill is only
-  sent to the LLM once (re-run explicitly via the reprocess route).
+**Precedence, applied on both pages** (`utils/merge-bill.ts`): factual fields —
+status, stages, sponsor, genres — come from the Civics API; the verdict —
+summary, tenets, judgment, rationale, steel man — comes from the database. Both
+pages go through the same helper, so they cannot disagree about a bill's status.
+
+- **List page** (`page.tsx` → `BillExplorer.tsx`) renders filterable cards.
+- **Detail page** (`[id]/page.tsx`) renders the summary, per-tenet breakdown,
+  judgment badge, steel man, QP questions, and a provenance line saying when the
+  verdict was computed and from which bill text.
+- A bill the sweep has not reached yet shows its real facts with "Analysis
+  pending" in place of a verdict.
+
+### The refresh sweep
+
+`services/refresh.ts` is the only thing that spends OpenAI calls automatically.
+It takes a Mongo lease (`models/JobLock.ts`) so multiple replicas are safe, and
+re-analyzes a bill only when it is new, has no analysis, or its bill text has
+changed — the decision lives in `services/refresh-decision.ts` and is unit
+tested. A per-sweep `analysisBudget` (default 10) bounds the cost; bills over
+budget still get their facts refreshed and are picked up next sweep.
+
+Run one by hand:
+
+```bash
+curl -X POST localhost:5050/bills/api/refresh \
+  -H "Authorization: Bearer $BILLS_CRON_SECRET"
+# optional body: {"analysisBudget": 3, "force": true}
+```
 
 ## Directory map
 
@@ -87,12 +121,17 @@ Civics Project API ──► getBillFromCivicsProjectApi ──► fetchBillMark
 | `page.tsx`, `BillExplorer.tsx` | List page + client-side filtering |
 | `[id]/page.tsx`, `components/BillDetail/*` | Bill detail view |
 | `[id]/edit/page.tsx` | Admin edit form (gated) |
-| `prompt/summary-and-vote-prompt.ts` | Tenets, social-issue rules, judgment signals, output schema |
-| `services/billApi.ts` | Civics fetch, `summarizeBillText`, markdown conversion, DB persistence |
-| `services/social-issue-grader.ts` | Binary social-issue classifier |
+| `prompt/summary-and-vote-prompt.ts` | Tenets, social-issue rules, judgment signals |
+| `prompt/analysis-schema.ts` | Structured-output JSON schema for the response |
+| `services/billApi.ts` | Civics fetch, `summarizeBillText`, markdown conversion, DB writes |
+| `services/refresh.ts`, `services/refresh-decision.ts` | The scheduled sweep and its re-analysis decision |
+| `utils/merge-bill.ts` | API-facts / stored-verdict precedence, shared by both pages |
+| `models/JobLock.ts` | Mongo lease so one sweep runs at a time |
+| `src/instrumentation.ts` (repo root) | Schedules the sweep on server start |
 | `server/*` | DB + Civics read helpers (`getUnifiedBillById`, etc.) |
 | `models/*` | Mongoose `Bill` and `User` schemas |
 | `api/[id]/route.ts`, `api/[id]/reprocess/route.ts` | Update / re-analyze a bill (gated) |
+| `api/refresh/route.ts` | Run the sweep on demand (bearer token) |
 | `utils/xml-to-md/` | Deterministic bill-XML → markdown conversion |
 | `evals/` | Manual LLM eval suite — see `evals/README.md` |
 
@@ -112,7 +151,7 @@ Configured in `env.ts`. Put these in `.env.local` for local dev.
 
 | Var | Purpose |
 |---|---|
-| `OPENAI_API_KEY` | LLM analysis + social grader (fallback output if unset) |
+| `OPENAI_API_KEY` | LLM analysis (fallback output if unset) |
 | `CIVICS_PROJECT_API_KEY` | Fetch bills from the Civics Project API |
 | `CIVICS_PROJECT_BASE_URL` | Defaults to `https://api.civicsproject.org` |
 | `MONGO_URI` (or `MONGODB_URI`) | Analyzed-bill + user store |
@@ -121,17 +160,21 @@ Configured in `env.ts`. Put these in `.env.local` for local dev.
 | `NEXT_PUBLIC_APP_URL` | Absolute URL for OG/metadata |
 | `BILLS_DEV_OPEN_ACCESS` | Dev-only admin bypass (see Auth) |
 | `BILLS_SLACK_WEBHOOK_URL` | Slack incoming webhook for #builder-mp — posts each newly generated analysis (summary, overall vote, tenet breakdown). No posts if unset. |
+| `BILLS_REFRESH_ENABLED` | `true` starts the scheduled sweep. Off by default, so dev and one-off containers never spend tokens. |
+| `BILLS_REFRESH_INTERVAL_MINUTES` | Sweep interval. Defaults to 60. |
+| `BILLS_CRON_SECRET` | Bearer token for `POST /bills/api/refresh`. Without it the route returns 503. |
 
 ## Local development
 
 ```bash
 pnpm dev            # Next.js dev server on :5050 — visit /bills
+pnpm test:bills     # unit tests for the merge precedence and sweep decision
 ```
 
 ## Evaluating the LLM features
 
 The `evals/` directory holds a manual, token-conscious eval suite that runs the
-real `summarizeBillText` and `socialIssueGrader` against committed, hand-labeled
+real `summarizeBillText` against committed, hand-labeled
 **real Parliament-45 bills** (fixtures span align / conflict / abstain /
 administrative). It gates on deterministic structural checks and reports
 judgment + social-issue accuracy.

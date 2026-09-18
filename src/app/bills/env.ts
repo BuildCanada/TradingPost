@@ -31,7 +31,10 @@ export const env = {
     "CIVICS_PROJECT_API_KEY",
     process.env.CIVICS_PROJECT_API_KEY,
   ),
-  CIVICS_PROJECT_BASE_URL: optional("CIVICS_PROJECT_BASE_URL", ENDPOINT),
+  // Honours the env var when set; ENDPOINT is the default, not an override.
+  CIVICS_PROJECT_BASE_URL:
+    optional("CIVICS_PROJECT_BASE_URL", process.env.CIVICS_PROJECT_BASE_URL) ??
+    ENDPOINT,
   MONGO_URI: optional(
     "MONGO_URI",
     (process.env.MONGO_URI || process.env.MONGODB_URI)?.trim(),
@@ -47,6 +50,20 @@ export const env = {
   BILLS_SLACK_WEBHOOK_URL: optional(
     "BILLS_SLACK_WEBHOOK_URL",
     process.env.BILLS_SLACK_WEBHOOK_URL,
+  ),
+  // The scheduled refresh sweep (src/instrumentation.ts). Off unless enabled.
+  BILLS_REFRESH_ENABLED: optional(
+    "BILLS_REFRESH_ENABLED",
+    process.env.BILLS_REFRESH_ENABLED,
+  ),
+  BILLS_REFRESH_INTERVAL_MINUTES: optional(
+    "BILLS_REFRESH_INTERVAL_MINUTES",
+    process.env.BILLS_REFRESH_INTERVAL_MINUTES,
+  ),
+  // Bearer token for POST /bills/api/refresh.
+  BILLS_CRON_SECRET: optional(
+    "BILLS_CRON_SECRET",
+    process.env.BILLS_CRON_SECRET,
   ),
 };
 

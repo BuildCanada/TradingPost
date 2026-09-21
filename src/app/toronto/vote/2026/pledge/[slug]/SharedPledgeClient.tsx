@@ -40,31 +40,33 @@ export default function SharedPledgeClient({ name }: { name: string }) {
 
   return (
     <div className="theme-election bg-bg text-dark">
-      <div className="relative h-[calc(100dvh-20px)] min-h-[480px] border-2 border-dark bg-bg overflow-clip">
+      {/* On small screens the copy would sit on top of the stamp, so the three
+          bands flow vertically instead; from md up they overlay it again. */}
+      <div className="relative flex flex-col h-[calc(100dvh-20px)] min-h-[560px] border-2 border-dark bg-bg overflow-clip">
         {/* ── The stamp, full bleed ──────────────────────────── */}
-        <div className="absolute inset-0">
+        <div className="relative order-2 min-h-[220px] flex-1 md:absolute md:inset-0">
           <StampScene stampSrc={stampImage.src} />
         </div>
 
         {/* ── Overlaid header ────────────────────────────────── */}
-        <div className="pointer-events-none absolute top-0 inset-x-0 flex flex-wrap items-start justify-between gap-x-8 gap-y-5 p-6 md:p-10">
+        <div className="order-1 shrink-0 flex flex-wrap items-start justify-between gap-x-8 gap-y-4 p-6 md:pointer-events-none md:absolute md:top-0 md:inset-x-0 md:gap-y-5 md:p-10">
           <div>
-            <p className="type-label text-accent mb-4">
+            <p className="type-label text-accent mb-2 md:mb-4">
               Municipal Election · City of Toronto
             </p>
-            <h1 className="font-sans font-medium leading-[0.98] tracking-[-0.04em] text-[clamp(2.25rem,4.5vw,3.75rem)] max-w-[16ch] text-balance">
+            <h1 className="font-sans font-medium leading-[0.98] tracking-[-0.04em] text-[clamp(1.875rem,7vw,3.75rem)] md:text-[clamp(2.25rem,4.5vw,3.75rem)] max-w-[16ch] text-balance">
               {name} pledged to vote.
             </h1>
           </div>
 
           {/* ── Share + join in ──────────────────────────────── */}
-          <div className="pointer-events-auto flex flex-col items-start gap-4 max-w-[24rem]">
-            <p className="type-label-sm text-text-secondary">
+          <div className="md:pointer-events-auto flex flex-wrap items-center gap-x-4 gap-y-3 md:flex-col md:items-start md:gap-4 md:max-w-[24rem]">
+            <p className="type-label-sm text-text-secondary w-full md:w-auto">
               Toronto votes Monday, October 26
             </p>
             <Link
               href="/toronto/vote/2026/pledge"
-              className="group/btn inline-flex items-center gap-3 type-button text-bg bg-accent px-6 py-3.5 transition-colors hover:bg-auburn-700"
+              className="group/btn inline-flex items-center gap-3 type-button text-bg bg-accent px-5 py-3 md:px-6 md:py-3.5 transition-colors hover:bg-auburn-700"
             >
               Pledge to vote too
               <ArrowRight className="size-4 shrink-0 transition-transform group-hover/btn:translate-x-0.5" />
@@ -90,15 +92,15 @@ export default function SharedPledgeClient({ name }: { name: string }) {
         </div>
 
         {/* ── Overlaid footer ────────────────────────────────── */}
-        <div className="pointer-events-none absolute bottom-0 inset-x-0 flex flex-wrap items-center justify-between gap-4 p-6 md:px-10 md:py-8">
+        <div className="order-3 shrink-0 flex flex-wrap items-center justify-between gap-3 p-6 md:pointer-events-none md:absolute md:bottom-0 md:inset-x-0 md:gap-4 md:px-10 md:py-8">
           <Link
             href="/toronto/vote/2026"
-            className="pointer-events-auto group/btn inline-flex items-center gap-3 type-button text-dark border-2 border-dark px-6 py-3.5 transition-colors hover:bg-dark hover:text-bg"
+            className="pointer-events-auto group/btn inline-flex items-center gap-3 type-button text-dark border-2 border-dark px-5 py-3 md:px-6 md:py-3.5 transition-colors hover:bg-dark hover:text-bg"
           >
             <ArrowLeft className="size-4 shrink-0 transition-transform group-hover/btn:-translate-x-0.5" />
             Back to the election tracker
           </Link>
-          <p className="type-label-sm text-text-secondary">
+          <p className="type-label-sm text-text-secondary text-balance">
             Drag the stamp around · Polls open 10:00 a.m. – 8:00 p.m.
           </p>
         </div>

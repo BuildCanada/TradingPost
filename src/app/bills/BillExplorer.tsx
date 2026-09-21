@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, useCallback, memo } from "react";
 import { BillSummary } from "./types";
 import BillCard from "@/app/bills/components/BillCard";
+import SectionLabel from "@/components/SectionLabel";
 import {
   FilterSidebar,
   FilterState,
@@ -264,39 +265,51 @@ function BillExplorer({ bills }: BillExplorerProps) {
   }, []);
 
   return (
-    <div className="mx-auto max-w-7xl py-4 md:py-6">
-      <div className="flex flex-col gap-4 md:flex-row md:gap-6">
-        <aside className="w-full md:w-auto md:min-w-[260px] md:max-w-xs md:shrink-0">
-          <FilterSidebar
-            filters={filters}
-            onFiltersChange={setFilters}
-            onClearFilters={clearFilters}
-            forceCollapsed={isFilterCollapsed}
-            onCollapsedChange={setIsFilterCollapsed}
-            filterOptions={filterOptions}
-          />
-        </aside>
+    <section className="px-5 py-10">
+      <div className="mx-auto max-w-[1080px]">
+        <div className="flex flex-col gap-6 md:flex-row md:gap-8">
+          <aside className="w-full md:w-[280px] md:shrink-0">
+            <FilterSidebar
+              filters={filters}
+              onFiltersChange={setFilters}
+              onClearFilters={clearFilters}
+              forceCollapsed={isFilterCollapsed}
+              onCollapsedChange={setIsFilterCollapsed}
+              filterOptions={filterOptions}
+            />
+          </aside>
 
-        <main className="flex-1">
-          {filteredBills.length === 0 ? (
-            <div className="text-sm">No bills match your filters.</div>
-          ) : (
-            <ul className="flex flex-col gap-3">
-              {filteredBills.map((bill) => (
-                <BillCard
-                  key={bill.billID}
-                  bill={
-                    bill as BillSummary & {
-                      tenet_evaluations?: TenetEvaluation[];
+          <div className="min-w-0 flex-1">
+            <div className="flex items-baseline justify-between gap-4 border-b border-border-light pb-3">
+              <SectionLabel as="h2">Bills</SectionLabel>
+              <span className="type-label-sm text-text-secondary">
+                {filteredBills.length}{" "}
+                {filteredBills.length === 1 ? "bill" : "bills"}
+              </span>
+            </div>
+
+            {filteredBills.length === 0 ? (
+              <p className="type-body-sm py-6 text-text-secondary">
+                No bills match your filters.
+              </p>
+            ) : (
+              <ul className="mt-6 flex flex-col gap-3">
+                {filteredBills.map((bill) => (
+                  <BillCard
+                    key={bill.billID}
+                    bill={
+                      bill as BillSummary & {
+                        tenet_evaluations?: TenetEvaluation[];
+                      }
                     }
-                  }
-                />
-              ))}
-            </ul>
-          )}
-        </main>
+                  />
+                ))}
+              </ul>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
   );
 }
 

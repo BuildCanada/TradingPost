@@ -38,8 +38,8 @@ const sizes: Record<
   Size,
   { pad: string; text: string; icon: string; gap: string }
 > = {
-  sm: { pad: "p-1", text: "text-xs", icon: "h-4 w-4", gap: "gap-2" },
-  md: { pad: "p-3", text: "text-base", icon: "h-5 w-5", gap: "gap-3" },
+  sm: { pad: "py-1", text: "type-label-sm", icon: "h-3.5 w-3.5", gap: "gap-1.5" },
+  md: { pad: "py-2.5", text: "type-label", icon: "h-4 w-4", gap: "gap-2" },
 };
 
 interface JudgementProps {
@@ -89,7 +89,7 @@ export function Judgement({
         .join(" ")}
     >
       <Icon className={`${sz.icon} ${s.icon}`} aria-hidden="true" />
-      <span className={`font-medium leading-none ${sz.text}`}>
+      <span className={`leading-none ${sz.text}`}>
         {verdictCopy(judgement)}
       </span>
     </article>

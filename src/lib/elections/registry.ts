@@ -45,6 +45,13 @@ export type SupportedElection = {
   electionDayLabel: string;
   /** e.g. "10:00 a.m. – 8:00 p.m." */
   pollHoursLabel: string;
+  /**
+   * Nomination day, "YYYY-MM-DD". Overrides York Factory's
+   * `nomination_close_date` wherever we show it — set this when the city has
+   * published a date the upstream record hasn't caught up to yet, and drop it
+   * again once upstream agrees.
+   */
+  nominationCloseIso?: string;
   /** first day of advance voting; omitted until the city publishes it */
   advanceVote?: ElectionKeyDate;
   /** deadline to apply to vote by mail; omitted until published */
@@ -57,13 +64,56 @@ export type SupportedElection = {
    */
   themeClass?: string;
   /**
-   * Whether to offer the postal-code → ward lookup on this election's page.
-   * Off unless we've confirmed the upstream lookup returns *this* city's
-   * municipal wards — a lookup that silently resolves to another city's ward
-   * number would match our roster and show a confidently wrong ward.
+   * Whether this region's coverage is switched off. The config stays here so
+   * the routes keep type-checking and the pages can be turned back on in one
+   * line, but a hidden election is dropped from the /vote index and its URLs
+   * redirect there (see next.config.ts). Only Toronto is live right now.
    */
-  wardLookup: boolean;
+  hidden?: boolean;
+  /** the region has postal-code → ward boundary data upstream, so the wards
+   *  section can offer the lookup. False is not "no map": it is "asking for a
+   *  postal code here would answer with boundary_data_unavailable". */
+  wardLookup?: boolean;
+  /**
+   * The region has a page per candidate under `${basePath}/candidates/:slug`.
+   * Where it does, a candidate's name is a link to that page and the campaign
+   * site is one of the things on it; where it doesn't, the name links straight
+   * out to the campaign site as it always did. Only Toronto has the route, and
+   * a name linking to a 404 is worse than a name linking outward, so this is
+   * opt-in rather than assumed from `basePath`.
+   */
+  candidateProfiles?: boolean;
+  /**
+   * The region's voter survey is off for now.
+   *
+   * Temporary and deliberately one line: the survey route stops answering and
+   * every invitation to it disappears, while the questions, the submissions
+   * already taken and the code that reads them all stay exactly where they
+   * are. Turning it back on is deleting this flag.
+   *
+   * Set it rather than unpicking the call sites. There are four separate
+   * invitations to the survey across the tracker — the landing page's card,
+   * its closing call to action, the mayoral page and the issues page — plus
+   * every ward page, and a survey withdrawn from three of them is a survey a
+   * reader still finds from the fourth. `surveyHref` below is what they all
+   * ask, so the rule lives in one place and no call site can forget it.
+   */
+  surveyClosed?: boolean;
 };
+
+/**
+ * Where this region's voter survey lives, or nothing while it is closed.
+ *
+ * Returning `undefined` rather than a path plus a flag to check is what makes
+ * the closed case hard to get wrong: a caller has nothing to link to, so the
+ * invitation has to disappear rather than being left pointing at a page that
+ * will not answer.
+ */
+export function surveyHref(
+  election: SupportedElection,
+): string | undefined {
+  return election.surveyClosed ? undefined : `${election.basePath}/survey`;
+}
 
 const TORONTO_2026: SupportedElection = {
   slug: "toronto-2026",
@@ -79,10 +129,12 @@ const TORONTO_2026: SupportedElection = {
   pollHoursLabel: "10:00 a.m. – 8:00 p.m.",
   // Per the City Clerk's 2026 election calendar:
   // https://www.toronto.ca/city-government/elections/key-dates/
+  nominationCloseIso: "2026-08-21",
   advanceVote: { iso: "2026-10-06", label: "Oct 6 – 11" },
   mailIn: { iso: "2026-09-24", label: "Thu, Sept 24" },
-  themeClass: "theme-election",
   wardLookup: true,
+  candidateProfiles: true,
+  themeClass: "theme-election",
 };
 
 const BRAMPTON_2026: SupportedElection = {
@@ -99,7 +151,7 @@ const BRAMPTON_2026: SupportedElection = {
   pollHoursLabel: "10:00 a.m. – 8:00 p.m.",
   // Brampton hasn't published its advance-vote or vote-by-mail dates yet;
   // those countdowns stay off the page rather than guess at them.
-  wardLookup: false,
+  hidden: true,
 };
 
 const HAMILTON_2026: SupportedElection = {
@@ -115,7 +167,7 @@ const HAMILTON_2026: SupportedElection = {
   electionDayLabel: "Mon, Oct 26",
   pollHoursLabel: "10:00 a.m. – 8:00 p.m.",
   // As with Brampton — not yet published by the city.
-  wardLookup: false,
+  hidden: true,
 };
 
 const OTTAWA_2026: SupportedElection = {
@@ -131,7 +183,7 @@ const OTTAWA_2026: SupportedElection = {
   electionDayLabel: "Mon, Oct 26",
   pollHoursLabel: "10:00 a.m. – 8:00 p.m.",
   // As with Brampton and Hamilton — not yet published by the city.
-  wardLookup: false,
+  hidden: true,
 };
 
 export const SUPPORTED_ELECTIONS: Record<string, SupportedElection> = {

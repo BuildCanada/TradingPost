@@ -8,23 +8,32 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        disallow: ["/admin", "/api/", "/bills/api/"],
+        disallow: [
+          "/admin",
+          "/api/",
+          "/bills/api/",
+          "/toronto/vote/survey-questions",
+        ],
       },
       {
         userAgent: "GPTBot",
         allow: "/",
+        disallow: ["/toronto/vote/survey-questions"],
       },
       {
         userAgent: "ChatGPT-User",
         allow: "/",
+        disallow: ["/toronto/vote/survey-questions"],
       },
       {
         userAgent: "ClaudeBot",
         allow: "/",
+        disallow: ["/toronto/vote/survey-questions"],
       },
       {
         userAgent: "PerplexityBot",
         allow: "/",
+        disallow: ["/toronto/vote/survey-questions"],
       },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,

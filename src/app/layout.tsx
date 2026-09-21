@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PUBLICATION_FEEDS } from "@/lib/feeds";
 import Script from "next/script";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
@@ -9,6 +10,8 @@ import { Toaster } from "sonner";
 import { SubscribeModal } from "@/components/subscribe";
 import { IdentifyUser } from "@/components/auth/IdentifyUser";
 import { HubspotTracking } from "@/components/HubspotTracking";
+import { XPixel } from "@/components/XPixel";
+import { MetaPixel } from "@/components/MetaPixel";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
 
@@ -49,6 +52,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        {PUBLICATION_FEEDS.map(({ file, title }) => (
+          <link key={file} rel="alternate" type="application/rss+xml" title={title} href={`/feeds/${file}`} />
+        ))}
+      </head>
       {GA_ID && (
         <>
           <Script
@@ -77,6 +85,8 @@ export default function RootLayout({
         <SubscribeModal />
         <IdentifyUser />
         <HubspotTracking />
+        <XPixel />
+        <MetaPixel />
       </body>
     </html>
   );

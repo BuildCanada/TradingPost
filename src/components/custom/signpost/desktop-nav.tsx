@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useRef, useEffect, useCallback } from "react";
 import type { TocItem as TocItemType } from "./config";
 import { useSignpost } from "./store";
@@ -11,9 +12,11 @@ import { ShareButtons } from "@/components/share/ui/ShareButtons";
 export function DesktopNav({
   topClass = "top-[90px]",
   showTopBorder = true,
+  afterShare,
 }: {
   topClass?: string;
   showTopBorder?: boolean;
+  afterShare?: ReactNode;
 }) {
   const { activeId, activeParentId, navigateTo, shareTitle, shareUrl } =
     useSignpost();
@@ -55,6 +58,7 @@ export function DesktopNav({
               Share
             </span>
             <ShareButtons title={shareTitle} url={shareUrl} />
+            {afterShare && <div className="mt-4">{afterShare}</div>}
           </div>
         )}
         <div className="relative" ref={containerRef}>

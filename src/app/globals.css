@@ -32,6 +32,43 @@ html {
   animation: fadeInUp 0.5s ease-out forwards;
 }
 
+/* ─── Loading placeholders ─── */
+
+/* A light band sweeping left→right, in the spirit of the reveal animations
+   below — quieter than a pulsing opacity blink, and it reads as "typesetting
+   in progress" rather than "widget buffering". */
+@keyframes skeletonSweep {
+  from { background-position: 150% 0; }
+  to { background-position: -150% 0; }
+}
+
+/* Placeholder for a line of body text — light grey from the charcoal ramp,
+   one step lighter than --color-border-light so placeholders stay quieter
+   than the rules and frames around them. */
+.skeleton-bar {
+  background-color: var(--color-charcoal-200);
+  background-image: linear-gradient(
+    90deg,
+    transparent 20%,
+    var(--color-charcoal-100) 50%,
+    transparent 80%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: skeletonSweep 2s ease-in-out infinite;
+}
+
+/* Heavier weight, for headings and other display type. */
+.skeleton-bar-strong {
+  background-color: var(--color-charcoal-300);
+}
+
+/* Staggers the sweep down a stack so it travels through the block instead of
+   every line flashing in unison. */
+.skeleton-delay-1 { animation-delay: 0.15s; }
+.skeleton-delay-2 { animation-delay: 0.3s; }
+.skeleton-delay-3 { animation-delay: 0.45s; }
+
 /* Draw stroke forward (dashoffset 1 → 0) */
 @keyframes drawIn {
   from { stroke-dashoffset: 1; }
@@ -78,6 +115,28 @@ html {
   60% { transform: rotate(-10deg); }
   80% { transform: rotate(10deg); }
   100% { transform: rotate(0deg); }
+}
+
+/* ─── Multi-step form transitions ─── */
+
+/* Each field in a step rises into place as it fades in. Staggered by an
+   inline animation-delay from the field's index. `forwards` plus the
+   reduced-motion override above means these still end up visible when
+   animation is disabled. */
+@keyframes stepFieldIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.step-field {
+  opacity: 0;
+  animation: stepFieldIn 340ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .accordion-expand {
@@ -515,4 +574,41 @@ body {
 /* Invert white-on-dark logo SVG so it reads on a white print page */
 .memo-print-logo {
   filter: invert(1);
+}
+
+/* ─── Expandable candidate answers ───
+   The questionnaire rows on the ward and mayoral pages are <details>, so what
+   a candidate wrote opens in place. Native <details> snaps, which on a card of
+   fourteen rows gives no sense of which row grew — the page just jumps.
+
+   Animated with `::details-content` rather than a script, so the rows stay
+   server-rendered and still work with JavaScript off. `interpolate-size` is
+   what makes a transition to `block-size: auto` possible at all; it is set
+   here rather than on :root because it inherits, and enabling keyword
+   interpolation for the whole document would quietly change every other
+   transition that lands on an intrinsic size.
+
+   Browsers without `::details-content` ignore all of this and open the way
+   they always did. */
+.answer-reveal {
+  interpolate-size: allow-keywords;
+}
+
+.answer-reveal::details-content {
+  block-size: 0;
+  overflow: hidden;
+}
+
+.answer-reveal[open]::details-content {
+  block-size: auto;
+}
+
+/* The global reduced-motion rule reaches `*`, `::before` and `::after`, which
+   does not include `::details-content` — so this one guards itself. */
+@media (prefers-reduced-motion: no-preference) {
+  .answer-reveal::details-content {
+    transition:
+      block-size 220ms ease,
+      content-visibility 220ms allow-discrete;
+  }
 }

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ExitIntentHandler } from "@/components/subscribe";
 
 export const metadata: Metadata = {
   title: {
@@ -14,5 +15,18 @@ export default function TorontoLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return <div className="theme-toronto bg-bg">{children}</div>;
+  return (
+    <div className="theme-toronto bg-bg">
+      {/* Exit intent across the whole Toronto section — the memos, the
+          election tracker, the ward pages and the guides — rather than the
+          root homepage alone, where it was the only thing mounting it.
+
+          Mounted on the layout, not the pages, so the listener survives
+          client-side navigation within /toronto: someone who reads three ward
+          pages gets asked at most once, not once per page. It renders nothing
+          and only listens; the modal itself lives in the root layout. */}
+      <ExitIntentHandler />
+      {children}
+    </div>
+  );
 }

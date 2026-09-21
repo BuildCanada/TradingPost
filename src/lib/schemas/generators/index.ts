@@ -5,3 +5,4 @@ export { generateArticleSchema } from "./article";
 export { generateReviewSchema } from "./review";
 export { generateFAQPageSchema } from "./faq-page";
 export { generateBreadcrumbSchema } from "./breadcrumb";
+export { generateVotingEventSchema } from "./event";

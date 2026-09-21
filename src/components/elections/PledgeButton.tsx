@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { hubspotPageContext } from "@/lib/hubspot-context";
 import { pledgeSharePath } from "@/lib/elections/pledge-share";
 import { DEFAULT_ELECTION_SLUG, getElection } from "@/lib/elections/registry";
+import { trackXEvent } from "@/components/XPixel";
 
 /* "Pledge to vote" CTA — opens the same modal treatment as the navbar
    Subscribe button. Submitting records the pledge (via /api/elections/pledge
@@ -34,6 +35,7 @@ export function PledgeButton({
 }) {
   const config = getElection(election);
   const router = useRouter();
+  const [open, setOpen] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -83,8 +85,7 @@ export function PledgeButton({
       // No pledge recorded. Either the postal code couldn't be judged — say so
       // and let them fix it, since they may well live here — or they're outside
       // the jurisdiction, in which case they're subscribed but not pledged, and
-      // the landing page explains and invites them to explore. Keep the button
-      // disabled while we navigate.
+      // the landing page explains and invites them to explore.
       if (data.outsideRegion) {
         if (data.unverifiedPostalCode) {
           setError(
@@ -97,11 +98,18 @@ export function PledgeButton({
           source,
           election: config.slug,
         });
+        // Close this modal ourselves and drop the loading state: the redirect
+        // is often to the page we're already on (the landing page owns the
+        // ResidencyModal), so this component isn't unmounted by the navigation
+        // and would otherwise sit disabled on "Recording…" forever.
+        setLoading(false);
+        setOpen(false);
         router.push(`${config.basePath}?residency=outside`);
         return;
       }
 
       posthog.capture("pledged_to_vote", { source, election: config.slug });
+      trackXEvent("pledgedToVote", email);
       // keep the button disabled while we navigate to the shared page;
       // prefer the server's record (canonical name + unguessable token)
       router.push(pledgeSharePath(config, data.name || name, data.shareToken));
@@ -116,12 +124,19 @@ export function PledgeButton({
 
   return (
     <Dialog.Root
-      onOpenChange={(open) => {
-        if (open)
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (next) {
           posthog.capture("pledge_modal_opened", {
             source,
             election: config.slug,
           });
+        } else {
+          // never reopen onto a stale "Recording…" button or an old error
+          setLoading(false);
+          setError(null);
+        }
       }}
     >
       <Dialog.Trigger className={className}>{children}</Dialog.Trigger>

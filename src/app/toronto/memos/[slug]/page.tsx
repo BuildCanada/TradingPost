@@ -1,3 +1,5 @@
+import { ArticleLayout } from "@/components/content/ArticleLayout";
+import { ArticleBody } from "@/components/content/ArticleBody";
 import { notFound, permanentRedirect } from "next/navigation";
 import type { Metadata } from "next";
 import { fetchMemo, fetchMemos, getSiteConfig } from "@/lib/api";
@@ -72,10 +74,16 @@ export default async function TorontoMemoDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  let memo;
-  try {
-    memo = await fetchMemo(slug, { publication: PUBLICATION });
-  } catch {
+
+  // The memo and the list backing "related memos" don't depend on each other,
+  // so they go out together rather than one after the other. Related memos are
+  // decorative — if that list fails the memo still renders.
+  const [memo, allMemos] = await Promise.all([
+    fetchMemo(slug, { publication: PUBLICATION }).catch(() => null),
+    fetchMemos({ publication: PUBLICATION }).catch(() => []),
+  ]);
+
+  if (!memo) {
     notFound();
   }
 
@@ -129,7 +137,6 @@ export default async function TorontoMemoDetailPage({
     )
   );
 
-  const allMemos = await fetchMemos({ publication: PUBLICATION });
   const sameCategory = allMemos.filter(
     (m) => m.slug !== memo.slug && memo.category && m.category === memo.category,
   );
@@ -185,13 +192,10 @@ export default async function TorontoMemoDetailPage({
         />
       </div>
 
-      <div
-        className="animate-fade-in max-w-[1400px] mx-auto px-[5vw] md:px-[10vw] pt-[42px] pb-[52px] 2xl-memo:grid 2xl-memo:grid-cols-[240px_minmax(0,1fr)] 2xl-memo:gap-12"
-        style={{ animationDelay: "0.3s" }}
-      >
+      <ArticleLayout>
         <Signpost headings={headings} />
 
-        <article className="max-w-[720px]" data-memo-content>
+        <article className="w-full min-w-0 max-w-[720px]" data-memo-content>
           <div className="mb-8 p-6 border-[3px] border-double border-border-light bg-[#d7e4f3] space-y-4">
             <span className="type-label block mb-3">Key Messages</span>
             {keyMessages.map((msg, i) => (
@@ -207,16 +211,13 @@ export default async function TorontoMemoDetailPage({
             ))}
           </div>
 
-          <div
-            className="prose-bc"
-            dangerouslySetInnerHTML={{ __html: bodyHtml }}
-          />
+          <ArticleBody html={bodyHtml} />
 
           <div className="print-hide 2xl-memo:hidden mt-10 pt-8 border-t border-border-light">
             {sidebar}
           </div>
         </article>
-      </div>
+      </ArticleLayout>
     </div>
   );
 }

@@ -1,0 +1,72 @@
+// The questionnaire, fetched once and cut to a roster.
+//
+// Both the ward pages and the mayoral page draw the same grid from the same
+// two York Factory resources, and both need the same thing out of them: the
+// answers belonging to the candidates on the page.
+//
+// Both halves are publish-gated, so an empty result is the normal case for
+// most of the campaign — not a failure. The questionnaire is a nice-to-have on
+// these pages besides: if York Factory is unreachable the page still has to
+// render its roster, so a failed fetch costs the answers rather than the page.
+// That is the opposite of the survey page, where a missing survey means there
+// is nothing to show at all.
+
+import {
+  byCandidateKey,
+  candidateAnswers,
+  candidateWriting,
+  type CandidateAnswers,
+  type WrittenAnswer,
+} from "./candidate-answers";
+import {
+  CANDIDATE_QUESTIONNAIRE_SLUG,
+  fetchCandidateResponses,
+} from "./candidate-responses";
+import { fetchSurvey } from "./survey";
+
+export type RosterSurvey = {
+  /** the roster's own answers, keyed by `nameKey` */
+  answers: Record<string, CandidateAnswers>;
+  /** the roster's free-text answers, keyed by `nameKey`. The choices are what
+   *  a grid can compare; this is what the candidates wrote. */
+  written: Record<string, WrittenAnswer[]>;
+};
+
+/**
+ * Every published answer belonging to `candidateKeys`.
+ *
+ * Answers we cannot match to a candidate on the roster are dropped. The join is
+ * on name, and a response we cannot place is one we must not attribute.
+ *
+ * The fetch is deliberately for the whole election rather than the roster: the
+ * counts beside each answer are the whole field's split ("21 of 30 said this
+ * too"), which a ward of one or two respondents — or a mayoral field of
+ * three — cannot supply on its own. The roster narrows who gets a column, not
+ * what they are measured against.
+ */
+export async function rosterSurvey(
+  electionSlug: string,
+  candidateKeys: Set<string>,
+): Promise<RosterSurvey> {
+  try {
+    const [survey, responses] = await Promise.all([
+      fetchSurvey(electionSlug, CANDIDATE_QUESTIONNAIRE_SLUG),
+      fetchCandidateResponses(electionSlug),
+    ]);
+    const entries = candidateAnswers(survey, responses).filter((entry) =>
+      candidateKeys.has(entry.key),
+    );
+    const written = candidateWriting(survey, responses);
+
+    return {
+      answers: byCandidateKey(entries),
+      /* Narrowed to the roster on the same rule the answers are: prose we
+         cannot place on a candidate is prose we must not attribute. */
+      written: Object.fromEntries(
+        Object.entries(written).filter(([key]) => candidateKeys.has(key)),
+      ),
+    };
+  } catch {
+    return { answers: {}, written: {} };
+  }
+}

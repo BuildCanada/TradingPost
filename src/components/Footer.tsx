@@ -128,7 +128,7 @@ export default function Footer() {
             progress and freedom shall come.
           </p>
           <span className="type-label text-linen-100 font-bold">
-            — Sir Wilfred Laurier
+            — Sir Wilfrid Laurier
           </span>
         </div>
 

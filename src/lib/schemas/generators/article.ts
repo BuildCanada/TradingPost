@@ -10,6 +10,7 @@ interface SiteConfigData {
 interface MemoData {
   title: string;
   slug: string;
+  path?: string;
   keyMessage1?: string | null;
   seoImage?: string | null;
   publishedAt?: Date | string | null;
@@ -39,7 +40,7 @@ export function generateArticleSchema(
     }),
     mainEntityOfPage: {
       "@type": "WebPage" as const,
-      "@id": `${config.siteUrl}/memos/${memo.slug}`,
+      "@id": `${config.siteUrl}${memo.path ?? `/memos/${memo.slug}`}`,
     },
   });
 }

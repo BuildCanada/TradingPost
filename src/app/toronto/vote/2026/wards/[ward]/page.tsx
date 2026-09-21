@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { WardDetail } from "@/components/elections/WardDetail";
 import { WardMap, WardMapDefs } from "@/components/elections/WardMap";
+import { rosterSurvey } from "@/lib/elections/survey-answers";
 import { ELECTION, WARD_NUMBERS, getToronto2026, getToronto2026Ward } from "../../data";
 import { WARD_GEO, WARD_SHAPES } from "../../wardGeo";
+import { wardProfile } from "../../wardProfiles";
 
 export function generateStaticParams() {
   return WARD_NUMBERS.map((n) => ({ ward: n }));
@@ -41,11 +43,26 @@ export default async function WardDetailPage({
   ]);
   if (!data) notFound();
 
+  const candidateKeys = new Set(
+    data.councilRaces.flatMap((race) => race.candidates.map((c) => c.key)),
+  );
+  const { answers: surveyAnswers } = await rosterSurvey(
+    ELECTION.slug,
+    candidateKeys,
+  );
+
   return (
     <WardDetail
       election={ELECTION}
       data={data}
       nominationCloseLabel={view.nominationCloseLabel}
+      surveyAnswers={surveyAnswers}
+      profile={
+        wardProfile(
+          data.ward.n,
+          data.councilRaces.flatMap((race) => race.candidates),
+        ) ?? undefined
+      }
       wardMapDefs={<WardMapDefs geo={WARD_GEO} />}
       wardMap={
         <WardMap

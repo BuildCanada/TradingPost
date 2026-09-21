@@ -2,8 +2,6 @@ import { BillSummary } from "./types";
 import BillExplorer from "./BillExplorer";
 import { getAllBillsFromDB } from "@/app/bills/server/get-all-bills-from-db";
 import { fromBuildCanadaDbBill } from "@/app/bills/utils/billConverters";
-import { getParliament45Header } from "@/app/bills/components/BillDetail/BillHeader";
-import Markdown from "react-markdown";
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { env } from "@/app/bills/env";
@@ -14,6 +12,7 @@ import {
   PROJECT_NAME,
 } from "@/app/bills/consts/general";
 import FAQModalTrigger from "./FAQModalTrigger";
+import { PageHeader } from "@/components/ui/page-header";
 
 const CANADIAN_PARLIAMENT_NUMBER = 45;
 type HomeSearchParams = { cache?: string };
@@ -254,33 +253,17 @@ export default async function Home({
     },
   };
   return (
-    <div className="min-h-screen">
+    <div className="mx-[10px] my-[10px] border border-border-light bg-bg">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="mx-auto max-w-[1120px] px-6 py-8  gap-8">
-        <main>
-          <header className="flex items-center justify-between gap-4 pb-6 border-b border-border-light mb-6">
-            <div>
-              <h1 className="type-h2 text-dark">
-                {PROJECT_NAME}: Bills of the 45th Canadian Parliament
-              </h1>
-              <p className="mt-2 type-body text-text-secondary">
-                Every federal bill before the House and the Senate, summarized
-                and weighed against a pro-growth, builder-first agenda.
-              </p>
-            </div>
-            <FAQModalTrigger />
-          </header>
-
-          <Markdown>{getParliament45Header()}</Markdown>
-
-          <section className="mt-6">
-            <BillExplorer bills={bills} />
-          </section>
-        </main>
-      </div>
+      <PageHeader
+        title={<>{PROJECT_NAME} &mdash; Bills of the 45th Parliament</>}
+        description="Every federal bill before the House and the Senate, summarized and weighed against a pro-growth, builder-first standard."
+        action={<FAQModalTrigger />}
+      />
+      <BillExplorer bills={bills} />
     </div>
   );
 }

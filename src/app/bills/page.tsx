@@ -33,7 +33,7 @@ export async function generateMetadata(): Promise<Metadata> {
     absolute: `${PROJECT_NAME} — Canadian Federal Bills Tracker | Build Canada`,
   };
   const description =
-    "Builder MP tracks every bill before Canada's House of Commons and Senate, summarized and judged through a pro-growth, builder-first lens.";
+    "Builder MP tracks every bill before Canada's House of Commons and Senate, summarized and judged through a builder-first lens.";
   const h = headers();
   const headerList = await h;
   const host =
@@ -242,7 +242,7 @@ export default async function Home({
     alternateName: "Builder MP by Build Canada",
     url: `${BUILD_CANADA_URL}${buildRelativePath()}`,
     description:
-      "Builder MP tracks every bill before Canada's House of Commons and Senate, summarized and judged through a pro-growth, builder-first lens.",
+      "Builder MP tracks every bill before Canada's House of Commons and Senate, summarized and judged through a builder-first lens.",
     applicationCategory: "GovernmentApplication",
     operatingSystem: "Web",
     isAccessibleForFree: true,
@@ -260,7 +260,7 @@ export default async function Home({
       />
       <PageHeader
         title={<>{PROJECT_NAME} &mdash; Bills of the 45th Parliament</>}
-        description="Every federal bill before the House and the Senate, summarized and weighed against a pro-growth, builder-first standard."
+        description="Every federal bill before the House and the Senate, summarized and weighed against a builder-first standard"
         action={<FAQModalTrigger />}
       />
       <BillExplorer bills={bills} />

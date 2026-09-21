@@ -1,9 +1,15 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getBillByIdFromDB } from "@/app/bills/server/get-bill-by-id-from-db";
 import { requireAuthenticatedUser } from "@/app/bills/lib/auth-guards";
 import { BASE_PATH } from "@/app/bills/utils/basePath";
 import { Button } from "@/components/ui/button";
 import { ReprocessButton } from "@/app/bills/components/ReprocessButton/reprocess-button.component";
+
+export const metadata: Metadata = {
+  title: "Edit Bill",
+  robots: { index: false, follow: false, googleBot: { index: false, follow: false } },
+};
 
 interface Params {
   params: Promise<{ id: string }>;

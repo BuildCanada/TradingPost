@@ -15,7 +15,8 @@ export const metadata: Metadata = {
     default: PROJECT_NAME,
     template: `%s · ${PROJECT_NAME}`,
   },
-  description: "Understand Canadian Federal Bills",
+  description:
+    "Builder MP: Canadian federal bills summarized and judged through a builder-first lens.",
   openGraph: {
     type: "website",
     siteName: PROJECT_NAME,
@@ -36,7 +37,8 @@ export const metadata: Metadata = {
     site: BUILD_CANADA_TWITTER_HANDLE,
     creator: BUILD_CANADA_TWITTER_HANDLE,
     title: PROJECT_NAME,
-    description: "Understand Canadian Federal Bills",
+    description:
+      "Builder MP: Canadian federal bills summarized and judged through a builder-first lens.",
     images: ["https://buildcanada.com/bills/builder-mp-seo-image.png"],
   },
 };

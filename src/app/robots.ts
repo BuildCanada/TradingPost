@@ -11,6 +11,7 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [
           "/admin",
           "/api/",
+          "/bills/api/",
           "/toronto/vote/survey-questions",
         ],
       },

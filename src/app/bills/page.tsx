@@ -6,7 +6,11 @@ import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { env } from "@/app/bills/env";
 import { buildRelativePath } from "@/app/bills/utils/basePath";
-import { BUILD_CANADA_TWITTER_HANDLE, PROJECT_NAME } from "@/app/bills/consts/general";
+import {
+  BUILD_CANADA_TWITTER_HANDLE,
+  BUILD_CANADA_URL,
+  PROJECT_NAME,
+} from "@/app/bills/consts/general";
 import FAQModalTrigger from "./FAQModalTrigger";
 import { PageHeader } from "@/components/ui/page-header";
 
@@ -25,9 +29,11 @@ export const dynamic = "auto";
 export const revalidate = 120; // seconds - cache page data
 
 export async function generateMetadata(): Promise<Metadata> {
-  const title = "Home";
+  const title = {
+    absolute: `${PROJECT_NAME} — Canadian Federal Bills Tracker | Build Canada`,
+  };
   const description =
-    "Understand Canadian federal bills with builder-first analysis.";
+    "Builder MP tracks every bill before Canada's House of Commons and Senate, summarized and judged through a builder-first lens.";
   const h = headers();
   const headerList = await h;
   const host =
@@ -44,6 +50,14 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title,
     description,
+    keywords: [
+      "Builder MP",
+      "Canadian federal bills",
+      "Parliament of Canada bills",
+      "bill tracker Canada",
+      "45th Parliament",
+      "Build Canada",
+    ],
     alternates: { canonical: pageUrl },
     openGraph: {
       title: PROJECT_NAME,
@@ -221,11 +235,32 @@ export default async function Home({
     clearMergedBillsCache(); // Allow manual cache busting with ?cache=clear
   }
   const bills = await getMergedBillsCached();
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: PROJECT_NAME,
+    alternateName: "Builder MP by Build Canada",
+    url: `${BUILD_CANADA_URL}${buildRelativePath()}`,
+    description:
+      "Builder MP tracks every bill before Canada's House of Commons and Senate, summarized and judged through a builder-first lens.",
+    applicationCategory: "GovernmentApplication",
+    operatingSystem: "Web",
+    isAccessibleForFree: true,
+    publisher: {
+      "@type": "Organization",
+      name: "Build Canada",
+      url: BUILD_CANADA_URL,
+    },
+  };
   return (
     <div className="mx-[10px] my-[10px] border border-border-light bg-bg">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <PageHeader
-        title={<>Bills &mdash; The 45th Parliament</>}
-        description="Every federal bill before the House and the Senate, summarized and weighed against a pro-growth standard."
+        title={<>{PROJECT_NAME} &mdash; Bills of the 45th Parliament</>}
+        description="Every federal bill before the House and the Senate, summarized and weighed against a builder-first standard"
         action={<FAQModalTrigger />}
       />
       <BillExplorer bills={bills} />

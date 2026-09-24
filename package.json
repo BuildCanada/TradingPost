@@ -3,6 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "packageManager": "pnpm@9.5.0",
+  "pnpm": {
+    "overrides": {
+      "eslint-config-next>eslint-plugin-react-hooks": "7.0.1"
+    }
+  },
   "scripts": {
     "dev": "next dev -p 5050",
     "dev:remote": "YORK_FACTORY_API_URL=https://yorkfactory.buildcanada.com/api/v1 next dev -p 5050",
@@ -87,7 +92,7 @@
     "eslint-config-next": "16.1.7",
     "sass": "^1.104.0",
     "tailwindcss": "^4",
-    "tsx": "^4.21.0",
+    "tsx": "4.21.0",
     "typescript": "^5.9.3"
   }
 }

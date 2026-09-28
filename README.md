@@ -78,7 +78,7 @@ Recommended:
 |----------|---------|
 | `NEXT_PUBLIC_POSTHOG_TOKEN` | PostHog analytics + client-side exception capture (`error.tsx` boundaries report here). |
 | `NEXT_PUBLIC_POSTHOG_HOST` | PostHog UI host. Defaults to `https://us.i.posthog.com`. |
-| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics. Loader is conditional — omit to disable. |
+| `NEXT_PUBLIC_GA_MEASUREMENT_ID` | Google Analytics. Omit to disable Analytics; the Google Ads tag still loads on `buildcanada.com` and `www.buildcanada.com` to track completed signups and voter pledges. Ads does not load on other hosts. |
 
 ## Deployment notes
 

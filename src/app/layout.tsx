@@ -14,6 +14,7 @@ import { XPixel } from "@/components/XPixel";
 import { MetaPixel } from "@/components/MetaPixel";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+const GOOGLE_ADS_ID = "AW-17738155749";
 
 export const metadata: Metadata = {
   title: {
@@ -57,22 +58,27 @@ export default function RootLayout({
           <link key={file} rel="alternate" type="application/rss+xml" title={title} href={`/feeds/${file}`} />
         ))}
       </head>
-      {GA_ID && (
-        <>
-          <Script
-            src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
-            strategy="afterInteractive"
-          />
-          <Script id="gtag-init" strategy="afterInteractive">
-            {`
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', '${GA_ID}');
-            `}
-          </Script>
-        </>
-      )}
+      <Script id="gtag-init" strategy="beforeInteractive">
+        {`
+          (function () {
+            var gaId = ${JSON.stringify(GA_ID || "")};
+            var adsId = ${JSON.stringify(GOOGLE_ADS_ID)};
+            var productionHost = ['buildcanada.com', 'www.buildcanada.com'].includes(window.location.hostname);
+            if (!gaId && !productionHost) return;
+
+            window.dataLayer = window.dataLayer || [];
+            window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+            window.gtag('js', new Date());
+            if (productionHost) window.gtag('config', adsId);
+            if (gaId) window.gtag('config', gaId);
+
+            var tag = document.createElement('script');
+            tag.async = true;
+            tag.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(gaId || adsId);
+            document.head.appendChild(tag);
+          })();
+        `}
+      </Script>
       <body className="antialiased bg-[#E0E0E0] p-[10px]">
         <ThemeShell>
           <div className="fixed top-0 left-0 right-0 h-[10px] bg-bg z-40" />

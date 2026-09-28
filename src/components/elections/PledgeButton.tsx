@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import posthog from "posthog-js";
 import { Button } from "@/components/ui/button";
+import { reportConversion } from "@/lib/conversions";
 import { hubspotPageContext } from "@/lib/hubspot-context";
 import { pledgeSharePath } from "@/lib/elections/pledge-share";
 import { DEFAULT_ELECTION_SLUG, getElection } from "@/lib/elections/registry";
@@ -108,7 +109,10 @@ export function PledgeButton({
         return;
       }
 
-      posthog.capture("pledged_to_vote", { source, election: config.slug });
+      await reportConversion("voterPledge", {
+        source,
+        election: config.slug,
+      });
       trackXEvent("pledgedToVote", email);
       // keep the button disabled while we navigate to the shared page;
       // prefer the server's record (canonical name + unguessable token)

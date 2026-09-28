@@ -58,17 +58,25 @@ export default function RootLayout({
           <link key={file} rel="alternate" type="application/rss+xml" title={title} href={`/feeds/${file}`} />
         ))}
       </head>
-      <Script
-        src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID || GOOGLE_ADS_ID}`}
-        strategy="afterInteractive"
-      />
-      <Script id="gtag-init" strategy="afterInteractive">
+      <Script id="gtag-init" strategy="beforeInteractive">
         {`
-          window.dataLayer = window.dataLayer || [];
-          function gtag(){dataLayer.push(arguments);}
-          gtag('js', new Date());
-          gtag('config', '${GOOGLE_ADS_ID}');
-          ${GA_ID ? `gtag('config', '${GA_ID}');` : ""}
+          (function () {
+            var gaId = ${JSON.stringify(GA_ID || "")};
+            var adsId = ${JSON.stringify(GOOGLE_ADS_ID)};
+            var productionHost = ['buildcanada.com', 'www.buildcanada.com'].includes(window.location.hostname);
+            if (!gaId && !productionHost) return;
+
+            window.dataLayer = window.dataLayer || [];
+            window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+            window.gtag('js', new Date());
+            if (productionHost) window.gtag('config', adsId);
+            if (gaId) window.gtag('config', gaId);
+
+            var tag = document.createElement('script');
+            tag.async = true;
+            tag.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(gaId || adsId);
+            document.head.appendChild(tag);
+          })();
         `}
       </Script>
       <body className="antialiased bg-[#E0E0E0] p-[10px]">

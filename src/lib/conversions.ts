@@ -23,6 +23,7 @@ export type Conversion = keyof typeof conversions;
 declare global {
   interface Window {
     gtag?: (...args: unknown[]) => void;
+    dataLayer?: IArguments[];
   }
 }
 
@@ -30,8 +31,8 @@ declare global {
  * Reports a completed conversion to every configured analytics/ad platform.
  *
  * The promise gives navigations a brief chance to let providers send their
- * event. It resolves immediately when Google Tag is unavailable and never
- * lets an analytics failure interrupt the user's successful action.
+ * event. It never lets an analytics failure interrupt the user's successful
+ * action.
  */
 export function reportConversion(
   conversion: Conversion,
@@ -49,9 +50,24 @@ export function reportConversion(
 }
 
 function reportGoogleAdsConversion(destination: string): Promise<void> {
-  if (typeof window === "undefined" || typeof window.gtag !== "function") {
+  if (
+    typeof window === "undefined" ||
+    !["buildcanada.com", "www.buildcanada.com"].includes(
+      window.location.hostname,
+    )
+  ) {
     return Promise.resolve();
   }
+
+  // The tag loader runs asynchronously. Queue a completed conversion even if
+  // it finishes before the bootstrap script installs gtag.
+  window.dataLayer = window.dataLayer || [];
+  const gtag = window.gtag || function () {
+    // gtag.js consumes the arguments object from each queued command.
+    // eslint-disable-next-line prefer-rest-params
+    window.dataLayer?.push(arguments);
+  };
+  window.gtag = gtag;
 
   return new Promise((resolve) => {
     const done = () => {
@@ -64,7 +80,7 @@ function reportGoogleAdsConversion(destination: string): Promise<void> {
     const timeout = setTimeout(resolve, 1_000);
 
     try {
-      window.gtag?.("event", "conversion", {
+      gtag("event", "conversion", {
         send_to: destination,
         event_callback: done,
         event_timeout: 1_000,

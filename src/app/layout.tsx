@@ -14,6 +14,7 @@ import { XPixel } from "@/components/XPixel";
 import { MetaPixel } from "@/components/MetaPixel";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+const GOOGLE_ADS_ID = "AW-17738155749";
 
 export const metadata: Metadata = {
   title: {
@@ -57,22 +58,19 @@ export default function RootLayout({
           <link key={file} rel="alternate" type="application/rss+xml" title={title} href={`/feeds/${file}`} />
         ))}
       </head>
-      {GA_ID && (
-        <>
-          <Script
-            src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
-            strategy="afterInteractive"
-          />
-          <Script id="gtag-init" strategy="afterInteractive">
-            {`
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', '${GA_ID}');
-            `}
-          </Script>
-        </>
-      )}
+      <Script
+        src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID || GOOGLE_ADS_ID}`}
+        strategy="afterInteractive"
+      />
+      <Script id="gtag-init" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', '${GOOGLE_ADS_ID}');
+          ${GA_ID ? `gtag('config', '${GA_ID}');` : ""}
+        `}
+      </Script>
       <body className="antialiased bg-[#E0E0E0] p-[10px]">
         <ThemeShell>
           <div className="fixed top-0 left-0 right-0 h-[10px] bg-bg z-40" />

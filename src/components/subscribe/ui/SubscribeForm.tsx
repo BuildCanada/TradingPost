@@ -3,6 +3,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import posthog from "posthog-js";
 import { Button } from "@/components/ui/button";
+import { reportConversion } from "@/lib/conversions";
 import { hubspotPageContext } from "@/lib/hubspot-context";
 import { useSubscribeStore, type SubscribeSource } from "../store";
 
@@ -69,7 +70,7 @@ export function SubscribeForm({
         return;
       }
       posthog.identify(email, { email });
-      posthog.capture("subscribed", { source });
+      void reportConversion("signup", { source });
       setSubscribed();
       onSuccess?.();
     } catch {

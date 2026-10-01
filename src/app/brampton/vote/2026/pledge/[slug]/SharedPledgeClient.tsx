@@ -2,9 +2,9 @@
 
 import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useState } from "react";
 import { ArrowLeft, ArrowRight, Check, Link2 } from "lucide-react";
 import { getElection } from "@/lib/elections/registry";
+import { usePledgeShare } from "@/lib/elections/use-pledge-share";
 import stampImage from "../brampton-stamp.png";
 
 const ELECTION = getElection("brampton-2026");
@@ -21,25 +21,9 @@ const StampScene = dynamic(() => import("@/components/elections/StampScene"), {
 });
 
 export default function SharedPledgeClient({ name }: { name: string }) {
-  const [copied, setCopied] = useState(false);
-
-  async function share() {
-    const url = window.location.href;
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `${name} pledged to vote — Brampton 2026`,
-          url,
-        });
-        return;
-      } catch {
-        // fall through to the clipboard if the user dismissed the sheet
-      }
-    }
-    await navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
+  const { copied, share } = usePledgeShare(
+    `${name} pledged to vote — Brampton 2026`,
+  );
 
   return (
     /* On small screens the copy would sit on top of the stamp, so the three

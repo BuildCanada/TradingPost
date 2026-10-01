@@ -1,9 +1,12 @@
 # /bills LLM eval suite
 
-Manual evals for the two LLM touchpoints in `/bills`:
+Manual evals for the single LLM touchpoint in `/bills`:
 
-- `summarizeBillText` (`services/billApi.ts`) — summary, 8 tenet evaluations, `final_judgment`, 3 Question Period questions.
-- `socialIssueGrader` (`services/social-issue-grader.ts`) — binary "is this primarily a social issue" classifier.
+- `summarizeBillText` (`services/billApi.ts`) — summary, 8 tenet evaluations, `final_judgment`, steel man, 3 Question Period questions, and `is_social_issue`.
+
+(There used to be a second call, `socialIssueGrader`, answering the social-issue
+question separately from the first 8000 characters. It disagreed with the main
+call's own answer, so it is gone; one call now answers both.)
 
 The suite calls the **real** functions (full prompt → parse → normalize pipeline) against committed, hand-labeled bill fixtures. It is **run manually only** — it spends OpenAI tokens on a cache miss and is never wired into `build`, `lint`, or CI.
 
@@ -13,37 +16,33 @@ The suite calls the **real** functions (full prompt → parse → normalize pipe
 export OPENAI_API_KEY=sk-...      # a real key is needed for a real eval
 pnpm eval:bills                   # all fixtures (cached where possible)
 pnpm eval:bills --refresh         # bypass cache, re-call the API
-pnpm eval:bills --only=social     # only the social-issue classifier
-pnpm eval:bills --only=analysis   # only summarizeBillText
 pnpm eval:bills --grep=tax        # only fixtures whose id contains "tax"
 pnpm eval:bills --fallback        # force the no-key fallback path (0 tokens)
 ```
 
 Exit code is non-zero when any **structural** check fails. Accuracy (judgment
-vs label, social-issue confusion matrix) and cross-consistency are reported but
-never gate the run — they are probabilistic.
+vs label, social-issue confusion matrix) is reported but never gates the run —
+it is probabilistic.
 
 ## What it checks
 
 - **Structural** (`checks/analysis-checks.ts`, deterministic, gates the run):
-  non-empty summary (steel_man is a human-editable field, not LLM-generated, so
-  it is not checked); exactly 8 tenets with ids 1–8 and valid
-  `aligns|conflicts|neutral`; valid `final_judgment`; exactly 3 non-empty QP
-  questions with no "Mr./Madam Speaker" prefix; no `Build Canada`/`we`/`our`
-  self-reference in prose; (soft warning) tenet text not quoted in the summary.
+  non-empty summary; non-empty steel man; exactly 8 tenets with ids 1–8 and
+  valid `aligns|conflicts|neutral`; valid `final_judgment`; `abstain` whenever
+  `isSocialIssue`; non-empty `missing_details` whenever `needs_more_info`;
+  exactly 3 non-empty QP questions with no "Mr./Madam Speaker" prefix; no
+  `Build Canada`/`we`/`our` self-reference in prose; (soft warning) tenet text
+  not quoted in the summary.
 - **Judgment accuracy** — `final_judgment` vs the fixture's `finalJudgment` label.
-- **Social-issue accuracy** — `socialIssueGrader` vs `isSocialIssue` label, with
-  a confusion matrix and precision/recall.
-- **Cross-consistency warning** — flags when `summarizeBillText` abstains but
-  `socialIssueGrader` disagrees. This is expected: `summarizeBillText` ignores
-  its own `is_social_issue` field, and the app's stored `isSocialIssue` comes
-  from the separate grader.
+- **Social-issue accuracy** — the analysis's `is_social_issue` vs the fixture's
+  `isSocialIssue` label, with a confusion matrix and precision/recall.
 
 ## Caching
 
 Each response is cached to `.cache/` (gitignored), keyed by a hash of the input
 text **and** the prompt text. Editing a prompt invalidates its entries
-automatically; for other changes (model, reasoning effort) bump `VERSION` in
+automatically; for other changes (model, reasoning effort, the response schema)
+bump `VERSION` in
 `lib/cache.ts`. Re-runs read from disk, so iterating on checks/fixtures costs no
 tokens. `--refresh` forces a re-call. A machine-readable `report.json` is written
 to `.cache/` each run for diffing.

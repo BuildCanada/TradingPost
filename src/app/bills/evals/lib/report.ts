@@ -18,8 +18,6 @@ export type FixtureReport = {
   checks: CheckResult[];
   judgment?: { actual: string; expected?: string; match?: boolean };
   social?: { actual: boolean; expected: boolean; match: boolean };
-  /** actual abstain-vs-grader agreement, for the cross-consistency flag */
-  consistency?: { analysisAbstain: boolean; socialIssue: boolean; agree: boolean };
   cached: boolean;
   /** true when produced via the no-key fallback path (--fallback), not the API */
   fallback?: boolean;
@@ -88,11 +86,6 @@ export function printReport(reports: FixtureReport[]): { errorFailures: number }
         `   ${mark} social_issue=${r.social.actual} expected=${r.social.expected}`,
       );
     }
-    if (r.consistency && !r.consistency.agree) {
-      console.log(
-        `   ${c.yellow("⚠")} consistency: analysis abstain=${r.consistency.analysisAbstain} but grader social_issue=${r.consistency.socialIssue}`,
-      );
-    }
   }
 
   /* ---- structural summary ---- */
@@ -126,22 +119,6 @@ export function printReport(reports: FixtureReport[]): { errorFailures: number }
     );
     console.log(
       c.dim(`  confusion: TP=${s.tp} FP=${s.fp} TN=${s.tn} FN=${s.fn} (n=${s.total})`),
-    );
-  }
-
-  /* ---- consistency warnings ---- */
-  const disagreements = reports.filter((r) => r.consistency && !r.consistency.agree);
-  if (disagreements.length) {
-    console.log(c.bold("\n=== Cross-consistency warnings ===\n"));
-    console.log(
-      c.yellow(
-        `  ${disagreements.length} fixture(s): summarizeBillText abstain disagrees with socialIssueGrader`,
-      ),
-    );
-    console.log(
-      c.dim(
-        "  (expected: summarizeBillText ignores its own is_social_issue field; abstain is model-driven)",
-      ),
     );
   }
 

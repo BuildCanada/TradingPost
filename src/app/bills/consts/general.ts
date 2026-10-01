@@ -9,3 +9,6 @@ export const BUILD_CANADA_TWITTER_HANDLE = "@buildcanada";
 // Note: Route segment configs (export const revalidate in page.tsx files) must use literal values
 // due to Next.js static analysis requirements. Use these constants only for runtime fetch calls.
 export const BILL_API_REVALIDATE_INTERVAL = 600; // Bill API data cache (fetch revalidation)
+
+/** The Parliament whose bills Builder MP covers. */
+export const CANADIAN_PARLIAMENT_NUMBER = 45;

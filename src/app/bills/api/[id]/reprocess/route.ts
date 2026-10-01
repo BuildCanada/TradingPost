@@ -9,6 +9,7 @@ import {
   type ApiBillDetail,
   fetchBillMarkdown,
   getBillFromCivicsProjectApi,
+  saveBillAnalysis,
   summarizeBillText,
 } from "@/app/bills/services/billApi";
 import { notifyNewBillAnalysis } from "@/app/bills/services/slack-notifier";
@@ -106,47 +107,9 @@ export async function POST(
     );
   }
 
-  const latestStageDate =
-    apiBill.stages && apiBill.stages.length > 0
-      ? apiBill.stages[apiBill.stages.length - 1].date
-      : (apiBill.updatedAt ?? apiBill.date);
-
-  await Bill.updateOne(
-    { billId: id },
-    {
-      $set: {
-        // Refreshed metadata from the Civics Project API
-        title: apiBill.title,
-        status: apiBill.status,
-        sponsorParty: apiBill.sponsorParty,
-        genres: apiBill.genres,
-        supportedRegion: apiBill.supportedRegion,
-        stages: apiBill.stages?.map((stage) => ({
-          stage: stage.stage,
-          state: stage.state,
-          house: stage.house,
-          date: new Date(stage.date),
-        })),
-        billTextsCount: Array.isArray(apiBill.billTexts)
-          ? apiBill.billTexts.length
-          : 0,
-        source,
-        // Regenerated AI analysis
-        summary: analysis.summary,
-        short_title:
-          apiBill.shortTitle ?? analysis.short_title ?? existing.short_title,
-        tenet_evaluations: analysis.tenet_evaluations,
-        final_judgment: analysis.final_judgment,
-        rationale: analysis.rationale,
-        needs_more_info: analysis.needs_more_info,
-        missing_details: analysis.missing_details,
-        steel_man: analysis.steel_man,
-        question_period_questions: analysis.question_period_questions ?? [],
-        lastUpdatedOn: new Date(latestStageDate),
-      },
-    },
-    { upsert: false },
-  );
+  // One write path, shared with the refresh sweep: it applies the same
+  // provenance stamp and the same social-issue-forces-abstain rule.
+  await saveBillAnalysis({ bill: apiBill, analysis, source });
 
   await notifyNewBillAnalysis({
     billId: id,

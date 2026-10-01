@@ -9,7 +9,9 @@ import { fileURLToPath } from "node:url";
  * prompt invalidates its cache automatically — this is for other changes (e.g.
  * model, reasoning effort) that the key would otherwise miss.
  */
-const VERSION = "1";
+// Bumped when the response shape changes independently of the prompt text —
+// v2 is the move to Structured Outputs (`prompt/analysis-schema.ts`).
+const VERSION = "2";
 
 const CACHE_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", ".cache");
 

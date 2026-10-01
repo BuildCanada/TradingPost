@@ -1,9 +1,18 @@
 import { xmlToMarkdown } from "@/app/bills/utils/xml-to-md/xml-to-md.util";
-import { SUMMARY_AND_VOTE_PROMPT } from "@/app/bills/prompt/summary-and-vote-prompt";
+import {
+  SUMMARY_AND_VOTE_PROMPT,
+  TENETS,
+} from "@/app/bills/prompt/summary-and-vote-prompt";
+import {
+  BILL_ANALYSIS_SCHEMA,
+  type RawBillAnalysis,
+} from "@/app/bills/prompt/analysis-schema";
 import OpenAI from "openai";
-import { BILL_API_REVALIDATE_INTERVAL } from "@/app/bills/consts/general";
+import {
+  BILL_API_REVALIDATE_INTERVAL,
+  CANADIAN_PARLIAMENT_NUMBER,
+} from "@/app/bills/consts/general";
 import { env } from "@/app/bills/env";
-import type { BillDocument } from "@/app/bills/models/Bill";
 
 export type ApiStage = {
   stage: string;
@@ -38,28 +47,26 @@ export type ApiBillDetail = {
   billTexts?: unknown[];
 };
 
-const CANADIAN_PARLIAMENT_NUMBER = 45;
-
-const FALLBACK_TENET_TITLES = [
-  "Canada should aim to be the world's most prosperous country",
-  "Promote economic freedom, ambition, and breaking from bureaucratic inertia",
-  "Drive national productivity and global competitiveness",
-  "Grow exports of Canadian products and resources",
-  "Encourage investment, innovation, and resource development",
-  "Deliver better public services at lower cost (government efficiency)",
-  "Reform taxes to incentivize work, risk-taking, and innovation",
-  "Focus on large-scale prosperity, not incrementalism",
-];
+/**
+ * Tenet titles are owned by TENETS and filled in here by id, rather than being
+ * asked of the model. One source of truth instead of three, and the model
+ * spends no tokens echoing text we already have.
+ */
+export function tenetTitle(id: number): string {
+  return TENETS[id as keyof typeof TENETS] ?? `Tenet ${id}`;
+}
 
 function makeFallbackTenets(
   explanation: string,
 ): BillAnalysis["tenet_evaluations"] {
-  return FALLBACK_TENET_TITLES.map((title, index) => ({
-    id: index + 1,
-    title,
-    alignment: "neutral",
-    explanation,
-  }));
+  return Object.keys(TENETS)
+    .map(Number)
+    .map((id) => ({
+      id,
+      title: tenetTitle(id),
+      alignment: "neutral" as const,
+      explanation,
+    }));
 }
 
 /** Types for AI analysis results */
@@ -78,6 +85,12 @@ export interface BillAnalysis {
   missing_details: string[];
   steel_man: string;
   question_period_questions?: Array<{ question: string }>;
+  /**
+   * Whether the bill is primarily a social issue. Answered by the same call
+   * that produces the judgment — a separate grader used to answer it again
+   * from the first 8000 characters and disagree.
+   */
+  isSocialIssue: boolean;
   // Set when this is a degraded placeholder (no OpenAI key, parse failure,
   // API error, rate cap) rather than a real analysis. Callers must not
   // persist or Slack-notify a fallback. Never written to Mongo.
@@ -95,7 +108,7 @@ export async function getBillFromCivicsProjectApi(
       : { cache: "no-store" }),
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${process.env.CIVICS_PROJECT_API_KEY}`,
+      Authorization: `Bearer ${env.CIVICS_PROJECT_API_KEY ?? ""}`,
     },
   });
   if (!response.ok) {
@@ -148,43 +161,18 @@ export async function summarizeBillText(
 ): Promise<BillAnalysis> {
   if (!process.env.OPENAI_API_KEY) {
     console.log("No OPENAI API key, using fallback analysis");
-    // Fallback analysis
-    const text = input?.trim() || "";
-    const truncatedSummary =
-      text.length <= 500 ? text : `${text.slice(0, 500)}…`;
-
-    return {
-      summary: truncatedSummary || "No bill text available for analysis.",
-      short_title: undefined,
-      tenet_evaluations: makeFallbackTenets("Unable to analyze without AI"),
-      final_judgment: "abstain",
-      rationale: undefined,
-      needs_more_info: true,
-      missing_details: ["AI analysis capabilities required"],
-      steel_man:
-        "The steel man for this bill is the bill that aligns with the tenets of Build Canada.",
-      question_period_questions: [],
-      isFallback: true,
-    };
+    return degradedAnalysis(input, "Unable to analyze without AI", [
+      "AI analysis capabilities required",
+    ]);
   }
 
   if (!options?.bypassCap && summarizeCapExceeded()) {
     console.error(
       `[LLM_SUMMARIZE_CAP] exceeded ${SUMMARIZE_CAP_PER_HOUR} calls/hour — refusing OpenAI call`,
     );
-    const text = input?.trim() || "";
-    return {
-      summary: text.length <= 500 ? text : `${text.slice(0, 500)}…`,
-      short_title: undefined,
-      tenet_evaluations: makeFallbackTenets("Analysis rate cap exceeded"),
-      final_judgment: "abstain",
-      rationale: undefined,
-      needs_more_info: true,
-      missing_details: ["Analysis rate cap exceeded"],
-      steel_man: "Analysis rate cap exceeded",
-      question_period_questions: [],
-      isFallback: true,
-    };
+    return degradedAnalysis(input, "Analysis rate cap exceeded", [
+      "Analysis rate cap exceeded",
+    ]);
   }
 
   try {
@@ -198,79 +186,101 @@ export async function summarizeBillText(
       reasoning: {
         effort: "high",
       },
+      // Structured Outputs: the shape below is guaranteed, so there is no
+      // markdown fence to strip, no enum to re-case, and no parse fallback.
+      text: {
+        format: {
+          type: "json_schema",
+          name: "bill_analysis",
+          strict: true,
+          schema: BILL_ANALYSIS_SCHEMA as unknown as Record<string, unknown>,
+        },
+      },
     });
+
+    // A refusal or an incomplete response leaves output_text empty; treat that
+    // as a degraded result rather than parsing "" and throwing.
     const responseText = response.output_text;
-
-    // Parse JSON response
-    try {
-      const parsed = JSON.parse(responseText);
-      const rawFj = String(parsed.final_judgment || "")
-        .trim()
-        .toLowerCase();
-      const normalizedFj: "yes" | "no" | "abstain" =
-        rawFj === "yes" || rawFj === "no" || rawFj === "abstain"
-          ? rawFj
-          : "abstain";
-      const analysis: BillAnalysis = {
-        summary: parsed.summary ?? "",
-        short_title: parsed.short_title ?? undefined,
-        tenet_evaluations: parsed.tenet_evaluations ?? [],
-        final_judgment: normalizedFj,
-        rationale: parsed.rationale ?? undefined,
-        needs_more_info: parsed.needs_more_info ?? false,
-        missing_details: parsed.missing_details ?? [],
-        steel_man: parsed.steel_man ?? "",
-        question_period_questions: Array.isArray(
-          parsed.question_period_questions,
-        )
-          ? parsed.question_period_questions
-          : [],
-      };
-      return analysis;
-    } catch (parseError) {
-      console.error("Failed to parse AI response as JSON:", parseError);
-
-      // Fallback to extracting summary from text response
-      const summaryMatch = responseText.match(
-        /summary['":\s]*["']([^"']+)["']/i,
-      );
-      const summary = summaryMatch
-        ? summaryMatch[1]
-        : `${responseText.slice(0, 500)}…`;
-
-      return {
-        summary,
-        short_title: undefined,
-        tenet_evaluations: makeFallbackTenets("JSON parse failed"),
-        final_judgment: "abstain",
-        rationale: undefined,
-        needs_more_info: true,
-        missing_details: ["Valid AI response format"],
-        steel_man: "Analysis parsing failed",
-        question_period_questions: [],
-        isFallback: true,
-      };
+    if (!responseText) {
+      console.error("[LLM_SUMMARIZE] empty response", {
+        status: response.status,
+        incomplete: response.incomplete_details,
+      });
+      return degradedAnalysis(input, "Model returned no analysis", [
+        "A complete model response",
+      ]);
     }
+
+    const parsed = JSON.parse(responseText) as RawBillAnalysis;
+    return fromRawAnalysis(parsed);
   } catch (error) {
     console.error("Error analyzing bill:", error);
-    // Fallback analysis
-    const text = input?.trim() || "";
-    const truncatedSummary =
-      text.length <= 500 ? text : `${text.slice(0, 500)}…`;
-
-    return {
-      summary: truncatedSummary || "Error occurred during analysis.",
-      short_title: undefined,
-      tenet_evaluations: makeFallbackTenets("Analysis failed"),
-      final_judgment: "abstain",
-      rationale: "Technical error during analysis",
-      needs_more_info: true,
-      missing_details: ["Technical issue resolution"],
-      steel_man: "Technical error during analysis",
-      question_period_questions: [],
-      isFallback: true,
-    };
+    return degradedAnalysis(input, "Analysis failed", [
+      "Technical issue resolution",
+    ]);
   }
+}
+
+/**
+ * Fill in tenet titles from TENETS and apply the one rule the prompt states but
+ * cannot enforce on itself: a bill that is primarily a social issue abstains.
+ * Builder MP takes no position on social questions, so a "yes"/"no" alongside
+ * is_social_issue would contradict the product. `migrations/1.ts` existed to
+ * repair exactly this drift after the fact.
+ */
+export function fromRawAnalysis(raw: RawBillAnalysis): BillAnalysis {
+  const judgment = raw.is_social_issue ? "abstain" : raw.final_judgment;
+  if (raw.is_social_issue && raw.final_judgment !== "abstain") {
+    console.warn(
+      `[LLM_SUMMARIZE] social issue judged "${raw.final_judgment}" — forcing abstain`,
+    );
+  }
+
+  return {
+    summary: raw.summary,
+    short_title: raw.short_title || undefined,
+    tenet_evaluations: raw.tenet_evaluations.map((t) => ({
+      id: t.id,
+      title: tenetTitle(t.id),
+      alignment: t.alignment,
+      explanation: t.explanation,
+    })),
+    final_judgment: judgment,
+    rationale: raw.rationale || undefined,
+    needs_more_info: raw.needs_more_info,
+    missing_details: raw.missing_details ?? [],
+    steel_man: raw.steel_man,
+    question_period_questions: raw.question_period_questions ?? [],
+    isSocialIssue: raw.is_social_issue,
+  };
+}
+
+/**
+ * A placeholder for every path where no real analysis was produced. Always
+ * `isFallback: true`, which is what stops callers persisting it over good data
+ * or announcing it in Slack.
+ */
+function degradedAnalysis(
+  input: string,
+  reason: string,
+  missingDetails: string[],
+): BillAnalysis {
+  const text = input?.trim() || "";
+  return {
+    summary:
+      (text.length <= 500 ? text : `${text.slice(0, 500)}…`) ||
+      "No bill text available for analysis.",
+    short_title: undefined,
+    tenet_evaluations: makeFallbackTenets(reason),
+    final_judgment: "abstain",
+    rationale: undefined,
+    needs_more_info: true,
+    missing_details: missingDetails,
+    steel_man: reason,
+    question_period_questions: [],
+    isSocialIssue: false,
+    isFallback: true,
+  };
 }
 
 export async function fetchBillMarkdown(
@@ -293,153 +303,139 @@ export async function fetchBillMarkdown(
   return null;
 }
 
-export async function onBillNotInDatabase(params: {
-  billId: string;
-  source?: string;
-  markdown?: string | null;
-  bill: ApiBillDetail;
-  analysis: BillAnalysis;
-  billTextsCount: number;
-  isSocialIssue: boolean;
-}): Promise<void> {
-  console.log("Saving bill to database:", params.billId);
-
-  // Import here to avoid circular dependencies
+/** Mongo is reachable and configured. */
+async function connectIfConfigured(): Promise<boolean> {
+  const uri = env.MONGO_URI || "";
+  if (!uri.startsWith("mongodb://") && !uri.startsWith("mongodb+srv://")) {
+    console.warn("[bills] No valid MongoDB URI, skipping write");
+    return false;
+  }
+  // Imported here to avoid a circular dependency through the models.
   const { connectToDatabase } = await import("@/app/bills/lib/mongoose");
+  await connectToDatabase();
+  return true;
+}
+
+/** The fields that come from the Civics Project API rather than the model. */
+function factsFromApiBill(bill: ApiBillDetail, source?: string) {
+  const latestStageDate =
+    bill.stages && bill.stages.length > 0
+      ? bill.stages[bill.stages.length - 1].date
+      : (bill.updatedAt ?? bill.date);
+
+  return {
+    title: bill.title,
+    status: bill.status,
+    sponsorParty: bill.sponsorParty,
+    genres: bill.genres,
+    supportedRegion: bill.supportedRegion,
+    stages: bill.stages?.map((stage) => ({
+      stage: stage.stage,
+      state: stage.state,
+      house: stage.house,
+      date: new Date(stage.date),
+    })),
+    billTextsCount: Array.isArray(bill.billTexts) ? bill.billTexts.length : 0,
+    source: source ?? bill.source,
+    lastUpdatedOn: new Date(latestStageDate),
+  };
+}
+
+/**
+ * Bring a stored bill's factual fields up to date with the API — status,
+ * stages, sponsor, genres, source. No LLM call, so this is cheap enough to run
+ * over every bill on every sweep.
+ *
+ * Never upserts: a row with no analysis would read as "found" to the detail
+ * page. New bills are created by `saveBillAnalysis` once they have one.
+ *
+ * Returns true when a document was written. The schema sets `timestamps: true`,
+ * so `updatedAt` changes on every call and this is "written", not "changed".
+ */
+export async function updateBillFacts(
+  bill: ApiBillDetail,
+  source?: string,
+): Promise<boolean> {
+  if (!(await connectIfConfigured())) return false;
   const { Bill } = await import("@/app/bills/models/Bill");
 
   try {
-    const { env } = await import("@/app/bills/env");
-    const uri = env.MONGO_URI || "";
-    const hasValidMongoUri =
-      uri.startsWith("mongodb://") || uri.startsWith("mongodb+srv://");
-
-    if (!hasValidMongoUri) {
-      console.warn("No valid MongoDB URI, skipping bill save");
-      return;
-    }
-
-    await connectToDatabase();
-
-    // Check if bill already exists and if we need to update it
-    const existing = (await Bill.findOne({ billId: params.billId })
-      .lean()
-      .exec()) as BillDocument | null;
-    if (existing) {
-      const countChanged = existing.billTextsCount !== params.billTextsCount;
-      const sourceChanged =
-        (existing.source || null) !== (params.source || null);
-      const existingQP = Array.isArray(existing.question_period_questions)
-        ? existing.question_period_questions
-        : [];
-      const newQP = Array.isArray(params.analysis.question_period_questions)
-        ? params.analysis.question_period_questions
-        : [];
-      const qpMissingOrDifferent =
-        (existingQP.length === 0 && newQP.length > 0) ||
-        JSON.stringify(existingQP) !== JSON.stringify(newQP);
-      const shortTitleMissing =
-        !existing.short_title &&
-        (params.bill.shortTitle || params.analysis.short_title);
-
-      if (
-        sourceChanged ||
-        countChanged ||
-        qpMissingOrDifferent ||
-        shortTitleMissing
-      ) {
-        if (sourceChanged) {
-          console.log(
-            `Updating bill ${params.billId} - source changed from ${existing.source || "<none>"} to ${params.source || "<none>"}`,
-          );
-        } else if (countChanged) {
-          console.log(
-            `Updating bill ${params.billId} - billTexts count changed from ${existing.billTextsCount} to ${params.billTextsCount}`,
-          );
-        } else if (qpMissingOrDifferent) {
-          console.log(
-            `Updating bill ${params.billId} - adding/updating Question Period questions (${existingQP.length} -> ${newQP.length})`,
-          );
-        } else if (shortTitleMissing) {
-          console.log(
-            `Updating bill ${params.billId} - adding missing short_title`,
-          );
-        }
-
-        await Bill.updateOne(
-          { billId: params.billId },
-          {
-            title: params.bill.title,
-            short_title: params.bill.shortTitle || params.analysis.short_title,
-            summary: params.analysis.summary,
-            tenet_evaluations: params.analysis.tenet_evaluations,
-            final_judgment: params.analysis.final_judgment,
-            rationale: params.analysis.rationale,
-            needs_more_info: params.analysis.needs_more_info,
-            missing_details: params.analysis.missing_details,
-            steel_man: params.analysis.steel_man,
-            status: params.bill.status,
-            sponsorParty: params.bill.sponsorParty,
-            genres: params.bill.genres,
-            billTextsCount: params.billTextsCount,
-            lastUpdatedOn: new Date(),
-            isSocialIssue: params.isSocialIssue,
-            question_period_questions: newQP,
-            source: params.source,
-          },
-        );
-      }
-      return;
-    }
-
-    // Convert API bill to DB format
-    const latestStageDate =
-      params.bill.stages && params.bill.stages.length > 0
-        ? params.bill.stages[params.bill.stages.length - 1].date
-        : (params.bill.updatedAt ?? params.bill.date);
-
-    const classifiedIsSocialIssue = params.isSocialIssue;
-
-    const billData = {
-      billId: params.bill.billID,
-      parliamentNumber: params.bill.parliamentNumber,
-      sessionNumber: params.bill.sessionNumber,
-      title: params.bill.title,
-      short_title: params.bill.shortTitle || params.analysis.short_title,
-      summary: params.analysis.summary,
-      tenet_evaluations: params.analysis.tenet_evaluations,
-      final_judgment: params.analysis.final_judgment,
-      rationale: params.analysis.rationale,
-      needs_more_info: params.analysis.needs_more_info,
-      missing_details: params.analysis.missing_details,
-      steel_man: params.analysis.steel_man,
-      status: params.bill.status,
-      sponsorParty: params.bill.sponsorParty,
-      chamber: params.bill.billID.startsWith("S")
-        ? "Senate"
-        : "House of Commons",
-      genres: params.bill.genres,
-      supportedRegion: params.bill.supportedRegion,
-      introducedOn: new Date(params.bill.date),
-      lastUpdatedOn: new Date(latestStageDate),
-      source: params.source || params.bill.source,
-      stages: params.bill.stages?.map((stage) => ({
-        stage: stage.stage,
-        state: stage.state,
-        house: stage.house,
-        date: new Date(stage.date),
-      })),
-      votes: [], // API doesn't provide detailed vote records
-      billTextsCount: params.billTextsCount,
-      isSocialIssue: classifiedIsSocialIssue,
-      question_period_questions:
-        params.analysis.question_period_questions ?? [],
-    };
-
-    await Bill.create(billData);
-    console.log("Successfully saved bill to database:", params.billId);
+    const result = await Bill.updateOne(
+      { billId: bill.billID },
+      { $set: factsFromApiBill(bill, source) },
+      { upsert: false },
+    );
+    return result.modifiedCount > 0;
   } catch (error) {
-    console.error("Error saving bill to database:", error);
-    // Don't throw - this shouldn't break the page if DB save fails
+    console.error(`[bills] Failed to update facts for ${bill.billID}:`, error);
+    return false;
+  }
+}
+
+/**
+ * Write a freshly generated analysis, creating the bill if it is new.
+ *
+ * The decision of *whether* to spend an OpenAI call lives in the caller (the
+ * refresh sweep, or an admin pressing reprocess); by the time we are here the
+ * analysis has been paid for, so it is always written. An earlier version
+ * re-derived that decision here and silently dropped writes whose source had
+ * not changed.
+ */
+export async function saveBillAnalysis(params: {
+  bill: ApiBillDetail;
+  analysis: BillAnalysis;
+  source?: string;
+}): Promise<void> {
+  const { bill, analysis, source } = params;
+
+  if (analysis.isFallback) {
+    // A degraded placeholder must never overwrite real stored data, nor create
+    // a row that then looks analyzed.
+    console.warn(
+      `[bills] Refusing to persist fallback analysis for ${bill.billID}`,
+    );
+    return;
+  }
+
+  if (!(await connectIfConfigured())) return;
+  const { Bill } = await import("@/app/bills/models/Bill");
+
+  try {
+    const facts = factsFromApiBill(bill, source);
+    await Bill.updateOne(
+      { billId: bill.billID },
+      {
+        $set: {
+          ...facts,
+          short_title: bill.shortTitle || analysis.short_title,
+          summary: analysis.summary,
+          tenet_evaluations: analysis.tenet_evaluations,
+          final_judgment: analysis.final_judgment,
+          rationale: analysis.rationale,
+          needs_more_info: analysis.needs_more_info,
+          missing_details: analysis.missing_details,
+          steel_man: analysis.steel_man,
+          isSocialIssue: analysis.isSocialIssue,
+          question_period_questions: analysis.question_period_questions ?? [],
+          // Provenance: which text this verdict was computed from, and when.
+          // Surfaced to readers on the bill page.
+          analysisGeneratedAt: new Date(),
+          analysisSourceRef: facts.source,
+        },
+        $setOnInsert: {
+          billId: bill.billID,
+          parliamentNumber: bill.parliamentNumber,
+          sessionNumber: bill.sessionNumber,
+          chamber: bill.billID.startsWith("S") ? "Senate" : "House of Commons",
+          introducedOn: new Date(bill.date),
+          votes: [],
+        },
+      },
+      { upsert: true },
+    );
+    console.log(`[bills] Saved analysis for ${bill.billID}`);
+  } catch (error) {
+    // Never throw — a failed write must not break the caller's sweep.
+    console.error(`[bills] Error saving ${bill.billID} to database:`, error);
   }
 }

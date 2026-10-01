@@ -58,6 +58,14 @@ export interface BillDocument extends mongoose.Document {
   votes?: VoteRecord[];
   billTextsCount?: number; // track number of bill texts to detect changes
   isSocialIssue?: boolean;
+  /**
+   * When the stored analysis was generated, and the bill-text URL it was
+   * generated from. Together these let the refresh sweep tell a stale verdict
+   * from a current one, and let the page tell the reader which version of the
+   * bill was judged.
+   */
+  analysisGeneratedAt?: Date;
+  analysisSourceRef?: string;
   question_period_questions?: Array<{ question: string }>;
 }
 
@@ -130,6 +138,8 @@ const BillSchema = new Schema<BillDocument>(
     votes: { type: [VoteSchema], default: [] },
     billTextsCount: { type: Number },
     isSocialIssue: { type: Boolean, default: false },
+    analysisGeneratedAt: { type: Date },
+    analysisSourceRef: { type: String },
     question_period_questions: {
       type: [{ question: { type: String, required: true } }],
       default: [],

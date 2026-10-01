@@ -32,9 +32,7 @@ function warn(name: string, pass: boolean, message: string): CheckResult {
 export function checkAnalysis(a: BillAnalysis): CheckResult[] {
   const results: CheckResult[] = [];
 
-  // summary non-empty. NOTE: steel_man is intentionally NOT checked here — it
-  // is a human-editable editorial field (admin edit page), not produced by
-  // SUMMARY_AND_VOTE_PROMPT, so summarizeBillText correctly leaves it "".
+  // summary non-empty
   results.push(
     typeof a.summary === "string" && a.summary.trim().length > 0
       ? ok("summary-present")
@@ -123,6 +121,35 @@ export function checkAnalysis(a: BillAnalysis): CheckResult[] {
           `forbidden self-reference (Build Canada / we / our) in: ${selfRefHits
             .map(([f]) => f)
             .join(", ")}`,
+        ),
+  );
+
+  // steel man: the model is asked for it, and the bill page renders it
+  results.push(
+    typeof a.steel_man === "string" && a.steel_man.trim().length > 0
+      ? ok("steel-man-present")
+      : fail("steel-man-present", "steel_man is empty or not a string"),
+  );
+
+  // A social issue must abstain. fromRawAnalysis enforces this, so a failure
+  // here means the enforcement was bypassed, not that the model disagreed.
+  results.push(
+    !a.isSocialIssue || a.final_judgment === "abstain"
+      ? ok("social-issue-abstains")
+      : fail(
+          "social-issue-abstains",
+          `isSocialIssue but final_judgment=${JSON.stringify(a.final_judgment)}`,
+        ),
+  );
+
+  // needs_more_info is a claim; missing_details says what is missing
+  results.push(
+    !a.needs_more_info ||
+      (Array.isArray(a.missing_details) && a.missing_details.length > 0)
+      ? ok("missing-details-when-needed")
+      : fail(
+          "missing-details-when-needed",
+          "needs_more_info is true but missing_details is empty",
         ),
   );
 

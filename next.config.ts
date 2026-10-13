@@ -177,6 +177,27 @@ const nextConfig: NextConfig = {
         ];
 
     return [
+      // /voteTO (direct mail) and /VoteToronto (pamphlet) are printed, and
+      // people type them however they like (/voteto, /VOTETORONTO, …). Route
+      // paths are case-sensitive, so send every casing to the one handler in
+      // src/app/<name>, which owns the redirect and its campaign params.
+      // Trailing slash allowed because skipTrailingSlashRedirect is on.
+      {
+        source: "/:vanity([vV][oO][tT][eE][tT][oO])",
+        destination: "/voteTO",
+      },
+      {
+        source: "/:vanity([vV][oO][tT][eE][tT][oO])/",
+        destination: "/voteTO",
+      },
+      {
+        source: "/:vanity([vV][oO][tT][eE][tT][oO][rR][oO][nN][tT][oO])",
+        destination: "/VoteToronto",
+      },
+      {
+        source: "/:vanity([vV][oO][tT][eE][tT][oO][rR][oO][nN][tT][oO])/",
+        destination: "/VoteToronto",
+      },
       {
         source: "/ph/static/:path*",
         destination: "https://us-assets.i.posthog.com/static/:path*",

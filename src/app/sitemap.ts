@@ -18,6 +18,7 @@ import {
   KEY_DATES_PATH,
   VOTE_BY_MAIL_PATH,
 } from "@/app/toronto/vote/2026/key-dates";
+import { VOLUNTEER_PATH } from "@/app/toronto/volunteer/build-the-vote";
 
 function toValidDate(value?: Date | string): Date | undefined {
   if (!value) return undefined;
@@ -105,6 +106,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: "weekly",
       priority: 0.6,
+    },
+    // Build the Vote's landing page. Its step-2 and thanks pages are noindex.
+    {
+      url: `${baseUrl}${VOLUNTEER_PATH}`,
+      lastModified: new Date(),
+      changeFrequency: "weekly",
+      priority: 0.7,
     },
     ...WARD_NUMBERS.map((n) => ({
       url: `${baseUrl}/toronto/vote/2026/wards/${n}`,

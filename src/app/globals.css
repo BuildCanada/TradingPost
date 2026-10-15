@@ -8,6 +8,9 @@
 /* Bills sub-app theme — scoped under .bills-scope (see src/app/bills/bills.css). */
 @import "./bills/bills.css";
 
+/* CJPAC's Formstack forms on the Build the Vote pages. */
+@import "./toronto/volunteer/formstack.css";
+
 html {
   scroll-behavior: auto;
   -webkit-font-smoothing: antialiased;

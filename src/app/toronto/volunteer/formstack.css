@@ -1,0 +1,132 @@
+/*
+ * CJPAC's Formstack forms, restyled to match our own inputs (see SubscribeForm)
+ * and Button. Imported once from src/app/globals.css.
+ *
+ * Formstack styles the form with styled-components: hashed class names that
+ * change between renderer releases, so these rules hang off the stable fs*
+ * classes and element types instead. Its rules arrive after ours and can be as
+ * specific, hence the !important on anything it also sets.
+ */
+
+.formstack-embed .fsBody,
+.formstack-embed .fsForm,
+.formstack-embed .fsPage,
+.formstack-embed .fsSection,
+.formstack-embed .fsBody > div {
+  background: transparent !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  max-width: none !important;
+  width: 100% !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+.formstack-embed .fsFieldCell {
+  margin: 0 0 1.25rem !important;
+  padding: 0 !important;
+}
+
+.formstack-embed .fsLabel,
+.formstack-embed legend {
+  font-family: var(--font-label) !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.14em !important;
+  line-height: 1.3 !important;
+  text-transform: uppercase !important;
+  color: var(--color-dark) !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.formstack-embed .fsRequiredMarker {
+  color: var(--color-accent) !important;
+  margin-left: 0.25em;
+}
+
+/* Sub-labels under split fields ("First Name", "Postal Code") and supporting
+   text. */
+.formstack-embed .fsSubField label,
+.formstack-embed .fsSupportingSubLabel,
+.formstack-embed .fsSupporting {
+  font-family: var(--font-serif) !important;
+  font-size: 0.9rem !important;
+  color: var(--color-text-secondary) !important;
+  margin-top: 0.35rem !important;
+}
+
+.formstack-embed input[type="text"],
+.formstack-embed input[type="email"],
+.formstack-embed input[type="tel"],
+.formstack-embed select,
+.formstack-embed textarea {
+  width: 100% !important;
+  border: 1px solid var(--color-charcoal-300) !important;
+  border-radius: 0 !important;
+  background: #fff !important;
+  color: var(--color-dark) !important;
+  font-family: var(--font-serif) !important;
+  font-size: 1.05rem !important;
+  line-height: 1.4 !important;
+  padding: 0.65rem 0.75rem !important;
+  height: auto !important;
+  box-shadow: none !important;
+  outline: none !important;
+  transition: border-color 0.15s;
+}
+
+.formstack-embed input:focus,
+.formstack-embed select:focus,
+.formstack-embed textarea:focus {
+  border-color: var(--color-dark) !important;
+}
+
+.formstack-embed .fsOptionLabel {
+  font-family: var(--font-serif) !important;
+  font-size: 1.05rem !important;
+  color: var(--color-dark) !important;
+  display: flex !important;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.formstack-embed input[type="checkbox"],
+.formstack-embed input[type="radio"] {
+  accent-color: var(--color-accent);
+}
+
+.formstack-embed .fsSubmit,
+.formstack-embed [id^="fsSubmit"] {
+  background: transparent !important;
+  padding: 0.5rem 0 0 !important;
+  margin: 0 !important;
+  border: 0 !important;
+  text-align: left !important;
+}
+
+/* Matches Button's "auburn" variant, which reads as Toronto blue inside the
+   election theme. */
+.formstack-embed .fsSubmitButton {
+  background: var(--color-auburn-800) !important;
+  border: 1px solid var(--color-auburn-800) !important;
+  border-radius: 0 !important;
+  color: #fff !important;
+  font-family: var(--font-label) !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+  padding: 1.1rem 1.75rem !important;
+  width: auto !important;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.formstack-embed .fsSubmitButton:hover {
+  opacity: 0.8;
+}
+
+.formstack-embed .fsSubmitButton:focus-visible {
+  outline: 2px solid var(--color-dark) !important;
+  outline-offset: 3px;
+}

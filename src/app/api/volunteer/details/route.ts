@@ -7,13 +7,13 @@ import {
   SHEET_COLUMNS,
   SHEET_TAB,
 } from "@/app/toronto/volunteer/build-the-vote";
+import { identifyToCustomerio } from "@/lib/customerio";
 import { upsertSheetRow } from "@/lib/google-sheet";
 
 // Build the Vote step 2: optional details, added to the volunteer's row in the
 // Sheet shared with CJPAC. The row is found by the email step 1's response put
-// in an httpOnly cookie, so the email is never in a URL or the page. These
-// answers (including a mayoral preference) go to the Sheet only, not to
-// Customer.io.
+// in an httpOnly cookie, so the email is never in a URL or the page. The
+// answers also go to Customer.io, best-effort as in step 1.
 
 export async function POST(req: NextRequest) {
   try {
@@ -40,6 +40,16 @@ export async function POST(req: NextRequest) {
         Issues: issues,
       },
     });
+
+    try {
+      await identifyToCustomerio(email, {
+        toronto_2026_build_the_vote_availability: availability.join(", "),
+        toronto_2026_build_the_vote_mayoral_candidate: mayoral,
+        toronto_2026_build_the_vote_issues: issues,
+      });
+    } catch (err) {
+      console.error(err);
+    }
 
     return NextResponse.json({ success: true });
   } catch (err) {

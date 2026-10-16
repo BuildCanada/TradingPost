@@ -7,7 +7,7 @@ import {
   SHEET_COLUMNS,
   SHEET_TAB,
 } from "@/app/toronto/volunteer/build-the-vote";
-import { sheetTimestamp, upsertSheetRow } from "@/lib/google-sheet";
+import { upsertSheetRow } from "@/lib/google-sheet";
 
 // Build the Vote step 2: optional details, added to the volunteer's row in the
 // Sheet shared with CJPAC. The row is found by the email step 1's response put
@@ -36,9 +36,8 @@ export async function POST(req: NextRequest) {
       email,
       values: {
         Availability: availability.join(", "),
-        "Mayoral candidate": mayoral,
+        "Mayoral Candidate": mayoral,
         Issues: issues,
-        "Details added at": sheetTimestamp(),
       },
     });
 

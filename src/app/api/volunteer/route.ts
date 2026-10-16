@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   DETAILS_API_PATH,
   EMAIL_COOKIE,
-  PARTNER_SOURCE,
   SHEET_COLUMNS,
   SHEET_TAB,
 } from "@/app/toronto/volunteer/build-the-vote";
@@ -57,16 +56,13 @@ export async function POST(req: NextRequest) {
       columns: SHEET_COLUMNS,
       email,
       values: {
-        "Signed up at": sheetTimestamp(),
-        "First name": firstName,
-        "Last name": lastName,
+        "Submitted At": sheetTimestamp(),
+        "First Name": firstName,
+        "Last Name": lastName,
         Phone: phone,
-        City: city,
-        "Postal code": postalCode,
-        Source: str(body.utm_source, 100),
-        Medium: str(body.utm_medium, 100),
-        Campaign: str(body.utm_campaign, 100),
-        Partner: PARTNER_SOURCE,
+        "Postal Code": postalCode,
+        // Submitting the form is consent; the form says so above the button.
+        "Consent to share with CJPAC": "Yes",
       },
     });
 

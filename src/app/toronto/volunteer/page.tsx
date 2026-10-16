@@ -140,7 +140,7 @@ const FAQS: { question: string; answer: React.ReactNode }[] = [
 const h2Class =
   "font-sans font-medium leading-[1.05] tracking-[-0.03em] text-[clamp(1.9rem,3.2vw,2.5rem)] max-w-[24ch] text-balance";
 const ledeClass =
-  "font-serif text-[1.1rem] leading-[1.5] max-w-[58ch] text-text-secondary";
+  "font-serif text-[1.15rem] leading-[1.5] max-w-[58ch] text-text-secondary";
 
 export default function VolunteerPage() {
   const now = new Date();
@@ -150,7 +150,7 @@ export default function VolunteerPage() {
       <div className="mx-[10px] my-[10px] border border-border-light bg-bg overflow-x-clip">
         {/* ── Hero ─────────────────────────────────────────────── */}
         <section className="grid lg:grid-cols-[1.5fr_1fr] border-b-2 border-dark">
-          <div className="px-6 py-14 md:px-14 md:py-20">
+          <div className="px-6 py-10 md:px-14 md:py-20">
             <p className="type-label text-accent mb-5">
               Build the Vote &middot; {ELECTION.voteDayLabel}
             </p>
@@ -172,14 +172,14 @@ export default function VolunteerPage() {
               >
                 Sign up to volunteer
               </Button>
-              <p className="font-serif text-[1rem] leading-[1.4] text-text-secondary max-w-[30ch]">
+              <p className="font-serif text-[1.0625rem] leading-[1.45] text-text-secondary max-w-[30ch]">
                 Takes about a minute. No experience needed.
               </p>
             </div>
           </div>
-          <div className="px-6 py-10 md:px-14 border-t lg:border-t-0 lg:border-l border-border-light bg-bg-alt flex flex-col justify-center gap-5">
+          <div className="px-6 py-8 md:px-14 md:py-10 border-t lg:border-t-0 lg:border-l border-border-light bg-bg-alt flex flex-col justify-center gap-5">
             <PeriodCountdown period={ELECTION_DAY} now={now} size="lg" />
-            <p className="font-serif text-[1rem] leading-[1.4] text-text-secondary border-t border-border-light pt-4">
+            <p className="font-serif text-[1.0625rem] leading-[1.45] text-text-secondary border-t border-border-light pt-4">
               Polls are open {ELECTION_DAY.hoursLabel} on{" "}
               {ELECTION.voteDayLabel}.
             </p>
@@ -188,8 +188,8 @@ export default function VolunteerPage() {
 
         {/* ── What's at stake ──────────────────────────────────── */}
         <section className="border-b-2 border-dark">
-          <div className="px-6 pt-12 pb-8 md:px-14">
-            <p className="type-label text-accent mb-3.5">What&rsquo;s at stake</p>
+          <div className="px-6 pt-10 pb-6 md:px-14 md:pt-12 md:pb-8">
+            <p className="type-label text-accent mb-2.5">What&rsquo;s at stake</p>
             <h2 className={`${h2Class} mb-2.5`}>
               What the next council will decide.
             </h2>
@@ -201,21 +201,21 @@ export default function VolunteerPage() {
             {ISSUES.map((issue, i) => (
               <div
                 key={issue.title}
-                className="px-6 py-9 md:px-9 border-b last:border-b-0 md:[&:nth-last-child(-n+2)]:border-b-0 border-border-light md:[&:nth-child(2n)]:border-l lg:[&:not(:first-child)]:border-l"
+                className="px-6 py-6 md:px-9 md:py-8 border-b last:border-b-0 md:[&:nth-last-child(-n+2)]:border-b-0 border-border-light md:[&:nth-child(2n)]:border-l lg:[&:not(:first-child)]:border-l"
               >
-                <p className="type-label text-accent mb-3">
+                <p className="type-label text-accent mb-1.5">
                   {String(i + 1).padStart(2, "0")}
                 </p>
-                <h3 className="font-sans font-medium text-[1.15rem] leading-[1.25] tracking-[-0.02em] mb-2.5">
+                <h3 className="font-sans font-medium text-[1.2rem] leading-[1.25] tracking-[-0.02em] mb-1.5">
                   {issue.title}
                 </h3>
-                <p className="font-serif text-[1rem] leading-[1.5] text-text-secondary">
+                <p className="font-serif text-[1.0625rem] leading-[1.55] text-text-secondary">
                   {issue.body}
                 </p>
               </div>
             ))}
           </div>
-          <div className="px-6 md:px-14 py-9 border-t border-border-light">
+          <div className="px-6 md:px-14 py-6 md:py-8 border-t border-border-light">
             <Button as="link" variant="ghost" href={`${ELECTION.basePath}/issues`}>
               See where the candidates stand
             </Button>
@@ -224,11 +224,11 @@ export default function VolunteerPage() {
 
         {/* ── Turnout and margins ──────────────────────────────── */}
         <section className="border-b-2 border-dark">
-          <div className="px-6 pt-12 pb-8 md:px-14">
+          <div className="px-6 pt-10 pb-6 md:px-14 md:pt-12 md:pb-8">
             <p className="font-sans font-semibold leading-[0.95] tracking-[-0.04em] text-[clamp(2.6rem,7vw,4.5rem)] text-accent">
               Fewer than 3 in 10
             </p>
-            <p className="font-serif text-[clamp(1.15rem,1.6vw,1.4rem)] leading-[1.5] mt-3 mb-10 max-w-[44ch]">
+            <p className="font-serif text-[clamp(1.15rem,1.6vw,1.4rem)] leading-[1.5] mt-3 mb-8 md:mb-10 max-w-[44ch]">
               eligible Torontonians voted in the last municipal election.
             </p>
             <h2 className={`${h2Class} mb-2.5`}>
@@ -242,7 +242,7 @@ export default function VolunteerPage() {
             {MARGINS.map((m, i) => (
               <div
                 key={m.race + m.detail}
-                className={`px-6 py-9 md:px-9 ${
+                className={`px-6 py-6 md:px-9 md:py-8 ${
                   i > 0
                     ? "border-t md:border-t-0 md:border-l border-border-light"
                     : ""
@@ -254,7 +254,7 @@ export default function VolunteerPage() {
                     {m.votes === 1 ? "vote" : "votes"}
                   </span>
                 </p>
-                <p className="font-serif text-[1rem] leading-[1.5] text-text-secondary mt-3">
+                <p className="font-serif text-[1.0625rem] leading-[1.55] text-text-secondary mt-3">
                   decided the{" "}
                   <strong className="font-semibold text-dark">{m.race}</strong>{" "}
                   {m.detail}
@@ -266,8 +266,8 @@ export default function VolunteerPage() {
 
         {/* ── How Election Day volunteering works ──────────────── */}
         <section className="grid md:grid-cols-[1.2fr_1fr] border-b-2 border-dark bg-bg-alt">
-          <div className="px-6 py-12 md:px-14 md:py-16">
-            <p className="type-label text-accent mb-3.5">
+          <div className="px-6 py-10 md:px-14 md:py-16">
+            <p className="type-label text-accent mb-2.5">
               How Election Day volunteering works
             </p>
             <h2 className={`${h2Class} mb-5`}>
@@ -280,7 +280,7 @@ export default function VolunteerPage() {
               what you believe into a result.
             </p>
           </div>
-          <div className="px-6 pb-12 md:px-14 md:py-16 flex items-center">
+          <div className="px-6 pb-10 md:px-14 md:py-16 flex items-center">
             <p className="border-l-[3px] border-accent pl-5 font-serif text-[1.3rem] leading-[1.45] max-w-[34ch]">
               You won&rsquo;t be debating strangers. You&rsquo;ll be reminding
               people who already support your candidate to get to the polls.
@@ -290,33 +290,33 @@ export default function VolunteerPage() {
 
         {/* ── Three steps ──────────────────────────────────────── */}
         <section className="border-b-2 border-dark">
-          <div className="px-6 pt-12 pb-8 md:px-14">
-            <p className="type-label text-accent mb-3.5">Three simple steps</p>
+          <div className="px-6 pt-10 pb-6 md:px-14 md:pt-12 md:pb-8">
+            <p className="type-label text-accent mb-2.5">Three simple steps</p>
             <h2 className={h2Class}>Here&rsquo;s how it works.</h2>
           </div>
           <ol className="grid md:grid-cols-3 border-t border-border-light">
             {STEPS.map((step, i) => (
               <li
                 key={step.title}
-                className={`px-6 py-9 md:px-9 ${
+                className={`px-6 py-6 md:px-9 md:py-8 ${
                   i > 0
                     ? "border-t md:border-t-0 md:border-l border-border-light"
                     : ""
                 }`}
               >
-                <p className="font-sans font-medium text-[1.5rem] tracking-[-0.03em] text-accent mb-4">
+                <p className="type-label text-accent mb-1.5">
                   {String(i + 1).padStart(2, "0")}
                 </p>
-                <h3 className="font-sans font-medium text-[1.25rem] leading-[1.25] tracking-[-0.02em] mb-2.5 max-w-[20ch]">
+                <h3 className="font-sans font-medium text-[1.25rem] leading-[1.25] tracking-[-0.02em] mb-1.5 max-w-[22ch]">
                   {step.title}
                 </h3>
-                <p className="font-serif text-[1rem] leading-[1.5] text-text-secondary">
+                <p className="font-serif text-[1.0625rem] leading-[1.55] text-text-secondary">
                   {step.body}
                 </p>
               </li>
             ))}
           </ol>
-          <div className="px-6 md:px-14 py-9 border-t border-border-light">
+          <div className="px-6 md:px-14 py-6 md:py-8 border-t border-border-light">
             <Button as="link" variant="auburn" href="#signup" className="px-7 py-4.5">
               Sign up to volunteer
             </Button>
@@ -325,8 +325,8 @@ export default function VolunteerPage() {
 
         {/* ── A typical shift ──────────────────────────────────── */}
         <section className="border-b-2 border-dark">
-          <div className="px-6 pt-12 pb-8 md:px-14">
-            <p className="type-label text-accent mb-3.5">
+          <div className="px-6 pt-10 pb-6 md:px-14 md:pt-12 md:pb-8">
+            <p className="type-label text-accent mb-2.5">
               What a typical shift looks like
             </p>
             <h2 className={`${h2Class} mb-2.5`}>
@@ -335,26 +335,29 @@ export default function VolunteerPage() {
             <p className={ledeClass}>You won&rsquo;t be on your own.</p>
           </div>
           <ol className="grid md:grid-cols-2 lg:grid-cols-4 border-t border-border-light">
-            {SHIFT.map((step) => (
+            {SHIFT.map((step, i) => (
               <li
                 key={step.title}
-                className="px-6 py-8 md:px-9 border-b last:border-b-0 md:[&:nth-last-child(-n+2)]:border-b-0 border-border-light md:[&:nth-child(2n)]:border-l lg:[&:not(:first-child)]:border-l"
+                className="px-6 py-5 md:px-9 md:py-7 border-b last:border-b-0 md:[&:nth-last-child(-n+2)]:border-b-0 border-border-light md:[&:nth-child(2n)]:border-l lg:[&:not(:first-child)]:border-l"
               >
-                <h3 className="font-sans font-medium text-[1.1rem] leading-[1.3] tracking-[-0.02em] mb-2">
+                <p className="type-label text-accent mb-1.5">
+                  {String(i + 1).padStart(2, "0")}
+                </p>
+                <h3 className="font-sans font-medium text-[1.2rem] leading-[1.3] tracking-[-0.02em] mb-1.5">
                   {step.title}
                 </h3>
-                <p className="font-serif text-[1rem] leading-[1.5] text-text-secondary">
+                <p className="font-serif text-[1.0625rem] leading-[1.55] text-text-secondary">
                   {step.body}
                 </p>
               </li>
             ))}
           </ol>
-          <div className="px-6 md:px-14 py-10 border-t border-border-light">
-            <div className="border border-dark bg-bg-alt px-5 py-6 sm:px-7">
+          <div className="px-6 md:px-14 py-6 md:py-8 border-t border-border-light">
+            <div className="border border-dark bg-bg-alt px-5 py-5 md:px-7 md:py-6">
               <p className="type-label text-accent mb-2">
                 Free training before Election Day
               </p>
-              <p className="font-serif text-[1.05rem] leading-[1.5] max-w-[62ch]">
+              <p className="font-serif text-[1.125rem] leading-[1.55] max-w-[62ch]">
                 Short Zoom sessions on canvassing and get-out-the-vote basics
                 on {TRAINING_DATES}. The link arrives by email when you sign
                 up.
@@ -368,7 +371,7 @@ export default function VolunteerPage() {
           id="signup"
           className="grid lg:grid-cols-[1fr_1.2fr] border-b-2 border-dark scroll-mt-24"
         >
-          <div className="px-6 py-12 md:px-14 md:py-16 bg-[#003086] text-linen-100">
+          <div className="px-6 py-10 md:px-14 md:py-16 bg-[#003086] text-linen-100">
             <p className="type-label text-auburn-200 mb-3.5">Build the Vote</p>
             <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.035em] text-[clamp(2rem,4vw,3.25rem)] max-w-[16ch] text-balance mb-5">
               Can Toronto count on you on October&nbsp;26?
@@ -378,12 +381,12 @@ export default function VolunteerPage() {
               a candidate who shares your values.
             </p>
           </div>
-          <div className="px-6 py-12 md:px-14 md:py-16">
+          <div className="px-6 py-10 md:px-14 md:py-16">
             <VolunteerSignupForm />
-            <p className="font-serif text-[0.95rem] leading-[1.5] text-text-secondary mt-6 max-w-[56ch]">
+            <p className="font-serif text-[1rem] leading-[1.5] text-text-secondary mt-6 max-w-[56ch]">
               {CONSENT}
             </p>
-            <p className="font-serif text-[0.95rem] leading-[1.5] text-text-secondary mt-3 max-w-[56ch]">
+            <p className="font-serif text-[1rem] leading-[1.5] text-text-secondary mt-3 max-w-[56ch]">
               Sign-ups are handled by our volunteer partner,{" "}
               <a
                 href={CJPAC_URL}
@@ -401,16 +404,16 @@ export default function VolunteerPage() {
 
         {/* ── FAQ ──────────────────────────────────────────────── */}
         <section className="border-b-2 border-dark">
-          <div className="px-6 pt-12 pb-8 md:px-14">
+          <div className="px-6 pt-10 pb-6 md:px-14 md:pt-12 md:pb-8">
             <h2 className={h2Class}>Questions</h2>
           </div>
-          <div className="px-6 md:px-14 pb-12 grid gap-9 md:grid-cols-2 md:gap-x-14">
+          <div className="px-6 md:px-14 pb-10 md:pb-12 grid gap-7 md:grid-cols-2 md:gap-x-14">
             {FAQS.map((faq) => (
               <div key={faq.question}>
-                <h3 className="font-sans font-medium text-[1.15rem] leading-[1.3] tracking-[-0.02em] mb-2.5">
+                <h3 className="font-sans font-medium text-[1.2rem] leading-[1.3] tracking-[-0.02em] mb-1.5">
                   {faq.question}
                 </h3>
-                <p className="font-serif text-[1.05rem] leading-[1.5] text-text-secondary">
+                <p className="font-serif text-[1.125rem] leading-[1.55] text-text-secondary">
                   {faq.answer}
                 </p>
               </div>
@@ -419,7 +422,7 @@ export default function VolunteerPage() {
         </section>
 
         {/* ── Closing (Toronto-blue band, full bleed) ──────────── */}
-        <section className="bg-[#003086] text-bg px-6 py-20 md:px-14 md:py-24 text-center flex flex-col items-center">
+        <section className="bg-[#003086] text-bg px-6 py-14 md:px-14 md:py-24 text-center flex flex-col items-center">
           <p className="mb-8 font-serif italic text-[1.1rem] leading-[1.5] text-bg/70">
             &ldquo;Whatever our errors are otherwise, we shall not err for want of
             boldness.&rdquo;
@@ -434,7 +437,7 @@ export default function VolunteerPage() {
           >
             Sign up to volunteer
           </a>
-          <div className="mt-14 max-w-[60ch] space-y-2 font-serif text-[0.9rem] leading-[1.5] text-bg/60">
+          <div className="mt-14 max-w-[60ch] space-y-2 font-serif text-[0.95rem] leading-[1.5] text-bg/70">
             <p>
               Build the Vote is a Build Canada&nbsp;&ndash; Toronto volunteer
               program. Volunteers choose the candidates they support.

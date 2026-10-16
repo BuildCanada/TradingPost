@@ -30,18 +30,19 @@ export async function POST(req: NextRequest) {
     const firstName = str(first_name, 100);
     const lastName = str(last_name, 100);
 
-    await identifyToCustomerio(email.trim().toLowerCase(), {
+    const identified = await identifyToCustomerio(email.trim().toLowerCase(), {
       first_name: firstName,
       last_name: lastName,
       name: [firstName, lastName].filter(Boolean).join(" "),
       city: str(city, 100),
       postal_code: normalizePostalCode(postal_code),
-      build_the_vote_volunteer: true,
+      toronto_2026_build_the_vote_volunteer: true,
       // A Unix timestamp, so date-based segments can use it.
-      build_the_vote_signed_up_at: Math.floor(Date.now() / 1000),
+      toronto_2026_build_the_vote_signed_up_at: Math.floor(Date.now() / 1000),
     });
 
-    return NextResponse.json({ success: true });
+    // `identified` is false when Customer.io isn't configured (local dev).
+    return NextResponse.json({ success: true, identified });
   } catch (err) {
     return NextResponse.json({ error: String(err) }, { status: 500 });
   }

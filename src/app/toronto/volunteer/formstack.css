@@ -50,7 +50,7 @@
 .formstack-embed .fsSupportingSubLabel,
 .formstack-embed .fsSupporting {
   font-family: var(--font-serif) !important;
-  font-size: 0.9rem !important;
+  font-size: 0.95rem !important;
   color: var(--color-text-secondary) !important;
   margin-top: 0.35rem !important;
 }

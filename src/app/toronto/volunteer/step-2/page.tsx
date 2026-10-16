@@ -44,7 +44,7 @@ export default async function VolunteerStep2Page() {
               slug={STEP_2.slug}
               fill={{ [STEP_2.fields.email]: email }}
             />
-            <p className="font-serif text-[0.95rem] leading-[1.5] text-text-secondary mt-6 max-w-[56ch]">
+            <p className="font-serif text-[1rem] leading-[1.5] text-text-secondary mt-6 max-w-[56ch]">
               Sign-ups are handled by our volunteer partner,{" "}
               <a
                 href={CJPAC_URL}

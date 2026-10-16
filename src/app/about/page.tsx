@@ -1,6 +1,7 @@
 import { fetchFaqs, fetchTeamMembers, getSiteConfig } from "@/lib/api";
 import TeamBlock from "./TeamBlock";
 import QnaBlock from "./QnaBlock";
+import PrinciplesBlock from "./PrinciplesBlock";
 import QuickLinks from "./QuickLinks";
 import { buildGraph } from "@/lib/schemas/graph";
 import { generateOrganizationSchema } from "@/lib/schemas/generators/organization";
@@ -9,6 +10,7 @@ import { generateFAQPageSchema } from "@/lib/schemas/generators/faq-page";
 const quickLinks = [
   { label: "Core Team", href: "#core-team" },
   { label: "Board", href: "#board" },
+  { label: "Principles", href: "#principles" },
   { label: "FAQs", href: "#faqs" },
 ];
 
@@ -54,6 +56,7 @@ export default async function AboutPage() {
       </section>
       <QuickLinks links={quickLinks} />
       <TeamBlock members={people} />
+      <PrinciplesBlock />
       <QnaBlock items={qandaItems} />
     </div>
   );

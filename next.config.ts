@@ -27,6 +27,12 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      // The constitution's principles now live on the about page.
+      {
+        source: "/constitution",
+        destination: "/about#principles",
+        permanent: true,
+      },
       {
         source: "/great-canadian-builders",
         destination: "/builders",

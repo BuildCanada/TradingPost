@@ -1,13 +1,4 @@
-import type { Metadata } from "next";
-
-export const metadata: Metadata = {
-  title: "Constitution",
-  description:
-    "The principles that guide Build Canada in its mission to make Canada the most prosperous country in the world.",
-  alternates: {
-    canonical: "/constitution",
-  },
-};
+import SectionLabel from "@/components/SectionLabel";
 
 const principles = [
   {
@@ -40,45 +31,31 @@ const principles = [
   },
 ];
 
-export default function ConstitutionPage() {
+export default function PrinciplesBlock() {
   return (
-    <div className="mx-[10px] my-[10px] border border-border-light bg-bg overflow-hidden">
-      <article className="animate-fade-in">
-        <header className="border-b border-border-light px-5 py-12 sm:px-10 sm:py-16 md:px-16 md:py-24">
-          <div className="mx-auto max-w-[1080px]">
-            <p className="type-label mb-5 text-accent">Build Canada</p>
-            <h1 className="type-display max-w-[12ch] text-dark">
-              Constitution
-            </h1>
-            <p className="type-body mt-8 max-w-[38ch] text-dark">
-              Build Canada&rsquo;s mission is to make Canada the most prosperous
-              country in the world.
-            </p>
-            <p className="type-label mt-8 text-text-muted">
-              These principles guide our work.
-            </p>
-          </div>
-        </header>
-
-        <ol className="mx-auto max-w-[1080px] border-x border-border-light">
+    <section
+      id="principles"
+      className="px-6 sm:px-16 py-12 border-b border-border-light"
+    >
+      <div className="max-w-screen-2xl mx-auto">
+        <SectionLabel as="h2">Principles</SectionLabel>
+        <ol className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8 list-none">
           {principles.map((principle, index) => (
             <li
               key={principle.title}
-              className="grid gap-5 border-b border-border-light px-5 py-9 last:border-b-0 sm:px-10 md:grid-cols-[56px_minmax(0,1fr)] md:gap-8 md:px-12 md:py-12"
+              className="border-t border-border-light pt-6 grid grid-cols-[3rem_1fr] gap-4"
             >
-              <span className="type-label pt-1 text-accent" aria-hidden="true">
+              <span className="type-h3 text-accent leading-none">
                 {String(index + 1).padStart(2, "0")}
               </span>
-              <div className="max-w-[760px]">
-                <h2 className="type-title-sm text-dark">{principle.title}</h2>
-                <p className="type-body mt-4 text-text-secondary">
-                  {principle.body}
-                </p>
+              <div>
+                <h3 className="type-h3 text-dark mb-2">{principle.title}</h3>
+                <p className="type-body text-dark/70">{principle.body}</p>
               </div>
             </li>
           ))}
         </ol>
-      </article>
-    </div>
+      </div>
+    </section>
   );
 }

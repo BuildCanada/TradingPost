@@ -73,7 +73,7 @@ const STEPS = [
   },
   {
     title: "Show up on October 26",
-    body: "Join your candidate’s team for as little as two hours and help win a close race.",
+    body: "Join your candidate’s team for as little as two hours and help them win.",
   },
 ];
 
@@ -420,33 +420,15 @@ export default function VolunteerPage() {
               </div>
             ))}
           </div>
-        </section>
-
-        {/* ── Closing (Toronto-blue band, full bleed) ──────────── */}
-        <section className={`${GUTTER} bg-[#003086] text-bg py-14 md:py-24 text-center flex flex-col items-center`}>
-          <p className="mb-8 font-serif italic text-[1.1rem] leading-[1.5] text-bg/70">
-            &ldquo;Whatever our errors are otherwise, we shall not err for want of
-            boldness.&rdquo;
-            <br className="sm:hidden" /> &mdash; Sir Wilfrid Laurier
-          </p>
-          <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.035em] text-[clamp(2rem,5vw,3.75rem)] max-w-[22ch] text-balance text-linen-100 mb-10">
-            Two hours. A close race. Your call.
-          </h2>
-          <a
-            href="#signup"
-            className="group/btn inline-flex items-center gap-3 type-button text-accent bg-bg px-7 py-4 transition-colors hover:bg-linen-100"
-          >
-            Sign up to volunteer
-          </a>
-          <div className="mt-14 max-w-[60ch] space-y-2 font-serif text-[0.95rem] leading-[1.5] text-bg/70">
-            <p>
-              Build the Vote is a Build Canada&nbsp;&ndash; Toronto volunteer
-              program. Volunteers choose the candidates they support.
-            </p>
-            <p>
-              Turnout and race margins are from official City of Toronto 2022
-              municipal election results.
-            </p>
+          <div className={`${GUTTER} py-6 md:py-8 border-t border-border-light`}>
+            <Button
+              as="link"
+              variant="auburn"
+              href="#signup"
+              className="px-7 py-4.5 bg-[#003086] border-[#003086]"
+            >
+              Sign up to volunteer
+            </Button>
           </div>
         </section>
       </div>

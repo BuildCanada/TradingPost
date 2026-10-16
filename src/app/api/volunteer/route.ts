@@ -16,8 +16,7 @@ import { sheetTimestamp, upsertSheetRow } from "@/lib/google-sheet";
 // aren't newsletter subscribers created by our newsletter form.
 //
 // The Sheet write must succeed, or the volunteer is told to try again: a
-// sign-up CJPAC never sees is lost. Customer.io is best-effort. The phone
-// number goes to the Sheet only; CJPAC calls, we don't.
+// sign-up CJPAC never sees is lost. Customer.io is best-effort.
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -71,9 +70,14 @@ export async function POST(req: NextRequest) {
         first_name: firstName,
         last_name: lastName,
         name: `${firstName} ${lastName}`,
+        phone,
         city,
         postal_code: postalCode,
         toronto_2026_build_the_vote_volunteer: true,
+        toronto_2026_build_the_vote_consent_to_share_with_cjpac: true,
+        toronto_2026_build_the_vote_utm_source: str(body.utm_source, 100),
+        toronto_2026_build_the_vote_utm_medium: str(body.utm_medium, 100),
+        toronto_2026_build_the_vote_utm_campaign: str(body.utm_campaign, 100),
         // A Unix timestamp, so date-based segments can use it.
         toronto_2026_build_the_vote_signed_up_at: Math.floor(Date.now() / 1000),
       });

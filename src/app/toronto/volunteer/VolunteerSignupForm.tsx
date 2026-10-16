@@ -1,21 +1,19 @@
 "use client";
 
 import posthog from "posthog-js";
-import { hubspotPageContext } from "@/lib/hubspot-context";
 import { FormstackForm } from "./FormstackForm";
-import { PARTNER_SOURCE, STEP_1, SUBSCRIBER_PLACEMENT } from "./build-the-vote";
+import { PARTNER_SOURCE, STEP_1 } from "./build-the-vote";
 
 const { fields } = STEP_1;
 
 /**
- * Step 1 of the sign-up. Formstack sends the volunteer to CJPAC; we copy them
- * into our own subscriber list too, which is how they reach Customer.io
- * (York Factory identifies every new subscriber there). The consent line
- * under the form covers Build Canada email, so a sign-up is a subscribe.
+ * Step 1 of the sign-up. Formstack sends the volunteer to CJPAC; we also
+ * identify them in PostHog and, through /api/volunteer, in Customer.io.
  *
- * Formstack may leave the page as soon as its submit handler runs, so the copy
- * goes as a keepalive request that outlives the navigation, and nothing waits
- * on it. Phone stays with CJPAC: our subscriber list has nowhere to put it.
+ * Formstack may leave the page as soon as its submit handler runs, so the
+ * Customer.io call goes as a keepalive request that outlives the navigation,
+ * and nothing waits on it. Phone stays with CJPAC: the consent line covers
+ * Build Canada email, not calls from us.
  */
 export function VolunteerSignupForm() {
   const handleSubmit = (values: FormData) => {
@@ -28,7 +26,7 @@ export function VolunteerSignupForm() {
 
     posthog.identify(email, { email });
 
-    fetch("/api/subscribe", {
+    fetch("/api/volunteer", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       keepalive: true,
@@ -36,9 +34,8 @@ export function VolunteerSignupForm() {
         email,
         first_name: value(`${fields.name}-first`),
         last_name: value(`${fields.name}-last`),
+        city: value(`${fields.address}-city`),
         postal_code: value(`${fields.address}-zip`),
-        source: SUBSCRIBER_PLACEMENT,
-        ...hubspotPageContext(),
       }),
     }).catch(() => {
       // Best-effort: CJPAC still has the sign-up.

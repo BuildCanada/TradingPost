@@ -45,10 +45,6 @@ export const STEP_2 = {
   },
 } as const;
 
-/** Sent with each step 1 sign-up we copy into our own subscriber list (and
- *  from there to Customer.io), so these subscribers can be told apart. */
-export const SUBSCRIBER_PLACEMENT = "build_the_vote";
-
 /** Query parameters the step 1 redirect may carry the volunteer's email in.
  *  The proxy strips both before the page renders (see src/proxy.ts). */
 export const EMAIL_PARAMS = ["email", `field${STEP_2.fields.email}`] as const;

@@ -23,6 +23,15 @@ const FORMSTACK_ORIGIN = "https://cjpac.formstack.com";
  * `onSubmit` sees each submit that passes the form's own required-field
  * checks, before Formstack sends it. It's for copying the answers elsewhere;
  * it can't stop or delay the submit.
+ *
+ * `onSubmitted` keeps the visitor on our page. Formstack submits with a plain
+ * form POST, so the page would follow the form's own redirect, which CJPAC
+ * sets in Formstack and which may point back at their hosted forms. With
+ * `onSubmitted`, the form posts into a hidden iframe instead: the submission
+ * and its redirect happen in there, and when the iframe loads we call
+ * `onSubmitted` so the page can go where we choose. The response is
+ * cross-origin, so we can't read it; the iframe loading means Formstack took
+ * the POST.
  */
 export function FormstackForm({
   slug,
@@ -30,6 +39,7 @@ export function FormstackForm({
   check = [],
   hide = [],
   onSubmit,
+  onSubmitted,
 }: {
   /** the form's Formstack slug, e.g. "buildthevote_step1" */
   slug: string;
@@ -41,6 +51,8 @@ export function FormstackForm({
   hide?: string[];
   /** called with the form's values on a valid submit */
   onSubmit?: (values: FormData) => void;
+  /** called once Formstack has received the submission; see above */
+  onSubmitted?: () => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "failed">(
@@ -52,13 +64,23 @@ export function FormstackForm({
   const fillKey = JSON.stringify(fill);
   const checkKey = check.join(",");
 
+  const sinkName = `formstack-${slug}`;
+  // An iframe fires load once for its initial blank page; only a load after a
+  // submit is Formstack's response.
+  const submittedRef = useRef(false);
+
   // Listening in the capture phase runs this before Formstack's own handler,
   // which may navigate away. checkValidity() still works under the form's
   // novalidate; it reads the required and type rules on each input.
   const handleSubmit = useEffectEvent((event: Event) => {
     const form = event.target;
-    if (!(form instanceof HTMLFormElement) || !form.checkValidity()) return;
-    onSubmit?.(new FormData(form));
+    if (!(form instanceof HTMLFormElement)) return;
+    if (onSubmitted) {
+      // Set before Formstack's handler calls form.submit(), which honours it.
+      form.target = sinkName;
+      submittedRef.current = true;
+    }
+    if (form.checkValidity()) onSubmit?.(new FormData(form));
   });
 
   useEffect(() => {
@@ -122,6 +144,17 @@ export function FormstackForm({
         </p>
       )}
       <div ref={containerRef} />
+      {onSubmitted && (
+        <iframe
+          name={sinkName}
+          title="Form submission"
+          hidden
+          tabIndex={-1}
+          onLoad={() => {
+            if (submittedRef.current) onSubmitted();
+          }}
+        />
+      )}
       <noscript>
         <a href={`${FORMSTACK_ORIGIN}/forms/${slug}`} className="underline">
           Open the form

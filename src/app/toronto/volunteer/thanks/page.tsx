@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { getSiteConfig } from "@/lib/api";
 import { ELECTION, ELECTION_DAY, HOW_TO_VOTE_PATH } from "../../vote/2026/key-dates";
 import { TRAINING_DATES, VOLUNTEER_PATH } from "../build-the-vote";
+import { GUTTER } from "../gutter";
 import { InviteFriends } from "./InviteFriends";
 
 export const metadata: Metadata = {
@@ -120,7 +121,7 @@ export default function VolunteerThanksPage() {
   return (
     <div className={`${ELECTION.themeClass ?? ""} bg-bg text-dark`}>
       <div className="mx-[10px] my-[10px] border border-border-light bg-bg overflow-x-clip">
-        <section className="px-6 py-14 md:px-14 md:py-20 border-b-2 border-dark">
+        <section className={`${GUTTER} py-14 md:py-20 border-b-2 border-dark`}>
           <p className="type-label text-accent mb-5">Build the Vote</p>
           <h1 className="font-sans font-medium leading-[0.98] tracking-[-0.04em] text-[clamp(2.6rem,6vw,5rem)] max-w-[16ch] text-balance mb-7">
             You&rsquo;re in. Thank you.
@@ -136,7 +137,7 @@ export default function VolunteerThanksPage() {
           {steps.map((step, i) => (
             <li
               key={step.title}
-              className="grid md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-x-14 gap-y-3 px-6 py-10 md:px-14 border-b border-border-light last:border-b-0"
+              className={`grid md:grid-cols-[minmax(0,1fr)_minmax(0,2fr)] gap-x-14 gap-y-3 py-10 border-b border-border-light last:border-b-0 ${GUTTER}`}
             >
               <div>
                 <p className="font-sans font-medium text-[1.5rem] tracking-[-0.03em] text-accent mb-2">

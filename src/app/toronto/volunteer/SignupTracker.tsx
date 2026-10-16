@@ -10,6 +10,9 @@ import posthog from "posthog-js";
  */
 export function SignupTracker() {
   useEffect(() => {
+    // Inside the hidden iframe a form posts into (see FormstackForm), should
+    // CJPAC's redirect ever point here: the visible page records it instead.
+    if (window !== window.top) return;
     posthog.capture("volunteer_signed_up", { program: "build_the_vote" });
   }, []);
 

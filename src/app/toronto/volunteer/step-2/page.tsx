@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { ELECTION } from "../../vote/2026/key-dates";
-import { FormstackForm } from "../FormstackForm";
 import { SignupTracker } from "../SignupTracker";
+import { Step2Form } from "./Step2Form";
+import { GUTTER_LEFT, GUTTER_RIGHT } from "../gutter";
 import {
   CJPAC_URL,
   EMAIL_COOKIE,
-  STEP_2,
   THANKS_PATH,
 } from "../build-the-vote";
 
@@ -25,7 +25,7 @@ export default async function VolunteerStep2Page() {
       <SignupTracker />
       <div className="mx-[10px] my-[10px] border border-border-light bg-bg overflow-x-clip">
         <section className="grid lg:grid-cols-[1fr_1.2fr]">
-          <div className="px-6 py-12 md:px-14 md:py-16 border-b lg:border-b-0 lg:border-r border-border-light">
+          <div className={`${GUTTER_LEFT} py-12 md:py-16 border-b lg:border-b-0 lg:border-r border-border-light`}>
             <div className="flex gap-1.5 max-w-[180px] mb-6" aria-hidden="true">
               <span className="h-1 flex-1 bg-accent" />
               <span className="h-1 flex-1 bg-border-light" />
@@ -39,11 +39,8 @@ export default async function VolunteerStep2Page() {
               for you. It takes under a minute.
             </p>
           </div>
-          <div className="px-6 py-12 md:px-14 md:py-16">
-            <FormstackForm
-              slug={STEP_2.slug}
-              fill={{ [STEP_2.fields.email]: email }}
-            />
+          <div className={`${GUTTER_RIGHT} py-12 md:py-16`}>
+            <Step2Form email={email} />
             <p className="font-serif text-[1rem] leading-[1.5] text-text-secondary mt-6 max-w-[56ch]">
               Sign-ups are handled by our volunteer partner,{" "}
               <a

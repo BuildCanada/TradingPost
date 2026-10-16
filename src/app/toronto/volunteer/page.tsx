@@ -8,6 +8,7 @@ import {
   TRAINING_DATES,
   VOLUNTEER_PATH,
 } from "./build-the-vote";
+import { GUTTER, GUTTER_CELLS, GUTTER_LEFT, GUTTER_RIGHT } from "./gutter";
 import { VolunteerSignupForm } from "./VolunteerSignupForm";
 
 /* Hourly, like the other pages with an election-day countdown: the server's
@@ -150,7 +151,7 @@ export default function VolunteerPage() {
       <div className="mx-[10px] my-[10px] border border-border-light bg-bg overflow-x-clip">
         {/* ── Hero ─────────────────────────────────────────────── */}
         <section className="grid lg:grid-cols-[1.5fr_1fr] border-b-2 border-dark">
-          <div className="px-6 py-10 md:px-14 md:py-20">
+          <div className={`${GUTTER_LEFT} py-10 md:py-20`}>
             <p className="type-label text-accent mb-5">
               Build the Vote &middot; {ELECTION.voteDayLabel}
             </p>
@@ -177,7 +178,7 @@ export default function VolunteerPage() {
               </p>
             </div>
           </div>
-          <div className="px-6 py-8 md:px-14 md:py-10 border-t lg:border-t-0 lg:border-l border-border-light bg-bg-alt flex flex-col justify-center gap-5">
+          <div className={`${GUTTER_RIGHT} py-8 md:py-10 border-t lg:border-t-0 lg:border-l border-border-light bg-bg-alt flex flex-col justify-center gap-5`}>
             <PeriodCountdown period={ELECTION_DAY} now={now} size="lg" />
             <p className="font-serif text-[1.0625rem] leading-[1.45] text-text-secondary border-t border-border-light pt-4">
               Polls are open {ELECTION_DAY.hoursLabel} on{" "}
@@ -188,7 +189,7 @@ export default function VolunteerPage() {
 
         {/* ── What's at stake ──────────────────────────────────── */}
         <section className="border-b-2 border-dark">
-          <div className="px-6 pt-10 pb-6 md:px-14 md:pt-12 md:pb-8">
+          <div className={`${GUTTER} pt-10 pb-6 md:pt-12 md:pb-8`}>
             <p className="type-label text-accent mb-2.5">What&rsquo;s at stake</p>
             <h2 className={`${h2Class} mb-2.5`}>
               What the next council will decide.
@@ -197,11 +198,11 @@ export default function VolunteerPage() {
               Some of the questions facing whoever wins on October&nbsp;26.
             </p>
           </div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 border-t border-border-light">
+          <div className={`grid md:grid-cols-2 lg:grid-cols-4 border-t border-border-light ${GUTTER_CELLS}`}>
             {ISSUES.map((issue, i) => (
               <div
                 key={issue.title}
-                className="px-6 py-6 md:px-9 md:py-8 border-b last:border-b-0 md:[&:nth-last-child(-n+2)]:border-b-0 border-border-light md:[&:nth-child(2n)]:border-l lg:[&:not(:first-child)]:border-l"
+                className="px-6 py-6 md:px-9 md:py-8 border-b last:border-b-0 md:[&:nth-last-child(-n+2)]:border-b-0 lg:border-b-0 border-border-light md:[&:nth-child(2n)]:border-l lg:[&:not(:first-child)]:border-l"
               >
                 <p className="type-label text-accent mb-1.5">
                   {String(i + 1).padStart(2, "0")}
@@ -215,7 +216,7 @@ export default function VolunteerPage() {
               </div>
             ))}
           </div>
-          <div className="px-6 md:px-14 py-6 md:py-8 border-t border-border-light">
+          <div className={`${GUTTER} py-6 md:py-8 border-t border-border-light`}>
             <Button as="link" variant="ghost" href={`${ELECTION.basePath}/issues`}>
               See where the candidates stand
             </Button>
@@ -224,7 +225,7 @@ export default function VolunteerPage() {
 
         {/* ── Turnout and margins ──────────────────────────────── */}
         <section className="border-b-2 border-dark">
-          <div className="px-6 pt-10 pb-6 md:px-14 md:pt-12 md:pb-8">
+          <div className={`${GUTTER} pt-10 pb-6 md:pt-12 md:pb-8`}>
             <p className="font-sans font-semibold leading-[0.95] tracking-[-0.04em] text-[clamp(2.6rem,7vw,4.5rem)] text-accent">
               Fewer than 3 in 10
             </p>
@@ -238,7 +239,7 @@ export default function VolunteerPage() {
               Every one of these 2022 races could have gone the other way.
             </p>
           </div>
-          <div className="grid md:grid-cols-3 border-t border-border-light">
+          <div className={`grid md:grid-cols-3 border-t border-border-light ${GUTTER_CELLS}`}>
             {MARGINS.map((m, i) => (
               <div
                 key={m.race + m.detail}
@@ -266,7 +267,7 @@ export default function VolunteerPage() {
 
         {/* ── How Election Day volunteering works ──────────────── */}
         <section className="grid md:grid-cols-[1.2fr_1fr] border-b-2 border-dark bg-bg-alt">
-          <div className="px-6 py-10 md:px-14 md:py-16">
+          <div className={`${GUTTER_LEFT} py-10 md:py-16`}>
             <p className="type-label text-accent mb-2.5">
               How Election Day volunteering works
             </p>
@@ -280,7 +281,7 @@ export default function VolunteerPage() {
               what you believe into a result.
             </p>
           </div>
-          <div className="px-6 pb-10 md:px-14 md:py-16 flex items-center">
+          <div className={`${GUTTER_RIGHT} pb-10 md:py-16 flex items-center`}>
             <p className="border-l-[3px] border-accent pl-5 font-serif text-[1.3rem] leading-[1.45] max-w-[34ch]">
               You won&rsquo;t be debating strangers. You&rsquo;ll be reminding
               people who already support your candidate to get to the polls.
@@ -290,11 +291,11 @@ export default function VolunteerPage() {
 
         {/* ── Three steps ──────────────────────────────────────── */}
         <section className="border-b-2 border-dark">
-          <div className="px-6 pt-10 pb-6 md:px-14 md:pt-12 md:pb-8">
+          <div className={`${GUTTER} pt-10 pb-6 md:pt-12 md:pb-8`}>
             <p className="type-label text-accent mb-2.5">Three simple steps</p>
             <h2 className={h2Class}>Here&rsquo;s how it works.</h2>
           </div>
-          <ol className="grid md:grid-cols-3 border-t border-border-light">
+          <ol className={`grid md:grid-cols-3 border-t border-border-light ${GUTTER_CELLS}`}>
             {STEPS.map((step, i) => (
               <li
                 key={step.title}
@@ -316,7 +317,7 @@ export default function VolunteerPage() {
               </li>
             ))}
           </ol>
-          <div className="px-6 md:px-14 py-6 md:py-8 border-t border-border-light">
+          <div className={`${GUTTER} py-6 md:py-8 border-t border-border-light`}>
             <Button as="link" variant="auburn" href="#signup" className="px-7 py-4.5">
               Sign up to volunteer
             </Button>
@@ -325,7 +326,7 @@ export default function VolunteerPage() {
 
         {/* ── A typical shift ──────────────────────────────────── */}
         <section className="border-b-2 border-dark">
-          <div className="px-6 pt-10 pb-6 md:px-14 md:pt-12 md:pb-8">
+          <div className={`${GUTTER} pt-10 pb-6 md:pt-12 md:pb-8`}>
             <p className="type-label text-accent mb-2.5">
               What a typical shift looks like
             </p>
@@ -334,11 +335,11 @@ export default function VolunteerPage() {
             </h2>
             <p className={ledeClass}>You won&rsquo;t be on your own.</p>
           </div>
-          <ol className="grid md:grid-cols-2 lg:grid-cols-4 border-t border-border-light">
+          <ol className={`grid md:grid-cols-2 lg:grid-cols-4 border-t border-border-light ${GUTTER_CELLS}`}>
             {SHIFT.map((step, i) => (
               <li
                 key={step.title}
-                className="px-6 py-5 md:px-9 md:py-7 border-b last:border-b-0 md:[&:nth-last-child(-n+2)]:border-b-0 border-border-light md:[&:nth-child(2n)]:border-l lg:[&:not(:first-child)]:border-l"
+                className="px-6 py-5 md:px-9 md:py-7 border-b last:border-b-0 md:[&:nth-last-child(-n+2)]:border-b-0 lg:border-b-0 border-border-light md:[&:nth-child(2n)]:border-l lg:[&:not(:first-child)]:border-l"
               >
                 <p className="type-label text-accent mb-1.5">
                   {String(i + 1).padStart(2, "0")}
@@ -352,7 +353,7 @@ export default function VolunteerPage() {
               </li>
             ))}
           </ol>
-          <div className="px-6 md:px-14 py-6 md:py-8 border-t border-border-light">
+          <div className={`${GUTTER} py-6 md:py-8 border-t border-border-light`}>
             <div className="border border-dark bg-bg-alt px-5 py-5 md:px-7 md:py-6">
               <p className="type-label text-accent mb-2">
                 Free training before Election Day
@@ -371,7 +372,7 @@ export default function VolunteerPage() {
           id="signup"
           className="grid lg:grid-cols-[1fr_1.2fr] border-b-2 border-dark scroll-mt-24"
         >
-          <div className="px-6 py-10 md:px-14 md:py-16 bg-[#003086] text-linen-100">
+          <div className={`${GUTTER_LEFT} py-10 md:py-16 bg-[#003086] text-linen-100`}>
             <p className="type-label text-auburn-200 mb-3.5">Build the Vote</p>
             <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.035em] text-[clamp(2rem,4vw,3.25rem)] max-w-[16ch] text-balance mb-5">
               Can Toronto count on you on October&nbsp;26?
@@ -381,7 +382,7 @@ export default function VolunteerPage() {
               a candidate who shares your values.
             </p>
           </div>
-          <div className="px-6 py-10 md:px-14 md:py-16">
+          <div className={`${GUTTER_RIGHT} py-10 md:py-16`}>
             <VolunteerSignupForm />
             <p className="font-serif text-[1rem] leading-[1.5] text-text-secondary mt-6 max-w-[56ch]">
               {CONSENT}
@@ -404,10 +405,10 @@ export default function VolunteerPage() {
 
         {/* ── FAQ ──────────────────────────────────────────────── */}
         <section className="border-b-2 border-dark">
-          <div className="px-6 pt-10 pb-6 md:px-14 md:pt-12 md:pb-8">
+          <div className={`${GUTTER} pt-10 pb-6 md:pt-12 md:pb-8`}>
             <h2 className={h2Class}>Questions</h2>
           </div>
-          <div className="px-6 md:px-14 pb-10 md:pb-12 grid gap-7 md:grid-cols-2 md:gap-x-14">
+          <div className={`${GUTTER} pb-10 md:pb-12 grid gap-7 md:grid-cols-2 md:gap-x-14`}>
             {FAQS.map((faq) => (
               <div key={faq.question}>
                 <h3 className="font-sans font-medium text-[1.2rem] leading-[1.3] tracking-[-0.02em] mb-1.5">
@@ -422,7 +423,7 @@ export default function VolunteerPage() {
         </section>
 
         {/* ── Closing (Toronto-blue band, full bleed) ──────────── */}
-        <section className="bg-[#003086] text-bg px-6 py-14 md:px-14 md:py-24 text-center flex flex-col items-center">
+        <section className={`${GUTTER} bg-[#003086] text-bg py-14 md:py-24 text-center flex flex-col items-center`}>
           <p className="mb-8 font-serif italic text-[1.1rem] leading-[1.5] text-bg/70">
             &ldquo;Whatever our errors are otherwise, we shall not err for want of
             boldness.&rdquo;

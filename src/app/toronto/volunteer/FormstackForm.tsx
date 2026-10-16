@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useEffectEvent, useRef, useState } from "react";
 
 const FORMSTACK_ORIGIN = "https://cjpac.formstack.com";
 
@@ -19,12 +19,17 @@ const FORMSTACK_ORIGIN = "https://cjpac.formstack.com";
  * setter plus an input event, which is what Formstack's controlled inputs
  * listen for; assigning `.value` directly would be overwritten on the next
  * render.
+ *
+ * `onSubmit` sees each submit that passes the form's own required-field
+ * checks, before Formstack sends it. It's for copying the answers elsewhere;
+ * it can't stop or delay the submit.
  */
 export function FormstackForm({
   slug,
   fill = {},
   check = [],
   hide = [],
+  onSubmit,
 }: {
   /** the form's Formstack slug, e.g. "buildthevote_step1" */
   slug: string;
@@ -34,6 +39,8 @@ export function FormstackForm({
   check?: string[];
   /** fields to hide, by Formstack field ID */
   hide?: string[];
+  /** called with the form's values on a valid submit */
+  onSubmit?: (values: FormData) => void;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "failed">(
@@ -44,6 +51,22 @@ export function FormstackForm({
   // once per mount, not on every render that passes a fresh object.
   const fillKey = JSON.stringify(fill);
   const checkKey = check.join(",");
+
+  // Listening in the capture phase runs this before Formstack's own handler,
+  // which may navigate away. checkValidity() still works under the form's
+  // novalidate; it reads the required and type rules on each input.
+  const handleSubmit = useEffectEvent((event: Event) => {
+    const form = event.target;
+    if (!(form instanceof HTMLFormElement) || !form.checkValidity()) return;
+    onSubmit?.(new FormData(form));
+  });
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+    container.addEventListener("submit", handleSubmit, true);
+    return () => container.removeEventListener("submit", handleSubmit, true);
+  }, []);
 
   useEffect(() => {
     const container = containerRef.current;

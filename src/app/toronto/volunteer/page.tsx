@@ -2,15 +2,13 @@ import type { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import { ELECTION, ELECTION_DAY, HOW_TO_VOTE_PATH } from "../vote/2026/key-dates";
 import { PeriodCountdown } from "../vote/2026/PeriodCountdown";
-import { FormstackForm } from "./FormstackForm";
 import {
   CJPAC_URL,
   CONSENT,
-  PARTNER_SOURCE,
-  STEP_1,
   TRAINING_DATES,
   VOLUNTEER_PATH,
 } from "./build-the-vote";
+import { VolunteerSignupForm } from "./VolunteerSignupForm";
 
 /* Hourly, like the other pages with an election-day countdown: the server's
    reading is the number crawlers and no-JS readers see, and the client
@@ -381,16 +379,7 @@ export default function VolunteerPage() {
             </p>
           </div>
           <div className="px-6 py-12 md:px-14 md:py-16">
-            <FormstackForm
-              slug={STEP_1.slug}
-              fill={{ [STEP_1.fields.utmSource]: PARTNER_SOURCE }}
-              check={[STEP_1.fields.emailOptIn]}
-              hide={[
-                STEP_1.fields.utmSource,
-                STEP_1.fields.emailOptIn,
-                STEP_1.fields.consent,
-              ]}
-            />
+            <VolunteerSignupForm />
             <p className="font-serif text-[0.95rem] leading-[1.5] text-text-secondary mt-6 max-w-[56ch]">
               {CONSENT}
             </p>

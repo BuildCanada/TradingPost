@@ -19,6 +19,11 @@ export const PARTNER_SOURCE = "buildcanada";
 export const STEP_1 = {
   slug: "buildthevote_step1",
   fields: {
+    /** Split by Formstack into `-first` and `-last` inputs. */
+    name: "199478140",
+    email: "199478141",
+    /** Asks only for city and postal code: `-city` and `-zip` inputs. */
+    address: "199478143",
     /** Visible in the form as built, so we fill it with PARTNER_SOURCE and
      *  hide it. */
     utmSource: "199478149",
@@ -39,6 +44,10 @@ export const STEP_2 = {
     email: "199478152",
   },
 } as const;
+
+/** Sent with each step 1 sign-up we copy into our own subscriber list (and
+ *  from there to Customer.io), so these subscribers can be told apart. */
+export const SUBSCRIBER_PLACEMENT = "build_the_vote";
 
 /** Query parameters the step 1 redirect may carry the volunteer's email in.
  *  The proxy strips both before the page renders (see src/proxy.ts). */

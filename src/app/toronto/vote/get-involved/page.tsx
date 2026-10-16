@@ -135,7 +135,8 @@ export default function GetInvolvedPage() {
         {/* ── Closing CTA (Toronto-blue band, full bleed) ──────── */}
         <section className="bg-[#003086] text-bg px-6 py-20 md:px-14 md:py-28 text-center flex flex-col items-center">
           <p className="mb-8 font-serif italic text-[1.1rem] leading-[1.5] text-bg/70">
-            &ldquo;We shall not err for want of boldness.&rdquo;
+            &ldquo;Whatever our errors are otherwise, we shall not err for want of
+            boldness.&rdquo;
             <br className="sm:hidden" /> — Sir Wilfrid Laurier
           </p>
           <h2 className="font-sans font-medium leading-[1.05] tracking-[-0.035em] text-[clamp(2rem,5vw,3.75rem)] max-w-[22ch] text-balance text-linen-100 mb-10">

@@ -8,14 +8,20 @@ import {
   refreshAccessToken,
   setSessionCookies,
 } from "@/lib/oauth";
+import {
+  EMAIL_COOKIE,
+  EMAIL_PARAMS,
+  STEP_2_PATH,
+} from "@/app/toronto/volunteer/build-the-vote";
 
 const FLAG = "dashboard";
 
 // Next 16 allows a single proxy (formerly "middleware") entrypoint, so this file
-// owns three unrelated concerns, dispatched by path:
+// owns four unrelated concerns, dispatched by path:
 //   - /dashboard/*                         → gate the section behind the `dashboard` PostHog flag
 //   - /memos/*, /posts/*, /builders/*      → serve markdown to LLM agents (.md suffix or Accept header)
 //   - /memos/*, /api/auth/me               → silently renew an expired OAuth session
+//   - /toronto/volunteer/step-2            → move the volunteer's email out of the URL
 export const config = {
   matcher: [
     "/memos/:path*",
@@ -25,6 +31,8 @@ export const config = {
     "/api/auth/me",
     "/dashboard",
     "/dashboard/:path*",
+    "/toronto/volunteer/step-2",
+    "/toronto/volunteer/step-2/",
   ],
 };
 
@@ -34,6 +42,10 @@ const MARKDOWN_CONTENT = /^\/(memos|polls|posts|builders)\/([^/]+?)(\.md)?$/;
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
+
+  if (pathname.replace(/\/$/, "") === STEP_2_PATH) {
+    return stripVolunteerEmail(req);
+  }
 
   if (pathname === "/dashboard" || pathname.startsWith("/dashboard/")) {
     return gateDashboard(req);
@@ -46,6 +58,32 @@ export async function proxy(req: NextRequest) {
     return renewSession(req);
   }
   return NextResponse.next();
+}
+
+// CJPAC's step 1 form sends volunteers to step 2 with their email in the query
+// string, so step 2's hidden email field can tie the two submissions together.
+// Left there, every analytics tag and pixel in the root layout would record it
+// with the page URL. So before any HTML is served, the email moves into a
+// short-lived cookie scoped to this one page, and the browser is sent to the
+// same URL without it. Other parameters (utm_*) survive the hop.
+function stripVolunteerEmail(req: NextRequest): NextResponse {
+  const url = req.nextUrl.clone();
+  const email = EMAIL_PARAMS.map((p) => url.searchParams.get(p)).find(Boolean);
+  if (!email) return NextResponse.next();
+
+  for (const p of EMAIL_PARAMS) url.searchParams.delete(p);
+  const response = NextResponse.redirect(url, 303);
+  response.cookies.set(EMAIL_COOKIE, email, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    path: STEP_2_PATH,
+    maxAge: 60 * 30,
+  });
+  // The redirect itself carries the email in its request URL; keep it out of
+  // any shared cache.
+  response.headers.set("Cache-Control", "no-store");
+  return response;
 }
 
 // Rewrites both public markdown shapes to the internal /md route:

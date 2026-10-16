@@ -1,49 +1,115 @@
 import { NextRequest, NextResponse } from "next/server";
 
+import {
+  DETAILS_API_PATH,
+  EMAIL_COOKIE,
+  PARTNER_SOURCE,
+  SHEET_COLUMNS,
+  SHEET_TAB,
+} from "@/app/toronto/volunteer/build-the-vote";
 import { identifyToCustomerio } from "@/lib/customerio";
 import { normalizePostalCode } from "@/lib/elections/postal-code";
+import { sheetTimestamp, upsertSheetRow } from "@/lib/google-sheet";
 
-// Build the Vote sign-ups, identified to Customer.io. The sign-up itself goes
-// to CJPAC's Formstack; this copies who signed up into our own Customer.io so
-// we can follow up. Deliberately not York Factory: these aren't newsletter
-// subscribers created by our own form.
+// Build the Vote step 1. Writes the sign-up to the Google Sheet shared with
+// CJPAC, which is how CJPAC receives it, then identifies the volunteer to
+// Customer.io for our own follow-up. Deliberately not York Factory: these
+// aren't newsletter subscribers created by our newsletter form.
+//
+// The Sheet write must succeed, or the volunteer is told to try again: a
+// sign-up CJPAC never sees is lost. Customer.io is best-effort. The phone
+// number goes to the Sheet only; CJPAC calls, we don't.
+
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { email, first_name, last_name, city, postal_code } = body;
 
-    if (!email || typeof email !== "string") {
-      return NextResponse.json({ error: "Email is required" }, { status: 400 });
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email) || email.length > 254) {
-      return NextResponse.json(
-        { error: "Invalid email format" },
-        { status: 400 },
-      );
-    }
+    // A field people never see; bots that fill in every input do. Answer as
+    // if it worked so they don't learn to skip it.
+    if (body.website) return NextResponse.json({ success: true });
 
     const str = (v: unknown, max: number) =>
-      typeof v === "string" ? v.trim().slice(0, max) : undefined;
-    const firstName = str(first_name, 100);
-    const lastName = str(last_name, 100);
+      typeof v === "string" ? v.trim().slice(0, max) : "";
 
-    const identified = await identifyToCustomerio(email.trim().toLowerCase(), {
-      first_name: firstName,
-      last_name: lastName,
-      name: [firstName, lastName].filter(Boolean).join(" "),
-      city: str(city, 100),
-      postal_code: normalizePostalCode(postal_code),
-      toronto_2026_build_the_vote_volunteer: true,
-      // A Unix timestamp, so date-based segments can use it.
-      toronto_2026_build_the_vote_signed_up_at: Math.floor(Date.now() / 1000),
+    const email = str(body.email, 254).toLowerCase();
+    const firstName = str(body.first_name, 50);
+    const lastName = str(body.last_name, 50);
+    const phone = normalizePhone(body.phone);
+    const city = str(body.city, 100);
+    const postalCode = normalizePostalCode(body.postal_code);
+
+    const checks: [boolean, string][] = [
+      [Boolean(firstName && lastName), "Please enter your first and last name"],
+      [EMAIL_PATTERN.test(email), "Please enter a valid email address"],
+      [Boolean(phone), "Please enter a 10-digit phone number"],
+      [Boolean(city), "Please enter your city"],
+      [Boolean(postalCode), "Please enter a valid postal code (e.g. M5V 1A1)"],
+    ];
+    const failed = checks.find(([ok]) => !ok);
+    if (failed) {
+      return NextResponse.json({ error: failed[1] }, { status: 400 });
+    }
+
+    await upsertSheetRow({
+      tab: SHEET_TAB,
+      columns: SHEET_COLUMNS,
+      email,
+      values: {
+        "Signed up at": sheetTimestamp(),
+        "First name": firstName,
+        "Last name": lastName,
+        Phone: phone,
+        City: city,
+        "Postal code": postalCode,
+        Source: str(body.utm_source, 100),
+        Medium: str(body.utm_medium, 100),
+        Campaign: str(body.utm_campaign, 100),
+        Partner: PARTNER_SOURCE,
+      },
     });
 
-    // `identified` is false when Customer.io isn't configured (local dev).
-    return NextResponse.json({ success: true, identified });
+    try {
+      await identifyToCustomerio(email, {
+        first_name: firstName,
+        last_name: lastName,
+        name: `${firstName} ${lastName}`,
+        city,
+        postal_code: postalCode,
+        toronto_2026_build_the_vote_volunteer: true,
+        // A Unix timestamp, so date-based segments can use it.
+        toronto_2026_build_the_vote_signed_up_at: Math.floor(Date.now() / 1000),
+      });
+    } catch (err) {
+      console.error(err);
+    }
+
+    // Lets step 2 add to this row without the email in a URL or the page.
+    const response = NextResponse.json({ success: true });
+    response.cookies.set(EMAIL_COOKIE, email, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: DETAILS_API_PATH,
+      maxAge: 60 * 60 * 2,
+    });
+    return response;
   } catch (err) {
-    return NextResponse.json({ error: String(err) }, { status: 500 });
+    console.error(err);
+    return NextResponse.json(
+      { error: "Something went wrong. Please try again." },
+      { status: 500 },
+    );
   }
+}
+
+/** "416-555-0123", "(416) 555 0123", "+1 416…" → "(416) 555-0123". North
+ *  American numbers only; anything else returns "". */
+function normalizePhone(raw: unknown): string {
+  if (typeof raw !== "string") return "";
+  let digits = raw.replace(/\D/g, "");
+  if (digits.length === 11 && digits.startsWith("1")) digits = digits.slice(1);
+  if (digits.length !== 10) return "";
+  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6)}`;
 }

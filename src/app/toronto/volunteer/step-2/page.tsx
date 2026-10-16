@@ -1,25 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { cookies } from "next/headers";
 import { ELECTION } from "../../vote/2026/key-dates";
 import { SignupTracker } from "../SignupTracker";
 import { Step2Form } from "./Step2Form";
 import { GUTTER_LEFT, GUTTER_RIGHT } from "../gutter";
-import {
-  CJPAC_URL,
-  EMAIL_COOKIE,
-  THANKS_PATH,
-} from "../build-the-vote";
+import { CJPAC_URL, THANKS_PATH } from "../build-the-vote";
 
 export const metadata: Metadata = {
   title: "A few more questions",
   robots: { index: false, follow: false },
 };
 
-export default async function VolunteerStep2Page() {
-  // Put here by src/proxy.ts, which took it off the URL step 1 redirected to.
-  const email = (await cookies()).get(EMAIL_COOKIE)?.value ?? "";
-
+export default function VolunteerStep2Page() {
   return (
     <div className={`${ELECTION.themeClass ?? ""} bg-bg text-dark`}>
       <SignupTracker />
@@ -40,7 +32,7 @@ export default async function VolunteerStep2Page() {
             </p>
           </div>
           <div className={`${GUTTER_RIGHT} py-12 md:py-16`}>
-            <Step2Form email={email} />
+            <Step2Form />
             <p className="font-serif text-[1rem] leading-[1.5] text-text-secondary mt-6 max-w-[56ch]">
               Sign-ups are handled by our volunteer partner,{" "}
               <a

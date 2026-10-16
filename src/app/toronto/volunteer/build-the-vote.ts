@@ -1,56 +1,62 @@
 // Build the Vote: the Election Day volunteer drive we run with CJPAC.
 //
-// The two sign-up forms live in CJPAC's Formstack account, not ours. CJPAC
-// owns the forms' fields and their submit redirects (step 1 → STEP_2_PATH with
-// the volunteer's email, step 2 → THANKS_PATH), and receives every lead. What
-// we own is the page around each form, so every Formstack ID this site depends
-// on is collected here: if CJPAC rebuilds a form, this is the file to update.
+// Volunteers sign up in two steps on our own forms. /api/volunteer writes each
+// sign-up to a Google Sheet shared with CJPAC (src/lib/google-sheet.ts), which
+// is how CJPAC gets its leads, and identifies the volunteer to Customer.io.
+// Step 2 adds optional details to the same row of the Sheet.
 
 export const VOLUNTEER_PATH = "/toronto/volunteer";
 export const STEP_2_PATH = `${VOLUNTEER_PATH}/step-2`;
 export const THANKS_PATH = `${VOLUNTEER_PATH}/thanks`;
 
-/** Written into each form's "UTM Source" field so CJPAC can tell our sign-ups
- *  from those of their other partners. Not the visitor's own utm_source: that
- *  stays on the URL for our analytics and lands in the form's hidden
- *  "Campaign Source" field on its own. */
+/** Written to every row's Partner column so CJPAC can tell our sign-ups from
+ *  those of their other partners. Not the visitor's own utm_source, which goes
+ *  in the Source column. */
 export const PARTNER_SOURCE = "buildcanada";
 
-export const STEP_1 = {
-  slug: "buildthevote_step1",
-  fields: {
-    /** Split by Formstack into `-first` and `-last` inputs. */
-    name: "199478140",
-    email: "199478141",
-    /** Asks only for city and postal code: `-city` and `-zip` inputs. */
-    address: "199478143",
-    /** Visible in the form as built, so we fill it with PARTNER_SOURCE and
-     *  hide it. */
-    utmSource: "199478149",
-    /** The opt-in checkbox for Build Canada email. Replaced by the consent
-     *  line under the form, which makes submitting the form the opt-in. */
-    emailOptIn: "199478245",
-    /** CJPAC's own consent copy. Ours (CONSENT below) includes it and adds
-     *  Build Canada email, so theirs is hidden rather than shown twice. */
-    consent: "199478150",
-  },
-} as const;
+/** The tab of CJPAC's Sheet that sign-ups are written to, and the header row
+ *  it starts with if empty. Values are matched to columns by these names, so
+ *  renaming one in the Sheet means renaming it here too. */
+export const SHEET_TAB = "Sign-ups";
+export const SHEET_COLUMNS = [
+  "Signed up at",
+  "First name",
+  "Last name",
+  "Email",
+  "Phone",
+  "City",
+  "Postal code",
+  "Availability",
+  "Mayoral candidate",
+  "Issues",
+  "Details added at",
+  "Source",
+  "Medium",
+  "Campaign",
+  "Partner",
+] as const;
 
-export const STEP_2 = {
-  slug: "buildthevote_step2",
-  fields: {
-    /** Hidden in the form. Carries the email from step 1 so CJPAC can join
-     *  the two submissions. */
-    email: "199478152",
-  },
-} as const;
-
-/** Query parameters the step 1 redirect may carry the volunteer's email in.
- *  The proxy strips both before the page renders (see src/proxy.ts). */
-export const EMAIL_PARAMS = ["email", `field${STEP_2.fields.email}`] as const;
-
-/** Holds the email across the proxy's redirect to the clean step-2 URL. */
+/** Set by step 1's API response so step 2 can add to the right row without
+ *  the email ever appearing in a URL or in the page. httpOnly, and scoped to
+ *  the API path step 2 posts to. */
 export const EMAIL_COOKIE = "btv_email";
+export const DETAILS_API_PATH = "/api/volunteer/details";
+
+/** Step 2's questions, worded as CJPAC wrote them for their Formstack form.
+ *  The API accepts only these options. */
+export const AVAILABILITY_OPTIONS = [
+  "All day",
+  "Morning",
+  "Afternoon",
+  "Evening",
+] as const;
+
+export const MAYORAL_OPTIONS = [
+  "Brad Bradford",
+  "Olivia Chow",
+  "Other / Not sure",
+  "Prefer not to say",
+] as const;
 
 export const CONSENT =
   "By submitting this form, you consent to being contacted by a CJPAC staff member or volunteer and to receive Build Canada emails.";

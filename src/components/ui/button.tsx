@@ -115,6 +115,18 @@ export function Button(props: ButtonProps) {
     );
   }
 
+  // A jump within the page is left to the browser. next/link treats a click on
+  // a hash that's already in the URL as a no-op navigation, so the second
+  // click (or the first, on a page opened at that hash) wouldn't scroll.
+  if (props.href.startsWith("#")) {
+    return (
+      <a href={props.href} className={classes}>
+        {children}
+        <RightArrow />
+      </a>
+    );
+  }
+
   // Default: internal link
   return (
     <Link href={props.href} className={classes}>

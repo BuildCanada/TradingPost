@@ -13,11 +13,8 @@ import { ELECTION } from "./vote/2026/data";
 import { STAGE_ONE } from "./vote/survey-questions/questions";
 import { SURVEY_PATH } from "./vote/survey-questions/path";
 import { WARD_GEO, WARD_SHAPES } from "./vote/2026/wardGeo";
-import {
-  ELECTION_DAY,
-  KEY_DATES_PATH,
-  VOTING_PERIODS,
-} from "./vote/2026/key-dates";
+import { ELECTION_DAY } from "./vote/2026/key-dates";
+import { VOLUNTEER_PATH } from "./volunteer/build-the-vote";
 import { EmailCapture } from "./EmailCapture";
 import { WardLookupCard } from "./WardLookupCard";
 import { HeroSurface } from "./HeroSurface";
@@ -251,10 +248,13 @@ function ElectionCard(props: ElectionCardProps) {
  * what it is.
  */
 function ElectionCardsSection() {
-  // Four topics against Yes/No, to match the four date rows beside it.
   const questions = STAGE_ONE.slice(0, 4);
-  // Off the shared calendar, so these can't drift from the page they link to.
-  const dates = [...VOTING_PERIODS, ELECTION_DAY];
+  // The volunteer page's three steps, cut down to fit beside the survey rows.
+  const steps = [
+    { title: "Sign up", detail: "About a minute" },
+    { title: "Get matched", detail: "With a campaign" },
+    { title: "Show up", detail: "Oct 26, as little as 2 hours" },
+  ];
 
   const button =
     "bg-dark text-linen-100 border-dark group-hover/card:bg-accent group-hover/card:border-accent";
@@ -269,27 +269,27 @@ function ElectionCardsSection() {
             ElectionCard). */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
           <ElectionCard
-            href={KEY_DATES_PATH}
-            title="Key election dates"
-            cta="See all dates"
+            href={VOLUNTEER_PATH}
+            title="Volunteer on Election Day"
+            cta="Sign up to volunteer"
             className="bg-bg-alt text-dark"
             buttonClassName={button}
           >
-            <dl className={rows}>
-              {dates.map((d) => (
-                <div
-                  key={d.id}
+            <ol className={rows}>
+              {steps.map((step, i) => (
+                <li
+                  key={step.title}
                   className="py-3 flex items-baseline justify-between gap-4"
                 >
-                  <dt className="type-label-sm text-dark/60 min-w-0">
-                    {d.title}
-                  </dt>
-                  <dd className="font-serif text-[0.9375rem] leading-[1.35] text-dark text-right shrink-0">
-                    {d.dateLabel}
-                  </dd>
-                </div>
+                  <span className="type-label-sm text-dark/60 whitespace-nowrap">
+                    {i + 1}. {step.title}
+                  </span>
+                  <span className="font-serif text-[0.9375rem] leading-[1.35] text-dark text-right">
+                    {step.detail}
+                  </span>
+                </li>
               ))}
-            </dl>
+            </ol>
           </ElectionCard>
 
           <ElectionCard

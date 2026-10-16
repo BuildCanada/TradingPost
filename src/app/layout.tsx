@@ -57,28 +57,30 @@ export default function RootLayout({
         {PUBLICATION_FEEDS.map(({ file, title }) => (
           <link key={file} rel="alternate" type="application/rss+xml" title={title} href={`/feeds/${file}`} />
         ))}
+        {/* Inside <head>, not loose in <html>: React can't place a <script>
+            there, which warns about script order and breaks hydration. */}
+        <Script id="gtag-init" strategy="beforeInteractive">
+          {`
+            (function () {
+              var gaId = ${JSON.stringify(GA_ID || "")};
+              var adsId = ${JSON.stringify(GOOGLE_ADS_ID)};
+              var productionHost = ['buildcanada.com', 'www.buildcanada.com'].includes(window.location.hostname);
+              if (!gaId && !productionHost) return;
+
+              window.dataLayer = window.dataLayer || [];
+              window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
+              window.gtag('js', new Date());
+              if (productionHost) window.gtag('config', adsId);
+              if (gaId) window.gtag('config', gaId);
+
+              var tag = document.createElement('script');
+              tag.async = true;
+              tag.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(gaId || adsId);
+              document.head.appendChild(tag);
+            })();
+          `}
+        </Script>
       </head>
-      <Script id="gtag-init" strategy="beforeInteractive">
-        {`
-          (function () {
-            var gaId = ${JSON.stringify(GA_ID || "")};
-            var adsId = ${JSON.stringify(GOOGLE_ADS_ID)};
-            var productionHost = ['buildcanada.com', 'www.buildcanada.com'].includes(window.location.hostname);
-            if (!gaId && !productionHost) return;
-
-            window.dataLayer = window.dataLayer || [];
-            window.gtag = window.gtag || function () { window.dataLayer.push(arguments); };
-            window.gtag('js', new Date());
-            if (productionHost) window.gtag('config', adsId);
-            if (gaId) window.gtag('config', gaId);
-
-            var tag = document.createElement('script');
-            tag.async = true;
-            tag.src = 'https://www.googletagmanager.com/gtag/js?id=' + encodeURIComponent(gaId || adsId);
-            document.head.appendChild(tag);
-          })();
-        `}
-      </Script>
       <body className="antialiased bg-[#E0E0E0] p-[10px]">
         <ThemeShell>
           <div className="fixed top-0 left-0 right-0 h-[10px] bg-bg z-40" />

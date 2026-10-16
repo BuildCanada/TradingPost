@@ -53,7 +53,7 @@ export default function VolunteerThanksPage() {
   const { siteUrl } = getSiteConfig();
   // Tagged so sign-ups from friends' invitations show up as their own source.
   const inviteUrl = `${siteUrl}${VOLUNTEER_PATH}?utm_source=volunteer_invite&utm_medium=referral&utm_campaign=build_the_vote`;
-  const inviteMessage = `I'm volunteering in Toronto on Election Day, October 26, with Build Canada's Build the Vote. Two hours can help a candidate who shares our values win a close race. Join me: ${inviteUrl}`;
+  const inviteMessage = `I'm volunteering in Toronto on Election Day, October 26, with Build Canada's Build the Vote. Two hours can help a candidate who shares your values win. Join me: ${inviteUrl}`;
 
   const steps: { title: string; body: React.ReactNode }[] = [
     {

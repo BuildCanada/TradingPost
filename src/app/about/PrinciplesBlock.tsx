@@ -1,4 +1,4 @@
-import { SectionHeader } from "@/components/ui/section-header";
+import SectionLabel from "@/components/SectionLabel";
 
 const principles = [
   {
@@ -38,21 +38,19 @@ export default function PrinciplesBlock() {
       className="px-6 sm:px-16 py-12 border-b border-border-light"
     >
       <div className="max-w-screen-2xl mx-auto">
-        <SectionHeader label="Principles" />
-        <ol className="mt-4 grid grid-cols-1 md:grid-cols-2 md:gap-x-12">
+        <SectionLabel as="h2">Principles</SectionLabel>
+        <ol className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-8 list-none">
           {principles.map((principle, index) => (
             <li
               key={principle.title}
-              className="grid grid-cols-[40px_minmax(0,1fr)] gap-4 border-b border-border-light py-6 first:border-t md:[&:nth-child(2)]:border-t"
+              className="border-t border-border-light pt-6 grid grid-cols-[3rem_1fr] gap-4"
             >
-              <span className="type-label pt-1 text-accent" aria-hidden="true">
+              <span className="type-h3 text-accent leading-none">
                 {String(index + 1).padStart(2, "0")}
               </span>
               <div>
-                <h3 className="type-h4 text-dark">{principle.title}</h3>
-                <p className="type-body mt-3 text-text-secondary">
-                  {principle.body}
-                </p>
+                <h3 className="type-h3 text-dark mb-2">{principle.title}</h3>
+                <p className="type-body text-dark/70">{principle.body}</p>
               </div>
             </li>
           ))}

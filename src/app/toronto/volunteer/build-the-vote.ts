@@ -9,31 +9,21 @@ export const VOLUNTEER_PATH = "/toronto/volunteer";
 export const STEP_2_PATH = `${VOLUNTEER_PATH}/step-2`;
 export const THANKS_PATH = `${VOLUNTEER_PATH}/thanks`;
 
-/** Written to every row's Partner column so CJPAC can tell our sign-ups from
- *  those of their other partners. Not the visitor's own utm_source, which goes
- *  in the Source column. */
-export const PARTNER_SOURCE = "buildcanada";
-
 /** The tab of CJPAC's Sheet that sign-ups are written to, and the header row
  *  it starts with if empty. Values are matched to columns by these names, so
  *  renaming one in the Sheet means renaming it here too. */
 export const SHEET_TAB = "Sign-ups";
 export const SHEET_COLUMNS = [
-  "Signed up at",
-  "First name",
-  "Last name",
+  "Submitted At",
+  "First Name",
+  "Last Name",
   "Email",
   "Phone",
-  "City",
-  "Postal code",
+  "Postal Code",
   "Availability",
-  "Mayoral candidate",
+  "Mayoral Candidate",
   "Issues",
-  "Details added at",
-  "Source",
-  "Medium",
-  "Campaign",
-  "Partner",
+  "Consent to share with CJPAC",
 ] as const;
 
 /** Set by step 1's API response so step 2 can add to the right row without

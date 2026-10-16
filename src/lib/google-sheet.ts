@@ -44,9 +44,8 @@ export async function upsertSheetRow({
   const config = sheetConfig();
   if (!config) {
     if (process.env.NODE_ENV === "production") {
-      throw new Error(
-        "GOOGLE_SERVICE_ACCOUNT_EMAIL, _PRIVATE_KEY and GOOGLE_SHEET_ID must be set",
-      );
+      const missing = SHEET_ENV.filter((name) => !process.env[name]);
+      throw new Error(`Google Sheet not configured. Missing: ${missing.join(", ")}`);
     }
     return false;
   }
@@ -120,6 +119,12 @@ export function sheetTimestamp(date = new Date()): string {
   );
   return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}`;
 }
+
+const SHEET_ENV = [
+  "GOOGLE_SERVICE_ACCOUNT_EMAIL",
+  "GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY",
+  "GOOGLE_SHEET_ID",
+] as const;
 
 type SheetConfig = { clientEmail: string; privateKey: string; sheetId: string };
 

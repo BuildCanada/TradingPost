@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useEffectEvent, useRef, useState } from "react";
+import posthog from "posthog-js";
 
 const FORMSTACK_ORIGIN = "https://cjpac.formstack.com";
 
@@ -106,10 +107,22 @@ export function FormstackForm({
           JSON.parse(fillKey) as Record<string, string>,
           checkKey ? checkKey.split(",") : [],
         );
-        setStatus("ready");
+        // The scripts ran, but that doesn't mean Formstack rendered: its
+        // renderer can fail inside (an old browser, a clash with another
+        // script) and leave the space blank. Only a form counts as ready.
+        await waitForForm(container, 15_000);
+        if (!cancelled) setStatus("ready");
       })
-      .catch(() => {
-        if (!cancelled) setStatus("failed");
+      .catch((error: unknown) => {
+        if (cancelled) return;
+        setStatus("failed");
+        // Blocked scripts (ad blockers, work networks) and failed renders
+        // both land here; recorded so we can see how often people get the
+        // fallback link instead of the form.
+        posthog.capture("formstack_form_failed", {
+          slug,
+          reason: error instanceof Error ? error.message : String(error),
+        });
       });
 
     return () => {
@@ -192,6 +205,25 @@ function captureWrites(src: string): Promise<string> {
       reject(new Error(`Failed to load ${src}`));
     };
     document.head.appendChild(script);
+  });
+}
+
+/** Resolves once Formstack's <form> is in the container, or rejects after
+ *  `timeout` ms. */
+function waitForForm(container: HTMLElement, timeout: number): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (container.querySelector("form")) return resolve();
+    const observer = new MutationObserver(() => {
+      if (!container.querySelector("form")) return;
+      observer.disconnect();
+      clearTimeout(timer);
+      resolve();
+    });
+    const timer = setTimeout(() => {
+      observer.disconnect();
+      reject(new Error("Formstack didn't render the form"));
+    }, timeout);
+    observer.observe(container, { childList: true, subtree: true });
   });
 }
 

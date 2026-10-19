@@ -12,7 +12,6 @@ for (const locale of ["en", "fr"]) {
     const upstream = "https://yorkfactory.buildcanada.com/api/v1/polls/poll/downloads/";
     const downloads = mapPollDownloads("poll", {
       analysis_pdf: `${upstream}analysis_pdf_${locale}${query}`,
-      crosstabs_pdf: `${upstream}crosstabs_pdf_${locale}${query}`,
       analysis_markdown: `${upstream}analysis_markdown${query}`,
       crosstabs_json: `${upstream}crosstabs_json${query}`,
       crosstabs_xlsx: `${upstream}crosstabs_xlsx${query}`,

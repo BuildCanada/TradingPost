@@ -7,8 +7,6 @@ export const POLL_DOWNLOAD_ASSETS = new Set([
   // Published report PDF; when a poll has one, York Factory serves it as analysis_pdf.
   "report_pdf_en",
   "report_pdf_fr",
-  "crosstabs_pdf_en",
-  "crosstabs_pdf_fr",
   "crosstabs_json",
   "crosstabs_xlsx",
 ]);
@@ -16,7 +14,6 @@ export const POLL_DOWNLOAD_ASSETS = new Set([
 export const POLL_DOWNLOAD_LABELS = {
   analysis_markdown: "Analysis (Markdown)",
   analysis_pdf: "Analysis (PDF)",
-  crosstabs_pdf: "Crosstabs (PDF)",
   crosstabs_json: "Crosstabs (JSON)",
   crosstabs_xlsx: "Crosstabs (Excel)",
 };

@@ -4,6 +4,9 @@ export const POLL_DOWNLOAD_ASSETS = new Set([
   "analysis_markdown",
   "analysis_pdf_en",
   "analysis_pdf_fr",
+  // Published report PDF; when a poll has one, York Factory serves it as analysis_pdf.
+  "report_pdf_en",
+  "report_pdf_fr",
   "crosstabs_pdf_en",
   "crosstabs_pdf_fr",
   "crosstabs_json",

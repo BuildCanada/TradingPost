@@ -35,3 +35,13 @@ test("French requests preserve the API's English PDF fallback", () => {
   });
   assert.deepEqual(mapPollDownloads("poll", {}), {});
 });
+
+test("an uploaded report PDF is served as the poll's report download", () => {
+  const downloads = mapPollDownloads("poll", {
+    analysis_pdf: "https://example.com/api/v1/polls/poll/downloads/report_pdf_en?locale=fr&publication=build_canada",
+  });
+  assert.deepEqual(downloads, {
+    analysis_pdf: "/api/polls/poll/downloads/report_pdf_en?locale=fr&publication=build_canada",
+  });
+  assert.ok(POLL_DOWNLOAD_ASSETS.has("report_pdf_en") && POLL_DOWNLOAD_ASSETS.has("report_pdf_fr"));
+});

@@ -1,7 +1,15 @@
 "use client";
 
 import * as THREE from "three";
-import { Suspense, useMemo, useRef, useState } from "react";
+import {
+  Component,
+  Suspense,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import posthog from "posthog-js";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useCursor, useTexture } from "@react-three/drei";
 import {
@@ -118,20 +126,52 @@ function Stamp({ stampSrc }: { stampSrc: string }) {
   );
 }
 
+/* A failed texture load or WebGL init throws out of the Canvas; show the
+   artwork flat instead so the rest of the pledge page stays usable */
+class StampBoundary extends Component<
+  { stampSrc: string; children: ReactNode },
+  { failed: boolean }
+> {
+  state = { failed: false };
+  static getDerivedStateFromError() {
+    return { failed: true };
+  }
+  componentDidCatch(error: Error) {
+    if (process.env.NEXT_PUBLIC_POSTHOG_TOKEN) {
+      posthog.captureException(error, { boundary: "stamp-scene" });
+    }
+  }
+  render() {
+    if (!this.state.failed) return this.props.children;
+    return (
+      <div className="flex h-full items-center justify-center">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={this.props.stampSrc}
+          alt=""
+          className="aspect-square h-[47%] max-w-[80%] object-contain rotate-[8deg]"
+        />
+      </div>
+    );
+  }
+}
+
 export default function StampScene({ stampSrc }: { stampSrc: string }) {
   return (
-    <Canvas
-      camera={{ position: [0, 0, 13], fov: 25 }}
-      gl={{ alpha: true }}
-      style={{ touchAction: "none" }}
-    >
-      {/* Physics suspends while the rapier WASM loads; the boundary must sit
-          inside the Canvas or the suspension unmounts it and kills the GL context */}
-      <Suspense fallback={null}>
-        <Physics gravity={[0, 0, 0]} timeStep={1 / 60}>
-          <Stamp stampSrc={stampSrc} />
-        </Physics>
-      </Suspense>
-    </Canvas>
+    <StampBoundary stampSrc={stampSrc}>
+      <Canvas
+        camera={{ position: [0, 0, 13], fov: 25 }}
+        gl={{ alpha: true }}
+        style={{ touchAction: "none" }}
+      >
+        {/* Physics suspends while the rapier WASM loads; the boundary must sit
+            inside the Canvas or the suspension unmounts it and kills the GL context */}
+        <Suspense fallback={null}>
+          <Physics gravity={[0, 0, 0]} timeStep={1 / 60}>
+            <Stamp stampSrc={stampSrc} />
+          </Physics>
+        </Suspense>
+      </Canvas>
+    </StampBoundary>
   );
 }

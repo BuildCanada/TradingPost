@@ -270,6 +270,7 @@ function EngagementDialog({
 
   useEffect(() => {
     if (!open) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- existing pattern, newly flagged by eslint-plugin-react-hooks 7.1
     setNeedsPostal(!engagementReady);
     setPostalCode("");
     setBody("");

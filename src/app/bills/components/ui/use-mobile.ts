@@ -13,6 +13,7 @@ export function useIsMobile() {
       setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
     };
     mql.addEventListener("change", onChange);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- existing pattern, newly flagged by eslint-plugin-react-hooks 7.1
     setIsMobile(window.innerWidth < MOBILE_BREAKPOINT);
     return () => mql.removeEventListener("change", onChange);
   }, []);
